@@ -33,7 +33,7 @@ public class Main {
           uncheck(
               () ->
                   compilationContext
-                      .loadLocalModule(Paths.get(args[0]).toAbsolutePath().normalize().toString())
+                      .loadRootModule(Paths.get(args[0]).toAbsolutePath().normalize().toString())
                       .get());
     } finally {
       modules = compilationContext.join();
