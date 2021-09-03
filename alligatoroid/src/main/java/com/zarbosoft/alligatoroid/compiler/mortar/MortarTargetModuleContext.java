@@ -90,18 +90,20 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                 false));
   }
 
-  public static JVMSharedCode lower(Context context, Value value) {
-    if (value instanceof LooseTuple) {
+  public static LowerResult lower(Context context, Value value) {
+    if (value == NullValue.value) {
+      return new LowerResult(NullType.type, new MortarCode());
+    } else if (value instanceof LooseTuple) {
       MortarCode out = new MortarCode();
       out.add(newTupleCode1);
       out.add(newTSListCode);
       for (EvaluateResult e : ((LooseTuple) value).data) {
         if (e.preEffect != null) out.add((JVMSharedCode) e.preEffect);
-        out.add(lower(context, e.value));
+        out.add(lower(context, e.value).valueCode);
         out.add(tsListAddCode);
       }
       out.add(newTupleCode2);
-      return out;
+      return new LowerResult(null /* TODO */, out);
     } else if (value instanceof LooseRecord) {
       MortarCode out = new MortarCode();
       out.add(newRecordCode1);
@@ -109,7 +111,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       for (ROPair<Object, EvaluateResult> e : ((LooseRecord) value).data) {
         if (e.second.preEffect != null) out.add((JVMSharedCode) e.second.preEffect);
         out.add(lowerRaw(context, e.first, true));
-        out.add(lower(context, e.second.value));
+        out.add(lower(context, e.second.value).valueCode);
         out.add(
             new MethodInsnNode(
                 INVOKEVIRTUAL,
@@ -122,13 +124,16 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                 false));
       }
       out.add(newRecordCode2);
-      return out;
+      return new LowerResult(null /* TODO */, out);
     } else if (value instanceof WholeString) {
-      return new MortarCode().addString(((WholeString) value).value);
+      return new LowerResult(
+          MortarHalfStringType.type, new MortarCode().addString(((WholeString) value).value));
+
     } else if (value instanceof MortarHalfValue) {
-      return ((MortarHalfValue) value).lower();
+      return new LowerResult(((MortarHalfValue) value).type, ((MortarHalfValue) value).lower());
     } else {
-      return ((MortarTargetModuleContext) context.target).transfer(value);
+      return new LowerResult(
+          null /* TODO */, ((MortarTargetModuleContext) context.target).transfer(value));
     }
   }
 
@@ -153,10 +158,10 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     if (argument instanceof LooseTuple) {
       for (EvaluateResult e : ((LooseTuple) argument).data) {
         if (e.preEffect != null) code.add((JVMSharedCode) e.preEffect);
-        code.add(lower(context, e.value));
+        code.add(lower(context, e.value).valueCode);
       }
     } else {
-      code.add(lower(context, argument));
+      code.add(lower(context, argument).valueCode);
     }
   }
 
@@ -182,12 +187,22 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     for (TargetCode chunk : chunks) {
       if (chunk == null) continue;
       if (!(chunk instanceof MortarCode)) {
-        context.module.errors.add(
+        context.module.log.errors.add(
             Error.incompatibleTargetValues(location, MORTAR_TARGET_NAME, chunk.targetName()));
         return null;
       }
       code.add((MortarCode) chunk);
     }
     return code;
+  }
+
+  public static class LowerResult {
+    public final MortarHalfDataType dataType;
+    public final JVMSharedCode valueCode;
+
+    public LowerResult(MortarHalfDataType dataType, JVMSharedCode valueCode) {
+      this.dataType = dataType;
+      this.valueCode = valueCode;
+    }
   }
 }

@@ -30,7 +30,7 @@ public class MortarMethodField implements SimpleValue {
     code.line(context.module.sourceLocation(location))
         .add(
             new MethodInsnNode(
-                INVOKEVIRTUAL, type.base.jvmInternalClass, type.name, type.jbcDesc, false));
+                INVOKEVIRTUAL, type.base.jvmName, type.name, type.jbcDesc, false));
     if (type.returnType == null) return new EvaluateResult(code, null, NullValue.value);
     else return EvaluateResult.pure(type.returnType.stackAsValue(code));
   }

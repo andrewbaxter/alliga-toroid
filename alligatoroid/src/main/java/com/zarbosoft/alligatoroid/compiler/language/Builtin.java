@@ -16,9 +16,10 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarClass;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfArrayType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfByteType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfObjectType;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfStringType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -37,6 +38,7 @@ public class Builtin extends LanguageValue {
               .put("print", EvaluateResult.pure(wrapModuleFunction("builtinLog")))
               .put("jvm", EvaluateResult.pure(JVMBuiltin.builtin))
               .put("null", EvaluateResult.pure(NullValue.value))
+              .put("nullType", EvaluateResult.pure(NullType.type))
               .put(
                   "createFile",
                   EvaluateResult.pure(wrapFunction(Builtin.class, "builtinCreateFile"))));
@@ -77,11 +79,11 @@ public class Builtin extends LanguageValue {
       return new ROPair<>(JVMDescriptor.voidDescriptor(), null);
     } else if (klass == String.class) {
       return new ROPair<>(
-          JVMDescriptor.objDescriptorFromReal(String.class), MortarHalfObjectType.type);
+          JVMDescriptor.objDescriptorFromReal(String.class), MortarHalfStringType.type);
     } else if (klass == byte[].class) {
       return new ROPair<>(
           JVMDescriptor.arrayDescriptor(JVMDescriptor.byteDescriptor()),
-          new MortarHalfArrayType(new MortarHalfByteType()));
+          new MortarHalfArrayType(MortarHalfByteType.type));
     } else {
       return new ROPair<>(JVMDescriptor.objDescriptorFromReal(klass), wrapClass(klass));
     }

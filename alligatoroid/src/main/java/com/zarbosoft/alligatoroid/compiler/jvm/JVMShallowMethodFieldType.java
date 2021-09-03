@@ -1,40 +1,32 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.cache.GraphSerializable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.Tuple;
-import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSMap;
 
-public class JVMShallowMethodFieldType implements JVMType {
-  public final JVMBaseClassType base;
+public class JVMShallowMethodFieldType implements JVMType, GraphSerializable {
+  public JVMBaseClassType base;
   public final JVMDataType returnType;
   public final String name;
   public final String jvmDesc;
 
   public JVMShallowMethodFieldType(
-      JVMBaseClassType base, JVMDataType returnType, String name, String jvmDesc) {
-    this.base = base;
+      JVMDataType returnType, String name, String jvmDesc) {
     this.returnType = returnType;
     this.name = name;
     this.jvmDesc = jvmDesc;
-  }
-
-  public static String specDetailArg(Value value) {
-    if (value instanceof JVMDataType) {
-      return ((JVMDataType) value).jvmDesc();
-    } else if (value == JVMStringType.value) {
-      return JVMDescriptor.objDescriptorFromReal(String.class);
-    } else throw new Assertion();
   }
 
   public static MethodSpecDetails specDetails(Record spec) {
     Object outRaw = spec.data.get("out");
     JVMDataType returnType = null;
     String returnDescriptor;
-    if (outRaw == NullValue.value) {
+    if (outRaw == NullType.type) {
       returnDescriptor = JVMDescriptor.voidDescriptor();
     } else {
       JVMDataType inJvmType = (JVMDataType) outRaw;
@@ -47,17 +39,36 @@ public class JVMShallowMethodFieldType implements JVMType {
       ROList<Object> inTuple = ((Tuple) inRaw).data;
       argDescriptor = new String[inTuple.size()];
       for (int i = 0; i < inTuple.size(); i++) {
-        argDescriptor[i] = specDetailArg((Value) inTuple.get(i));
+        argDescriptor[i] = ((JVMDataType) inTuple.get(i)).jvmDesc();
       }
     } else {
-      argDescriptor = new String[] {specDetailArg((Value) inRaw)};
+      argDescriptor = new String[] {((JVMDataType) inRaw).jvmDesc()};
     }
     return new MethodSpecDetails(returnType, JVMDescriptor.func(returnDescriptor, argDescriptor));
+  }
+
+  public static JVMShallowMethodFieldType graphDeserialize(Record record) {
+    return new JVMShallowMethodFieldType(
+        (JVMDataType) record.data.get("returnType"),
+        (String) record.data.get("name"),
+        (String) record.data.get("jvmDesc"));
   }
 
   @Override
   public Value asValue(JVMProtocode code) {
     return new JVMMethodField(code, this);
+  }
+
+  @Override
+  public Record graphSerialize() {
+    return new Record(
+        new TSMap<>(
+            m -> {
+              m.put("base", base)
+                  .put("returnType", returnType)
+                  .put("name", name)
+                  .put("jvmDesc", jvmDesc);
+            }));
   }
 
   public static class MethodSpecDetails {

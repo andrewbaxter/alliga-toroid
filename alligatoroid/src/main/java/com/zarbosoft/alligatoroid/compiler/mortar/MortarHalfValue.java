@@ -11,7 +11,7 @@ import com.zarbosoft.rendaw.common.ROPair;
 
 public class MortarHalfValue implements OkValue {
   public final MortarProtocode lower;
-  private final MortarHalfDataType type;
+  public final MortarHalfDataType type;
 
   public MortarHalfValue(MortarHalfDataType type, MortarProtocode lower) {
     this.type = type;

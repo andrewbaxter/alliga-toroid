@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.jvm;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedClass;
 import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public class JVMClassType extends JVMBaseClassType {
@@ -11,7 +12,7 @@ public class JVMClassType extends JVMBaseClassType {
   private byte[] built;
 
   public JVMClassType(String jvmExternalClass) {
-    super(jvmExternalClass);
+    super(jvmExternalClass, new TSMap<>());
     this.jvmClass = new JVMSharedClass(jvmExternalClass);
   }
 

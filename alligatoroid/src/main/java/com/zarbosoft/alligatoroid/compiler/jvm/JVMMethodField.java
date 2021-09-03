@@ -29,7 +29,7 @@ public class JVMMethodField implements SimpleValue {
   @Override
   public EvaluateResult call(Context context, Location location, Value argument) {
     JVMRWSharedCode code = new JVMCode().add(lower.lower());
-    JVMTargetModuleContext.convertFunctionArgument(context, code, argument);
+    JVMTargetModuleContext.convertFunctionArgument(code, argument);
     code.line(context.module.sourceLocation(location))
         .add(
             new MethodInsnNode(

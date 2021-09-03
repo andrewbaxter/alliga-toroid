@@ -46,6 +46,7 @@ import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
@@ -301,6 +302,27 @@ public class AlligatoroidSyntax {
 
     types.add(GROUP_EXPR, GROUP_STATEMENT);
 
+    // Imports (sugars)
+    types.add(
+        new ATypeBuilder(TYPE_MODULE_LOCAL, "Local Module")
+            .text("mod", COLOR_KEYWORD)
+            .space()
+            .compactSplit()
+            .atom("path", GROUP_EXPR)
+            .build(),
+        GROUP_EXPR);
+    types.add(
+        new ATypeBuilder(TYPE_MODULE_REMOTE_BUNDLE, "Bundle Module")
+            .text("mod", COLOR_KEYWORD)
+            .space()
+            .compactSplit()
+            .atom("uri", GROUP_EXPR)
+            .space()
+            .compactSplit()
+            .atom("hash", GROUP_EXPR)
+            .build(),
+        GROUP_EXPR);
+
     // Variables, fields
     types.add(
         new ATypeBuilder(TYPE_ACCESS, "Access")
@@ -446,27 +468,6 @@ public class AlligatoroidSyntax {
             .atom("value", GROUP_EXPR)
             .build(),
         GROUP_STATEMENT);
-
-    // Imports
-    types.add(
-        new ATypeBuilder(TYPE_MODULE_LOCAL, "Local Module")
-            .text("mod", COLOR_KEYWORD)
-            .space()
-            .compactSplit()
-            .atom("path", GROUP_EXPR)
-            .build(b -> backBuiltinFunc("moduleLocal", b.get(0))),
-        GROUP_EXPR);
-    types.add(
-        new ATypeBuilder(TYPE_MODULE_REMOTE_BUNDLE, "Bundle Module")
-            .text("mod", COLOR_KEYWORD)
-            .space()
-            .compactSplit()
-            .atom("uri", GROUP_EXPR)
-            .space()
-            .compactSplit()
-            .atom("hash", GROUP_EXPR)
-            .build(b -> backBuiltinFunc("moduleBundle", b.get(0))),
-        GROUP_EXPR);
 
     // Staging
     types.add(unaryPrefix(TYPE_STAGE, "Stage", "`", COLOR_LITERAL_SYMBOL, GROUP_EXPR), GROUP_EXPR);
@@ -731,6 +732,22 @@ public class AlligatoroidSyntax {
                 .pad(pad)),
         TSSet.of(TYPE_LOCAL, TYPE_ACCESS));
   }
+
+  /*
+  private static BackSpec tuple(BackSpec... data) {
+    return new BackFixedTypeSpec(
+        new BackFixedTypeSpec.Config(
+            TYPE_LITERAL_TUPLE,
+            new BackFixedRecordSpec(
+                new BackFixedRecordSpec.Config(
+                    new TSOrderedMap<String, BackSpec>()
+                        .put(
+                            "elements",
+                            new BackFixedArraySpec(
+                                new BackFixedArraySpec.Config().elements(new TSList<>(data)))),
+                    ROSet.empty))));
+  }
+   */
 
   private static void commentArray(ATypeBuilder b) {
     b.front.front.add(
@@ -1038,10 +1055,10 @@ public class AlligatoroidSyntax {
               .precedence(this.precedence));
     }
 
-    public AtomType build(Function<ROList<BackSpec>, ROList<BackSpec>> wrap) {
+    public AtomType build(Function<ROOrderedMap<String, BackSpec>, ROList<BackSpec>> wrap) {
       return new FreeAtomType(
           new FreeAtomType.Config(
-              description, new AtomType.Config(id, wrap.apply(back.build()), front.front)));
+              description, new AtomType.Config(id, wrap.apply(back.back), front.front)));
     }
 
     public ATypeBuilder text(String text, ModelColor color) {

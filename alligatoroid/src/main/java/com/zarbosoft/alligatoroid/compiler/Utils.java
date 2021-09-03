@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.Comparator;
@@ -16,6 +17,7 @@ public class Utils {
         () -> {
           try (Stream<Path> walk = Files.walk(path)) {
             walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+          } catch (NoSuchFileException e) {
           }
         });
   }
@@ -25,6 +27,11 @@ public class Utils {
 
     public SHA256() {
       digest = uncheck(() -> MessageDigest.getInstance("SHA-256"));
+    }
+
+    public SHA256 add(byte[] value) {
+      digest.update(value);
+      return this;
     }
 
     public SHA256 add(String value) {

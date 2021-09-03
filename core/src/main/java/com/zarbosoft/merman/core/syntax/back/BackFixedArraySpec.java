@@ -17,13 +17,15 @@ import com.zarbosoft.pidgoon.nodes.MergeSequence;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 public class BackFixedArraySpec extends BackSpec {
-  public List<BackSpec> elements = new ArrayList<>();
+  public final ROList<BackSpec> elements;
+
+  public BackFixedArraySpec(Config config) {
+    this.elements = config.elements;
+  }
 
   @Override
   protected Iterator<BackSpec> walkStep() {
@@ -43,11 +45,11 @@ public class BackFixedArraySpec extends BackSpec {
 
   @Override
   public void finish(
-          MultiError errors,
-          final Syntax syntax,
-          final SyntaxPath typePath,
-          boolean singularRestriction,
-          boolean typeRestriction) {
+      MultiError errors,
+      final Syntax syntax,
+      final SyntaxPath typePath,
+      boolean singularRestriction,
+      boolean typeRestriction) {
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
     for (int i = 0; i < elements.size(); ++i) {
       BackSpec element = elements.get(i);
@@ -70,7 +72,7 @@ public class BackFixedArraySpec extends BackSpec {
 
   @Override
   public void write(
-          Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
+      Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.arrayBegin();
     stack.add(new WriteStateArrayEnd());
     stack.add(new WriteStateBack(data, elements.iterator()));
@@ -84,5 +86,14 @@ public class BackFixedArraySpec extends BackSpec {
   @Override
   protected boolean isTypedValue() {
     return false;
+  }
+
+  public static class Config {
+    public ROList<BackSpec> elements;
+
+    public Config elements(ROList<BackSpec> elements) {
+      this.elements = elements;
+      return this;
+    }
   }
 }

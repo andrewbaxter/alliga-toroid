@@ -30,20 +30,19 @@ public class JVMMethod implements SimpleValue {
   public void implement(Record spec, Value body) {
     JVMShallowMethodFieldType.MethodSpecDetails specDetails =
         JVMShallowMethodFieldType.specDetails(spec);
-
-    base.fields.putNew(
-        name,
-        new JVMShallowMethodFieldType(
-            base, specDetails.returnType, externName, specDetails.jvmSigDesc));
-    ModuleContext moduleContext = new ModuleContext(null);
+    JVMShallowMethodFieldType field =
+        new JVMShallowMethodFieldType(specDetails.returnType, externName, specDetails.jvmSigDesc);
+    field.base = base;
+    base.fields.putNew(name, field);
+    ModuleContext moduleContext = new ModuleContext(null, null);
     JVMTargetModuleContext targetContext = new JVMTargetModuleContext();
     Context context = new Context(moduleContext, targetContext, new Scope(null));
 
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
     ectx.record(body.evaluate(context));
     built = (JVMCode) ectx.build(null).preEffect;
-    if (moduleContext.errors.some()) {
-      throw new MultiError(moduleContext.errors);
+    if (moduleContext.log.errors.some()) {
+      throw new MultiError(moduleContext.log.errors);
     }
     base.jvmClass.defineFunction(
         externName, specDetails.jvmSigDesc, new JVMCode().add(built).add(RETURN), new TSList<>());

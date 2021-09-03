@@ -11,7 +11,7 @@ public interface WholeValue extends SimpleValue, TreeSerializable {
   public static WholeValue getWhole(Context context, Location location, Value value) {
     if (value == ErrorValue.error) return null;
     if (!(value instanceof WholeValue)) {
-      context.module.errors.add(Error.valueNotWhole(location, value));
+      context.module.log.errors.add(Error.valueNotWhole(location, value));
       return null;
     }
     return (WholeValue) value;

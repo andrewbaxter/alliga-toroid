@@ -15,7 +15,7 @@ import static org.objectweb.asm.Opcodes.POP;
 public interface JVMDataType extends JVMType {
   default EvaluateResult valueAccess(
       Context context, Location location, Value field, JVMProtocode lower) {
-    context.module.errors.add(Error.accessNotSupported(location));
+    context.module.log.errors.add(Error.accessNotSupported(location));
     return EvaluateResult.error;
   }
 

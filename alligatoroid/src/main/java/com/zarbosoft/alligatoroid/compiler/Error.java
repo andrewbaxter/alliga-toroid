@@ -8,6 +8,8 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
+import java.nio.file.Path;
+
 public class Error implements TreeSerializable {
   public static final String DESCRIPTION_KEY = "description";
   private final String type;
@@ -62,7 +64,7 @@ public class Error implements TreeSerializable {
             .put("path", path.toString())
             .put("got", type)
             .put("expected", knownTypes)
-            .put(DESCRIPTION_KEY, "this is not a known language node type"));
+            .put(DESCRIPTION_KEY, "this is not a known type"));
   }
 
   public static Error deserializeUnknownField(
@@ -217,9 +219,62 @@ public class Error implements TreeSerializable {
                 "This lower element isn't in a matching stage element. If multiple stage elements are nested, the number of corresponding nested lower elements can't exceed the number of stage elements."));
   }
 
+  public static Error deserializeCacheSubvalueUnknownType(LuxemPath path, String type) {
+    return new Error(
+        "deserialize_cache_subvalue_unknown_type",
+        new TSMap<String, Object>()
+            .put("path", path.toString())
+            .put("type", type)
+            .put(
+                DESCRIPTION_KEY,
+                "this subvalue type is not recognized, maybe the cache is corrupt"));
+  }
+
+  public static Error deserializeCacheObjectUnknownType(LuxemPath path, String type) {
+    return new Error(
+        "deserialize_cache_object_unknown_type",
+        new TSMap<String, Object>()
+            .put("path", path.toString())
+            .put("type", type)
+            .put(
+                DESCRIPTION_KEY, "this object type is not recognized, maybe the cache is corrupt"));
+  }
+
+  public static Error deserializeMissingSourceFile(Path path) {
+    return new Error(
+        "deserialize_missing_source_file",
+        new TSMap<String, Object>()
+            .put("file", path.toString())
+            .put(DESCRIPTION_KEY, "this source file was not found"));
+  }
+
+  public static Error deserializeIncompleteFile(Path path) {
+    return new Error(
+        "deserialize_incomplete_file",
+        new TSMap<String, Object>()
+            .put("file", path.toString())
+            .put(DESCRIPTION_KEY, "this file ended before all expected data was read"));
+  }
+
+  public static Error deserializeCacheLoop(Path path) {
+    return new Error(
+        "deserialize_cache_loop",
+        new TSMap<String, Object>()
+            .put("file", path.toString())
+            .put(DESCRIPTION_KEY, "this cache file eventually references itself"));
+  }
+
   @Override
   public void serialize(Writer writer) {
     writer.type(type);
     TreeSerializable.serialize(writer, data);
+  }
+
+  public static class CacheError extends Error {
+    public CacheError(Path path, ROList<Error> errors) {
+      super(
+          "errors_accessing_cache",
+          new TSMap<String, Object>().put("cache_path", path.toString()).put("errors", errors));
+    }
   }
 }

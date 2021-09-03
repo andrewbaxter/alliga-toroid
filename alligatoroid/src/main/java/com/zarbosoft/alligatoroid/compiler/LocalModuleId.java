@@ -4,12 +4,12 @@ import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Assertion;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public final class LocalModuleId implements ModuleId {
-  public final Path path;
+  public final String path;
 
-  public LocalModuleId(Path path) {
-    if (!path.isAbsolute()) throw new Assertion();
+  public LocalModuleId(String path) {
     this.path = path;
   }
 

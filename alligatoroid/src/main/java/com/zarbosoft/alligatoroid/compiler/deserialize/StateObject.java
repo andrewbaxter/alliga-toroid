@@ -21,13 +21,12 @@ public class StateObject extends BaseState {
   public void eatKey(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String name) {
     StatePrototype proto = info.fields.getOpt(name);
     if (proto == null) {
-      errors.errors.add(Error.deserializeUnknownType(luxemPath, name, fields.keys().toList()));
-      stack.add(StateErrorSingle.state);
+      errors.add(Error.deserializeUnknownField(luxemPath, info.luxemType, name, fields.keys().toList()));
+      ok = false;
       return;
     }
     State fieldState = proto.create(errors, luxemPath, stack);
     fields.put(name, fieldState);
-    stack.add(fieldState);
   }
 
   @Override

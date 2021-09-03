@@ -1,11 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.appdirsj.AppDirs;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Main {
   public static final AppDirs appDirs =
@@ -17,15 +20,21 @@ public class Main {
     }
     Path cachePath;
     String cachePath0 = System.getenv("ALLIGATOROID_CACHE");
-    if (cachePath0.isEmpty()) {
+    if (cachePath0 == null || cachePath0.isEmpty()) {
       cachePath = appDirs.user_cache_dir(false);
     } else {
       cachePath = Paths.get(cachePath0);
     }
     CompilationContext compilationContext = new CompilationContext(cachePath);
     TSMap<ModuleId, Module> modules;
+    Value out;
     try {
-      compilationContext.loadModule(new LocalModuleId(Paths.get(args[0]))); // TODO handle result
+      out =
+          uncheck(
+              () ->
+                  compilationContext
+                      .loadLocalModule(Paths.get(args[0]).toAbsolutePath().normalize().toString())
+                      .get());
     } finally {
       modules = compilationContext.join();
     }
@@ -40,14 +49,21 @@ public class Main {
 
       outWriter.key("log");
       outWriter.arrayBegin();
-      for (String message : value.context.log) {
+      for (String message : value.context.log.log) {
         outWriter.primitive(message);
       }
       outWriter.arrayEnd();
 
       outWriter.key("errors");
       outWriter.arrayBegin();
-      for (Error error : value.context.errors) {
+      for (Error error : value.context.log.errors) {
+        error.serialize(outWriter);
+      }
+      outWriter.arrayEnd();
+
+      outWriter.key("warnings");
+      outWriter.arrayBegin();
+      for (Error error : value.context.log.warnings) {
         error.serialize(outWriter);
       }
       outWriter.arrayEnd();
@@ -56,9 +72,13 @@ public class Main {
     }
     outWriter.arrayEnd();
 
-    // TODO output value
+    if (out != ErrorValue.error && out != NullValue.value) {
+      outWriter.key("output");
+      compilationContext.cache.serializeSubValue(null, outWriter, out);
+    }
 
     outWriter.recordEnd();
+    System.out.println("");
     System.out.flush();
   }
 }

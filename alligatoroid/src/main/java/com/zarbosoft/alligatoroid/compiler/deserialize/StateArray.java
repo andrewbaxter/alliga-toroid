@@ -32,8 +32,7 @@ class StateArray extends BaseState {
   }
 
   private void push(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath) {
-    State out = inner.create(errors, luxemPath, stack);
-    stack.add(out);
+    elements.add(inner.create(errors, luxemPath, stack));
   }
 
   @Override

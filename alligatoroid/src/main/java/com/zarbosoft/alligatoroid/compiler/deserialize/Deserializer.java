@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class Deserializer {
+  public static final ErrorRet errorRet = new ErrorRet();
+
   public static void deserialize(TSList<Error> errors, Path path, TSList<State> stack) {
     // TODO luxem path
     BufferedReader reader =
@@ -59,13 +61,15 @@ public class Deserializer {
             stack.last().eatPrimitive(errors, stack, luxemPath, value);
           }
         };
-    if (!Files.exists(path)) {
-      return;
-    }
     try (InputStream stream = Files.newInputStream(path)) {
       reader.feed(stream);
     } catch (Exception e) {
       errors.add(Error.unexpected(e));
     }
+    if (stack.some()) {
+      errors.add(Error.deserializeIncompleteFile(path));
+    }
   }
+
+  public static class ErrorRet {}
 }

@@ -11,7 +11,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseTuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeString;
 import com.zarbosoft.rendaw.common.Assertion;
 
@@ -31,15 +31,24 @@ public class JVMTargetModuleContext implements TargetModuleContext {
     }
   }
 
-  public static void convertFunctionArgument(
-      Context context, JVMRWSharedCode code, Value argument) {
+  public static void convertFunctionArgument(JVMRWSharedCode code, Value argument) {
     if (argument instanceof LooseTuple) {
       for (EvaluateResult e : ((LooseTuple) argument).data) {
         if (e.preEffect != null) code.add((JVMSharedCode) e.preEffect);
-        code.add(MortarTargetModuleContext.lower(context, e.value));
+        code.add(lower(e.value));
       }
     } else {
-      code.add(MortarTargetModuleContext.lower(context, argument));
+      code.add(lower(argument));
+    }
+  }
+
+  public static JVMSharedCode lower(Value value) {
+    if (value instanceof WholeString) {
+      return new MortarCode().addString(((WholeString) value).value);
+    } else if (value instanceof MortarHalfValue) {
+      return ((MortarHalfValue) value).lower();
+    } else {
+      throw new Assertion();
     }
   }
 
@@ -49,7 +58,7 @@ public class JVMTargetModuleContext implements TargetModuleContext {
     for (TargetCode chunk : chunks) {
       if (chunk == null) continue;
       if (!(chunk instanceof JVMCode)) {
-        context.module.errors.add(
+        context.module.log.errors.add(
             Error.incompatibleTargetValues(location, MORTAR_TARGET_NAME, chunk.targetName()));
         return null;
       }

@@ -4,37 +4,35 @@ import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.rendaw.common.Assertion;
 
-import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.IRETURN;
-import static org.objectweb.asm.Opcodes.ISTORE;
+import static org.objectweb.asm.Opcodes.RETURN;
 
-public class MortarHalfByteType implements MortarHalfDataType {
-  public static final MortarHalfByteType type = new MortarHalfByteType();
+public class NullType implements MortarHalfDataType {
+  public static final NullType type = new NullType();
 
-  private MortarHalfByteType() {}
+  private NullType() {}
 
   @Override
   public int storeOpcode() {
-    return ISTORE;
+    throw new Assertion();
   }
 
   @Override
   public int loadOpcode() {
-    return ILOAD;
+    throw new Assertion();
   }
 
   @Override
   public int returnOpcode() {
-    return IRETURN;
+    return RETURN;
   }
 
   @Override
   public String jvmDesc() {
-    return JVMDescriptor.byteDescriptor();
+    return JVMDescriptor.voidDescriptor();
   }
 
   @Override
   public Value unlower(Object object) {
-    throw new Assertion(); // TODO
+    return NullValue.value;
   }
 }

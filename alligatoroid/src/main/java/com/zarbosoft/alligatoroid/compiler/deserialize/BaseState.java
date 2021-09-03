@@ -11,7 +11,7 @@ public class BaseState implements State {
   @Override
   public void eatArrayBegin(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath) {
     if (ok) {
-      errors.errors.add(Error.deserializeNotArray(luxemPath));
+      errors.add(Error.deserializeNotArray(luxemPath));
     } else {
       ok = true;
     }
@@ -26,7 +26,7 @@ public class BaseState implements State {
   @Override
   public void eatRecordBegin(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath) {
     if (ok) {
-      errors.errors.add(Error.deserializeNotRecord(luxemPath));
+      errors.add(Error.deserializeNotRecord(luxemPath));
     } else {
       ok = true;
     }
@@ -45,14 +45,14 @@ public class BaseState implements State {
 
   @Override
   public void eatType(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String name) {
-    errors.errors.add(Error.deserializeNotTyped(luxemPath));
+    errors.add(Error.deserializeNotTyped(luxemPath));
   }
 
   @Override
   public void eatPrimitive(
       TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String value) {
     if (ok) {
-      errors.errors.add(Error.deserializeNotPrimitive(luxemPath));
+      errors.add(Error.deserializeNotPrimitive(luxemPath));
     } else {
       ok = true;
     }

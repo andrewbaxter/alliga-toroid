@@ -40,7 +40,7 @@ public class Stage extends LanguageValue {
     MortarCode pre;
     if (value instanceof Lower) {
       EvaluateResult evalRes = ((Lower) value).child.evaluate(context);
-      JVMSharedCode lowerRes = MortarTargetModuleContext.lower(context, evalRes.value);
+      JVMSharedCode lowerRes = MortarTargetModuleContext.lower(context, evalRes.value).valueCode;
       pre =
           (MortarCode)
               context.target.merge(context, location, new TSList<>(evalRes.preEffect, lowerRes));

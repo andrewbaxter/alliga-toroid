@@ -1,21 +1,26 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.alligatoroid.compiler.mortar.FutureValue;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 public class ModuleContext {
-  public final CompilationContext global;
-  public final TSList<Error> errors = new TSList<>();
-  public final TSList<String> log = new TSList<>(); // TODO
+  /** Only in mortar. */
+  public final ModuleId id;
+  /** Only in mortar. */
+  public final CompilationContext compilationContext;
+
+  public final Log log = new Log();
   public final TSList<Location> sourceMapReverse = new TSList<>();
   public final TSMap<Location, Integer> sourceMapForward = new TSMap<>();
 
-  public ModuleContext(CompilationContext global) {
-    this.global = global;
+  public ModuleContext(ModuleId id, CompilationContext compilationContext) {
+    this.id = id;
+    this.compilationContext = compilationContext;
   }
 
   public final void builtinLog(String message) {
-    log.add(message);
+    log.log.add(message);
   }
 
   public int sourceLocation(Location location) {

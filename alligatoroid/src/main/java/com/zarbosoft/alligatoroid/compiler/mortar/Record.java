@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.rendaw.common.ROMap;
 
-public class Record {
+public final class Record {
   public final ROMap<Object, Object> data;
 
   public Record(ROMap<Object, Object> data) {

@@ -1,11 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.ASTORE;
 
-public class MortarHalfObjectType implements MortarHalfDataType {
-  public static MortarHalfObjectType type = new MortarHalfObjectType();
-
+public abstract class MortarHalfObjectType implements MortarHalfDataType {
   protected MortarHalfObjectType() {}
 
   @Override
@@ -16,5 +15,10 @@ public class MortarHalfObjectType implements MortarHalfDataType {
   @Override
   public int loadOpcode() {
     return ALOAD;
+  }
+
+  @Override
+  public int returnOpcode() {
+    return ARETURN;
   }
 }

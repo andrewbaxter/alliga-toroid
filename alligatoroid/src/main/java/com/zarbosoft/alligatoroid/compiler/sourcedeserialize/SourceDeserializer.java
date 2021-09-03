@@ -9,11 +9,13 @@ import com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer;
 import com.zarbosoft.alligatoroid.compiler.deserialize.LocationPrototype;
 import com.zarbosoft.alligatoroid.compiler.deserialize.ObjectInfo;
 import com.zarbosoft.alligatoroid.compiler.deserialize.State;
+import com.zarbosoft.alligatoroid.compiler.deserialize.StateErrorSingle;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StateObject;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototype;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototypeArray;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototypeInt;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototypeString;
+import com.zarbosoft.alligatoroid.compiler.deserialize.StateRecordBegin;
 import com.zarbosoft.alligatoroid.compiler.language.Access;
 import com.zarbosoft.alligatoroid.compiler.language.Bind;
 import com.zarbosoft.alligatoroid.compiler.language.Block;
@@ -22,6 +24,7 @@ import com.zarbosoft.alligatoroid.compiler.language.Call;
 import com.zarbosoft.alligatoroid.compiler.language.LiteralString;
 import com.zarbosoft.alligatoroid.compiler.language.Local;
 import com.zarbosoft.alligatoroid.compiler.language.Lower;
+import com.zarbosoft.alligatoroid.compiler.language.ModLocal;
 import com.zarbosoft.alligatoroid.compiler.language.Record;
 import com.zarbosoft.alligatoroid.compiler.language.RecordElement;
 import com.zarbosoft.alligatoroid.compiler.language.Stage;
@@ -37,6 +40,8 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
+
+import static com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer.errorRet;
 
 public class SourceDeserializer {
   private final StatePrototype valuePrototype;
@@ -57,34 +62,40 @@ public class SourceDeserializer {
           Tuple.class,
           Stage.class,
           Lower.class,
+          ModLocal.class,
         };
     valuePrototype =
         new StatePrototype() {
           @Override
           public State create(TSList<Error> errors, LuxemPath luxemPath, TSList<State> stack) {
-            return new BaseState() {
-              State child;
+            BaseState out =
+                new BaseState() {
+                  State child;
 
-              @Override
-              public void eatType(
-                  TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String name) {
-                ObjectInfo info = languageNodeInfos.getOpt(name);
-                if (info == null) {
-                  errors.add(
-                      Error.deserializeUnknownType(
-                          luxemPath, name, languageNodeInfos.keys().toList()));
-                  ok = false;
-                  return;
-                }
-                child = new StateObject(info);
-                stack.add(child);
-              }
+                  @Override
+                  public void eatType(
+                      TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String name) {
+                    ObjectInfo info = languageNodeInfos.getOpt(name);
+                    stack.removeLast();
+                    if (info == null) {
+                      errors.add(
+                          Error.deserializeUnknownType(
+                              luxemPath, name, languageNodeInfos.keys().toList()));
+                      stack.add(StateErrorSingle.state);
+                      return;
+                    }
+                    child = new StateObject(info);
+                    stack.add(child);
+                    stack.add(StateRecordBegin.state);
+                  }
 
-              @Override
-              public Object build(TSList<Error> errors) {
-                return child.build(errors);
-              }
-            };
+                  @Override
+                  public Object build(TSList<Error> errors) {
+                    return child.build(errors);
+                  }
+                };
+            stack.add(out);
+            return out;
           }
         };
 
@@ -157,6 +168,12 @@ public class SourceDeserializer {
           }
         });
     Deserializer.deserialize(errors, path, stack);
-    return (ROList<Value>) rootNodes.build(errors);
+    Object out = rootNodes.build(errors);
+    if (out == errorRet) {
+      if (errors.none()) errors.add(Error.deserializeMissingSourceFile(path));
+      return null;
+    }
+    if (out == null) throw new Assertion();
+    return (ROList<Value>) out;
   }
 }

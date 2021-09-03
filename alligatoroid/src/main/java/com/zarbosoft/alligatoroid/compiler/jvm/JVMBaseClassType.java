@@ -11,10 +11,11 @@ import com.zarbosoft.rendaw.common.TSMap;
 
 public class JVMBaseClassType extends JVMObjectType {
   public final String jvmInternalClass;
-  public final TSMap<Object, JVMType> fields = new TSMap<>();
+  public final TSMap<Object, JVMType> fields;
 
   public JVMBaseClassType(String jvmExternalClass, TSMap<Object, JVMType> fields) {
     this.jvmInternalClass = JVMDescriptor.jvmName(jvmExternalClass);
+    this.fields = fields;
   }
 
   @Override
@@ -23,7 +24,7 @@ public class JVMBaseClassType extends JVMObjectType {
     WholeValue key = WholeValue.getWhole(context, location, field0);
     JVMType field = fields.getOpt(key.concreteValue());
     if (field == null) {
-      context.module.errors.add(Error.noField(location, key));
+      context.module.log.errors.add(Error.noField(location, key));
       return EvaluateResult.error;
     }
     return EvaluateResult.pure(field.asValue(lower));

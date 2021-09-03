@@ -15,7 +15,7 @@ public class LocationPrototype implements StatePrototype {
 
   @Override
   public State create(TSList<Error> errors, LuxemPath luxemPath, TSList<State> stack) {
-    return new StateInt() {
+    StateInt out = new StateInt() {
       @Override
       public Object build(TSList<Error> errors) {
         Integer value = (Integer) super.build(errors);
@@ -25,5 +25,7 @@ public class LocationPrototype implements StatePrototype {
         return new Location(module, value);
       }
     };
+    stack.add(out);
+    return out;
   }
 }
