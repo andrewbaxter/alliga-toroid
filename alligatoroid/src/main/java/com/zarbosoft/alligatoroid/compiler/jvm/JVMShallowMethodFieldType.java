@@ -10,13 +10,12 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 public class JVMShallowMethodFieldType implements JVMType, GraphSerializable {
-  public JVMBaseClassType base;
   public final JVMDataType returnType;
   public final String name;
   public final String jvmDesc;
+  public JVMBaseClassType base;
 
-  public JVMShallowMethodFieldType(
-      JVMDataType returnType, String name, String jvmDesc) {
+  public JVMShallowMethodFieldType(JVMDataType returnType, String name, String jvmDesc) {
     this.returnType = returnType;
     this.name = name;
     this.jvmDesc = jvmDesc;
@@ -64,10 +63,7 @@ public class JVMShallowMethodFieldType implements JVMType, GraphSerializable {
     return new Record(
         new TSMap<>(
             m -> {
-              m.put("base", base)
-                  .put("returnType", returnType)
-                  .put("name", name)
-                  .put("jvmDesc", jvmDesc);
+              m.put("returnType", returnType).put("name", name).put("jvmDesc", jvmDesc);
             }));
   }
 
