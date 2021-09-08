@@ -1,12 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
@@ -19,6 +21,30 @@ public class Utils {
             walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
           } catch (NoSuchFileException e) {
           }
+        });
+  }
+
+  public static int reflectHashCode(Object o) {
+    return uncheck(
+        () -> {
+          Field[] fields = o.getClass().getDeclaredFields();
+          Object[] values = new Objects[fields.length];
+          for (int i = 0; i < fields.length; i++) {
+            values[i] = fields[i].get(o);
+          }
+          return Objects.hash(values);
+        });
+  }
+
+  public static boolean reflectEquals(Object o, Object o2) {
+    if (o == o2) return true;
+    if (o2 == null || o.getClass() != o2.getClass()) return false;
+    return uncheck(
+        () -> {
+          for (Field f : o.getClass().getDeclaredFields()) {
+            if (!Objects.equals(f.get(o), f.get(o2))) return false;
+          }
+          return true;
         });
   }
 

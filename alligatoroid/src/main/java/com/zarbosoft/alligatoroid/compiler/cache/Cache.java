@@ -229,7 +229,7 @@ public class Cache {
    * @param inner
    * @return
    */
-  public Value loadCachedModule(TSList<Error> warnings, Path moduleCacheRelPath) {
+  public Value loadOutput(TSList<Error> warnings, Path moduleCacheRelPath) {
     Path outputPath = cachePath(moduleCacheRelPath).resolve(CACHE_FILENAME_OUTPUT);
 
     TSList<Error> errors = new TSList<>();

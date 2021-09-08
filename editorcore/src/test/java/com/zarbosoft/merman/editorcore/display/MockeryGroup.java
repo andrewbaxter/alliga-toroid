@@ -19,12 +19,12 @@ public class MockeryGroup extends MockFreeDisplayNode implements Group {
   }
 
   @Override
-  public void remove(final int index, final int count) {
+  public void removeAt(final int index, final int count) {
     nodes.sublist(index, index + count - 1).clear();
   }
 
   @Override
-  public void remove(final DisplayNode node) {
+  public void removeNode(final DisplayNode node) {
     nodes.removeVal(node);
   }
 

@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.jvm;
 
 import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.ModuleContext;
+import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.Scope;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
@@ -27,22 +27,21 @@ public class JVMMethod implements SimpleValue {
     this.externName = name;
   }
 
-  public void implement(Record spec, Value body) {
+  public void implement(Module module, Record spec, Value body) {
     JVMShallowMethodFieldType.MethodSpecDetails specDetails =
         JVMShallowMethodFieldType.specDetails(spec);
     JVMShallowMethodFieldType field =
         new JVMShallowMethodFieldType(specDetails.returnType, externName, specDetails.jvmSigDesc);
     field.base = base;
     base.fields.putNew(name, field);
-    ModuleContext moduleContext = new ModuleContext(null, null);
     JVMTargetModuleContext targetContext = new JVMTargetModuleContext();
-    Context context = new Context(moduleContext, targetContext, new Scope(null));
+    Context context = new Context(module, targetContext, new Scope(null));
 
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
     ectx.record(body.evaluate(context));
     built = (JVMCode) ectx.build(null).preEffect;
-    if (moduleContext.log.errors.some()) {
-      throw new MultiError(moduleContext.log.errors);
+    if (module.log.errors.some()) {
+      throw new MultiError(module.log.errors);
     }
     base.jvmClass.defineFunction(
         externName, specDetails.jvmSigDesc, new JVMCode().add(built).add(RETURN), new TSList<>());

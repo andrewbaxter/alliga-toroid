@@ -63,6 +63,7 @@ public class Editor {
   public final FileIds fileIds;
   public Banner banner;
   public BeddingContainer details;
+  public TSMap<Integer, Atom> fileIdMap;
 
   public Editor(
       final Syntax syntax,
@@ -155,6 +156,7 @@ public class Editor {
       Field field = entry.getValue();
       if (field instanceof FieldId) {
         editor.fileIds.remove(((FieldId) field).id);
+        editor.fileIdMap.remove(((FieldId) field).id);
       } else if (field instanceof FieldAtom) {
         removeIds(editor, ((FieldAtom) field).data);
       } else if (field instanceof FieldArray) {
@@ -183,10 +185,11 @@ public class Editor {
     recorder.apply(editor, new ChangeArray(array, index, remove, add));
   }
 
-  private static void makeIdsUniqueInner(Editor editor, History.Recorder recorder, Field field) {
+  private static void makeIdsUniqueInner(Editor editor, History.Recorder recorder, Atom atom, Field field) {
     if (field instanceof FieldId) {
       Integer uniqueId = editor.fileIds.take(((FieldId) field).id);
       if (uniqueId != null) recorder.apply(editor, new ChangeId((FieldId) field, uniqueId));
+      editor.fileIdMap.put(((FieldId) field).id, atom);
     } else if (field instanceof FieldAtom) {
       makeIdsUnique(editor, recorder, ((FieldAtom) field).data);
     } else if (field instanceof FieldArray) {
@@ -200,11 +203,11 @@ public class Editor {
 
   public static void makeIdsUnique(Editor editor, History.Recorder recorder, Atom atom) {
     for (Field field : atom.unnamedFields) {
-      makeIdsUniqueInner(editor, recorder, field);
+      makeIdsUniqueInner(editor, recorder, atom, field);
     }
     for (Map.Entry<String, Field> entry : atom.namedFields) {
       Field field = entry.getValue();
-      makeIdsUniqueInner(editor, recorder, field);
+      makeIdsUniqueInner(editor, recorder, atom, field);
     }
   }
 

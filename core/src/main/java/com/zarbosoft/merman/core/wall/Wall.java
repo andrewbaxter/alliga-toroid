@@ -112,7 +112,7 @@ public class Wall {
       }
     }
     children.remove(at);
-    visual.remove(at);
+    visual.removeAt(at);
     if (at < children.size()) {
       renumber(at);
       if (cornerstoneCourse != null) {

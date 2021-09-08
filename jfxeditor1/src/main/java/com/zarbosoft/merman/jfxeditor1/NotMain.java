@@ -1,5 +1,12 @@
 package com.zarbosoft.merman.jfxeditor1;
 
+import com.zarbosoft.alligatoroid.compiler.Error;
+import com.zarbosoft.alligatoroid.compiler.ImportSpec;
+import com.zarbosoft.alligatoroid.compiler.LocalModuleId;
+import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.Main;
+import com.zarbosoft.alligatoroid.compiler.Module;
+import com.zarbosoft.alligatoroid.compiler.ModuleId;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.Hoverable;
@@ -51,6 +58,7 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
@@ -67,62 +75,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
+import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class NotMain extends Application {
-  /*
-  TODO
-  parens around non-precedential subtrees in at syntax
-  createfile and write
-  jvm builtin string
-  make call take multiple arguments, paren
-    redo tuple
-  record/tuple are dual types
-    half tuple = values + side effect
-    tuple = objects
-    half record = concrete keys: values + side effect
-    record = object map
-    bind half only produces store code if there are non-constant data (?)
-      otherwise just generate full object on load
-
-  tuple -> loose tuple then automatically convert to half tuple if accessed?
-    goal: functions are 1:1 and allow passing in all arguments as a group, easily joining functions
-
-  tuple literal -> loose tuple
-    access -> half tuple
-    bind -> half tuple
-    drop -> as is/reverse drop
-    use in function -> use as is
-
-
-    // records
-  loose record
-    map key -> evaluate res
-    access -> drop others
-    drop -> drop
-    lower -> new record + lower each field
-    bind -> bind each field individually, map to binding objects
-
-  loose record binding
-    drop -> drop
-    fork -> fork loose record binding obj
-
-  fork loose record binding obj
-    access -> access binding
-    drop -> nop
-    lower -> new record + lower each field
-    bind -> bind each as new loose record binding
-
-
-
-  best breaks music 2014 #3
-   */
   public static final ROSet<Key> controlKeys =
       TSSet.of(Key.CONTROL, Key.CONTROL_LEFT, Key.CONTROL_RIGHT).ro();
   public static final ROSet<Key> shiftKeys =
       TSSet.of(Key.SHIFT, Key.SHIFT_LEFT, Key.SHIFT_RIGHT).ro();
   public DragSelectState dragSelect;
+  public Runnable flushCallback;
   private String path;
   private Editor editor;
+  private Thread compileThread;
 
   public static void main(String[] args) {
     NotMain.launch(args);
@@ -299,6 +265,37 @@ public class NotMain extends Application {
                     Format.format("No syntax for files with extension [%s]", extension));
               });
       Syntax syntax = syntaxOut.syntax;
+
+      if ("at".equals(extension)) {
+        flushCallback =
+            () -> {
+              if (compileThread != null) {
+                compileThread.interrupt();
+                uncheck(() -> compileThread.join());
+              }
+              compileThread =
+                  new Thread(
+                      () -> {
+                        TSMap<ImportSpec, Module> modules = Main.compile(path);
+                        Platform.runLater(
+                            () -> {
+                              ModuleId moduleId = new LocalModuleId(path);
+                              for (Map.Entry<ImportSpec, Module> e : modules) {
+                                for (Error error : e.getValue().log.errors) {
+                                  Location location = (Location) error.data.getOpt("location");
+                                  if (location == null) continue;
+                                  if (!moduleId.equal1(location.module)) continue;
+                                  Atom atom = editor.fileIdMap.getOpt(location.id);
+                                  if (atom == null) continue;
+                                  atom.setMetadata("error");
+                                }
+                              }
+                            });
+                      });
+              compileThread.start();
+            };
+      }
+
       FileIds fileIds = new FileIds();
       serializer = new JavaSerializer(syntax.backType);
       try {
@@ -590,6 +587,7 @@ public class NotMain extends Application {
       } catch (IOException e) {
         logException(e, "Failed to clean up backup %s", backupPath);
       }
+    if (flushCallback != null) flushCallback.run();
   }
 
   public static interface PrimitiveKeyHandler {

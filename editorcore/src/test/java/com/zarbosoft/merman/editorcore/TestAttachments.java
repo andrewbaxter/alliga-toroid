@@ -52,9 +52,7 @@ public class TestAttachments {
         .run(
             editor ->
                 editor.history.record(
-                    editor,
-                    null,
-                    c -> c.apply(editor, new ChangePrimitive(value, 2, 1, ""))))
+                    editor, null, c -> c.apply(editor, new ChangePrimitive(value, 2, 1, ""))))
         .run(
             context -> {
               assertThat(lastBrick[0], equalTo(value.visual.lines.get(0).brick));

@@ -7,15 +7,17 @@ public class MortarMethodFieldType implements SimpleValue, MortarHalfType {
   public final String jbcDesc;
   /** Null if null */
   public final MortarHalfDataType returnType;
+  public final boolean needsModule;
 
   public final MortarClass base;
 
   public MortarMethodFieldType(
-      MortarClass base, String name, String jbcDesc, MortarHalfDataType returnType) {
+          MortarClass base, String name, String jbcDesc, MortarHalfDataType returnType, boolean needsModule) {
     this.base = base;
     this.name = name;
     this.jbcDesc = jbcDesc;
     this.returnType = returnType;
+    this.needsModule = needsModule;
   }
 
   @Override

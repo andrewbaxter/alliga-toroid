@@ -26,11 +26,11 @@ public class MortarMethodField implements SimpleValue {
   @Override
   public EvaluateResult call(Context context, Location location, Value argument) {
     MortarCode code = (MortarCode) new MortarCode().add(lower.lower());
+    if (type.needsModule)
+      code.add(((MortarTargetModuleContext) context.target).transfer(context.module));
     MortarTargetModuleContext.convertFunctionArgument(context, code, argument);
     code.line(context.module.sourceLocation(location))
-        .add(
-            new MethodInsnNode(
-                INVOKEVIRTUAL, type.base.jvmName, type.name, type.jbcDesc, false));
+        .add(new MethodInsnNode(INVOKEVIRTUAL, type.base.jvmName, type.name, type.jbcDesc, false));
     if (type.returnType == null) return new EvaluateResult(code, null, NullValue.value);
     else return EvaluateResult.pure(type.returnType.stackAsValue(code));
   }

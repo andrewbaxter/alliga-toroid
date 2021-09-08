@@ -105,17 +105,17 @@ public class Banner {
   public void removeMessage(final Context context, final BannerMessage message) {
     if (current != message) return;
     current = null;
-    context.midground.remove(text);
+    context.midground.removeNode(text);
     text = null;
     if (background != null) {
-      context.midground.remove(background.drawing);
+      context.midground.removeNode(background.drawing);
       background = null;
     }
     context.wall.removeBedding(context, bedding);
     bedding = null;
   }
 
-  private static class TransverseListener extends Attachment {
+  private static class TransverseListener implements Attachment {
     private final Banner banner;
 
     public TransverseListener(Banner banner) {

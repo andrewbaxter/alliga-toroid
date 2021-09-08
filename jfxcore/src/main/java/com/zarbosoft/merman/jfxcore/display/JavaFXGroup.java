@@ -19,12 +19,12 @@ public class JavaFXGroup extends JavaFXFreeDisplayNode implements Group {
   }
 
   @Override
-  public void remove(final int index, final int count) {
+  public void removeAt(final int index, final int count) {
     ((javafx.scene.Group) this.node).getChildren().subList(index, index + count).clear();
   }
 
   @Override
-  public void remove(final DisplayNode node) {
+  public void removeNode(final DisplayNode node) {
     ((javafx.scene.Group) this.node).getChildren().remove(node.inner_());
   }
 

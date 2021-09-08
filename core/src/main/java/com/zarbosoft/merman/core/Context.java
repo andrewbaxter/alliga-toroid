@@ -70,18 +70,17 @@ public class Context {
   public final Padding pad;
   public final boolean animateCoursePlacement;
   public final boolean animateDetails;
-  public int ellipsizeThreshold;
-  public int layBrickBatchSize;
-  public double retryExpandFactor;
   public final double scrollFactor;
   public final double scrollAlotFactor;
-  public boolean window;
-  public KeyListener mouseButtonEventListener;
   /** Contains banner/details and icons. Scrolls. */
   public final Group midground;
   /** Contains source borders. Scrolls. */
   public final Group background;
-
+  public int ellipsizeThreshold;
+  public int layBrickBatchSize;
+  public double retryExpandFactor;
+  public boolean window;
+  public KeyListener mouseButtonEventListener;
   public double scroll = 0;
   public double peek = 0;
   public IterationLayBricks idleLayBricks = null;
@@ -414,31 +413,6 @@ public class Context {
     env.clipboardGetString(cb);
   }
 
-  public static class SyntaxLocateQueue {
-    public int at = 0;
-    public final SyntaxPath path;
-
-    public SyntaxLocateQueue(SyntaxPath path) {
-      this.path = path;
-    }
-
-    public String consumeSegment() {
-      return path.segments.get(at++);
-    }
-
-    public boolean atEnd() {
-      return at >= path.segments.size();
-    }
-
-    public ROList<String> consumed() {
-      return path.segments.sublist(0, at - 1);
-    }
-
-    public void consumeRemaining() {
-      at = path.segments.size();
-    }
-  }
-
   /**
    * Note that the paths for atom fields and atoms are the same. There's no way to get an Atom back
    * if the atom's in an atom field, you'll always get the field.
@@ -478,9 +452,10 @@ public class Context {
   }
 
   /**
-   * When one or more atoms were added in the document tree, use this to trigger laying bricks before or after them.
-   * 1. Try to lay bricks using the first/last brick of surrounding elements _within_ parent
-   * 2. Try to lay bricks using the first/last brick of elements surrounding parent
+   * When one or more atoms were added in the document tree, use this to trigger laying bricks
+   * before or after them. 1. Try to lay bricks using the first/last brick of surrounding elements
+   * _within_ parent 2. Try to lay bricks using the first/last brick of elements surrounding parent
+   *
    * @param parent The parent containing the added bricks.
    * @param index The index within parent of the first element added.
    * @param addCount The number of elements added.
@@ -748,6 +723,31 @@ public class Context {
      * @param max
      */
     public void usageChanged(Display.UnconvertAxis min, Display.UnconvertAxis max);
+  }
+
+  public static class SyntaxLocateQueue {
+    public final SyntaxPath path;
+    public int at = 0;
+
+    public SyntaxLocateQueue(SyntaxPath path) {
+      this.path = path;
+    }
+
+    public String consumeSegment() {
+      return path.segments.get(at++);
+    }
+
+    public boolean atEnd() {
+      return at >= path.segments.size();
+    }
+
+    public ROList<String> consumed() {
+      return path.segments.sublist(0, at - 1);
+    }
+
+    public void consumeRemaining() {
+      at = path.segments.size();
+    }
   }
 
   public static class InitialConfig {

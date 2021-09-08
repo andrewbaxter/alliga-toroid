@@ -1,7 +1,5 @@
 package com.zarbosoft.merman.core.display;
 
-import com.zarbosoft.rendaw.common.ROList;
-
 /**
  * Combines transforms for multiple other visual nodes. Transforming a group with one node with 0
  * transverse/converse offset is the same as transforming the node directly with no group.
@@ -28,13 +26,13 @@ public interface Group extends FreeDisplayNode {
     return 0;
   }
 
-  default void remove(final int index) {
-    remove(index, 1);
+  default void removeAt(final int index) {
+    removeAt(index, 1);
   }
 
-  void remove(int index, int count);
+  void removeAt(int index, int count);
 
-  void remove(DisplayNode node);
+  void removeNode(DisplayNode node);
 
   int size();
 

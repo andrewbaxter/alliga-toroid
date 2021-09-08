@@ -9,7 +9,6 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-
 public abstract class Visual {
   public int visualDepth;
 
@@ -98,7 +97,10 @@ public abstract class Visual {
   }
 
   public abstract void notifyLastBrickCreated(Context context, Brick brick);
+
   public abstract void notifyFirstBrickCreated(Context context, Brick brick);
+
+  public abstract void metaChanged(Context context);
 
   public static class CreateBrickResult {
     /** No contents, no brick to create; skip and continue */
@@ -120,9 +122,7 @@ public abstract class Visual {
     }
   }
 
-  /**
-   * All fields are mutually exclusive (null/zero/false value if not present)
-   */
+  /** All fields are mutually exclusive (null/zero/false value if not present) */
   public static class ExtendBrickResult {
     /** No contents, no brick to create; skip and continue */
     public final boolean empty;

@@ -3,7 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
-import com.zarbosoft.alligatoroid.compiler.ModuleContext;
+import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -12,7 +12,7 @@ import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleConte
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 public class BuiltinModuleFunction implements SimpleValue {
-  public static final String jbcInternalClass = JVMDescriptor.jvmName(ModuleContext.class);
+  public static final String jbcInternalClass = JVMDescriptor.jvmName(Module.class);
   private final String name;
   private final String jbcDesc;
   private final MortarHalfDataType returnType;

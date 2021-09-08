@@ -39,7 +39,9 @@ public class CompilationContext {
 
   public final Object modulesLock = new Object();
   public final Cache cache;
-  private final TSMap<ModuleId, Module> modules = new TSMap<>();
+  /** Map cache path -> module */
+  private final TSMap<ImportSpec, Module> modules = new TSMap<>();
+
   private final ConcurrentLinkedDeque<Future> newPending = new ConcurrentLinkedDeque<>();
 
   public CompilationContext(Path rootCachePath) {
@@ -52,22 +54,26 @@ public class CompilationContext {
     } else if (e instanceof InvocationTargetException) {
       processError(module, e.getCause());
     } else if (e instanceof MultiError) {
-      module.context.log.errors.addAll(((MultiError) e).errors);
+      module.log.errors.addAll(((MultiError) e).errors);
     } else {
-      module.context.log.errors.add(Error.unexpected(e));
+      module.log.errors.add(Error.unexpected(e));
     }
   }
 
-  public Future<Value> loadRootModule(String path) {
+  public void loadRootModule(String path) {
     LocalModuleId moduleId = new LocalModuleId(path);
-    return loadModule(
-        moduleId,
-        new LoadModuleInner() {
-          @Override
-          public Value load(Module module) {
-            return compile(module, Paths.get(moduleId.path));
-          }
-        });
+    ImportSpec importSpec = new ImportSpec(moduleId);
+    uncheck(
+        () ->
+            loadModule(
+                    importSpec,
+                    new LoadModuleInner() {
+                      @Override
+                      public Value load(Module module) {
+                        return compile(module, Paths.get(moduleId.path));
+                      }
+                    })
+                .get());
   }
 
   private Value compile(Module module, Path sourcePath) {
@@ -75,9 +81,9 @@ public class CompilationContext {
     // Do first pass flat evaluation
     MortarTargetModuleContext targetContext =
         new MortarTargetModuleContext(JVMDescriptor.jvmName(className));
-    Context context = new Context(module.context, targetContext, new Scope(null));
+    Context context = new Context(module, targetContext, new Scope(null));
     ROList<Value> rootStatements =
-        new SourceDeserializer(module.id).deserialize(module.context.log.errors, sourcePath);
+        new SourceDeserializer(module.id).deserialize(module.log.errors, sourcePath);
     if (rootStatements == null) return ErrorValue.error;
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
     MortarTargetModuleContext.LowerResult lowered =
@@ -95,7 +101,7 @@ public class CompilationContext {
                 null,
                 new TSList<>(
                     evaluateResult.preEffect, lowered.valueCode, evaluateResult.postEffect));
-    if (module.context.log.errors.some()) {
+    if (module.log.errors.some()) {
       return ErrorValue.error;
     }
     // Do 2nd pass jvm evaluation
@@ -119,8 +125,9 @@ public class CompilationContext {
 
   public Future<Value> loadLocalModule(String path) {
     LocalModuleId moduleId = new LocalModuleId(path);
+    ImportSpec importSpec = new ImportSpec(moduleId);
     return loadModule(
-        moduleId,
+        importSpec,
         new LoadModuleInner() {
           @Override
           public Value load(Module module) {
@@ -133,7 +140,7 @@ public class CompilationContext {
               try {
                 sourceBytes = Files.readAllBytes(sourcePath);
               } catch (NoSuchFileException e) {
-                module.context.log.errors.add(Error.deserializeMissingSourceFile(sourcePath));
+                module.log.errors.add(Error.deserializeMissingSourceFile(sourcePath));
                 return ErrorValue.error;
               } catch (Throwable e) {
                 processError(module, e);
@@ -141,7 +148,7 @@ public class CompilationContext {
               }
               sourceHash = new Utils.SHA256().add(sourceBytes).buildHex();
             }
-            Path relCachePath = cache.ensureCachePath(module.context.log.warnings, moduleId);
+            Path relCachePath = cache.ensureCachePath(module.log.warnings, moduleId);
             Path hashPath = cache.cachePath(relCachePath).resolve("hash");
             String outputHash =
                 uncheck(
@@ -153,7 +160,7 @@ public class CompilationContext {
                       }
                     });
             if (sourceHash.equals(outputHash)) {
-              Value out = cache.loadCachedModule(module.context.log.warnings, relCachePath);
+              Value out = cache.loadOutput(module.log.warnings, relCachePath);
               if (out != ErrorValue.error) {
                 return out;
               }
@@ -164,11 +171,11 @@ public class CompilationContext {
 
             // Cache result
             if (out != ErrorValue.error) {
-              cache.writeOutput(module.context.log.warnings, relCachePath, out);
+              cache.writeOutput(module.log.warnings, relCachePath, out);
               try {
                 Files.writeString(hashPath, sourceHash);
               } catch (Throwable e) {
-                module.context.log.warnings.add(Error.unexpected(e));
+                module.log.warnings.add(Error.unexpected(e));
               }
             }
 
@@ -177,13 +184,13 @@ public class CompilationContext {
         });
   }
 
-  private Future<Value> loadModule(ModuleId id, LoadModuleInner inner) {
+  private Future<Value> loadModule(ImportSpec importSpec, LoadModuleInner inner) {
     synchronized (modulesLock) {
-      Module module = modules.getOpt(id);
+      Module module = modules.getOpt(importSpec);
       if (module == null) {
         CompletableFuture<Value> result = new CompletableFuture<>();
-        module = new Module(id, new ModuleContext(id, this), result);
-        modules.put(id, module);
+        module = new Module(importSpec.moduleId, this, result);
+        modules.put(importSpec, module);
         Module finalModule = module;
         executor.submit(
             () -> {
@@ -201,16 +208,19 @@ public class CompilationContext {
     }
   }
 
-  public TSMap<ModuleId, Module> join() {
+  public TSMap<ImportSpec, Module> join() {
     uncheck(
         () -> {
-          while (true) {
-            Future got = newPending.pollLast();
-            if (got == null) break;
-            got.get();
+          try {
+            while (true) {
+              Future got = newPending.pollLast();
+              if (got == null) break;
+              got.get();
+            }
+          } finally {
+            executor.shutdown();
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
           }
-          executor.shutdown();
-          executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         });
     return modules;
   }

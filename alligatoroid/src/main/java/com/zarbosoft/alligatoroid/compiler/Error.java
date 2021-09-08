@@ -12,8 +12,9 @@ import java.nio.file.Path;
 
 public class Error implements TreeSerializable {
   public static final String DESCRIPTION_KEY = "description";
+  public static final String LOCATION_KEY = "location";
   private final String type;
-  private final ROMap<String, Object> data;
+  public final ROMap<String, Object> data;
 
   public Error(String type, TSMap<String, Object> data) {
     this.type = type;
@@ -118,7 +119,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "incompatible_target_values",
         new TSMap<String, Object>()
-            .put("location", location)
+            .put(LOCATION_KEY, location)
             .put("got", gotTarget)
             .put("expected", expectedTarget)
             .put(DESCRIPTION_KEY, "this block contains values for incompatible targets"));
@@ -128,7 +129,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "no_field",
         new TSMap<String, Object>()
-            .put("location", location)
+            .put(LOCATION_KEY, location)
             .put("field", field)
             .put(DESCRIPTION_KEY, "the field accessed does not exist"));
   }
@@ -159,7 +160,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "call_not_supported",
         new TSMap<String, Object>()
-            .put("location", location)
+            .put(LOCATION_KEY, location)
             .put(DESCRIPTION_KEY, "this value cannot be called"));
   }
 
@@ -167,7 +168,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "access_not_supported",
         new TSMap<String, Object>()
-            .put("location", location)
+            .put(LOCATION_KEY, location)
             .put(DESCRIPTION_KEY, "the base value doesn't have fields that can be accessed"));
   }
 
@@ -175,7 +176,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "bind_not_supported",
         new TSMap<String, Object>()
-            .put("location", location)
+            .put(LOCATION_KEY, location)
             .put(DESCRIPTION_KEY, "the base value cannot be bound to a variable"));
   }
 
@@ -183,7 +184,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "value_not_known_at_phase_1",
         new TSMap<String, Object>()
-            .put("location", location)
+            .put(LOCATION_KEY, location)
             .put("value", value.getClass().getCanonicalName())
             .put(
                 DESCRIPTION_KEY, "this value needs to be known completely in phase 1 to use here"));
@@ -201,7 +202,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "record_element_not_record_pair",
         new TSMap<String, Object>()
-            .put("location", location)
+            .put(LOCATION_KEY, location)
             .put("got", gotType)
             .put("expected", "record pair")
             .put("description", "this element in a record literal is not a record pair"));
@@ -211,7 +212,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "lower_too_deep",
         new TSMap<String, Object>()
-            .put("location", location)
+            .put(LOCATION_KEY, location)
             .put("got", "no matching containing stage element")
             .put("expected", "at least one more containing element is a stage")
             .put(

@@ -102,7 +102,7 @@ public class TextBorderAttachment {
   public void destroy(final Context context) {
     if (first != null) first.removeAttachment(this.firstAttachment);
     if (last != null) last.removeAttachment(this.lastAttachment);
-    context.background.remove(border.drawing);
+    context.background.removeNode(border.drawing);
   }
 
   public void redraw(final Context context) {

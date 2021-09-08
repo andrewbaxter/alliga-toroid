@@ -26,7 +26,7 @@ public class JSGroup extends JSFreeDisplayNode implements Group {
   }
 
     @Override
-  public void remove(int start, int count) {
+  public void removeAt(int start, int count) {
     for (int i = 0; i < count; ++i) {
       ((HTMLElement) element.childNodes.getAt(start)).remove();
     }
@@ -34,7 +34,7 @@ public class JSGroup extends JSFreeDisplayNode implements Group {
   }
 
   @Override
-  public void remove(DisplayNode node) {
+  public void removeNode(DisplayNode node) {
     ((JSDisplayNode) node).inner_().remove();
     fixPosition();
   }

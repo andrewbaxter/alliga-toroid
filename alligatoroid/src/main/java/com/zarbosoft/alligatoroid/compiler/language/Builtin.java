@@ -4,11 +4,10 @@ import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
-import com.zarbosoft.alligatoroid.compiler.ModuleContext;
+import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMBuiltin;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.BuiltinModuleFunction;
 import com.zarbosoft.alligatoroid.compiler.mortar.CreatedFile;
 import com.zarbosoft.alligatoroid.compiler.mortar.Function;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseRecord;
@@ -21,7 +20,6 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
-import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -35,7 +33,7 @@ public class Builtin extends LanguageValue {
   public static LooseRecord builtin =
       new LooseRecord(
           new TSOrderedMap()
-              .put("print", EvaluateResult.pure(wrapModuleFunction("builtinLog")))
+              .put("log", EvaluateResult.pure(wrapFunction(Builtin.class, "builtinLog")))
               .put("jvm", EvaluateResult.pure(JVMBuiltin.builtin))
               .put("null", EvaluateResult.pure(NullValue.value))
               .put("nullType", EvaluateResult.pure(NullType.type))
@@ -47,31 +45,26 @@ public class Builtin extends LanguageValue {
     super(id, false);
   }
 
-  private static Value wrapModuleFunction(String methodName) {
-    Method method = null;
-    for (Method c : ModuleContext.class.getDeclaredMethods()) {
-      if (c.getName().equals(methodName)) {
-        method = c;
-        break;
-      }
-    }
-    if (method == null) throw new Assertion();
-    ROPair<String, MortarHalfDataType> desc = funcDescriptor(method);
-    return new BuiltinModuleFunction(methodName, desc.first, desc.second);
+  public static void builtinLog(Module module, String message) {
+    module.log.log.add(message);
   }
 
-  public static ROPair<String, MortarHalfDataType> funcDescriptor(Method method) {
-    // Arguments
+  public static FuncInfo funcDescriptor(Method method) {
+    boolean needsModule = false;
     String[] argDescriptor = new String[method.getParameters().length];
     for (int i = 0; i < method.getParameters().length; ++i) {
       Parameter parameter = method.getParameters()[i];
+      if (i == 0 && parameter.getType() == Module.class) {
+        needsModule = true;
+      }
       ROPair<String, MortarHalfDataType> paramDesc = dataDescriptor(parameter.getType());
       argDescriptor[i] = paramDesc.first;
     }
 
     ROPair<String, MortarHalfDataType> retDesc = dataDescriptor(method.getReturnType());
 
-    return new ROPair<>(JVMDescriptor.func(retDesc.first, argDescriptor), retDesc.second);
+    return new FuncInfo(
+        JVMDescriptor.func(retDesc.first, argDescriptor), retDesc.second, needsModule);
   }
 
   public static ROPair<String, MortarHalfDataType> dataDescriptor(Class klass) {
@@ -103,10 +96,11 @@ public class Builtin extends LanguageValue {
       if (klass != Value.class)
         for (Method method : klass.getDeclaredMethods()) {
           if (!Modifier.isPublic(method.getModifiers())) continue;
-          ROPair<String, MortarHalfDataType> desc = funcDescriptor(method);
+          FuncInfo info = funcDescriptor(method);
           fields.putNew(
               method.getName(),
-              new MortarMethodFieldType(out, method.getName(), desc.first, desc.second));
+              new MortarMethodFieldType(
+                  out, method.getName(), info.descriptor, info.returnType, info.needsModule));
         }
       /*
       TODO
@@ -127,9 +121,9 @@ public class Builtin extends LanguageValue {
       method = checkMethod;
       break;
     }
-    ROPair<String, MortarHalfDataType> desc = funcDescriptor(method);
+    FuncInfo info = funcDescriptor(method);
     return new Function(
-        JVMDescriptor.jvmName(klass.getCanonicalName()), name, desc.first, desc.second);
+        JVMDescriptor.jvmName(klass.getCanonicalName()), name, info.descriptor, info.returnType);
   }
 
   public static CreatedFile builtinCreateFile(String path) {
@@ -139,5 +133,17 @@ public class Builtin extends LanguageValue {
   @Override
   public EvaluateResult evaluate(Context context) {
     return EvaluateResult.pure(builtin);
+  }
+
+  public static class FuncInfo {
+    public final String descriptor;
+    public final MortarHalfDataType returnType;
+    public final boolean needsModule;
+
+    public FuncInfo(String descriptor, MortarHalfDataType returnType, boolean needsModule) {
+      this.descriptor = descriptor;
+      this.returnType = returnType;
+      this.needsModule = needsModule;
+    }
   }
 }

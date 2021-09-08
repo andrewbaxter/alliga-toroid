@@ -4,10 +4,10 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.Drawing;
 import com.zarbosoft.merman.core.display.DrawingContext;
 import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
-import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 
 public class CursorAttachment {
   private final double toPixels;
@@ -99,7 +99,7 @@ public class CursorAttachment {
 
   public void destroy(final Context context) {
     if (brick != null) brick.removeAttachment(this.attachment);
-    context.overlay.remove(drawing);
+    context.overlay.removeNode(drawing);
   }
 
   public void setStyle(final Context context, final ObboxStyle style) {

@@ -2,9 +2,9 @@ package com.zarbosoft.merman.core.visual.attachments;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.derived.Obbox;
+import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.Brick;
-import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 
 public class BorderAttachment {
   private final Obbox border;
@@ -91,7 +91,7 @@ public class BorderAttachment {
   public void destroy(final Context context) {
     if (first != null) this.first.removeAttachment(this.firstAttachment);
     if (last != null) this.last.removeAttachment(this.lastAttachment);
-    context.background.remove(border.drawing);
+    context.background.removeNode(border.drawing);
   }
 
   public void redraw(final Context context) {

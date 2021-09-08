@@ -137,7 +137,7 @@ public class Course {
         if (brick == parent.cornerstone) resetCornerstone = true;
       }
       transplantRemove.clear();
-      visual.remove(index, visual.size() - index);
+      visual.removeAt(index, visual.size() - index);
       next.add(context, 0, transportAdd);
     }
     if (resetCornerstone) parent.setCornerstone(context, parent.cornerstone, null, null);
@@ -187,7 +187,7 @@ public class Course {
       if (at == 0 && this.index > 0) {
         joinPreviousCourse(context);
       } else {
-        visual.remove(at);
+        visual.removeAt(at);
         renumber(at);
         getIdlePlace(context);
         idlePlace.removeMaxAscent = Math.max(idlePlace.removeMaxAscent, brick.ascent());

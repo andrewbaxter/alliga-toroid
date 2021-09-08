@@ -97,7 +97,7 @@ public class BeddingContainer {
   public void setInner(Editor editor, Container inner) {
     Context context = editor.context;
     if (current != null) {
-      context.midground.remove(current);
+      context.midground.removeNode(current);
       context.wall.removeBedding(context, bedding);
       bedding = null;
     }
