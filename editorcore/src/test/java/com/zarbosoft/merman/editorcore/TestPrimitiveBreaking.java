@@ -5,7 +5,7 @@ import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.editorcore.helper.GeneralTestWizard;
 import com.zarbosoft.merman.editorcore.helper.GroupBuilder;
@@ -37,7 +37,7 @@ public class TestPrimitiveBreaking {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
             .build();
     final Atom primitive = new TreeBuilder(primitiveType).add("value", "123").build();
     new GeneralTestWizard(syntax, primitive)
@@ -71,7 +71,7 @@ public class TestPrimitiveBreaking {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
             .build();
     final Atom primitiveAtom = new TreeBuilder(quoted).add("value", "12345").build();
     final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.namedFields.getOpt("value");
@@ -121,7 +121,7 @@ public class TestPrimitiveBreaking {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
             .build();
     final Atom primitiveAtom = new TreeBuilder(quoted).add("value", "123456").build();
     final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.namedFields.getOpt("value");
@@ -163,7 +163,7 @@ public class TestPrimitiveBreaking {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
             .build();
     final Atom primitiveAtom = new TreeBuilder(primitiveType).add("value", "word egg").build();
     final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.namedFields.getOpt("value");
@@ -198,7 +198,7 @@ public class TestPrimitiveBreaking {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
             .build();
     final Atom primitiveAtom =
         new TreeBuilder(primitiveType).add("value", "gate\nword egg").build();
@@ -234,7 +234,7 @@ public class TestPrimitiveBreaking {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
             .build();
     final Atom primitiveAtom =
         new TreeBuilder(primitiveType).add("value", "word egg\nroad").build();
@@ -270,7 +270,7 @@ public class TestPrimitiveBreaking {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
             .build();
     final Atom primitiveAtom = new TreeBuilder(primitiveType).add("value", "ab").build();
     final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.namedFields.getOpt("value");

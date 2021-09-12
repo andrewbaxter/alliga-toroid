@@ -6,7 +6,7 @@ import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.editorcore.helper.BackArrayBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
@@ -57,7 +57,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS)))))
             .build();
     final Atom line2 = new TreeBuilder(pair).add("first", "c").add("second", "d").build();
     final FieldPrimitive line2_1 = (FieldPrimitive) line2.namedFields.getOpt("first");
@@ -88,7 +88,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS)))))
             .build();
     final Atom line = new TreeBuilder(pair).add("first", "a").add("second", "b").build();
     final FieldPrimitive text = (FieldPrimitive) line.namedFields.getOpt("first");
@@ -119,7 +119,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS)))))
             .build();
     final Atom line2 = new TreeBuilder(pair).add("first", "ccccc").add("second", "d").build();
     final FieldPrimitive line2_1 = (FieldPrimitive) line2.namedFields.getOpt("first");
@@ -150,7 +150,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS)))))
             .build();
     new GeneralTestWizard(
             syntax, new TreeBuilder(pair).add("first", "a").add("second", "b").build())
@@ -203,7 +203,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS)))))
             .build();
     new GeneralTestWizard(
             syntax,
@@ -249,7 +249,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS)))))
             .build();
     final Atom line2 = new TreeBuilder(pair).add("first", "").add("second", "d").build();
     final FieldPrimitive line2_1 = (FieldPrimitive) line2.namedFields.getOpt("first");
@@ -293,7 +293,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS)))))
             .build();
     final Atom line2 =
         new TreeBuilder(line)
@@ -338,7 +338,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS)))))
             .build();
     final Atom line2 = new TreeBuilder(pair).add("first", "cc").add("second", "d").build();
     final FieldPrimitive line2_1 = (FieldPrimitive) line2.namedFields.getOpt("first");

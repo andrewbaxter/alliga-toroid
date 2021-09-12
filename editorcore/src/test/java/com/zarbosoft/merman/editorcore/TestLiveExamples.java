@@ -2,11 +2,9 @@ package com.zarbosoft.merman.editorcore;
 
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
-import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.style.Style;
-import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.editorcore.helper.GeneralTestWizard;
 import com.zarbosoft.merman.editorcore.helper.GroupBuilder;
@@ -43,7 +41,7 @@ public class TestLiveExamples {
             .back(Helper.buildBackDataPrimitive("value"))
             .front(
                 new FrontPrimitiveSpec(
-                    new FrontPrimitiveSpec.Config("value").splitMode(Style.SplitMode.ALWAYS)))
+                    new FrontPrimitiveSpec.Config("value").splitMode(SplitMode.ALWAYS)))
             .frontDataPrimitive("value")
             .precedence(10)
             .build();

@@ -4,14 +4,13 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.visual.Vector;
 
-public class BoxContainer extends StackContainer {
+public class BoxContainer extends StackContainer implements ObboxStyle.Stylable {
   private final Box box;
 
-  public BoxContainer(Context context, ObboxStyle boxStyle, Container node) {
+  public BoxContainer(Context context, Container node) {
     super(context);
     add(box = new Box(context));
     addRoot(node);
-    box.setStyle(boxStyle);
   }
 
   @Override
@@ -19,5 +18,10 @@ public class BoxContainer extends StackContainer {
     super.setConverseSpan(context, span);
     box.setSize(context, root.converseSpan(), root.transverseSpan());
     box.setPosition(Vector.zero, false);
+  }
+
+  @Override
+  public void setStyle(Context context, ObboxStyle style) {
+    box.setStyle(context, style);
   }
 }

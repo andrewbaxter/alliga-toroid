@@ -1,38 +1,44 @@
 package com.zarbosoft.merman.core.wall.bricks;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Font;
 import com.zarbosoft.merman.core.display.Text;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.Padding;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
 
 public class BrickText extends Brick {
-  private final Font font;
   private final double toPixels;
   public Text text;
+  private Font font;
+  private Double overrideDescent;
+  private Double overrideAscent;
+  private Padding padding = Padding.empty;
 
   public BrickText(
       final Context context,
       final BrickInterface inter,
-      Style.SplitMode splitMode,
-      Style style,
-      ModelColor initialColor,
+      SplitMode splitMode,
+      String alignmentId,
+      String splitAlignmentId,
       int hackAvoidChanged) {
-    super(inter, style, splitMode);
+    super(inter, splitMode, alignmentId, splitAlignmentId);
     toPixels = context.toPixels;
     text = context.display.text();
-    text.setColor(context, initialColor);
-    this.font = Context.getFont(context, style);
-    text.setFont(context, font);
+    setFont(context, null, 14);
   }
 
   public BrickText(
-      final Context context, final BrickInterface inter, Style.SplitMode splitMode, Style style) {
-    this(context, inter, splitMode, style, style.color, 0);
+      final Context context,
+      final BrickInterface inter,
+      SplitMode splitMode,
+      String alignmentId,
+      String splitAlignmentId) {
+    this(context, inter, splitMode, alignmentId, splitAlignmentId, 0);
     layoutPropertiesChanged(context);
   }
 
@@ -40,16 +46,21 @@ public class BrickText extends Brick {
     text.setColor(context, color);
   }
 
+  public void setFont(Context context, String fontName, double fontSize) {
+    font = Context.getFont(context, fontName, fontSize);
+    text.setFont(context, font);
+  }
+
   @Override
   public double descent() {
-    if (style.descent != null) return style.descent * toPixels;
-    return text.descent() + style.padding.transverseEnd * toPixels;
+    if (overrideDescent != null) return overrideDescent * toPixels;
+    return text.descent() + padding.transverseEnd * toPixels;
   }
 
   @Override
   public double ascent() {
-    if (style.ascent != null) return style.ascent * toPixels;
-    return text.ascent() + style.padding.converseStart * toPixels;
+    if (overrideAscent != null) return overrideAscent * toPixels;
+    return text.ascent() + padding.converseStart * toPixels;
   }
 
   @Override
@@ -63,14 +74,14 @@ public class BrickText extends Brick {
   }
 
   @Override
-  public DisplayNode getDisplayNode() {
+  public CourseDisplayNode getDisplayNode() {
     return text;
   }
 
   @Override
   public void setConverse(final Context context, final double minConverse, final double converse) {
     this.preAlignConverse = minConverse;
-    text.setConverse(style.padding.converseStart * toPixels + converse);
+    text.setConverse(padding.converseStart * toPixels + converse);
   }
 
   @Override
@@ -80,16 +91,25 @@ public class BrickText extends Brick {
 
   public void setText(final Context context, final String text) {
     this.text.setText(context, text.replaceAll("\\p{Cntrl}", context.syntax.unprintable));
+    recalculateSpan(context);
+  }
+
+  private void recalculateSpan(Context context) {
     this.converseSpan =
         font.measurer().getWidth(this.text.text())
-            + style.padding.converseStart * toPixels
-            + style.padding.converseEnd * toPixels;
+            + padding.converseStart * toPixels
+            + padding.converseEnd * toPixels;
     layoutPropertiesChanged(context);
   }
 
   @Override
+  public void restyle(Context context) {
+    context.stylist.styleText(context, this);
+  }
+
+  @Override
   public double getConverse() {
-    return text.converse() - style.padding.converseStart * toPixels;
+    return text.converse() - padding.converseStart * toPixels;
   }
 
   public Font getFont() {
@@ -102,5 +122,20 @@ public class BrickText extends Brick {
 
   public int getUnder(final Context context, final Vector point) {
     return text.getIndexAtConverse(context, point.converse);
+  }
+
+  public void setOverrideDescent(Context context, Double overrideDescent) {
+    this.overrideDescent = overrideDescent;
+    layoutPropertiesChanged(context);
+  }
+
+  public void setOverrideAscent(Context context, Double overrideAscent) {
+    this.overrideAscent = overrideAscent;
+    layoutPropertiesChanged(context);
+  }
+
+  public void setPadding(Context context, Padding padding) {
+    this.padding = padding;
+    recalculateSpan(context);
   }
 }

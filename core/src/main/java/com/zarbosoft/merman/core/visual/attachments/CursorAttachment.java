@@ -9,7 +9,7 @@ import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
 
-public class CursorAttachment {
+public class CursorAttachment implements ObboxStyle.Stylable {
   private final double toPixels;
   public Drawing drawing;
   Vector offset;

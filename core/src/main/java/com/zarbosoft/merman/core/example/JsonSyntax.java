@@ -32,7 +32,7 @@ import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Padding;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.ROList;
@@ -42,6 +42,8 @@ import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
+
+import java.util.function.Supplier;
 
 public class JsonSyntax {
   private static final String DEFAULT_ID = "default";
@@ -60,24 +62,41 @@ public class JsonSyntax {
 
   public static SyntaxOut create(Environment env, Padding pad) {
     double fontSize = 6;
-    final Style stringStyle =
-        new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("F79578")));
-    final Style numberStyle =
-        new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("95FA94")));
-    final Style specialStyle =
-        new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("7DD4FB")));
-    final Style symbolStyle =
-        new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("CACACA")));
-    Style.Config gapStyleConfig =
-        new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("d64a62"));
-    final Style gapStyle = new Style(gapStyleConfig);
-    Style gapEmptySymbolStyle = new Style(gapStyleConfig.dupe().padding(Padding.ct(1, 0)));
-    final Style baseAlignSymbolStyle =
-        new Style(
-            new Style.Config()
-                .fontSize(fontSize)
-                .color(ModelColor.RGB.hex("CACACA"))
-                .splitAlignment(ALIGNMENT_BASE));
+    final DirectStylist.TextStyle stringStyle =
+        new DirectStylist.TextStyle().fontSize(fontSize).color(ModelColor.RGB.hex("F79578"));
+    final DirectStylist.TextStyle numberStyle =
+        new DirectStylist.TextStyle().fontSize(fontSize).color(ModelColor.RGB.hex("95FA94"));
+    final DirectStylist.TextStyle specialStyle =
+        new DirectStylist.TextStyle().fontSize(fontSize).color(ModelColor.RGB.hex("7DD4FB"));
+    final DirectStylist.TextStyle symbolStyle =
+        new DirectStylist.TextStyle().fontSize(fontSize).color(ModelColor.RGB.hex("CACACA"));
+    Supplier<DirectStylist.TextStyle> baseGapStyle =
+        () -> new DirectStylist.TextStyle().fontSize(fontSize).color(ModelColor.RGB.hex("d64a62"));
+    final DirectStylist.TextStyle gapStyle = baseGapStyle.get();
+    DirectStylist.TextStyle gapEmptySymbolStyle = baseGapStyle.get().padding(Padding.ct(1, 0));
+    final DirectStylist.TextStyle baseAlignSymbolStyle =
+        new DirectStylist.TextStyle().fontSize(fontSize).color(ModelColor.RGB.hex("CACACA"));
+
+    ObboxStyle cursorStyle =
+        new ObboxStyle(
+            new ObboxStyle.Config()
+                .padding(Padding.same(1))
+                .roundStart(true)
+                .roundEnd(true)
+                .lineThickness(0.3)
+                .roundRadius(3)
+                .lineColor(ModelColor.RGB.white));
+
+    ObboxStyle hoverStyle =
+        new ObboxStyle(
+            new ObboxStyle.Config()
+                .padding(Padding.same(1))
+                .roundEnd(true)
+                .roundStart(true)
+                .lineThickness(0.3)
+                .roundRadius(3)
+                .lineColor(ModelColor.RGB.hex("888888")));
+
     TSMap<String, AlignmentSpec> containerAlignments =
         new TSMap<String, AlignmentSpec>()
             .put(
@@ -93,8 +112,8 @@ public class JsonSyntax {
             new FrontSymbolSpec.Config(
                 new SymbolSpaceSpec(
                     new SymbolSpaceSpec.Config()
-                        .splitMode(Style.SplitMode.COMPACT)
-                        .style(new Style(new Style.Config().splitAlignment(ALIGNMENT_INDENT))))));
+                        .splitMode(SplitMode.COMPACT)
+                        .splitAlignmentId(ALIGNMENT_INDENT))));
     TSList<AtomType> types =
         TSList.of(
             new FreeAtomType(
@@ -128,7 +147,8 @@ public class JsonSyntax {
                         TSList.of(
                             textSym("\"", stringStyle),
                             new FrontPrimitiveSpec(
-                                new FrontPrimitiveSpec.Config(DEFAULT_ID).style(stringStyle)),
+                                new FrontPrimitiveSpec.Config(DEFAULT_ID)
+                                    .meta(textStyleMeta(stringStyle))),
                             textSym("\"", stringStyle))))),
             new FreeAtomType(
                 new FreeAtomType.Config(
@@ -140,7 +160,8 @@ public class JsonSyntax {
                                 BackJSONSpecialPrimitiveSpec.integerConfig(DEFAULT_ID))),
                         TSList.of(
                             new FrontPrimitiveSpec(
-                                new FrontPrimitiveSpec.Config(DEFAULT_ID).style(numberStyle)))))),
+                                new FrontPrimitiveSpec.Config(DEFAULT_ID)
+                                    .meta(textStyleMeta(numberStyle))))))),
             new FreeAtomType(
                 new FreeAtomType.Config(
                     "decimal",
@@ -151,7 +172,8 @@ public class JsonSyntax {
                                 BackJSONSpecialPrimitiveSpec.decimalConfig(DEFAULT_ID))),
                         TSList.of(
                             new FrontPrimitiveSpec(
-                                new FrontPrimitiveSpec.Config(DEFAULT_ID).style(numberStyle)))))),
+                                new FrontPrimitiveSpec.Config(DEFAULT_ID)
+                                    .meta(textStyleMeta(numberStyle))))))),
             new FreeAtomType(
                 new FreeAtomType.Config(
                         "record",
@@ -179,7 +201,8 @@ public class JsonSyntax {
                             new BackAtomSpec(new BaseBackAtomSpec.Config("value", GROUP_ANY))),
                         TSList.of(
                             new FrontPrimitiveSpec(
-                                new FrontPrimitiveSpec.Config("key").style(symbolStyle)),
+                                new FrontPrimitiveSpec.Config("key")
+                                    .meta(textStyleMeta(symbolStyle))),
                             textSym(": ", symbolStyle),
                             new FrontAtomSpec(new FrontAtomSpec.Config("value")))))),
             new FreeAtomType(
@@ -204,7 +227,8 @@ public class JsonSyntax {
             new FrontSymbolSpec(
                 new FrontSymbolSpec.Config(
                         new SymbolTextSpec(
-                            new SymbolTextSpec.Config("￮").style(gapEmptySymbolStyle)))
+                            new SymbolTextSpec.Config("￮")
+                                .meta(textStyleMeta(gapEmptySymbolStyle))))
                     .condition(
                         new ConditionValue(
                             new ConditionValue.Config(
@@ -214,7 +238,8 @@ public class JsonSyntax {
             new FrontSymbolSpec(
                 new FrontSymbolSpec.Config(
                         new SymbolTextSpec(
-                            new SymbolTextSpec.Config("▹").style(gapEmptySymbolStyle)))
+                            new SymbolTextSpec.Config("▹")
+                                .meta(textStyleMeta(gapEmptySymbolStyle))))
                     .condition(
                         new ConditionValue(
                             new ConditionValue.Config(
@@ -223,13 +248,13 @@ public class JsonSyntax {
         new GapAtomType(
             new GapAtomType.Config()
                 .back(GapAtomType.jsonBack)
-                .primitiveStyle(gapStyle)
+                .primitiveMeta(textStyleMeta(gapStyle))
                 .frontSuffix(gapEmptyPlaceholder));
     SuffixGapAtomType suffixGap =
         new SuffixGapAtomType(
             new SuffixGapAtomType.Config()
                 .back(SuffixGapAtomType.jsonBack)
-                .primitiveStyle(gapStyle)
+                .primitiveMeta(textStyleMeta(gapStyle))
                 .frontSuffix(suffixGapEmptyPlaceholder)
                 .frontArrayConfig(new FrontArraySpecBase.Config().prefix(TSList.of(breakIndent))));
     TSMap<String, ROOrderedSetRef<AtomType>> splayedTypes;
@@ -256,9 +281,8 @@ public class JsonSyntax {
       errors.raise();
     }
     return new SyntaxOut(
+        new DirectStylist(cursorStyle, hoverStyle, null, null, null, null, null, null),
         ModelColor.RGB.hex("938f8d"),
-        ModelColor.RGB.hex("938f8d"),
-        ModelColor.RGB.hex("2A2A2A"),
         new Syntax(
             env,
             new Syntax.Config(
@@ -275,52 +299,29 @@ public class JsonSyntax {
                 .backType(BackType.JSON)
                 .displayUnit(Syntax.DisplayUnit.MM)
                 .background(ModelColor.RGB.hex("333333"))
-                .hoverStyle(hoverStyle(false))
-                .primitiveHoverStyle(hoverStyle(true))
-                .cursorStyle(cursorStyle(false))
-                .primitiveCursorStyle(cursorStyle(true))
                 .courseTransverseStride(fontSize * 1.1)
                 .pad(pad)),
-        ROSet.empty);
+        ROSet.empty,
+        fontSize * 0.7);
   }
 
-  private static Style cursorStyle(boolean primitive) {
-    return new Style(
-        new Style.Config()
-            .obbox(
-                new ObboxStyle(
-                    new ObboxStyle.Config()
-                        .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
-                        .roundStart(true)
-                        .roundEnd(true)
-                        .lineThickness(0.3)
-                        .roundRadius(3)
-                        .lineColor(ModelColor.RGB.white))));
+  public static ROMap<String, Object> textStyleMeta(DirectStylist.TextStyle style) {
+    return new TSMap<>(m -> m.put("style", style));
   }
 
-  private static Style hoverStyle(boolean primitive) {
-    return new Style(
-        new Style.Config()
-            .obbox(
-                new ObboxStyle(
-                    new ObboxStyle.Config()
-                        .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
-                        .roundEnd(true)
-                        .roundStart(true)
-                        .lineThickness(0.3)
-                        .roundRadius(3)
-                        .lineColor(ModelColor.RGB.hex("888888")))));
-  }
-
-  public static FrontSymbolSpec textSym(String s, Style style) {
+  public static FrontSymbolSpec textSym(String s, DirectStylist.TextStyle style) {
     return new FrontSymbolSpec(
-        new FrontSymbolSpec.Config(new SymbolTextSpec(new SymbolTextSpec.Config(s).style(style))));
+        new FrontSymbolSpec.Config(
+            new SymbolTextSpec(new SymbolTextSpec.Config(s).meta(textStyleMeta(style)))));
   }
 
-  public static FrontSymbolSpec baseAlignTextSym(String s, Style style) {
+  public static FrontSymbolSpec baseAlignTextSym(String s, DirectStylist.TextStyle style) {
     return new FrontSymbolSpec(
         new FrontSymbolSpec.Config(
             new SymbolTextSpec(
-                new SymbolTextSpec.Config(s).splitMode(Style.SplitMode.COMPACT).style(style))));
+                new SymbolTextSpec.Config(s)
+                    .splitMode(SplitMode.COMPACT)
+                    .splitAlignmentId(ALIGNMENT_BASE)
+                    .meta(textStyleMeta(style)))));
   }
 }

@@ -80,6 +80,7 @@ public class NotMain extends Application {
               display,
               env,
               serializer,
+              syntaxOut.stylist,
               new CursorFactory() {
                 boolean handleCommon(Context context, ButtonEvent e, Runnable copy) {
                   if (e.press) {

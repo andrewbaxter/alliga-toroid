@@ -10,4 +10,6 @@ public interface Attachment {
   default void setTransverseSpan(Context context, double ascent, double descent) {}
 
   void destroy(Context context);
+
+  default void setBaselineTransverse(Context context, double baselineTransverse) {}
 }

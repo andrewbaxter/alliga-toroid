@@ -8,7 +8,7 @@ class HoverableFieldArray extends HoverableFieldArrayBase {
   public int index;
 
   HoverableFieldArray(final Context context, VisualFieldArray visual) {
-    super(visual, context);
+    super(context, visual);
   }
 
   @Override

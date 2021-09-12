@@ -8,6 +8,7 @@ import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.example.DirectStylist;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
@@ -21,16 +22,16 @@ import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSubArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.EditorCursorFactory;
-import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldArray;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorAtom;
+import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldArray;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.display.MockeryDisplay;
 import com.zarbosoft.merman.editorcore.history.FileIds;
@@ -173,7 +174,8 @@ public class Helper {
   }
 
   public static void assertTreeEqual(final Context context, final Atom expected, final Field got) {
-    FieldArray value = new FieldArray((BaseBackArraySpec) context.syntax.root.namedFields.get("value"));
+    FieldArray value =
+        new FieldArray((BaseBackArraySpec) context.syntax.root.namedFields.get("value"));
     value.initialSet(TSList.of(expected)); // TODO this shouldn't really be setting the value
     assertTreeEqual(value, got);
   }
@@ -191,7 +193,7 @@ public class Helper {
     FieldArray rootArray = new FieldArray((BaseBackArraySpec) syntax.root.namedFields.get("value"));
     rootArray.initialSet(TSList.of(root));
     Atom rootAtom = new Atom(syntax.root);
-    rootAtom.initialSet(new TSList<>(),new TSMap<String, Field>().put("value", rootArray));
+    rootAtom.initialSet(new TSList<>(), new TSMap<String, Field>().put("value", rootArray));
     final Document doc = new Document(syntax, rootAtom);
     final Editor editor =
         new Editor(
@@ -202,6 +204,7 @@ public class Helper {
             new TestEnvironment(),
             new History(),
             new JavaSerializer(syntax.backType),
+            new DirectStylist(null, null, null, null, null, null, null, null),
             e -> new EditorCursorFactory(e),
             new Editor.Config(contextConfig));
     return editor;
@@ -225,7 +228,8 @@ public class Helper {
         dumpTreeInner(((FieldAtom) field.getValue()).data, indentText + indentChunk);
       } else if (field.getValue() instanceof FieldPrimitive) {
         System.out.format(
-            "%sprimitive text [%s]\n", indentText + indentChunk, ((FieldPrimitive) field.getValue()).get());
+            "%sprimitive text [%s]\n",
+            indentText + indentChunk, ((FieldPrimitive) field.getValue()).get());
       } else throw new Assertion();
     }
   }

@@ -6,59 +6,79 @@ import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Text;
 import com.zarbosoft.merman.core.syntax.AtomType;
-import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
+import com.zarbosoft.rendaw.common.ROMap;
 
 public class SymbolTextSpec extends Symbol {
   public final String text;
-  public final Style.SplitMode splitMode;
-  public final Style style;
+  public final SplitMode splitMode;
+  public final String alignmentId;
+  public final String splitAlignmentId;
+  private final ROMap<String, Object> meta;
 
   public SymbolTextSpec(Config config) {
     this.text = config.text;
     this.splitMode = config.splitMode;
-    this.style = config.style;
+    this.alignmentId = config.alignmentId;
+    this.splitAlignmentId = config.splitAlignmentId;
+    meta = config.meta;
   }
 
   @Override
   public CourseDisplayNode createDisplay(final Context context) {
     final Text text = context.display.text();
     text.setText(context, this.text);
-    text.setFont(context, Context.getFont(context, style));
-    text.setColor(context, style.color);
+    context.stylist.styleTextDisplay(context, text, meta);
     return text;
   }
 
   @Override
   public Brick createBrick(final Context context, final BrickInterface inter) {
-    final BrickText out = new BrickText(context, inter, splitMode, style);
+    final BrickText out = new BrickText(context, inter, splitMode, alignmentId, splitAlignmentId);
     out.setText(context, this.text);
+    context.stylist.styleText(context, out);
     return out;
   }
 
   @Override
-  public void finish(MultiError errors, SyntaxPath typePath, AtomType atomType) {
+  public void finish(MultiError errors, SyntaxPath typePath, AtomType atomType) {}
+
+  @Override
+  public ROMap<String, Object> meta() {
+    return meta;
   }
 
   public static class Config {
     public final String text;
-    public Style.SplitMode splitMode = Style.SplitMode.NEVER;
-    public Style style = new Style(new Style.Config());
+    public SplitMode splitMode = SplitMode.NEVER;
+    public String alignmentId;
+    public String splitAlignmentId;
+    private ROMap<String, Object> meta = ROMap.empty;
 
     public Config(String text) {
       this.text = text;
     }
 
-    public Config splitMode(Style.SplitMode mode) {
+    public Config splitMode(SplitMode mode) {
       this.splitMode = mode;
       return this;
     }
 
-    public Config style(Style style) {
-      this.style = style;
+    public Config alignmentId(String alignmentId) {
+      this.alignmentId = alignmentId;
+      return this;
+    }
+
+    public Config splitAlignmentId(String splitAlignmentId) {
+      this.splitAlignmentId = splitAlignmentId;
+      return this;
+    }
+
+    public Config meta(ROMap<String, Object> meta) {
+      this.meta = meta;
       return this;
     }
   }

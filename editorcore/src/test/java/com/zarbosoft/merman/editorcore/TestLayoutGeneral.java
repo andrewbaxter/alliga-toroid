@@ -7,7 +7,7 @@ import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
@@ -28,7 +28,7 @@ public class TestLayoutGeneral {
             .back(Helper.buildBackDataPrimitive("value"))
             .front(
                 new FrontPrimitiveSpec(
-                    new FrontPrimitiveSpec.Config("value").splitMode(Style.SplitMode.ALWAYS)))
+                    new FrontPrimitiveSpec.Config("value").splitMode(SplitMode.ALWAYS)))
             .build();
     final Syntax syntax =
         new SyntaxBuilder("any")
@@ -61,7 +61,7 @@ public class TestLayoutGeneral {
             .back(Helper.buildBackDataPrimitive("value"))
             .front(
                 new FrontPrimitiveSpec(
-                    new FrontPrimitiveSpec.Config("value").splitMode(Style.SplitMode.ALWAYS)))
+                    new FrontPrimitiveSpec.Config("value").splitMode(SplitMode.ALWAYS)))
             .frontDataPrimitive("value")
             .build();
     final Syntax syntax =

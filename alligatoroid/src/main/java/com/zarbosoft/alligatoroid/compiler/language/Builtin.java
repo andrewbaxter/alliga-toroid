@@ -24,6 +24,8 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -82,6 +84,9 @@ public class Builtin extends LanguageValue {
     }
   }
 
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface WrapExpose {}
+
   public static MortarHalfDataType wrapClass(Class klass) {
     /*
     if (klass == Value.class) {
@@ -96,6 +101,7 @@ public class Builtin extends LanguageValue {
       if (klass != Value.class)
         for (Method method : klass.getDeclaredMethods()) {
           if (!Modifier.isPublic(method.getModifiers())) continue;
+          if (!method.isAnnotationPresent(WrapExpose.class)) continue;
           FuncInfo info = funcDescriptor(method);
           fields.putNew(
               method.getName(),

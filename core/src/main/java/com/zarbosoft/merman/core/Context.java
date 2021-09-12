@@ -13,7 +13,6 @@ import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.Padding;
-import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
@@ -76,6 +75,7 @@ public class Context {
   public final Group midground;
   /** Contains source borders. Scrolls. */
   public final Group background;
+  public final Stylist stylist;
   public int ellipsizeThreshold;
   public int layBrickBatchSize;
   public double retryExpandFactor;
@@ -110,6 +110,7 @@ public class Context {
       Display display,
       Environment env,
       Serializer serializer,
+      Stylist stylist,
       CursorFactory cursorFactory) {
     this.serializer = serializer;
     this.syntax = syntax;
@@ -122,6 +123,7 @@ public class Context {
     this.retryExpandFactor = config.retryExpandFactor;
     this.scrollFactor = config.scrollFactor;
     this.scrollAlotFactor = config.scrollAlotFactor;
+    this.stylist = stylist;
     this.cursorFactory = cursorFactory;
     this.display = display;
     display.setBackgroundColor(syntax.background);
@@ -265,10 +267,11 @@ public class Context {
     triggerIdleLayBricksOutward();
   }
 
-  public static Font getFont(final Context context, Style style) {
+  public static Font getFont(final Context context, String name, Double size0) {
     double toPt = context.toPixels * context.fromPixelsToMM * 72.0 / 25.4;
-    if (style.font == null) return context.display.font(null, style.fontSize * toPt);
-    return context.display.font(style.font, style.fontSize * toPt);
+    double size = size0 == null ? 6 : size0;
+    if (name == null) return context.display.font(null, size * toPt);
+    return context.display.font(name, size * toPt);
   }
 
   public void flushIteration(final int limit) {

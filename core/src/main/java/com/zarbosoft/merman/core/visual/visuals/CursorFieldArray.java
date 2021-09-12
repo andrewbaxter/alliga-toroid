@@ -2,6 +2,7 @@ package com.zarbosoft.merman.core.visual.visuals;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.CursorState;
+import com.zarbosoft.merman.core.Stylist;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
@@ -23,7 +24,8 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
       final int start,
       final int end) {
     this.visual = visual;
-    border = new BorderAttachment(context, context.syntax.cursorStyle.obbox);
+    border = new BorderAttachment(context);
+    context.stylist.styleObbox(context, border, Stylist.ObboxType.CURSOR);
     this.leadFirst = leadFirst;
     setRange(context, start, end);
   }
@@ -43,9 +45,7 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
   private void setCornerstone(final Context context, final int index) {
     context.wall.setCornerstone(
         context,
-        getElementVisual(index)
-            .createOrGetCornerstoneCandidate(context)
-            .brick,
+        getElementVisual(index).createOrGetCornerstoneCandidate(context).brick,
         () -> {
           for (int at = visual.visualIndex(index) - 1; at >= 0; --at) {
             final Brick found = visual.children.get(at).getLastBrick(context);
@@ -74,7 +74,7 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
   }
 
   private Visual getElementVisual(int index) {
-    //return visual.children.get(visual.visualIndex(index));
+    // return visual.children.get(visual.visualIndex(index));
     return visual.value.data.get(index).visual;
   }
 

@@ -9,14 +9,15 @@ import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.example.SyntaxOut;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.UnsupportedDirections;
 import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
-import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
@@ -86,7 +87,9 @@ public class WebView {
 
   @JsMethod
   public HTMLElement block(
-      Syntax syntax, Environment env, String rawDoc, ROList<String> prioritizeKeys) {
+      SyntaxOut syntaxOut, Environment env, String rawDoc, ROList<String> prioritizeKeys) {
+    Syntax syntax = syntaxOut.syntax;
+
     /** Shifts origin for negative */
     HTMLDivElement elementOrigin = (HTMLDivElement) DomGlobal.document.createElement("div");
     elementOrigin.classList.add("merman-block-view-container-origin");
@@ -142,6 +145,7 @@ public class WebView {
             display,
             env,
             serializer,
+            syntaxOut.stylist,
             new CursorFactory() {
               boolean handleCommon(Context context, ButtonEvent e, Runnable copy) {
                 if (e.press) {
@@ -189,8 +193,7 @@ public class WebView {
               }
 
               @Override
-              public CursorAtom createAtomCursor(
-                      Context context, VisualAtom base, int index) {
+              public CursorAtom createAtomCursor(Context context, VisualAtom base, int index) {
                 return new CursorAtom(context, base, index) {
                   @Override
                   public boolean handleKey(Context context, ButtonEvent hidEvent) {

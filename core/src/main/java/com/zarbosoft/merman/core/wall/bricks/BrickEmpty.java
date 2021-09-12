@@ -2,31 +2,26 @@ package com.zarbosoft.merman.core.wall.bricks;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.Blank;
-import com.zarbosoft.merman.core.display.DisplayNode;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.display.CourseDisplayNode;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
 
 public class BrickEmpty extends Brick {
   private final Blank visual;
-  private final double ascent;
-  private final double descent;
+  private double ascent;
+  private double descent;
   private double converse = 0;
 
   public BrickEmpty(
-      final Context context, final BrickInterface inter, Style.SplitMode splitMode, Style style) {
-    super(inter, style, splitMode);
+      final Context context,
+      final BrickInterface inter,
+      SplitMode splitMode,
+      String alignmentId,
+      String splitAlignmentId) {
+    super(inter, splitMode, alignmentId, splitAlignmentId);
     visual = context.display.blank();
-    double toPixels = context.toPixels;
-    if (style.ascent != null) ascent = style.ascent * toPixels;
-    else ascent = style.padding.transverseStart * toPixels;
-    if (style.descent != null) descent= style.descent * toPixels;
-    else descent = style.padding.transverseEnd * toPixels;
-    converseSpan =
-        style.space * toPixels
-            + style.padding.converseStart * toPixels
-            + style.padding.converseEnd * toPixels;
     layoutPropertiesChanged(context);
   }
 
@@ -41,7 +36,7 @@ public class BrickEmpty extends Brick {
   }
 
   @Override
-  public DisplayNode getDisplayNode() {
+  public CourseDisplayNode getDisplayNode() {
     return visual;
   }
 
@@ -67,7 +62,27 @@ public class BrickEmpty extends Brick {
   }
 
   @Override
+  public void restyle(Context context) {
+    context.stylist.styleEmpty(context, this);
+  }
+
+  @Override
   public double getConverse() {
     return converse;
+  }
+
+  public void setAscent(Context context, double ascent) {
+    this.ascent = ascent;
+    layoutPropertiesChanged(context);
+  }
+
+  public void setDescent(Context context, double descent) {
+    this.descent = descent;
+    layoutPropertiesChanged(context);
+  }
+
+  public void setConverseSpan(Context context, double span) {
+    this.converseSpan = span;
+    layoutPropertiesChanged(context);
   }
 }

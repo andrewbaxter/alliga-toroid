@@ -10,6 +10,7 @@ import com.zarbosoft.merman.core.visual.condition.ConditionAttachment;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class VisualSymbol extends Visual
@@ -156,5 +157,10 @@ public class VisualSymbol extends Visual
   @Override
   public Alignment findAlignment(String alignment) {
     return parent.atomVisual().findAlignment(alignment);
+  }
+
+  @Override
+  public ROMap<String, Object> meta() {
+    return frontSymbol.type.meta();
   }
 }

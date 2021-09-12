@@ -3,6 +3,7 @@ package com.zarbosoft.merman.core.visual.visuals;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.CursorState;
 import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.Stylist;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.visual.Visual;
@@ -23,7 +24,7 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
       final int endOffset) {
     this.visualPrimitive = visualPrimitive;
     range = new VisualFieldPrimitive.RangeAttachment(visualPrimitive, true);
-    range.setStyle(context, context.syntax.cursorStyle.obbox);
+    context.stylist.styleObbox(context, range, Stylist.ObboxType.CURSOR);
     range.leadFirst = leadFirst;
     range.setOffsets(context, beginOffset, endOffset);
     clusterIterator = context.env.glyphWalker(visualPrimitive.value.get());

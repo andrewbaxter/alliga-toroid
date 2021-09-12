@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.editorcore.gap;
 
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Stylist;
 import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.DisplayNode;
 import com.zarbosoft.merman.core.visual.Vector;
@@ -37,7 +38,7 @@ public class TwoColumnChoicePage {
     final StackGroup group = new StackGroup(editor.context);
 
     highlight = new Box(editor.context);
-    highlight.setStyle(editor.choiceCursorStyle);
+    editor.context.stylist.styleObbox(editor.context,highlight, Stylist.ObboxType.CHOICE_CURSOR);
     group.add(highlight.drawing);
 
     ColumnarTableLayout table =
@@ -55,11 +56,12 @@ public class TwoColumnChoicePage {
     table.layout();
     scroller.inner = group;
     changeChoice(editor.context, 0);
-    displayRoot =
+    BoxContainer displayRootBox =
         new BoxContainer(
-            editor.context,
-            editor.detailStyle,
-            new PadContainer(editor.context, editor.detailPad).addRoot(scroller));
+            editor.context, new PadContainer(editor.context, editor.detailPad).addRoot(scroller));
+    editor.context.stylist.styleObbox(
+        editor.context, displayRootBox, Stylist.ObboxType.DETAILS_BACKGROUND);
+    this.displayRoot = displayRootBox;
   }
 
   public void updateScroll(final Context context) {

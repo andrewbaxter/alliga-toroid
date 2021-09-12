@@ -4,12 +4,13 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.CursorState;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.Hoverable;
+import com.zarbosoft.merman.core.Stylist;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.display.Font;
+import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
-import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualLeaf;
@@ -22,6 +23,7 @@ import com.zarbosoft.merman.core.wall.BrickInterface;
 import com.zarbosoft.merman.core.wall.bricks.BrickLine;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -29,7 +31,7 @@ import com.zarbosoft.rendaw.common.TSSet;
 import java.util.function.Function;
 
 import static com.zarbosoft.merman.core.Environment.I18N_DONE;
-import static com.zarbosoft.merman.core.syntax.style.Style.SplitMode.ALWAYS;
+import static com.zarbosoft.merman.core.syntax.style.SplitMode.ALWAYS;
 
 public class VisualFieldPrimitive extends Visual implements VisualLeaf {
 
@@ -45,7 +47,6 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
   public CursorFieldPrimitive cursor;
   public TSList<Line> lines = new TSList<>();
   public int hardLineCount = 0;
-  public boolean valid = true;
 
   public VisualFieldPrimitive(
       final Context context,
@@ -277,6 +278,13 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
     int endIndex = i;
     final int modifiedLength;
 
+    Font softFont = null; // example for new lines later
+    Font hardFont = null; // example for new lines later
+    Font firstFont = null; // example for new lines later
+    if (lines.get(i).brick != null) {
+      firstFont = lines.get(i).brick.getFont();
+    }
+
     // Get the full unwrapped text
     {
       final StringBuilder sum = new StringBuilder();
@@ -298,14 +306,26 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
       final Font font;
       final double converse;
       if (line.brick == null) {
-        final Style style = j == 0 ? spec.firstStyle : j == i ? spec.hardStyle : spec.softStyle;
-        font = Context.getFont(context, style);
-        final Alignment alignment = atom.findAlignment(style.alignment);
+        String alignmentName =
+            j == 0
+                ? spec.firstAlignmentId
+                : j == i ? spec.hardSplitAlignmentId : spec.softSplitAlignmentId;
+        font = j == 0 ? firstFont : j == i ? hardFont : softFont;
+        final Alignment alignment = atom.findAlignment(alignmentName);
         if (alignment == null) converse = 0;
         else converse = alignment.converse;
       } else {
         font = line.brick.getFont();
         converse = line.brick.getConverse();
+        if (line.hard) {
+          if (j == 0) {
+            firstFont = font;
+          } else {
+            hardFont = font;
+          }
+        } else {
+          softFont = font;
+        }
       }
       result.merge(build.build(line, font, converse));
     }
@@ -318,9 +338,10 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
       while (build.hasText()) {
         final Line line = new Line(this, false);
         line.setIndex(context, j);
-        final Style style = spec.softStyle;
-        final Font font = Context.getFont(context, style);
-        final Alignment alignment = atom.findAlignment(style.alignment);
+        Font font = softFont;
+        if (font == null) font = hardFont;
+        if (font == null) font = firstFont;
+        final Alignment alignment = atom.findAlignment(spec.softSplitAlignmentId);
         final double converse;
         if (alignment == null) converse = 0;
         else converse = alignment.converse;
@@ -378,27 +399,42 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
       return !text.isEmpty();
     }
 
+    /**
+     * Update/reuse line with the amount of text that can fit. Keep remainder.
+     *
+     * <p>If font is null (line has no brick) just put the remainder in that line. Probably
+     * offscreen?
+     *
+     * @param line
+     * @param font
+     * @param converse
+     * @return
+     */
     public ResplitResult build(final Line line, final Font font, final double converse) {
       final ResplitResult result = new ResplitResult();
-      Font.Measurer measurer = font.measurer();
-      final double width = measurer.getWidth(text);
-      final double edge = converse + width;
       int split;
-      if (converse < context.edge && edge > context.edge) {
-        final Environment.I18nWalker lineIter = context.env.lineWalker(text);
-        final double edgeOffset = context.edge - converse;
-        final int under = measurer.getIndexAtConverse(context, text, edgeOffset);
-        if (under == text.length()) split = under;
-        else {
-          split = lineIter.precedingStart(under + 1);
-          if (split == 0 || split == I18N_DONE) {
-            final Environment.I18nWalker clusterIter = context.env.glyphWalker(text);
-            split = clusterIter.precedingStart(under + 1);
+      if (font != null) {
+        Font.Measurer measurer = font.measurer();
+        final double width = measurer.getWidth(text);
+        final double edge = converse + width;
+        if (converse < context.edge && edge > context.edge) {
+          final Environment.I18nWalker lineIter = context.env.lineWalker(text);
+          final double edgeOffset = context.edge - converse;
+          final int under = measurer.getIndexAtConverse(context, text, edgeOffset);
+          if (under == text.length()) split = under;
+          else {
+            split = lineIter.precedingStart(under + 1);
+            if (split == 0 || split == I18N_DONE) {
+              final Environment.I18nWalker clusterIter = context.env.glyphWalker(text);
+              split = clusterIter.precedingStart(under + 1);
+            }
+            if (split < 4 || split == I18N_DONE) {
+              split = text.length();
+              result.compactLimit = true;
+            }
           }
-          if (split < 4 || split == I18N_DONE) {
-            split = text.length();
-            result.compactLimit = true;
-          }
+        } else {
+          split = text.length();
         }
       } else {
         split = text.length();
@@ -469,11 +505,14 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
         boolean newValid =
             this.visualFieldPrimitive.value.back.matcher.match(
                 context.env, this.visualFieldPrimitive.value.data.toString());
-        if (newValid != visualFieldPrimitive.valid) {
-          visualFieldPrimitive.valid = newValid;
+        Atom atom = visualFieldPrimitive.atomVisual().atom;
+        boolean oldValid = atom.meta.getOpt("invalid") == null;
+        if (newValid != oldValid) {
+          if (!newValid) atom.meta.put("invalid", newValid);
+          else atom.meta.remove("invalid");
           for (Line line : this.visualFieldPrimitive.lines) {
             if (line.brick == null) continue;
-            line.brick.updateValid(context);
+            context.stylist.styleText(context, line.brick);
           }
         }
       }
@@ -592,7 +631,7 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
     }
   }
 
-  public static class RangeAttachment {
+  public static class RangeAttachment implements ObboxStyle.Stylable {
     private final boolean forSelection;
     private final VisualFieldPrimitive visualFieldPrimitive;
     public CursorAttachment cursor;
@@ -767,9 +806,9 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
     private final VisualFieldPrimitive visual;
     RangeAttachment range;
 
-    PrimitiveHoverable(VisualFieldPrimitive visual, final Context context) {
+    PrimitiveHoverable(final Context context, VisualFieldPrimitive visual) {
       range = new RangeAttachment(visual, false);
-      range.setStyle(context, context.syntax.hoverStyle.obbox);
+      context.stylist.styleObbox(context, range, Stylist.ObboxType.HOVER);
       this.visual = visual;
     }
 
@@ -835,7 +874,7 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
       }
       boolean changed = false;
       if (visual.hoverable == null) {
-        visual.hoverable = new VisualFieldPrimitive.PrimitiveHoverable(visual, context);
+        visual.hoverable = new VisualFieldPrimitive.PrimitiveHoverable(context, visual);
         changed = true;
       }
       int newIndex = offset + brick.getUnder(context, point);
@@ -874,10 +913,12 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
               context,
               this,
               index == 0 ? visual.spec.splitMode : ALWAYS,
+              index == 0 ? visual.spec.firstAlignmentId : null,
               index == 0
-                  ? visual.spec.firstStyle
-                  : hard ? visual.spec.hardStyle : visual.spec.softStyle);
+                  ? visual.spec.firstSplitAlignmentId
+                  : hard ? visual.spec.hardSplitAlignmentId : visual.spec.softSplitAlignmentId);
       brick.setText(context, text);
+      context.stylist.styleText(context, brick);
       if (index == 0) visual.notifyFirstBrickCreated(context, brick);
       if (index + 1 == visual.lines.size()) visual.notifyLastBrickCreated(context, brick);
       return brick;
@@ -903,6 +944,11 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
     @Override
     public Alignment findAlignment(String alignment) {
       return visual.parent.atomVisual().findAlignment(alignment);
+    }
+
+    @Override
+    public ROMap<String, Object> meta() {
+      return visual.spec.meta;
     }
 
     public Brick createOrGetBrick(final Context context) {

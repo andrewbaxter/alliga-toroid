@@ -11,6 +11,7 @@ import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.visuals.VisualSymbol;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public class FrontSymbolSpec extends FrontSpec {

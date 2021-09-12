@@ -22,7 +22,6 @@ import com.zarbosoft.merman.core.syntax.primitivepattern.PatternSequence;
 import com.zarbosoft.merman.core.syntax.primitivepattern.PatternString;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.core.syntax.style.Padding;
-import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.Node;
@@ -58,10 +57,6 @@ public class Syntax {
   public final Direction converseDirection;
   public final Direction transverseDirection;
   public final DisplayUnit displayUnit;
-  public final Style cursorStyle;
-  public final Style primitiveCursorStyle;
-  public final Style hoverStyle;
-  public final Style primitiveHoverStyle;
   public final String gapInRecordKeyPrefix;
   public final PatternSequence gapInRecordKeyPrefixPattern;
   public final double courseTransverseStride;
@@ -98,17 +93,6 @@ public class Syntax {
     this.suffixGap = config.suffixGap;
     this.converseDirection = config.converseDirection;
     this.transverseDirection = config.transverseDirection;
-    this.cursorStyle =
-        config.cursorStyle == null ? new Style(new Style.Config()) : config.cursorStyle;
-    this.primitiveCursorStyle =
-        config.primitiveCursorStyle == null
-            ? new Style(new Style.Config())
-            : config.primitiveCursorStyle;
-    this.hoverStyle = config.hoverStyle == null ? new Style(new Style.Config()) : config.hoverStyle;
-    this.primitiveHoverStyle =
-        config.primitiveHoverStyle == null
-            ? new Style(new Style.Config())
-            : config.primitiveHoverStyle;
     this.gapInRecordKeyPrefix = config.gapInRecordKeyPrefix;
     this.gapInRecordKeyPrefixPattern =
         new PatternSequence(
@@ -288,10 +272,6 @@ public class Syntax {
     public Direction converseDirection = Direction.RIGHT;
     public Direction transverseDirection = Direction.DOWN;
     public DisplayUnit displayUnit = DisplayUnit.MM;
-    public Style cursorStyle;
-    public Style primitiveCursorStyle;
-    public Style hoverStyle;
-    public Style primitiveHoverStyle;
     public String gapInRecordKeyPrefix = "__gap_pair_";
     public double courseTransverseStride;
 
@@ -335,26 +315,6 @@ public class Syntax {
 
     public Config background(ModelColor color) {
       this.background = color;
-      return this;
-    }
-
-    public Config cursorStyle(Style style) {
-      this.cursorStyle = style;
-      return this;
-    }
-
-    public Config primitiveCursorStyle(Style style) {
-      this.primitiveCursorStyle = style;
-      return this;
-    }
-
-    public Config hoverStyle(Style style) {
-      this.hoverStyle = style;
-      return this;
-    }
-
-    public Config primitiveHoverStyle(Style style) {
-      this.primitiveHoverStyle = style;
       return this;
     }
 

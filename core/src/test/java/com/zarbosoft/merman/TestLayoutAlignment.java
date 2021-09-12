@@ -5,7 +5,7 @@ import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.merman.helper.BackArrayBuilder;
@@ -132,7 +132,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS)))))
             .build();
     new GeneralTestWizard(
             syntax,
@@ -192,7 +192,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
             .build();
     new GeneralTestWizard(
             syntax,
@@ -243,7 +243,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
             .build();
     new GeneralTestWizard(
             syntax,
@@ -271,7 +271,7 @@ public class TestLayoutAlignment {
             .frontDataPrimitive("first")
             .alignedFrontDataPrimitive("second", "concensus1")
             .build();
-      final FreeAtomType splitPair =
+    final FreeAtomType splitPair =
         new TypeBuilder("splitPair")
             .back(
                 new BackArrayBuilder()
@@ -282,8 +282,8 @@ public class TestLayoutAlignment {
             .front(
                 new FrontPrimitiveSpec(
                     new FrontPrimitiveSpec.Config("second")
-                        .splitMode(Style.SplitMode.COMPACT)
-                        .style(new Style(new Style.Config().alignment("concensus1")))))
+                        .splitMode(SplitMode.COMPACT)
+                        .firstAlignmentId("concensus1")))
             .build();
     final Syntax syntax =
         new SyntaxBuilder("any")
@@ -295,7 +295,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS)))))
             .build();
     new GeneralTestWizard(
             syntax,
@@ -319,7 +319,7 @@ public class TestLayoutAlignment {
             .back(Helper.buildBackDataPrimitive("value"))
             .frontDataPrimitive("value")
             .build();
-      final FreeAtomType pair =
+    final FreeAtomType pair =
         new TypeBuilder("pair")
             .back(
                 new BackArrayBuilder()
@@ -329,10 +329,9 @@ public class TestLayoutAlignment {
             .front(new FrontDataPrimitiveBuilder("first").build())
             .front(
                 new FrontPrimitiveSpec(
-                    new FrontPrimitiveSpec.Config("second")
-                        .style(new Style(new Style.Config().alignment("concensus1")))))
+                    new FrontPrimitiveSpec.Config("second").firstAlignmentId("concensus1")))
             .build();
-      final FreeAtomType atomPair =
+    final FreeAtomType atomPair =
         new TypeBuilder("atomPair")
             .back(
                 new BackArrayBuilder()
@@ -348,8 +347,8 @@ public class TestLayoutAlignment {
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config()
-                                .splitMode(Style.SplitMode.COMPACT)
-                                .style(new Style(new Style.Config().alignment("concensus1")))))))
+                                .splitMode(SplitMode.COMPACT)
+                                .alignmentId("concensus1")))))
             .frontDataNode("second")
             .build();
     final Syntax syntax =
@@ -364,7 +363,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS)))))
             .build();
     new GeneralTestWizard(
             syntax,
@@ -394,13 +393,12 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolTextSpec(
-                            new SymbolTextSpec.Config("line2").splitMode(Style.SplitMode.ALWAYS)))))
+                            new SymbolTextSpec.Config("line2").splitMode(SplitMode.ALWAYS)))))
             .front(
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolTextSpec(
-                            new SymbolTextSpec.Config("line3")
-                                .splitMode(Style.SplitMode.COMPACT)))))
+                            new SymbolTextSpec.Config("line3").splitMode(SplitMode.COMPACT)))))
             .build();
     final Syntax syntax =
         new SyntaxBuilder("any")
@@ -410,7 +408,7 @@ public class TestLayoutAlignment {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS)))))
             .build();
     new GeneralTestWizard(syntax, new TreeBuilder(threeLine2).build())
         .displayWidth(50)

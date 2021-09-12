@@ -2,6 +2,7 @@ package com.zarbosoft.merman.core.visual.visuals;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Hoverable;
+import com.zarbosoft.merman.core.Stylist;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.attachments.BorderAttachment;
@@ -11,9 +12,10 @@ public class AtomHoverable extends Hoverable {
   final BorderAttachment border;
   public int index;
 
-  AtomHoverable(VisualAtom visual, final Context context) {
+  AtomHoverable(final Context context, VisualAtom visual) {
     this.visual = visual;
-    border = new BorderAttachment(context, context.syntax.hoverStyle.obbox);
+    border = new BorderAttachment(context);
+    context.stylist.styleObbox(context, border, Stylist.ObboxType.HOVER);
   }
 
   @Override

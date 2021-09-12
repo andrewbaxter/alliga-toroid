@@ -14,8 +14,8 @@ import com.zarbosoft.merman.core.syntax.error.GapPrimitiveCantHavePattern;
 import com.zarbosoft.merman.core.syntax.error.GapPrimitiveHasBadId;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
-import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -54,7 +54,12 @@ public class GapAtomType extends BaseGapAtomType {
                 .addAll(config.frontPrefix == null ? ROList.empty : config.frontPrefix)
                 .add(
                     new FrontPrimitiveSpec(
-                        new FrontPrimitiveSpec.Config(PRIMITIVE_KEY).style(config.primitiveStyle)))
+                        new FrontPrimitiveSpec.Config(PRIMITIVE_KEY)
+                            .firstAlignmentId(config.firstAlignmentId)
+                            .firstSplitAlignmentId(config.firstSplitAlignmentId)
+                            .hardSplitAlignmentId(config.hardSplitAlignmentId)
+                            .softSplitAlignmentId(config.softSplitAlignmentId)
+                            .meta(config.primitiveMeta)))
                 .addAll(config.frontSuffix == null ? ROList.empty : config.frontSuffix)));
     backType = config.backType;
     MultiError checkErrors = new MultiError();
@@ -76,7 +81,7 @@ public class GapAtomType extends BaseGapAtomType {
                         new GapPrimitiveHasBadId(
                             GapAtomType.this.id, ((BaseBackPrimitiveSpec) backSpec).id));
                   }
-                } else if (backSpec instanceof BackIdSpec){
+                } else if (backSpec instanceof BackIdSpec) {
                   // nop
                 } else {
                   checkErrors.add(new GapHasExtraField(id, GapAtomType.this.id));
@@ -100,17 +105,16 @@ public class GapAtomType extends BaseGapAtomType {
     public ROList<BackSpec> back;
     public ROList<FrontSpec> frontPrefix = null;
     public ROList<FrontSpec> frontSuffix = null;
-    public Style primitiveStyle;
+    public String firstAlignmentId;
+    public String firstSplitAlignmentId;
+    public String hardSplitAlignmentId;
+    public String softSplitAlignmentId;
+    public ROMap<String, Object> primitiveMeta;
 
     public Config() {}
 
     public Config back(ROList<BackSpec> back) {
       this.back = back;
-      return this;
-    }
-
-    public Config primitiveStyle(Style style) {
-      this.primitiveStyle = style;
       return this;
     }
 
@@ -121,6 +125,33 @@ public class GapAtomType extends BaseGapAtomType {
 
     public Config frontSuffix(ROList<FrontSpec> frontSuffix) {
       this.frontSuffix = frontSuffix;
+      return this;
+    }
+
+    public Config splitAlignmentId(String id) {
+      firstSplitAlignmentId = id;
+      hardSplitAlignmentId = id;
+      softSplitAlignmentId = id;
+      return this;
+    }
+
+    public Config firstSplitAlignmentId(String id) {
+      firstSplitAlignmentId = id;
+      return this;
+    }
+
+    public Config hardSplitAlignmentId(String id) {
+      hardSplitAlignmentId = id;
+      return this;
+    }
+
+    public Config softSplitAlignmentId(String id) {
+      softSplitAlignmentId = id;
+      return this;
+    }
+
+    public Config primitiveMeta(ROMap<String, Object> meta) {
+      this.primitiveMeta = meta;
       return this;
     }
   }

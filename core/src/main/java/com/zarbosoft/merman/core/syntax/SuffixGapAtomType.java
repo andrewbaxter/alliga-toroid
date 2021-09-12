@@ -19,9 +19,9 @@ import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
-import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -81,7 +81,12 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                 .addAll(config.frontPrefix)
                 .add(
                     new FrontPrimitiveSpec(
-                        new FrontPrimitiveSpec.Config(PRIMITIVE_KEY).style(config.primitiveStyle)))
+                        new FrontPrimitiveSpec.Config(PRIMITIVE_KEY)
+                            .firstAlignmentId(config.firstAlignmentId)
+                            .firstSplitAlignmentId(config.firstSplitAlignmentId)
+                            .hardSplitAlignmentId(config.hardSplitAlignmentId)
+                            .softSplitAlignmentId(config.softSplitAlignmentId)
+                            .meta(config.primitiveMeta)))
                 .addAll(config.frontSuffix)));
     backType = config.backType;
     MultiError checkErrors = new MultiError();
@@ -133,17 +138,21 @@ public class SuffixGapAtomType extends BaseGapAtomType {
     public ROList<FrontSpec> frontSuffix = ROList.empty;
     public ROList<FrontSpec> frontPrefix = ROList.empty;
     public Symbol gapPlaceholderSymbol;
-    public Style primitiveStyle;
+    public String firstAlignmentId;
+    public String firstSplitAlignmentId;
+    public String hardSplitAlignmentId;
+    public String softSplitAlignmentId;
+    public ROMap<String, Object> primitiveMeta;
 
     public Config() {}
 
-    public Config back(ROList<BackSpec> back) {
-      this.back = back;
+    public Config primitiveMeta(ROMap<String, Object> meta) {
+      this.primitiveMeta = meta;
       return this;
     }
 
-    public Config primitiveStyle(Style style) {
-      this.primitiveStyle = style;
+    public Config back(ROList<BackSpec> back) {
+      this.back = back;
       return this;
     }
 
@@ -159,6 +168,28 @@ public class SuffixGapAtomType extends BaseGapAtomType {
 
     public Config frontArrayConfig(FrontArraySpecBase.Config config) {
       this.frontArrayConfig = config;
+      return this;
+    }
+
+    public Config splitAlignmentId(String id) {
+      firstSplitAlignmentId = id;
+      hardSplitAlignmentId = id;
+      softSplitAlignmentId = id;
+      return this;
+    }
+
+    public Config firstSplitAlignmentId(String id) {
+      firstSplitAlignmentId = id;
+      return this;
+    }
+
+    public Config hardSplitAlignmentId(String id) {
+      hardSplitAlignmentId = id;
+      return this;
+    }
+
+    public Config softSplitAlignmentId(String id) {
+      softSplitAlignmentId = id;
       return this;
     }
   }

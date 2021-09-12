@@ -1,11 +1,12 @@
 package com.zarbosoft.merman.helper;
 
+import com.zarbosoft.merman.core.example.DirectStylist;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 
 public class FrontDataPrimitiveBuilder {
   private final String field;
-  private Style.SplitMode splitMode;
+  private SplitMode splitMode;
   private String compactAlignment;
   private String alignment;
 
@@ -15,21 +16,19 @@ public class FrontDataPrimitiveBuilder {
 
   public FrontPrimitiveSpec build() {
     FrontPrimitiveSpec.Config config = new FrontPrimitiveSpec.Config(field);
-    if (splitMode != null)  {
+    if (splitMode != null) {
       config.splitMode(splitMode);
     }
-    Style.Config style = new Style.Config();
     if (alignment != null) {
-      style.alignment(alignment);
+      config.firstAlignmentId(alignment);
     }
     if (compactAlignment != null) {
-      style.splitAlignment(compactAlignment);
+      config.splitAlignmentId(compactAlignment);
     }
-      config.style(new Style(style));
     return new FrontPrimitiveSpec(config);
   }
 
-  public FrontDataPrimitiveBuilder split(Style.SplitMode splitMode) {
+  public FrontDataPrimitiveBuilder split(SplitMode splitMode) {
     this.splitMode = splitMode;
     return this;
   }
@@ -38,6 +37,7 @@ public class FrontDataPrimitiveBuilder {
     this.alignment = alignment;
     return this;
   }
+
   public FrontDataPrimitiveBuilder compactAlignment(String compactAlignment) {
     this.compactAlignment = compactAlignment;
     return this;

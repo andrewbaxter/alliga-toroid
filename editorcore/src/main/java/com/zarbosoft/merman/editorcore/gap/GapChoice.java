@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.editorcore.gap;
 
-import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Text;
 import com.zarbosoft.merman.core.display.derived.CourseGroup;
@@ -47,7 +46,7 @@ public class GapChoice extends TwoColumnChoice {
   private final TSList<Event> glyphs;
   private final FrontSpec followingSpec;
   private final ROList<FrontSpec> allKeyFrontSpecs;
-  private ROList<ParsedField> completeMatchFields;
+  private final ROList<ParsedField> completeMatchFields;
 
   public GapChoice(
       Atom gap,
@@ -330,11 +329,9 @@ public class GapChoice extends TwoColumnChoice {
 
     final Text text = editor.context.display.text();
     text.setBaselineTransverse(0);
-    text.setColor(editor.context, editor.choiceDescriptionStyle.color);
-    text.setFont(editor.context, Context.getFont(editor.context, editor.choiceDescriptionStyle));
     text.setText(editor.context, type.name());
     CourseGroup textPad = new CourseGroup(editor.context.display.group());
-    textPad.setPadding(editor.context, editor.choiceDescriptionStyle.padding);
+    editor.context.stylist.styleChoiceDescription(editor.context, text, textPad);
     textPad.add(text);
 
     return new ROPair<CourseDisplayNode, CourseDisplayNode>(previewLayout, textPad);

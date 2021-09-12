@@ -6,8 +6,8 @@ import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.Brick;
 
-public class BorderAttachment {
-  private final Obbox border;
+public class BorderAttachment implements ObboxStyle.Stylable {
+  public final Obbox border;
   Brick first;
   Brick last;
   private double startConverse;
@@ -68,9 +68,8 @@ public class BorderAttachment {
         }
       };
 
-  public BorderAttachment(final Context context, final ObboxStyle style) {
+  public BorderAttachment(final Context context) {
     border = new Obbox(context);
-    border.setStyle(style);
     context.background.add(border.drawing);
   }
 

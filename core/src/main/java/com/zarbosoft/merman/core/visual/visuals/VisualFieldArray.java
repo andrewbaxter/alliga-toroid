@@ -15,6 +15,7 @@ import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -243,6 +244,11 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
               public Alignment findAlignment(String alignment) {
                 return parent.atomVisual().findAlignment(alignment);
               }
+
+              @Override
+              public ROMap<String, Object> meta() {
+                return front.emptyMeta;
+              }
             });
     return empty;
   }
@@ -380,6 +386,11 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
               @Override
               public Alignment findAlignment(String alignment) {
                 return parent.atomVisual().findAlignment(alignment);
+              }
+
+              @Override
+              public ROMap<String, Object> meta() {
+                return front.ellipsisMeta;
               }
             });
     return ellipsis;

@@ -14,7 +14,6 @@ import com.zarbosoft.merman.core.wall.Bedding;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Course;
 import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
-import com.zarbosoft.merman.core.wall.bricks.BrickImage;
 import com.zarbosoft.merman.core.wall.bricks.BrickLine;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
 import com.zarbosoft.merman.editorcore.Editor;
@@ -108,8 +107,6 @@ public class GeneralTestWizard {
         if (inner.editor.context.wall.cornerstone == brick) System.out.format("*");
         if (brick instanceof BrickText) {
           System.out.printf("%s ", ((MockeryText) ((BrickText) brick).text).text());
-        } else if (brick instanceof BrickImage) {
-          System.out.printf("\\i ");
         } else if (brick instanceof BrickLine) {
           System.out.printf("\\l ");
         } else if (brick instanceof BrickEmpty) {

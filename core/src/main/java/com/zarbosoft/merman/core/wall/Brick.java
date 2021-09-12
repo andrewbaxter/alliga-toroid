@@ -2,21 +2,23 @@ package com.zarbosoft.merman.core.wall;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Hoverable;
-import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.display.CourseDisplayNode;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualLeaf;
 import com.zarbosoft.merman.core.visual.alignment.Alignment;
-import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public abstract class Brick {
-  public final Style.SplitMode splitMode;
+  public final SplitMode splitMode;
   public final BrickInterface inter;
-  public final Style style;
+  public final String splitAlignmentId;
+  public final String alignmentId;
   public Course parent;
   public int index;
   public Alignment alignment;
@@ -27,11 +29,18 @@ public abstract class Brick {
 
   TSSet<Attachment> attachments = Context.createSet.get();
 
-  protected Brick(final BrickInterface inter, Style style, Style.SplitMode splitMode) {
-    this.style = style;
+  protected Brick(
+      final BrickInterface inter,
+      SplitMode splitMode,
+      String alignmentId,
+      String splitAlignmentId) {
     this.splitMode = splitMode;
     this.inter = inter;
+    this.alignmentId = alignmentId;
+    this.splitAlignmentId = splitAlignmentId;
   }
+
+  public abstract void restyle(Context context);
 
   public boolean isSplit(boolean compact) {
     switch (splitMode) {
@@ -56,7 +65,7 @@ public abstract class Brick {
 
   public abstract double converseSpan();
 
-  public abstract DisplayNode getDisplayNode();
+  public abstract CourseDisplayNode getDisplayNode();
 
   public abstract void setConverse(Context context, double minConverse, double converse);
 
@@ -150,9 +159,9 @@ public abstract class Brick {
    * @param context
    */
   public void layoutPropertiesChanged(final Context context) {
-    String alignmentName = isSplit() ? style.splitAlignment : style.alignment;
-    if (alignmentName == null) this.alignment = null;
-    else this.alignment = inter.findAlignment(alignmentName);
+    String alignmentId1 = isSplit() ? splitAlignmentId : alignmentId;
+    if (alignmentId1 == null) this.alignment = null;
+    else this.alignment = inter.findAlignment(alignmentId1);
     if (parent != null) parent.changed(context, index);
   }
 
@@ -161,6 +170,7 @@ public abstract class Brick {
     attachment.setConverse(context, getConverse());
     if (parent != null) {
       attachment.setTransverse(context, parent.transverseStart);
+      attachment.setBaselineTransverse(context, parent.transverseStart + parent.ascent);
       attachment.setTransverseSpan(context, parent.ascent, parent.descent);
     }
   }
@@ -189,4 +199,8 @@ public abstract class Brick {
   public abstract double descent();
 
   public abstract double ascent();
+
+  public ROMap<String, Object> meta() {
+    return inter.meta();
+  }
 }

@@ -100,8 +100,6 @@ public abstract class Visual {
 
   public abstract void notifyFirstBrickCreated(Context context, Brick brick);
 
-  public abstract void metaChanged(Context context);
-
   public static class CreateBrickResult {
     /** No contents, no brick to create; skip and continue */
     public final boolean empty;

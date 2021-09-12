@@ -3,8 +3,8 @@ package com.zarbosoft.merman.editorcore.banner;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.IterationContext;
 import com.zarbosoft.merman.core.IterationTask;
+import com.zarbosoft.merman.core.Stylist;
 import com.zarbosoft.merman.core.display.Text;
-import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.Bedding;
@@ -15,7 +15,6 @@ import com.zarbosoft.merman.editorcore.displayderived.Box;
 
 public class Banner {
   private final Attachment attachment = new TransverseListener(this);
-  private final Style style;
   public Text text;
   public Box background;
   private BannerMessage current;
@@ -24,8 +23,7 @@ public class Banner {
   private Bedding bedding;
   private IterationPlace idle;
 
-  public Banner(final Context context, Style style) {
-    this.style = style;
+  public Banner(final Context context) {
     context.wall.addCornerstoneListener(
         context,
         new Wall.CornerstoneListener() {
@@ -73,10 +71,8 @@ public class Banner {
 
   public void setMessage(final Editor editor, final BannerMessage message) {
     if (current == null) {
-      if (style.obbox.line || style.obbox.fill) {
-        background = new Box(editor.context);
-        editor.context.midground.add(background.drawing);
-      }
+      background = new Box(editor.context);
+      editor.context.midground.add(background.drawing);
       text = editor.context.display.text();
       editor.context.midground.add(text);
       updateStyle(editor);
@@ -88,9 +84,8 @@ public class Banner {
 
   private void updateStyle(final Editor editor) {
     if (text == null) return;
-    if (background != null) background.setStyle(style.obbox);
-    text.setFont(editor.context, Context.getFont(editor.context, style));
-    text.setColor(editor.context, style.color);
+    editor.context.stylist.styleObbox(editor.context, background, Stylist.ObboxType.BANNER_BACKGROUND);
+    editor.context.stylist.styleBannerText(editor.context, text);
     if (bedding != null) editor.context.wall.removeBedding(editor.context, bedding);
     bedding =
         new Bedding(

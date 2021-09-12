@@ -2,6 +2,7 @@ package com.zarbosoft.merman.core.visual.visuals;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.CursorState;
+import com.zarbosoft.merman.core.Stylist;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
@@ -20,7 +21,8 @@ public class CursorAtom extends com.zarbosoft.merman.core.Cursor {
 
   public CursorAtom(final Context context, final VisualAtom visual, final int index) {
     this.visual = visual;
-    border = new BorderAttachment(context, context.syntax.cursorStyle.obbox);
+    border = new BorderAttachment(context);
+    context.stylist.styleObbox(context, border, Stylist.ObboxType.CURSOR);
     setIndex(context, index);
   }
 

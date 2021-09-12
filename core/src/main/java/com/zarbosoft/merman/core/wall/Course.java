@@ -83,6 +83,7 @@ public class Course {
     for (Brick child : children.mut()) {
       for (Attachment a : child.attachments.mut()) {
         a.setTransverse(context, transverseStart);
+        a.setBaselineTransverse(context, transverseStart + ascent);
       }
     }
   }
@@ -159,6 +160,7 @@ public class Course {
       brick.allocateTransverse(context, ascent, descent);
       for (Attachment a : brick.getAttachments().copy()) {
         a.setTransverse(context, transverseStart);
+        a.setBaselineTransverse(context, transverseStart + ascent);
         a.setTransverseSpan(context, ascent, descent);
       }
     }

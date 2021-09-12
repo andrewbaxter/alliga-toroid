@@ -8,6 +8,7 @@ import com.zarbosoft.merman.core.document.Document;
 import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.core.example.DirectStylist;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
@@ -20,7 +21,6 @@ import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Course;
 import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
-import com.zarbosoft.merman.core.wall.bricks.BrickImage;
 import com.zarbosoft.merman.core.wall.bricks.BrickLine;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
@@ -254,7 +254,9 @@ public class TestWindowing {
         .actWindow()
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new SyntaxPath("named", "value", "1", "named", "value", "1")))
+                ((Atom)
+                        context.syntaxLocate(
+                            new SyntaxPath("named", "value", "1", "named", "value", "1")))
                     .fieldParentRef.selectField(context))
         .actWindow()
         .checkTextBrick(0, i++, "2_0")
@@ -271,7 +273,9 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((FieldAtom) context.syntaxLocate(new SyntaxPath("named", "value", "0", "named", "value")))
+                ((FieldAtom)
+                        context.syntaxLocate(
+                            new SyntaxPath("named", "value", "0", "named", "value")))
                     .selectInto(context))
         .actWindow()
         .checkTextBrick(0, i++, "0_0");
@@ -283,7 +287,10 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((FieldAtom) context.syntaxLocate(new SyntaxPath("named", "value", "0", "named", "value", "named", "value")))
+                ((FieldAtom)
+                        context.syntaxLocate(
+                            new SyntaxPath(
+                                "named", "value", "0", "named", "value", "named", "value")))
                     .selectInto(context))
         .actWindow()
         .checkTextBrick(0, i++, "0_0")
@@ -306,7 +313,9 @@ public class TestWindowing {
             context ->
                 ((Atom)
                         context.syntaxLocate(
-                            new SyntaxPath("named", "value", "1", "named", "value", "1", "named", "value", "1", "named", "value", "1")))
+                            new SyntaxPath(
+                                "named", "value", "1", "named", "value", "1", "named", "value", "1",
+                                "named", "value", "1")))
                     .fieldParentRef.selectField(context))
         .actWindow()
         .checkTextBrick(0, i++, "4");
@@ -325,7 +334,9 @@ public class TestWindowing {
             context ->
                 ((Atom)
                         context.syntaxLocate(
-                            new SyntaxPath("named", "value", "1", "named", "value", "1", "named", "value", "1")))
+                            new SyntaxPath(
+                                "named", "value", "1", "named", "value", "1", "named", "value",
+                                "1")))
                     .fieldParentRef.selectField(context))
         .actWindowTowardsCursor()
         .checkTextBrick(0, i++, "2_0")
@@ -344,7 +355,9 @@ public class TestWindowing {
             context ->
                 ((Atom)
                         context.syntaxLocate(
-                            new SyntaxPath("named", "value", "1", "named", "value", "1", "named", "value", "1", "named", "value", "1")))
+                            new SyntaxPath(
+                                "named", "value", "1", "named", "value", "1", "named", "value", "1",
+                                "named", "value", "1")))
                     .fieldParentRef.selectField(context))
         .actWindow()
         .actWindowTowardsCursor()
@@ -359,7 +372,9 @@ public class TestWindowing {
             context ->
                 ((Atom)
                         context.syntaxLocate(
-                            new SyntaxPath("named", "value", "1", "named", "value", "1", "named", "value", "1", "named", "value", "1")))
+                            new SyntaxPath(
+                                "named", "value", "1", "named", "value", "1", "named", "value", "1",
+                                "named", "value", "1")))
                     .fieldParentRef.selectField(context))
         .actWindow()
         .checkCourseCount(1)
@@ -429,7 +444,9 @@ public class TestWindowing {
         .checkTextBrick(0, 0, "1_0")
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new SyntaxPath("named", "value", "1", "named", "value", "1")))
+                ((Atom)
+                        context.syntaxLocate(
+                            new SyntaxPath("named", "value", "1", "named", "value", "1")))
                     .fieldParentRef.selectField(context))
         .checkTextBrick(0, i++, "1_0")
         .checkTextBrick(0, i++, "2_0")
@@ -454,7 +471,9 @@ public class TestWindowing {
             context ->
                 ((Atom)
                         context.syntaxLocate(
-                            new SyntaxPath("named", "value", "1", "named", "value", "1", "named", "value", "1")))
+                            new SyntaxPath(
+                                "named", "value", "1", "named", "value", "1", "named", "value",
+                                "1")))
                     .fieldParentRef.selectField(context))
         .actEnter()
         .checkTextBrick(0, i++, "1_0")
@@ -482,7 +501,9 @@ public class TestWindowing {
             context ->
                 ((Atom)
                         context.syntaxLocate(
-                            new SyntaxPath("named", "value", "1", "named", "value", "1", "named", "value", "1", "named", "value", "1")))
+                            new SyntaxPath(
+                                "named", "value", "1", "named", "value", "1", "named", "value", "1",
+                                "named", "value", "1")))
                     .fieldParentRef.selectField(context))
         .checkTextBrick(0, i++, "1_0")
         .checkTextBrick(0, i++, "2_0")
@@ -507,7 +528,9 @@ public class TestWindowing {
         .checkCourseCount(1)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new SyntaxPath("named", "value", "1", "named", "value", "1")))
+                ((Atom)
+                        context.syntaxLocate(
+                            new SyntaxPath("named", "value", "1", "named", "value", "1")))
                     .fieldParentRef.selectField(context))
         .checkTextBrick(0, i++, "0_0")
         .checkTextBrick(0, i++, "1_0")
@@ -526,7 +549,9 @@ public class TestWindowing {
             context ->
                 ((Atom)
                         context.syntaxLocate(
-                            new SyntaxPath("named", "value", "1", "named", "value", "1", "named", "value", "1", "named", "value", "1")))
+                            new SyntaxPath(
+                                "named", "value", "1", "named", "value", "1", "named", "value", "1",
+                                "named", "value", "1")))
                     .fieldParentRef.selectField(context))
         .actWindow()
         .checkTextBrick(0, 0, "4")
@@ -559,6 +584,7 @@ public class TestWindowing {
               new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
               new TestEnvironment(),
               null,
+              new DirectStylist(null, null, null, null, null, null, null, null),
               new ViewerCursorFactory());
       flushIteration();
     }
@@ -671,8 +697,6 @@ public class TestWindowing {
           if (context.wall.cornerstone == brick) System.out.format("*");
           if (brick instanceof BrickText) {
             System.out.printf("%s ", ((MockeryText) ((BrickText) brick).text).text());
-          } else if (brick instanceof BrickImage) {
-            System.out.printf("\\i ");
           } else if (brick instanceof BrickLine) {
             System.out.printf("\\l ");
           } else if (brick instanceof BrickEmpty) {

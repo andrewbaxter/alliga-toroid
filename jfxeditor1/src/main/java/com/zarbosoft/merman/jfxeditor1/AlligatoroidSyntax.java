@@ -2,6 +2,7 @@ package com.zarbosoft.merman.jfxeditor1;
 
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.example.DirectStylist;
 import com.zarbosoft.merman.core.example.SyntaxOut;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.BackType;
@@ -41,7 +42,7 @@ import com.zarbosoft.merman.core.syntax.primitivepattern.SymbolCharacter;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Padding;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.ROList;
@@ -57,28 +58,14 @@ import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class AlligatoroidSyntax {
-  public static final FrontSymbolSpec compactZeroSplit =
-      new FrontSymbolSpec(
-          new FrontSymbolSpec.Config(
-              new SymbolSpaceSpec(
-                  new SymbolSpaceSpec.Config()
-                      .splitMode(Style.SplitMode.COMPACT)
-                      .style(new Style(new Style.Config())))));
-  public static final FrontSymbolSpec zeroSplit =
-      new FrontSymbolSpec(
-          new FrontSymbolSpec.Config(
-              new SymbolSpaceSpec(
-                  new SymbolSpaceSpec.Config()
-                      .splitMode(Style.SplitMode.ALWAYS)
-                      .style(new Style(new Style.Config())))));
   public static final Pattern PATTERN_IDENTIFIER = new Repeat1(new SymbolCharacter());
   public static final Pattern PATTERN_INT;
   public static final Pattern PATTERN_HEXINT;
   public static final Pattern PATTERN_FLOAT;
   public static final Pattern PATTERN_HEXFLOAT;
-
   public static final ModelColor COLOR_IDENTIFIER = ModelColor.RGB.hex("#d8c3ff");
   public static final ModelColor.RGB COLOR_LITERAL_TEXT = ModelColor.RGB.hex("#79bf97");
   public static final ModelColor COLOR_LITERAL_SYMBOL =
@@ -93,6 +80,14 @@ public class AlligatoroidSyntax {
   public static final ModelColor COLOR_POPUP_BG = new ModelColor.RGBA(14. / 255, 8. / 255, 0, 0.3);
   public static final ModelColor COLOR_HOVER = ModelColor.RGB.hex("#737373");
   public static final ModelColor COLOR_CURSOR = ModelColor.RGB.hex("#b9b9b9");
+  public static final FrontSymbolSpec compactZeroSplit =
+      new FrontSymbolSpec(
+          new FrontSymbolSpec.Config(
+              new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT))));
+  public static final FrontSymbolSpec zeroSplit =
+      new FrontSymbolSpec(
+          new FrontSymbolSpec.Config(
+              new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS))));
   private static final double fontSize = 6;
   private static final String GROUP_EXPR = "expr";
   private static final String GROUP_STATEMENT = "statement";
@@ -150,16 +145,16 @@ public class AlligatoroidSyntax {
           new FrontSymbolSpec.Config(
               new SymbolSpaceSpec(
                   new SymbolSpaceSpec.Config()
-                      .splitMode(Style.SplitMode.COMPACT)
-                      .style(new Style(new Style.Config().splitAlignment(ALIGN_INDENT))))));
+                      .splitMode(SplitMode.COMPACT)
+                      .splitAlignmentId(ALIGN_INDENT))));
   private static final String ALIGN_BASE = "base";
   public static final FrontSymbolSpec baseCompactSplit =
       new FrontSymbolSpec(
           new FrontSymbolSpec.Config(
               new SymbolSpaceSpec(
                   new SymbolSpaceSpec.Config()
-                      .splitMode(Style.SplitMode.COMPACT)
-                      .style(new Style(new Style.Config().splitAlignment(ALIGN_BASE))))));
+                      .splitMode(SplitMode.COMPACT)
+                      .splitAlignmentId(ALIGN_BASE))));
   private static final String TYPE_ACCESS = "access";
   private static final String TYPE_ACCESS_DYNAMIC = "access_dynamic";
   private static final String TYPE_LOCAL = "local";
@@ -218,44 +213,16 @@ public class AlligatoroidSyntax {
     return new ABackBuilder(BACK_TYPE_LITERAL_STRING).raw("value", value).build().get(0);
   }
 
-  private static Style cursorStyle(boolean primitive) {
-    return new Style(
-        new Style.Config()
-            .obbox(
-                new ObboxStyle(
-                    new ObboxStyle.Config()
-                        .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
-                        .roundStart(true)
-                        .roundEnd(true)
-                        .lineThickness(0.3)
-                        .roundRadius(3)
-                        .lineColor(COLOR_CURSOR))));
-  }
-
-  private static Style hoverStyle(boolean primitive) {
-    return new Style(
-        new Style.Config()
-            .obbox(
-                new ObboxStyle(
-                    new ObboxStyle.Config()
-                        .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
-                        .roundEnd(true)
-                        .roundStart(true)
-                        .lineThickness(0.3)
-                        .roundRadius(3)
-                        .lineColor(COLOR_HOVER))));
-  }
-
-  private static Style.Config baseCodeStyle() {
+  private static DirectStylist.TextStyle baseCodeStyle() {
     return sizedBaseCodeStyle(fontSize);
   }
 
-  private static Style.Config sizedBaseCodeStyle(double size) {
-    return new Style.Config()
+  private static DirectStylist.TextStyle sizedBaseCodeStyle(double size) {
+    return new DirectStylist.TextStyle()
         .font("monospace")
         .fontSize(size)
         .ascent(size * 0.8)
-        .descent(size * 0.2);
+        .descent(size * 0.5);
   }
 
   public static AtomType binaryInfix(
@@ -627,20 +594,22 @@ public class AlligatoroidSyntax {
     generateComments.generate(TYPE_EXPR_COMMENT_P, TYPE_EXPR_COMMENT_H1, "", GROUP_COMMENT_BODY);
 
     // Gap
-    final Style.Config gapStyleConfig =
-        new Style.Config().fontSize(fontSize).color(COLOR_INCOMPLETE);
-    final Style gapStyle = new Style(gapStyleConfig);
-    final Style gapEmptySymbolStyle = new Style(gapStyleConfig.dupe().padding(Padding.ct(1, 0)));
+    Supplier<DirectStylist.TextStyle> baseGapStyleConfig =
+        () -> new DirectStylist.TextStyle().fontSize(fontSize).color(COLOR_INCOMPLETE);
+    final DirectStylist.TextStyle gapStyle = baseGapStyleConfig.get();
+    final DirectStylist.TextStyle gapEmptySymbolStyle =
+        baseGapStyleConfig.get().padding(Padding.ct(1, 0));
     GapAtomType gap =
         new GapAtomType(
             new GapAtomType.Config()
-                .primitiveStyle(gapStyle)
+                .primitiveMeta(DirectStylist.meta(gapStyle).put("mark", true))
                 .frontSuffix(
                     new TSList<FrontSpec>(
                         new FrontSymbolSpec(
                             new FrontSymbolSpec.Config(
                                     new SymbolTextSpec(
-                                        new SymbolTextSpec.Config("￮").style(gapEmptySymbolStyle)))
+                                        new SymbolTextSpec.Config("￮")
+                                            .meta(DirectStylist.meta(gapEmptySymbolStyle))))
                                 .condition(
                                     new ConditionValue(
                                         new ConditionValue.Config(
@@ -650,20 +619,23 @@ public class AlligatoroidSyntax {
     SuffixGapAtomType suffixGap =
         new SuffixGapAtomType(
             new SuffixGapAtomType.Config()
-                .primitiveStyle(gapStyle)
+                .primitiveMeta(DirectStylist.meta(gapStyle).put("mark", true))
                 .frontPrefix(
                     new TSList<>(
                         new FrontSymbolSpec(
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
-                                        .style(new Style(new Style.Config().space(1))))))))
+                                        .meta(
+                                            DirectStylist.meta(
+                                                new DirectStylist.SpaceStyle().space(1))))))))
                 .frontSuffix(
                     new TSList<FrontSpec>(
                         new FrontSymbolSpec(
                             new FrontSymbolSpec.Config(
                                     new SymbolTextSpec(
-                                        new SymbolTextSpec.Config("▹").style(gapEmptySymbolStyle)))
+                                        new SymbolTextSpec.Config("▹")
+                                            .meta(DirectStylist.meta(gapEmptySymbolStyle))))
                                 .condition(
                                     new ConditionValue(
                                         new ConditionValue.Config(
@@ -679,9 +651,50 @@ public class AlligatoroidSyntax {
       errors.raise();
     }
     return new SyntaxOut(
+        new DirectStylist(
+            new ObboxStyle(
+                new ObboxStyle.Config()
+                    .padding(Padding.same(1))
+                    .roundStart(true)
+                    .roundEnd(true)
+                    .lineThickness(0.3)
+                    .roundRadius(3)
+                    .lineColor(COLOR_CURSOR)),
+            new ObboxStyle(
+                new ObboxStyle.Config()
+                    .padding(Padding.same(1))
+                    .roundEnd(true)
+                    .roundStart(true)
+                    .lineThickness(0.3)
+                    .roundRadius(3)
+                    .lineColor(COLOR_HOVER)),
+            new ObboxStyle(new ObboxStyle.Config().line(false)),
+            new DirectStylist.TextStyle().fontSize(5).color(COLOR_CHOICE),
+            new ObboxStyle(
+                new ObboxStyle.Config()
+                    .line(false)
+                    .fill(true)
+                    .fillColor(COLOR_POPUP_BG)
+                    .roundStart(true)
+                    .roundEnd(true)
+                    .roundOuterEdges(true)
+                    .roundRadius(2)
+                    .padding(Padding.ct(20, 1))),
+            new ObboxStyle(
+                new ObboxStyle.Config()
+                    .lineThickness(0.3)
+                    .padding(Padding.ct(1.5, 0.5))
+                    .roundStart(true)
+                    .roundEnd(true)
+                    .roundOuterEdges(true)
+                    .roundRadius(1)
+                    .lineColor(COLOR_CHOICE)),
+            new DirectStylist.TextStyle()
+                .fontSize(5)
+                .color(COLOR_CHOICE)
+                .padding(new Padding(4, 0, 1, 1)),
+            baseCodeStyle().color(COLOR_INCOMPLETE)),
         COLOR_CHOICE,
-        COLOR_CHOICE,
-        COLOR_POPUP_BG,
         new Syntax(
             env,
             new Syntax.Config(
@@ -707,15 +720,15 @@ public class AlligatoroidSyntax {
                                                             new SymbolSpaceSpec(
                                                                 new SymbolSpaceSpec.Config()
                                                                     .splitMode(
-                                                                        Style.SplitMode.ALWAYS))))))
+                                                                        SplitMode.ALWAYS))))))
                                             .suffix(
                                                 new TSList<>(
                                                     new FrontSymbolSpec(
                                                         new FrontSymbolSpec.Config(
                                                             new SymbolTextSpec(
                                                                 new SymbolTextSpec.Config(";")
-                                                                    .style(
-                                                                        new Style(
+                                                                    .meta(
+                                                                        DirectStylist.meta(
                                                                             baseCodeStyle()
                                                                                 .color(
                                                                                     COLOR_OTHER))))))))))),
@@ -725,12 +738,9 @@ public class AlligatoroidSyntax {
                 .backType(BackType.LUXEM)
                 .displayUnit(Syntax.DisplayUnit.MM)
                 .background(COLOR_BG)
-                .hoverStyle(hoverStyle(false))
-                .primitiveHoverStyle(hoverStyle(true))
-                .cursorStyle(cursorStyle(false))
-                .primitiveCursorStyle(cursorStyle(true))
                 .pad(pad)),
-        TSSet.of(TYPE_LOCAL, TYPE_ACCESS));
+        TSSet.of(TYPE_LOCAL, TYPE_ACCESS),
+        fontSize * 0.5);
   }
 
   /*
@@ -796,6 +806,15 @@ public class AlligatoroidSyntax {
 
   public static class AFrontBuilder {
     private final TSList<FrontSpec> front = new TSList<>();
+    private boolean createdFirstDisplayed = false;
+
+    public TSMap<String, Object> markMeta(TSMap<String, Object> meta) {
+      if (!createdFirstDisplayed) {
+        meta.put("mark", true);
+        createdFirstDisplayed = true;
+      }
+      return meta;
+    }
 
     public AFrontBuilder fixed(String text, ModelColor color) {
       front.add(
@@ -803,7 +822,7 @@ public class AlligatoroidSyntax {
               new FrontSymbolSpec.Config(
                   new SymbolTextSpec(
                       new SymbolTextSpec.Config(text)
-                          .style(new Style(baseCodeStyle().color(color)))))));
+                          .meta(markMeta(DirectStylist.meta(baseCodeStyle().color(color))))))));
       return this;
     }
 
@@ -812,7 +831,8 @@ public class AlligatoroidSyntax {
           new FrontSymbolSpec(
               new FrontSymbolSpec.Config(
                       new SymbolTextSpec(
-                          new SymbolTextSpec.Config(" ").style(new Style(baseCodeStyle()))))
+                          new SymbolTextSpec.Config(" ")
+                              .meta(markMeta(DirectStylist.meta(baseCodeStyle())))))
                   .nonGapKey()));
       return this;
     }
@@ -823,7 +843,7 @@ public class AlligatoroidSyntax {
               new FrontSymbolSpec.Config(
                   new SymbolTextSpec(
                       new SymbolTextSpec.Config(text)
-                          .style(new Style(baseCodeStyle().color(color)))))));
+                          .meta(markMeta(DirectStylist.meta(baseCodeStyle().color(color))))))));
       return this;
     }
 
@@ -833,10 +853,9 @@ public class AlligatoroidSyntax {
               new FrontSymbolSpec.Config(
                   new SymbolTextSpec(
                       new SymbolTextSpec.Config(text)
-                          .splitMode(Style.SplitMode.COMPACT)
-                          .style(
-                              new Style(
-                                  baseCodeStyle().splitAlignment(ALIGN_BASE).color(color)))))));
+                          .splitMode(SplitMode.COMPACT)
+                          .splitAlignmentId(ALIGN_BASE)
+                          .meta(markMeta(DirectStylist.meta(baseCodeStyle().color(color))))))));
       return this;
     }
 
@@ -876,8 +895,8 @@ public class AlligatoroidSyntax {
                                   new FrontSymbolSpec.Config(
                                       new SymbolTextSpec(
                                           new SymbolTextSpec.Config(suffix)
-                                              .style(
-                                                  new Style(
+                                              .meta(
+                                                  DirectStylist.meta(
                                                       baseCodeStyle().color(COLOR_OTHER)))))))))));
       return this;
     }
@@ -895,8 +914,8 @@ public class AlligatoroidSyntax {
                                   new FrontSymbolSpec.Config(
                                       new SymbolTextSpec(
                                           new SymbolTextSpec.Config(separator)
-                                              .style(
-                                                  new Style(
+                                              .meta(
+                                                  DirectStylist.meta(
                                                       baseCodeStyle().color(COLOR_OTHER)))))))))));
       return this;
     }
@@ -904,7 +923,8 @@ public class AlligatoroidSyntax {
     public AFrontBuilder primitive(String id, ModelColor color) {
       front.add(
           new FrontPrimitiveSpec(
-              new FrontPrimitiveSpec.Config(id).style(new Style(baseCodeStyle().color(color)))));
+              new FrontPrimitiveSpec.Config(id)
+                  .meta(markMeta(DirectStylist.meta(baseCodeStyle().color(color))))));
       return this;
     }
 
@@ -912,7 +932,9 @@ public class AlligatoroidSyntax {
       front.add(
           new FrontPrimitiveSpec(
               new FrontPrimitiveSpec.Config(id)
-                  .style(new Style(sizedBaseCodeStyle(size).font(font).color(color)))));
+                  .meta(
+                      markMeta(
+                          DirectStylist.meta(sizedBaseCodeStyle(size).font(font).color(color))))));
       return this;
     }
 
@@ -922,7 +944,7 @@ public class AlligatoroidSyntax {
               new FrontSymbolSpec.Config(
                       new SymbolTextSpec(
                           new SymbolTextSpec.Config(text)
-                              .style(new Style(baseCodeStyle().color(color)))))
+                              .meta(DirectStylist.meta(baseCodeStyle().color(color)))))
                   .condition(
                       new ConditionValue(
                           new ConditionValue.Config(field, ConditionValue.Is.EMPTY, false)))));
@@ -939,7 +961,10 @@ public class AlligatoroidSyntax {
       front.add(
           new FrontPrimitiveSpec(
               new FrontPrimitiveSpec.Config(field)
-                  .style(new Style(baseCodeStyle().color(color).invalidColor(invalidColor)))));
+                  .meta(
+                      markMeta(
+                          DirectStylist.meta(
+                              baseCodeStyle().color(color).invalidColor(invalidColor))))));
     }
 
     public void vspacer(double ascent, double descent) {
@@ -948,7 +973,9 @@ public class AlligatoroidSyntax {
               new FrontSymbolSpec.Config(
                   new SymbolSpaceSpec(
                       new SymbolSpaceSpec.Config()
-                          .style(new Style(new Style.Config().ascent(ascent).descent(descent)))))));
+                          .meta(
+                              DirectStylist.meta(
+                                  baseCodeStyle().ascent(ascent).descent(descent)))))));
     }
   }
 

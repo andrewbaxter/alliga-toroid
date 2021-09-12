@@ -10,11 +10,16 @@ import com.zarbosoft.alligatoroid.compiler.ModuleId;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.Hoverable;
+import com.zarbosoft.merman.core.Stylist;
 import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.display.Blank;
+import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.display.derived.CourseGroup;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.example.DirectStylist;
 import com.zarbosoft.merman.core.example.JsonSyntax;
 import com.zarbosoft.merman.core.example.SyntaxOut;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
@@ -22,7 +27,6 @@ import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Padding;
-import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
@@ -30,12 +34,16 @@ import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
+import com.zarbosoft.merman.core.wall.Brick;
+import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
+import com.zarbosoft.merman.core.wall.bricks.BrickText;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.EditorCursorFactory;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.history.FileIds;
 import com.zarbosoft.merman.editorcore.history.History;
+import com.zarbosoft.merman.editorcore.history.ModifiedStateListener;
 import com.zarbosoft.merman.jfxcore.JFXEnvironment;
 import com.zarbosoft.merman.jfxcore.display.JavaFXDisplay;
 import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
@@ -69,6 +77,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.ref.WeakReference;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -84,11 +93,13 @@ public class NotMain extends Application {
       TSSet.of(Key.CONTROL, Key.CONTROL_LEFT, Key.CONTROL_RIGHT).ro();
   public static final ROSet<Key> shiftKeys =
       TSSet.of(Key.SHIFT, Key.SHIFT_LEFT, Key.SHIFT_RIGHT).ro();
+  public static final String META_KEY_ERROR = "error";
   public DragSelectState dragSelect;
   public Runnable flushCallback;
-  private String path;
+  private Path path;
   private Editor editor;
   private Thread compileThread;
+  private Delay delayFlush = new Delay(500, () -> flush(false));
 
   public static void main(String[] args) {
     NotMain.launch(args);
@@ -254,9 +265,10 @@ public class NotMain extends Application {
               .put("json", JsonSyntax.create(env, new Padding(5, 5, 5, 5)))
               .put("at", AlligatoroidSyntax.create(env, new Padding(5, 5, 5, 5)));
 
-      path = args.get(0);
+      String rawPath = args.get(0);
+      path = Paths.get(rawPath).toAbsolutePath();
       Document document;
-      String extension = extension(path);
+      String extension = extension(rawPath);
       SyntaxOut syntaxOut =
           syntaxes.getOr(
               extension,
@@ -265,7 +277,68 @@ public class NotMain extends Application {
                     Format.format("No syntax for files with extension [%s]", extension));
               });
       Syntax syntax = syntaxOut.syntax;
+      TSMap<Atom, WeakReference<MarkerBox>> markDisplays = new TSMap<>();
+      Stylist stylist =
+          new Stylist() {
+            @Override
+            public void styleEmpty(Context context, BrickEmpty brick) {
+              syntaxOut.stylist.styleEmpty(context, brick);
+              updateMarkDisplay(brick);
+            }
 
+            private void updateMarkDisplay(Brick brick) {
+              if (!brick.meta().has("mark")) return;
+              Atom atom = brick.getVisual().atomVisual().atom;
+              MarkerBox display = null;
+              WeakReference<MarkerBox> ref = markDisplays.getOpt(atom);
+              if (ref != null) display = ref.get();
+              if (display == null) {
+                display = new MarkerBox(editor.context, atom, syntaxOut.markTransverseOffset);
+                brick.addAttachment(editor.context, display);
+                markDisplays.put(atom, new WeakReference<>(display));
+              }
+              display.update(editor.context);
+            }
+
+            @Override
+            public void styleText(Context context, BrickText brick) {
+              syntaxOut.stylist.styleText(context, brick);
+              updateMarkDisplay(brick);
+            }
+
+            @Override
+            public void styleObbox(Context context, ObboxStyle.Stylable obbox, ObboxType type) {
+              syntaxOut.stylist.styleObbox(context, obbox, type);
+            }
+
+            @Override
+            public void styleBannerText(Context context, Text text) {
+              syntaxOut.stylist.styleBannerText(context, text);
+            }
+
+            @Override
+            public void styleEmptyDisplay(
+                Context context, Blank blank, ROMap<String, Object> meta) {
+              syntaxOut.stylist.styleEmptyDisplay(context, blank, meta);
+            }
+
+            @Override
+            public void styleTextDisplay(Context context, Text text, ROMap<String, Object> meta) {
+              syntaxOut.stylist.styleTextDisplay(context, text, meta);
+            }
+
+            @Override
+            public void styleChoiceDescription(Context context, Text text, CourseGroup textPad) {
+              syntaxOut.stylist.styleChoiceDescription(context, text, textPad);
+            }
+
+            @Override
+            public void styleMarker(Context context, Text text, MarkerType type) {
+              syntaxOut.stylist.styleMarker(context, text, type);
+            }
+          };
+
+      TSList<Atom> errorAtoms = new TSList<>();
       if ("at".equals(extension)) {
         flushCallback =
             () -> {
@@ -276,18 +349,45 @@ public class NotMain extends Application {
               compileThread =
                   new Thread(
                       () -> {
-                        TSMap<ImportSpec, Module> modules = Main.compile(path);
+                        TSMap<ImportSpec, Module> modules = Main.compile(path.toString());
                         Platform.runLater(
                             () -> {
-                              ModuleId moduleId = new LocalModuleId(path);
+                              TSSet<Atom> changedAtoms = new TSSet<>();
+
+                              // Clear existing errors
+                              for (Atom atom : errorAtoms) {
+                                atom.meta.remove(META_KEY_ERROR);
+                                changedAtoms.add(atom);
+                              }
+                              errorAtoms.clear();
+
+                              // Attach new errors
+                              ModuleId moduleId = new LocalModuleId(path.toString());
                               for (Map.Entry<ImportSpec, Module> e : modules) {
                                 for (Error error : e.getValue().log.errors) {
                                   Location location = (Location) error.data.getOpt("location");
-                                  if (location == null) continue;
-                                  if (!moduleId.equal1(location.module)) continue;
+                                  if (location == null) {
+                                    continue;
+                                  }
+                                  if (!moduleId.equal1(location.module)) {
+                                    continue;
+                                  }
                                   Atom atom = editor.fileIdMap.getOpt(location.id);
-                                  if (atom == null) continue;
-                                  atom.setMetadata("error");
+                                  if (atom == null) {
+                                    continue;
+                                  }
+                                  errorAtoms.add(atom);
+                                  atom.meta.put(META_KEY_ERROR, true);
+                                  changedAtoms.add(atom);
+                                }
+                              }
+
+                              for (Atom atom : changedAtoms) {
+                                MarkerBox display = null;
+                                WeakReference<MarkerBox> ref = markDisplays.get(atom);
+                                if (ref != null) display = ref.get();
+                                if (display != null) {
+                                  display.update(editor.context);
                                 }
                               }
                             });
@@ -299,7 +399,7 @@ public class NotMain extends Application {
       FileIds fileIds = new FileIds();
       serializer = new JavaSerializer(syntax.backType);
       try {
-        document = serializer.loadDocument(syntax, Files.readAllBytes(Paths.get(path)));
+        document = serializer.loadDocument(syntax, Files.readAllBytes(path));
       } catch (NoSuchFileException e) {
         document = new Document(syntax, Editor.createEmptyAtom(syntax, fileIds, syntax.root));
       } catch (Exception e) {
@@ -316,6 +416,7 @@ public class NotMain extends Application {
               env,
               new History(),
               serializer,
+              stylist,
               e ->
                   new EditorCursorFactory(e) {
                     @Override
@@ -364,54 +465,28 @@ public class NotMain extends Application {
               new Editor.Config(
                       new Context.InitialConfig().animateCoursePlacement(true).animateDetails(true))
                   .suffixOnPatternMismatch(syntaxOut.suffixOnPatternMismatch)
-                  .bannerStyle(
-                      new Style(
-                          new Style.Config()
-                              .fontSize(5)
-                              .color(syntaxOut.choiceText /* TODO */)
-                              .obbox(new ObboxStyle(new ObboxStyle.Config().line(false)))))
                   .bannerPad(Padding.ct(3, 3))
-                  .choiceCursorStyle(
-                      new ObboxStyle(
-                          new ObboxStyle.Config()
-                              .lineThickness(0.3)
-                              .padding(Padding.ct(1.5, 0.5))
-                              .roundStart(true)
-                              .roundEnd(true)
-                              .roundOuterEdges(true)
-                              .roundRadius(1)
-                              .lineColor(syntaxOut.choiceCursor)))
-                  .choiceDescriptionStyle(
-                      new Style(
-                          new Style.Config()
-                              .fontSize(5)
-                              .color(syntaxOut.choiceText)
-                              .padding(new Padding(4, 0, 1, 1))))
                   .choiceColumnSpace(8)
-                  .detailsBoxStyle(
-                      new ObboxStyle(
-                          new ObboxStyle.Config()
-                              .line(false)
-                              .fill(true)
-                              .fillColor(syntaxOut.choiceBg)
-                              .roundStart(true)
-                              .roundEnd(true)
-                              .roundOuterEdges(true)
-                              .roundRadius(2)
-                              .padding(Padding.ct(20, 1))))
                   .detailsPad(Padding.ct(3, 3))
                   .detailsMaxTransverseSpan(40)
                   .gapPlaceholderSymbol(
                       new SymbolTextSpec(
                           new SymbolTextSpec.Config("▢")
-                              .style(
-                                  new Style(
-                                      new Style.Config()
+                              .meta(
+                                  DirectStylist.meta(
+                                      new DirectStylist.TextStyle()
                                           .fontSize(5)
                                           .padding(Padding.ct(1, 0))
                                           .color(syntaxOut.choiceCursor))))));
       editor.context.document.root.visual.selectIntoAnyChild(editor.context);
 
+      editor.history.addModifiedStateListener(
+          new ModifiedStateListener() {
+            @Override
+            public void changed(boolean modified) {
+              if (modified) delayFlush.trigger(editor.context);
+            }
+          });
       editor.context.addHoverListener(
           new Context.HoverListener() {
             @Override
@@ -495,6 +570,8 @@ public class NotMain extends Application {
               return false;
             }
           };
+      flushCallback.run();
+
       primaryStage
           .getIcons()
           .addAll(
@@ -558,8 +635,9 @@ public class NotMain extends Application {
 
   public void flush(boolean clearBackup) {
     Path backupPath = Paths.get((path.startsWith(".") ? "" : ".") + path + ".merman_backup");
-    if (editor.history.isModified()) {
-      Path path1 = Paths.get(this.path);
+    boolean wasModified = editor.history.isModified();
+    if (wasModified) {
+      Path path1 = this.path;
       if (!clearBackup && !Files.exists(backupPath)) {
         try {
           Files.copy(path1, backupPath);
@@ -587,7 +665,7 @@ public class NotMain extends Application {
       } catch (IOException e) {
         logException(e, "Failed to clean up backup %s", backupPath);
       }
-    if (flushCallback != null) flushCallback.run();
+    if (wasModified && flushCallback != null) flushCallback.run();
   }
 
   public static interface PrimitiveKeyHandler {

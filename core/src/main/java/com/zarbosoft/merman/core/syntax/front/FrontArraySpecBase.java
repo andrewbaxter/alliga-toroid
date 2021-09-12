@@ -13,6 +13,7 @@ import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSSet;
 
@@ -22,6 +23,8 @@ public abstract class FrontArraySpecBase extends FrontSpec {
   public final ROList<FrontSymbolSpec> separator;
   public final Symbol ellipsis;
   public final Symbol empty;
+  public final ROMap<String, Object> ellipsisMeta;
+  public final ROMap<String, Object> emptyMeta;
   public BaseBackArraySpec field;
 
   public FrontArraySpecBase(Config config) {
@@ -29,7 +32,9 @@ public abstract class FrontArraySpecBase extends FrontSpec {
     this.suffix = config.suffix;
     this.separator = config.separator;
     this.ellipsis = config.ellipsis;
+    ellipsisMeta = config.ellipsisMeta;
     empty = config.empty;
+    emptyMeta = config.emptyMeta;
   }
 
   public BaseBackArraySpec field() {
@@ -60,13 +65,15 @@ public abstract class FrontArraySpecBase extends FrontSpec {
 
   public abstract String fieldId();
 
-    public static class Config {
+  public static class Config {
     public ROSet<String> tags = ROSet.empty;
     public ROList<FrontSymbolSpec> prefix = ROList.empty;
     public ROList<FrontSymbolSpec> suffix = ROList.empty;
     public ROList<FrontSymbolSpec> separator = ROList.empty;
     public Symbol ellipsis = new SymbolTextSpec(new SymbolTextSpec.Config("..."));
+    public ROMap<String, Object> ellipsisMeta = ROMap.empty;
     public Symbol empty = new SymbolSpaceSpec(new SymbolSpaceSpec.Config());
+    public ROMap<String, Object> emptyMeta = ROMap.empty;
 
     public Config() {}
 

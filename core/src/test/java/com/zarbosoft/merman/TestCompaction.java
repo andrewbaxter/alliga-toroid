@@ -15,7 +15,7 @@ import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
 import org.junit.Test;
 
-import static com.zarbosoft.merman.core.syntax.style.Style.SplitMode.COMPACT;
+import static com.zarbosoft.merman.core.syntax.style.SplitMode.COMPACT;
 
 public class TestCompaction {
   @Test

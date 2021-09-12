@@ -9,7 +9,7 @@ class HoverableFieldArrayPlaceholder extends HoverableFieldArrayBase {
   public final VisualFieldArray visual;
 
   HoverableFieldArrayPlaceholder(final Context context, final Brick brick, VisualFieldArray visual) {
-    super(visual, context);
+    super(context, visual);
     this.visual = visual;
     border.setFirst(context, brick);
     border.setLast(context, brick);

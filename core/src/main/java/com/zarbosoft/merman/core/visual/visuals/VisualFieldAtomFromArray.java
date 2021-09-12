@@ -9,6 +9,7 @@ import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
 
 public class VisualFieldAtomFromArray extends VisualFieldAtomBase {
   public final FieldArray value;
@@ -20,8 +21,9 @@ public class VisualFieldAtomFromArray extends VisualFieldAtomBase {
       final FieldArray value,
       final int visualDepth,
       final int depthScore,
-      Symbol ellipsis) {
-    super(visualDepth, ellipsis);
+      Symbol ellipsis,
+      ROMap<String, Object> ellipsisMeta) {
+    super(visualDepth, ellipsis, ellipsisMeta);
     this.value = value;
     dataListener =
         new FieldArray.Listener() {

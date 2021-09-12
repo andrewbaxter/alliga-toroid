@@ -1,5 +1,7 @@
 package com.zarbosoft.merman.core.syntax.style;
 
+import com.zarbosoft.merman.core.Context;
+
 /** Used for obboxes (cursor, hover) including 0-selection text cursors (vertical line) */
 public class ObboxStyle {
   public final Padding padding;
@@ -14,6 +16,10 @@ public class ObboxStyle {
   public final double lineThickness;
   public final boolean fill;
   public final ModelColor fillColor;
+
+  public interface Stylable {
+    void setStyle(Context context, ObboxStyle style);
+  }
 
   public ObboxStyle(Config config) {
     this.padding = config.padding == null ? Padding.empty : config.padding;

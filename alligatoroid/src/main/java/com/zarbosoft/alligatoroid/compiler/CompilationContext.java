@@ -9,6 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.language.Block;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.sourcedeserialize.SourceDeserializer;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
@@ -61,6 +62,7 @@ public class CompilationContext {
   }
 
   public void loadRootModule(String path) {
+    if (!Paths.get(path).isAbsolute()) throw new Assertion();
     LocalModuleId moduleId = new LocalModuleId(path);
     ImportSpec importSpec = new ImportSpec(moduleId);
     uncheck(
@@ -124,6 +126,7 @@ public class CompilationContext {
   }
 
   public Future<Value> loadLocalModule(String path) {
+    if (!Paths.get(path).isAbsolute()) throw new Assertion();
     LocalModuleId moduleId = new LocalModuleId(path);
     ImportSpec importSpec = new ImportSpec(moduleId);
     return loadModule(

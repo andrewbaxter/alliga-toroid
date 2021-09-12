@@ -1,11 +1,12 @@
 package com.zarbosoft.merman;
 
+import com.zarbosoft.merman.core.example.DirectStylist;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.style.Padding;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
@@ -40,20 +41,18 @@ public class TestLayoutGeneral {
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config()
-                                .splitMode(Style.SplitMode.ALWAYS)
-                                .style(
-                                    new Style(
-                                        new Style.Config()
-                                            .
-                                            /* only in first syntax */ padding(
-                                                new Padding(0, 0, 0, 60))))))))
+                                .splitMode(SplitMode.ALWAYS)
+                                .meta(
+                                    DirectStylist.meta(
+                                        new DirectStylist.TextStyle() /* only in first syntax */
+                                            .padding(new Padding(0, 0, 0, 60))))))))
             .build();
     text =
         new TypeBuilder("text")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(
                 new FrontPrimitiveSpec(
-                    new FrontPrimitiveSpec.Config("value").splitMode(Style.SplitMode.ALWAYS)))
+                    new FrontPrimitiveSpec.Config("value").splitMode(SplitMode.ALWAYS)))
             .build();
     array =
         new TypeBuilder("array")

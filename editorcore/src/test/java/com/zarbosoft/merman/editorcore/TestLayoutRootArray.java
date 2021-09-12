@@ -4,7 +4,7 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.editorcore.helper.GeneralTestWizard;
@@ -37,7 +37,7 @@ public class TestLayoutRootArray {
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
-                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
             .build();
     final Atom text = new TreeBuilder(textType).add("value", "").build();
     new GeneralTestWizard(syntax, new TreeBuilder(one).build(), text)

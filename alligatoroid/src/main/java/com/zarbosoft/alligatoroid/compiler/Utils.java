@@ -28,7 +28,7 @@ public class Utils {
     return uncheck(
         () -> {
           Field[] fields = o.getClass().getDeclaredFields();
-          Object[] values = new Objects[fields.length];
+          Object[] values = new Object[fields.length];
           for (int i = 0; i < fields.length; i++) {
             values[i] = fields[i].get(o);
           }

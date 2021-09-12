@@ -3,7 +3,7 @@ package com.zarbosoft.merman.helper;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 
 public class PrimitiveSyntax {
@@ -59,7 +59,7 @@ public class PrimitiveSyntax {
             .addRootFrontPrefix(
                     new FrontSymbolSpec(
                             new FrontSymbolSpec.Config(
-                                    new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
+                                    new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
             .build();
   }
 
@@ -115,7 +115,7 @@ public class PrimitiveSyntax {
             .addRootFrontPrefix(
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
-                        new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
+                        new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
             .build();
   }
 }

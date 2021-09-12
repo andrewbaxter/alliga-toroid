@@ -398,7 +398,7 @@ public class VisualAtom extends Visual {
       if (needIntermediateCursor) {
         boolean changed = false;
         if (hoverable == null) {
-          hoverable = new AtomHoverable(VisualAtom.this, context);
+          hoverable = new AtomHoverable(context, VisualAtom.this);
           changed = true;
         } else if (hoverable.index != selectableIndex) {
           changed = true;

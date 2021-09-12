@@ -10,7 +10,7 @@ import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class Box implements FreeDisplayNode {
+public class Box implements FreeDisplayNode, ObboxStyle.Stylable {
   public final Drawing drawing;
   private final double toPixels;
   private Vector offset;
@@ -25,16 +25,6 @@ public class Box implements FreeDisplayNode {
   public Box(final Context context) {
     drawing = context.display.drawing();
     toPixels = context.toPixels;
-  }
-
-  public void setStyle(final ObboxStyle style) {
-    this.style = style;
-    stylePaddingConverse = style.padding.converseStart * toPixels;
-    stylePaddingConverseEnd = style.padding.converseEnd * toPixels;
-    stylePaddingTransverse = style.padding.transverseStart * toPixels;
-    stylePaddingTransverseEnd = style.padding.transverseEnd * toPixels;
-    styleLineThickness = style.lineThickness * toPixels;
-    styleRoundRadius = style.roundRadius * toPixels;
   }
 
   public void setPosition(final Vector vector, final boolean animate) {
@@ -105,5 +95,16 @@ public class Box implements FreeDisplayNode {
   @Override
   public Object inner_() {
     return drawing.inner_();
+  }
+
+  @Override
+  public void setStyle(Context context, ObboxStyle style) {
+    this.style = style;
+    stylePaddingConverse = style.padding.converseStart * toPixels;
+    stylePaddingConverseEnd = style.padding.converseEnd * toPixels;
+    stylePaddingTransverse = style.padding.transverseStart * toPixels;
+    stylePaddingTransverseEnd = style.padding.transverseEnd * toPixels;
+    styleLineThickness = style.lineThickness * toPixels;
+    styleRoundRadius = style.roundRadius * toPixels;
   }
 }

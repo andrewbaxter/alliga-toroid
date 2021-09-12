@@ -8,6 +8,7 @@ import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.example.DirectStylist;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
@@ -149,7 +150,8 @@ public class Helper {
   }
 
   public static void assertTreeEqual(final Context context, final Atom expected, final Field got) {
-    FieldArray value = new FieldArray((BaseBackArraySpec) context.syntax.root.namedFields.get("value"));
+    FieldArray value =
+        new FieldArray((BaseBackArraySpec) context.syntax.root.namedFields.get("value"));
     value.initialSet(TSList.of(expected)); // TODO this shouldn't really be setting the value
     assertTreeEqual(value, got);
   }
@@ -177,6 +179,7 @@ public class Helper {
             new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
             new TestEnvironment(),
             null,
+            new DirectStylist(null, null, null, null, null, null, null, null),
             new ViewerCursorFactory());
     return context;
   }

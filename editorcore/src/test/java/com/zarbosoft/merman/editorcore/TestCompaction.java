@@ -6,7 +6,7 @@ import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
@@ -38,7 +38,7 @@ public class TestCompaction {
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
-                                        .splitMode(Style.SplitMode.COMPACT)))))
+                                        .splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(0)
             .depthScore(1)
@@ -92,7 +92,7 @@ public class TestCompaction {
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
-                                        .splitMode(Style.SplitMode.COMPACT)))))
+                                        .splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(0)
             .depthScore(1)
@@ -165,7 +165,7 @@ public class TestCompaction {
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
-                                        .splitMode(Style.SplitMode.COMPACT)))))
+                                        .splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(0)
             .depthScore(1)
@@ -224,7 +224,7 @@ public class TestCompaction {
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
-                                        .splitMode(Style.SplitMode.COMPACT)))))
+                                        .splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(0)
             .depthScore(1)
@@ -239,7 +239,7 @@ public class TestCompaction {
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
-                                        .splitMode(Style.SplitMode.COMPACT)))))
+                                        .splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(50)
             .depthScore(1)
@@ -254,7 +254,7 @@ public class TestCompaction {
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
-                                        .splitMode(Style.SplitMode.COMPACT)))))
+                                        .splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(100)
             .depthScore(1)
@@ -326,7 +326,7 @@ public class TestCompaction {
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
-                                        .splitMode(Style.SplitMode.COMPACT)))))
+                                        .splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(0)
             .depthScore(1)

@@ -20,13 +20,16 @@ import com.zarbosoft.rendaw.common.TSList;
 
 public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
   private final Symbol ellipsisSpec;
+  private final ROMap<String, Object> ellipsisMeta;
   protected VisualAtom body;
   VisualParent parent;
   private Brick ellipsis = null;
 
-  public VisualFieldAtomBase(final int visualDepth, Symbol ellipsis) {
+  public VisualFieldAtomBase(
+      final int visualDepth, Symbol ellipsis, ROMap<String, Object> ellipsisMeta) {
     super(visualDepth);
     ellipsisSpec = ellipsis;
+    this.ellipsisMeta = ellipsisMeta;
   }
 
   @Override
@@ -154,6 +157,11 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
               @Override
               public Alignment findAlignment(String alignment) {
                 return parent.atomVisual().findAlignment(alignment);
+              }
+
+              @Override
+              public ROMap<String, Object> meta() {
+                return ellipsisMeta;
               }
             });
     notifyFirstBrickCreated(context, ellipsis);

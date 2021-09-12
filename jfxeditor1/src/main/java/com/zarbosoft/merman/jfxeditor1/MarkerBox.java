@@ -1,23 +1,67 @@
 package com.zarbosoft.merman.jfxeditor1;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.display.Group;
+import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.wall.Attachment;
 
+import static com.zarbosoft.merman.core.Stylist.MarkerType.ERROR;
+import static com.zarbosoft.merman.jfxeditor1.NotMain.META_KEY_ERROR;
+
 public class MarkerBox implements Attachment {
-    Group group;
-    @Override
-    public void setConverse(Context context, double converse) {
-        group.setConverse(converse);
-    }
+  public final Atom atom;
+  public final double transverseOffset;
+  public double transverse;
+  public double converse;
+  public Text mark;
 
-    @Override
-    public void setTransverse(Context context, double transverse) {
-        group.setTransverse(transverse, false);
-    }
+  public MarkerBox(Context context, Atom atom, double transverseOffset) {
+    this.atom = atom;
+    this.transverseOffset = context.toPixels * transverseOffset;
+  }
 
-    @Override
-    public void destroy(Context context) {
-        context.background.removeNode(group);
+  @Override
+  public void setConverse(Context context, double converse) {
+    this.converse = converse;
+    if (mark != null) {
+      mark.setConverse(converse);
     }
+  }
+
+  @Override
+  public void setBaselineTransverse(Context context, double baselineTransverse) {
+    this.transverse = baselineTransverse;
+    if (mark != null) {
+      mark.setBaselineTransverse(baselineTransverse + transverseOffset, false);
+    }
+  }
+
+  private void clearMark(Context context) {
+    if (mark != null) {
+      context.background.removeNode(mark);
+      mark = null;
+    }
+  }
+
+  @Override
+  public void destroy(Context context) {
+    clearMark(context);
+  }
+
+  public void update(Context context) {
+    if (atom.meta.has(META_KEY_ERROR)) {
+      if (mark == null) {
+        mark = context.display.text();
+        mark.setText(context, "┄");
+        context.stylist.styleMarker(context, mark, ERROR);
+        mark.setBaselinePosition(new Vector(converse, transverse + transverseOffset), false);
+        context.background.add(mark);
+      }
+    } else {
+      if (mark != null) {
+        clearMark(context);
+      }
+    }
+  }
 }

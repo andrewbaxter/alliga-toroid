@@ -6,7 +6,7 @@ import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
 
-public class TextBorderAttachment {
+public class TextBorderAttachment implements ObboxStyle.Stylable {
   private final Obbox border;
   BrickText first;
   int firstIndex;

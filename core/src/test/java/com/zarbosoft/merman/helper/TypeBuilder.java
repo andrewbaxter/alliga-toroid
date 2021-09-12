@@ -12,7 +12,7 @@ import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.TSList;
@@ -74,10 +74,11 @@ public class TypeBuilder {
   }
 
   public TypeBuilder alignedFrontDataPrimitive(final String middle, String alignment) {
-      this.front.add(
+    this.front.add(
         new FrontPrimitiveSpec(
             new FrontPrimitiveSpec.Config(middle)
-                .style(new Style(new Style.Config().alignment(alignment)))));
+                .firstAlignmentId(alignment)
+                .splitAlignmentId(alignment)));
     return this;
   }
 
@@ -85,8 +86,7 @@ public class TypeBuilder {
     this.front.add(
         new FrontSymbolSpec(
             new FrontSymbolSpec.Config(
-                new SymbolTextSpec(
-                    new SymbolTextSpec.Config(value).splitMode(Style.SplitMode.ALWAYS)))));
+                new SymbolTextSpec(new SymbolTextSpec.Config(value).splitMode(SplitMode.ALWAYS)))));
     return this;
   }
 
@@ -97,7 +97,7 @@ public class TypeBuilder {
     return this;
   }
 
-  public TypeBuilder frontSpace(Style.SplitMode splitMode) {
+  public TypeBuilder frontSpace(SplitMode splitMode) {
     this.front.add(
         new FrontSymbolSpec(
             new FrontSymbolSpec.Config(

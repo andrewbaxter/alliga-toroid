@@ -8,6 +8,7 @@ import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
+import com.zarbosoft.rendaw.common.ROMap;
 
 public class VisualFieldAtom extends VisualFieldAtomBase {
   public final FieldAtom value;
@@ -19,8 +20,9 @@ public class VisualFieldAtom extends VisualFieldAtomBase {
       final FieldAtom value,
       final int visualDepth,
       final int depthScore,
-      Symbol ellipsis) {
-    super(visualDepth, ellipsis);
+      Symbol ellipsis,
+      ROMap<String, Object> ellipsisMeta) {
+    super(visualDepth, ellipsis, ellipsisMeta);
     this.value = value;
     dataListener =
         new FieldAtom.Listener() {
@@ -70,5 +72,4 @@ public class VisualFieldAtom extends VisualFieldAtomBase {
     value.visual = null;
     super.uproot(context, root);
   }
-
 }

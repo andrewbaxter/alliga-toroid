@@ -30,6 +30,7 @@ public class Atom {
   public ROMap<String, Field> namedFields;
   /** Null if root */
   public Field.Parent<?> fieldParentRef;
+  public final TSMap<String, Object> meta = new TSMap<>();
 
   public VisualAtom visual;
 

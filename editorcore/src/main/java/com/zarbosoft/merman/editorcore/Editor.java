@@ -1,7 +1,9 @@
 package com.zarbosoft.merman.editorcore;
 
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.CursorFactory;
 import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.Stylist;
 import com.zarbosoft.merman.core.display.Display;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
@@ -21,7 +23,6 @@ import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Padding;
-import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtom;
@@ -48,13 +49,10 @@ import java.util.function.Function;
 public class Editor {
   public final Context context;
   public final History history;
-  public final ObboxStyle choiceCursorStyle;
   public final Padding choicePreviewPadding;
-  public final Style choiceDescriptionStyle;
   public final Symbol gapPlaceholderSymbol;
   public final double detailSpan;
   public final Padding bannerPad;
-  public final ObboxStyle detailStyle;
   public final Padding detailPad;
   public final double choiceRowStride;
   public final Padding choiceRowPadding;
@@ -63,7 +61,7 @@ public class Editor {
   public final FileIds fileIds;
   public Banner banner;
   public BeddingContainer details;
-  public TSMap<Integer, Atom> fileIdMap;
+  public final TSMap<Integer, Atom> fileIdMap;
 
   public Editor(
       final Syntax syntax,
@@ -73,9 +71,11 @@ public class Editor {
       Environment environment,
       final History history,
       Serializer serializer,
+      Stylist stylist,
       Function<Editor, EditorCursorFactory> cursorFactory,
       Config config) {
     this.fileIds = fileIds;
+    this.fileIdMap = new TSMap<>();
     context =
         new EditorContext(
             config.context,
@@ -84,17 +84,10 @@ public class Editor {
             display,
             environment,
             serializer,
+            stylist,
             cursorFactory.apply(this),
             this);
     this.history = history;
-    this.choiceCursorStyle =
-        config.choiceCursorStyle == null
-            ? new ObboxStyle(new ObboxStyle.Config())
-            : config.choiceCursorStyle;
-    this.choiceDescriptionStyle =
-        config.choiceDescriptionStyle == null
-            ? new Style(new Style.Config())
-            : config.choiceDescriptionStyle;
     this.choicePreviewPadding = config.choicePreviewPadding;
 
     choiceRowPadding = config.choiceRowPadding;
@@ -104,16 +97,11 @@ public class Editor {
         config.gapPlaceholderSymbol == null
             ? new SymbolTextSpec(new SymbolTextSpec.Config("▢"))
             : config.gapPlaceholderSymbol;
-    this.banner =
-        new Banner(
-            this.context,
-            config.bannerStyle == null ? new Style(new Style.Config()) : config.bannerStyle);
+    this.banner = new Banner(this.context);
     suffixOnPatternMismatch = config.suffixOnPatternMismatch;
     this.bannerPad = config.bannerPad;
     this.details = new BeddingContainer(this.context, false);
     this.detailPad = config.detailPad;
-    this.detailStyle =
-        config.detailsStyle == null ? new ObboxStyle(new ObboxStyle.Config()) : config.detailsStyle;
     this.detailSpan = config.detailSpan;
     history.record(
         this,
@@ -185,7 +173,8 @@ public class Editor {
     recorder.apply(editor, new ChangeArray(array, index, remove, add));
   }
 
-  private static void makeIdsUniqueInner(Editor editor, History.Recorder recorder, Atom atom, Field field) {
+  private static void makeIdsUniqueInner(
+      Editor editor, History.Recorder recorder, Atom atom, Field field) {
     if (field instanceof FieldId) {
       Integer uniqueId = editor.fileIds.take(((FieldId) field).id);
       if (uniqueId != null) recorder.apply(editor, new ChangeId((FieldId) field, uniqueId));
@@ -331,9 +320,10 @@ public class Editor {
         Display display,
         Environment env,
         Serializer serializer,
-        com.zarbosoft.merman.core.CursorFactory cursorFactory,
+        Stylist stylist,
+        CursorFactory cursorFactory,
         Editor editor) {
-      super(config, syntax, document, display, env, serializer, cursorFactory);
+      super(config, syntax, document, display, env, serializer, stylist, cursorFactory);
       this.editor = editor;
     }
   }
@@ -343,11 +333,9 @@ public class Editor {
     public double choiceRowStride;
     public Padding choiceRowPadding = Padding.empty;
     public double choiceColumnSpace;
-    public Style choiceDescriptionStyle;
     public Padding choicePreviewPadding = Padding.empty;
     public Symbol gapPlaceholderSymbol;
     public ObboxStyle choiceCursorStyle;
-    public Style bannerStyle;
     public ObboxStyle detailsStyle;
     public double detailSpan = 300;
     public Padding bannerPad = Padding.empty;
@@ -363,18 +351,8 @@ public class Editor {
       return this;
     }
 
-    public Config bannerStyle(Style style) {
-      this.bannerStyle = style;
-      return this;
-    }
-
     public Config bannerPad(Padding padding) {
       this.bannerPad = padding;
-      return this;
-    }
-
-    public Config choiceDescriptionStyle(Style style) {
-      this.choiceDescriptionStyle = style;
       return this;
     }
 
