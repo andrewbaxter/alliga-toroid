@@ -2,6 +2,7 @@ package com.zarbosoft.merman.core;
 
 import com.zarbosoft.merman.core.syntax.primitivepattern.CharacterEvent;
 import com.zarbosoft.pidgoon.events.Event;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -65,21 +66,21 @@ public interface Environment {
    * @return list of CharacterEvent
    */
   default TSList<String> splitGlyphs(String text) {
-    I18nWalker walker = glyphWalker(text);
+    GlyphWalker walker = glyphWalker(text);
     TSList<String> glyphs = TSList.of();
     int end = 0;
     while (true) {
       int start = end;
-      end = walker.followingStart(end);
+      end = walker.after(end);
       if (end == I18N_DONE) break;
       glyphs.add(text.substring(start, end));
     }
     return glyphs;
   }
 
-  public I18nWalker glyphWalker(String s);
+  public GlyphWalker glyphWalker(String s);
 
-  public I18nWalker wordWalker(String s);
+  public WordWalker wordWalker(String s);
 
   /**
    * Suitable places to break lines
@@ -87,7 +88,7 @@ public interface Environment {
    * @param s
    * @return
    */
-  public I18nWalker lineWalker(String s);
+  public LineWalker lineWalker(String s);
 
   void destroy();
 
@@ -101,90 +102,135 @@ public interface Environment {
     void cancel();
   }
 
+  public static interface GlyphWalker {
+    /**
+     * Offset of glyph before offset, I18N_DONE if offset == 0
+     *
+     * <p>Includes 0
+     *
+     * @param offset
+     * @return
+     */
+    int before(int offset);
+
+    /**
+     * Offset of glyph after offset, I18N_DONE if offset == length
+     *
+     * <p>Includes 0
+     *
+     * @param offset
+     * @return
+     */
+    int after(int offset);
+  }
+
   /**
-   * Moves in larger increments: doesn't flop before/after whitespace between words (1 glyph
+   * There is whitespace between the end of one word and the start of the next. Index 0 and length
+   * are both starts and ends.
+   *
+   * <p>Moves in larger increments: doesn't flop before/after whitespace between words (1 glyph
    * movement)
    */
-  public static interface FixedWordI18nWalker extends I18nWalker {
-    int precedingAny(int offset);
+  public abstract static class WordWalker {
+    /**
+     * Word start or end before or at offset
+     *
+     * @param offset
+     * @return
+     */
+    protected abstract int anyBeforeOrAt(int offset);
 
-    int followingAny(int offset);
+    /**
+     * Word start or end at or after offset
+     *
+     * @param offset
+     * @return
+     */
+    protected abstract int anyAtOrAfter(int offset);
 
-    boolean isWhitespace(String glyph);
+    /**
+     * Also true for anything < 0 or gte length
+     *
+     * @param offset
+     * @return
+     */
+    protected abstract boolean isWhitespace(int offset);
 
-    String charAt(int offset);
+    protected abstract int length();
 
-    int length();
-
-    @Override
-    default int precedingStart(int offset) {
-      int out = precedingAny(offset);
-      if (out != -1 && isWhitespace(charAt(out))) out = precedingAny(out);
-      return out;
+    public int startBeforeOrAt(int offset) {
+      if (offset < 0 || offset > length()) throw new Assertion();
+      int out = anyBeforeOrAt(offset);
+      if (!isWhitespace(out) || out == 0) return out;
+      return anyBeforeOrAt(out - 1);
     }
 
-    @Override
-    default int precedingEnd(int offset) {
-      int out = precedingAny(offset);
-      if (out != -1 && !isWhitespace(charAt(out))) out = precedingAny(out);
-      if (out == -1 && offset > 0) return 0;
-      return out;
+    public int startBefore(int offset) {
+      if (offset < 0 || offset > length()) throw new Assertion();
+      if (offset == 0) return I18N_DONE;
+      return startBeforeOrAt(offset - 1);
     }
 
-    @Override
-    default int followingStart(int offset) {
-      int out = followingAny(offset);
-      if (out != -1 && out < length() && isWhitespace(charAt(out))) out = followingAny(out);
-      return out;
+    public int endBeforeOrAt(int offset) {
+      if (offset < 0 || offset > length()) throw new Assertion();
+      int out = anyBeforeOrAt(offset);
+      if (isWhitespace(out) || out == 0) return out;
+      return anyBeforeOrAt(out - 1);
     }
 
-    @Override
-    default int followingEnd(int offset) {
-      int out = followingAny(offset);
-      if (out != -1 && out < length() && !isWhitespace(charAt(out))) out = followingAny(out);
-      return out;
+    public int endBefore(int offset) {
+      if (offset < 0 || offset > length()) throw new Assertion();
+      if (offset == 0) return I18N_DONE;
+      return endBeforeOrAt(offset - 1);
+    }
+
+    public int startAfterOrAt(int offset) {
+      if (offset < 0 || offset > length()) throw new Assertion();
+      int out = anyAtOrAfter(offset);
+      if (!isWhitespace(out) || out == length()) return out;
+      return anyAtOrAfter(out + 1);
+    }
+
+    public int startAfter(int offset) {
+      if (offset < 0 || offset > length()) throw new Assertion();
+      if (offset == length()) return I18N_DONE;
+      return startAfterOrAt(offset + 1);
+    }
+
+    public int endAfterOrAt(int offset) {
+      if (offset < 0 || offset > length()) throw new Assertion();
+      int out = anyAtOrAfter(offset);
+      if (isWhitespace(out)) return out;
+      return anyAtOrAfter(out + 1);
+    }
+
+    public int endAfter(int offset) {
+      if (offset < 0 || offset > length()) throw new Assertion();
+      if (offset == length()) return I18N_DONE;
+      return endAfterOrAt(offset + 1);
     }
   }
 
-  public static interface I18nWalker {
-    /**
-     * Offset of start of next element starting before offset, I18N_DONE if at start
-     *
-     * <p>Includes 0
-     *
-     * @param offset
-     * @return
-     */
-    int precedingStart(int offset);
+  /**
+   * Line: the end of one line is somewhere after text and before next text. The start of a line is
+   * always at the start of text, except the first line which may start with whitespace. A line
+   * contains as much following whitespace as possible. The first line contains preceding
+   * whitespace. Bounds are 0 and size
+   */
+  public abstract static class LineWalker {
+    protected abstract int anyBeforeOrAt(int offset);
 
-    /**
-     * Offset of end of next element ending before offset, I18N_DONE if at start
-     *
-     * <p>Includes 0
-     *
-     * @param offset
-     * @return
-     */
-    int precedingEnd(int offset);
+    protected abstract int anyAtOrAfter(int offset);
 
-    /**
-     * Offset of start of next element starting after offset, I18N_DONE if at end
-     *
-     * <p>Includes string.size()
-     *
-     * @param offset
-     * @return
-     */
-    int followingStart(int offset);
+    protected abstract boolean isWhitespace(int offset);
 
-    /**
-     * Offset of end of next element ending after offset, I18N_DONE if at end
-     *
-     * <p>Includes string.size()
-     *
-     * @param offset
-     * @return
-     */
-    int followingEnd(int offset);
+    protected abstract int length();
+
+    public int beforeOrAt(int offset) {
+      if (offset < 0 || offset > length()) throw new Assertion();
+      int out = anyBeforeOrAt(offset);
+      while (out < offset && isWhitespace(out + 1)) out += 1;
+      return out;
+    }
   }
 }

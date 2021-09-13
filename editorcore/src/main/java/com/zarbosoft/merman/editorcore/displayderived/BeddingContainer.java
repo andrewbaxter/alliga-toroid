@@ -3,6 +3,7 @@ package com.zarbosoft.merman.editorcore.displayderived;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.IterationContext;
 import com.zarbosoft.merman.core.IterationTask;
+import com.zarbosoft.merman.core.display.Container;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.Bedding;

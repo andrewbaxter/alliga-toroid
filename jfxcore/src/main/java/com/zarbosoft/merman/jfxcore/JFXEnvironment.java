@@ -26,6 +26,11 @@ public class JFXEnvironment implements Environment {
     this.locale = locale;
   }
 
+  protected static boolean isWhitespace(String s, int i) {
+    if (i < 0 || i >= s.length()) return true;
+    return Character.isWhitespace(s.codePointAt(i));
+  }
+
   @Override
   public Time now() {
     return new JavaTime(Instant.now());
@@ -96,8 +101,8 @@ public class JFXEnvironment implements Environment {
   }
 
   @Override
-  public Environment.I18nWalker glyphWalker(String s) {
-    return new I18nWalker() {
+  public Environment.GlyphWalker glyphWalker(String s) {
+    return new GlyphWalker() {
       private final BreakIterator iter;
 
       {
@@ -106,30 +111,20 @@ public class JFXEnvironment implements Environment {
       }
 
       @Override
-      public int precedingStart(int offset) {
+      public int before(int offset) {
         return iter.preceding(offset);
       }
 
       @Override
-      public int precedingEnd(int offset) {
-        return iter.preceding(offset);
-      }
-
-      @Override
-      public int followingStart(int offset) {
-        return iter.following(offset);
-      }
-
-      @Override
-      public int followingEnd(int offset) {
+      public int after(int offset) {
         return iter.following(offset);
       }
     };
   }
 
   @Override
-  public Environment.I18nWalker wordWalker(String s) {
-    return new FixedWordI18nWalker() {
+  public Environment.WordWalker wordWalker(String s) {
+    return new WordWalker() {
       private final String text;
       private final BreakIterator iter;
 
@@ -140,35 +135,32 @@ public class JFXEnvironment implements Environment {
       }
 
       @Override
-      public int precedingAny(int offset) {
-        return iter.preceding(offset);
+      protected int anyBeforeOrAt(int offset) {
+        if (offset == length()) return offset;
+        return iter.preceding(offset + 1);
       }
 
       @Override
-      public int followingAny(int offset) {
-        return iter.following(offset);
+      protected int anyAtOrAfter(int offset) {
+        if (offset == 0) return offset;
+        return iter.following(offset - 1);
       }
 
       @Override
-      public boolean isWhitespace(String glyph) {
-        return Character.isWhitespace(glyph.codePointAt(0));
+      protected boolean isWhitespace(int offset) {
+        return JFXEnvironment.isWhitespace(text, offset);
       }
 
       @Override
-      public String charAt(int offset) {
-        return text.substring(offset, offset + 1);
-      }
-
-      @Override
-      public int length() {
+      protected int length() {
         return text.length();
       }
     };
   }
 
   @Override
-  public Environment.I18nWalker lineWalker(String s) {
-    return new I18nWalker() {
+  public Environment.LineWalker lineWalker(String s) {
+    return new LineWalker() {
       private final BreakIterator iter;
 
       {
@@ -177,23 +169,25 @@ public class JFXEnvironment implements Environment {
       }
 
       @Override
-      public int precedingStart(int offset) {
-        return iter.preceding(offset);
+      protected int anyBeforeOrAt(int offset) {
+        if (offset == length()) return offset;
+        return iter.preceding(offset + 1);
       }
 
       @Override
-      public int precedingEnd(int offset) {
-        return iter.preceding(offset);
-      }
-
-      @Override
-      public int followingStart(int offset) {
+      protected int anyAtOrAfter(int offset) {
+        if (offset == 0) return offset;
         return iter.following(offset);
       }
 
       @Override
-      public int followingEnd(int offset) {
-        return iter.following(offset);
+      protected boolean isWhitespace(int offset) {
+        return JFXEnvironment.isWhitespace(s, offset);
+      }
+
+      @Override
+      protected int length() {
+        return s.length();
       }
     };
   }

@@ -14,7 +14,7 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
   public final VisualFieldPrimitive.RangeAttachment range;
   public final VisualFieldPrimitive visualPrimitive;
   private final FieldPrimitive.Listener clusterListener;
-  Environment.I18nWalker clusterIterator;
+  Environment.GlyphWalker clusterIterator;
 
   public CursorFieldPrimitive(
       final Context context,
@@ -32,10 +32,16 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
     visualPrimitive.value.addListener(this.clusterListener);
   }
 
-  private int precedingStart(final Environment.I18nWalker iter, final int offset) {
-    int to = iter.precedingStart(offset);
+  private int precedingStart(final Environment.GlyphWalker iter, final int offset) {
+    int to = iter.before(offset);
     if (to == I18N_DONE) to = 0;
     return Math.max(0, to);
+  }
+
+  private int precedingStart(final Environment.WordWalker iter, final int offset) {
+    int to = iter.startBefore(offset);
+    if (to == I18N_DONE) to = 0;
+    return to;
   }
 
   public int precedingStart() {
@@ -46,10 +52,16 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
     return precedingEnd(clusterIterator, offset);
   }
 
-  private int precedingEnd(final Environment.I18nWalker iter, final int offset) {
-    int to = iter.precedingEnd(offset);
+  private int precedingEnd(final Environment.GlyphWalker iter, final int offset) {
+    int to = iter.before(offset);
     if (to == I18N_DONE) to = 0;
     return Math.max(0, to);
+  }
+
+  private int precedingEnd(final Environment.WordWalker iter, final int offset) {
+    int to = iter.endBefore(offset);
+    if (to == I18N_DONE) to = 0;
+    return to;
   }
 
   public int precedingEnd() {
@@ -60,10 +72,16 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
     return followingStart(clusterIterator, offset);
   }
 
-  private int followingStart(final Environment.I18nWalker iter, final int offset) {
-    int to = iter.followingStart(offset);
+  private int followingStart(final Environment.GlyphWalker iter, final int offset) {
+    int to = iter.after(offset);
     if (to == I18N_DONE) to = visualPrimitive.value.length();
-    return Math.min(visualPrimitive.value.length(), to);
+    return to;
+  }
+
+  private int followingStart(final Environment.WordWalker iter, final int offset) {
+    int to = iter.startAfter(offset);
+    if (to == I18N_DONE) to = visualPrimitive.value.length();
+    return to;
   }
 
   public int followingStart() {
@@ -74,10 +92,16 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
     return followingEnd(clusterIterator, offset);
   }
 
-  private int followingEnd(final Environment.I18nWalker iter, final int offset) {
-    int to = iter.followingEnd(offset);
+  private int followingEnd(final Environment.GlyphWalker iter, final int offset) {
+    int to = iter.after(offset);
     if (to == I18N_DONE) to = visualPrimitive.value.length();
     return Math.min(visualPrimitive.value.length(), to);
+  }
+
+  private int followingEnd(final Environment.WordWalker iter, final int offset) {
+    int to = iter.endAfter(offset);
+    if (to == I18N_DONE) to = visualPrimitive.value.length();
+    return to;
   }
 
   public int followingEnd() {
@@ -85,17 +109,17 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
   }
 
   private int nextWordStart(Context context, final int source) {
-    final Environment.I18nWalker iter = context.env.wordWalker(visualPrimitive.value.get());
+    final Environment.WordWalker iter = context.env.wordWalker(visualPrimitive.value.get());
     return followingStart(iter, source);
   }
 
   private int nextWordEnd(Context context, final int source) {
-    final Environment.I18nWalker iter = context.env.wordWalker(visualPrimitive.value.get());
+    final Environment.WordWalker iter = context.env.wordWalker(visualPrimitive.value.get());
     return followingEnd(iter, source);
   }
 
   private int previousWordStart(Context context, final int source) {
-    final Environment.I18nWalker iter = context.env.wordWalker(visualPrimitive.value.get());
+    final Environment.WordWalker iter = context.env.wordWalker(visualPrimitive.value.get());
     return precedingStart(iter, source);
   }
 

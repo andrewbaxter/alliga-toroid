@@ -2,6 +2,7 @@ package com.zarbosoft.merman.core;
 
 import com.zarbosoft.merman.core.display.Blank;
 import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.display.TextStylable;
 import com.zarbosoft.merman.core.display.derived.CourseGroup;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
@@ -48,7 +49,7 @@ public interface Stylist {
    * @param text
    * @param textPad
    */
-  void styleChoiceDescription(Context context, Text text, CourseGroup textPad);
+  void styleChoiceDescription(Context context, TextStylable text, CourseGroup textPad);
 
   /**
    * Editor only

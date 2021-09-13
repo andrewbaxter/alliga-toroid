@@ -37,7 +37,7 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
     border.setLast(context, getElementVisual(end).getLastBrick(context));
   }
 
-  private void setBeginInternal(final Context context, final int index) {
+  protected void setBeginInternal(final Context context, final int index) {
     beginIndex = index;
     if (leadFirst) setCornerstone(context, beginIndex);
   }
@@ -62,7 +62,7 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
         });
   }
 
-  private void setEndInternal(final Context context, final int index) {
+  protected void setEndInternal(final Context context, final int index) {
     endIndex = index;
     if (!leadFirst) setCornerstone(context, endIndex);
   }

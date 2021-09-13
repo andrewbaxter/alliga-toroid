@@ -54,7 +54,7 @@ public class JSFont implements Font {
       int lastIndex = 0;
       int index = 0;
       while (true) {
-        index = walker.followingStart(index);
+        index = walker.startAfter(index);
         if (index == I18N_DONE) break;
         double textConverse = measure(text.substring(0, index)).width;
         if ((converse - lastTextConverse) / (textConverse - lastTextConverse) < 0.5) break;

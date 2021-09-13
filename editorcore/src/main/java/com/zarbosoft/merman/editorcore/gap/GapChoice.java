@@ -40,7 +40,7 @@ public class GapChoice extends TwoColumnChoice {
   public final Atom gap;
   public final FreeAtomType type;
   public final int consumePrecedingAtoms;
-  public final ROList<EditGapCursorFieldPrimitive.PrepareAtomField> supplyFillAtoms;
+  public final ROList<BaseEditCursorGapFieldPrimitive.PrepareAtomField> supplyFillAtoms;
   public final int consumeText;
   public final Leaf incompleteKeyParse;
   private final TSList<Event> glyphs;
@@ -52,7 +52,7 @@ public class GapChoice extends TwoColumnChoice {
       Atom gap,
       FreeAtomType type,
       int consumePrecedingAtoms,
-      ROList<EditGapCursorFieldPrimitive.PrepareAtomField> supplyFillAtoms,
+      ROList<BaseEditCursorGapFieldPrimitive.PrepareAtomField> supplyFillAtoms,
       TSList<Event> glyphs,
       int consumeText,
       ROList<ParsedField> completeMatchFields,
@@ -190,7 +190,7 @@ public class GapChoice extends TwoColumnChoice {
                 preceding.size() - consumePrecedingAtoms,
                 consumePrecedingAtoms,
                 ROList.empty);
-            for (EditGapCursorFieldPrimitive.PrepareAtomField s : supplyFillAtoms) {
+            for (BaseEditCursorGapFieldPrimitive.PrepareAtomField s : supplyFillAtoms) {
               Field field = s.process(editor, recorder1);
               namedFields.put(field.back().id, field);
             }
@@ -222,7 +222,7 @@ public class GapChoice extends TwoColumnChoice {
             } else {
               placeWithSuffixSelect(editor, recorder1, created);
             }
-            ((EditGapCursorFieldPrimitive) editor.context.cursor)
+            ((BaseEditCursorGapFieldPrimitive) editor.context.cursor)
                 .editHandleTyping(editor, recorder1, remainderText.toString());
           } else if (nextIncompletePrimitiveField != null) {
             place(editor, recorder1, created);

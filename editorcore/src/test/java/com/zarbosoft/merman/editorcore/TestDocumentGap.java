@@ -16,7 +16,7 @@ import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
-import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
+import com.zarbosoft.merman.editorcore.gap.BaseEditCursorGapFieldPrimitive;
 import com.zarbosoft.merman.editorcore.helper.BackRecordBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
@@ -45,10 +45,10 @@ public class TestDocumentGap {
 
   public static void assertChoices(Editor editor, int count) {
     if (count == 0)
-      assertThat(((EditGapCursorFieldPrimitive) editor.context.cursor).choicePage, equalTo(null));
+      assertThat(((BaseEditCursorGapFieldPrimitive) editor.context.cursor).choicePage, equalTo(null));
     else
       assertThat(
-          ((EditGapCursorFieldPrimitive) editor.context.cursor).choicePage.choices.size(),
+          ((BaseEditCursorGapFieldPrimitive) editor.context.cursor).choicePage.choices.size(),
           is(count));
   }
 
@@ -813,7 +813,7 @@ public class TestDocumentGap {
                   editor.context.syntaxLocate(
                       new SyntaxPath("named", "value", "0", "named", "value", "0", "named", "gap")))
               .selectInto(editor.context);
-          ((EditGapCursorFieldPrimitive) editor.context.cursor).editExit(editor);
+          ((BaseEditCursorGapFieldPrimitive) editor.context.cursor).editExit(editor);
         },
         new TreeBuilder(array).addArray("value").build());
   }
@@ -840,7 +840,7 @@ public class TestDocumentGap {
                   editor.context.syntaxLocate(
                       new SyntaxPath("named", "value", "0", "named", "gap")))
               .selectInto(editor.context);
-          ((EditGapCursorFieldPrimitive) editor.context.cursor).editExit(editor);
+          ((BaseEditCursorGapFieldPrimitive) editor.context.cursor).editExit(editor);
         },
         new TreeBuilder(infinity).build());
   }

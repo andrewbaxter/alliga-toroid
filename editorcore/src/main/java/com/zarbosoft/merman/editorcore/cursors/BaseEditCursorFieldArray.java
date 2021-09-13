@@ -13,8 +13,8 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class EditCursorFieldArray extends CursorFieldArray {
-  public EditCursorFieldArray(
+public class BaseEditCursorFieldArray extends CursorFieldArray {
+  public BaseEditCursorFieldArray(
       Context context, VisualFieldArray visual, boolean leadFirst, int start, int end) {
     super(context, visual, leadFirst, start, end);
   }

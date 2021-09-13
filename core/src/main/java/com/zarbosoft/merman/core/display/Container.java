@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.editorcore.displayderived;
+package com.zarbosoft.merman.core.display;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.FreeDisplayNode;

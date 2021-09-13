@@ -8,6 +8,29 @@ public class TestEnvironment implements Environment {
   byte[] data = null;
   String string = null;
 
+  protected static boolean isWhitespace(String s, int i) {
+    if (i < 0 || i >= s.length()) return true;
+    return s.charAt(i) == ' ' || s.charAt(i) == '\n';
+  }
+
+  protected static int anyBeforeOrAt(String s, int offset) {
+    for (int i = offset; i > 0; --i) {
+      boolean prevWs = isWhitespace(s, i - 1);
+      boolean ws = isWhitespace(s, i);
+      if (prevWs && !ws || !prevWs && ws) return i;
+    }
+    return 0;
+  }
+
+  protected static int anyAtOrAfter(String s, int offset) {
+    for (int i = offset; i < s.length(); ++i) {
+      boolean prevWs = isWhitespace(s, i - 1);
+      boolean ws = isWhitespace(s, i);
+      if (prevWs && !ws || !prevWs && ws) return i;
+    }
+    return s.length();
+  }
+
   @Override
   public Time now() {
     return new Time() {
@@ -53,84 +76,71 @@ public class TestEnvironment implements Environment {
   }
 
   @Override
-  public I18nWalker glyphWalker(String s) {
-    return new I18nWalker() {
+  public GlyphWalker glyphWalker(String s) {
+    return new GlyphWalker() {
       @Override
-      public int precedingStart(int offset) {
+      public int before(int offset) {
         if (offset == 0) return I18N_DONE;
         return offset - 1;
       }
 
-      @Override
-      public int precedingEnd(int offset) {
-        return precedingStart(offset);
-      }
-
-      @Override
-      public int followingStart(int offset) {
+      public int after(int offset) {
         if (offset == s.length()) return I18N_DONE;
         return offset + 1;
       }
-
-      @Override
-      public int followingEnd(int offset) {
-        return followingStart(offset);
-      }
     };
   }
 
   @Override
-  public I18nWalker wordWalker(String s) {
-    return new I18nWalker() {
-      private boolean isSpace(int i) {
-        if (i < 0 || i >= s.length()) return true;
-        return s.charAt(i) == ' ' || s.charAt(i) == '\n';
+  public WordWalker wordWalker(String s) {
+    return new WordWalker() {
+      @Override
+      protected int anyBeforeOrAt(int offset) {
+        return TestEnvironment.anyBeforeOrAt(s, offset);
       }
 
       @Override
-      public int precedingStart(int offset) {
-        if (offset == 0) return I18N_DONE;
-        for (int i = offset - 1; i > 0; --i) {
-          if (isSpace(i - 1) && !isSpace(i)) return i;
-        }
-        return 0;
+      protected int anyAtOrAfter(int offset) {
+        return TestEnvironment.anyAtOrAfter(s, offset);
       }
 
       @Override
-      public int precedingEnd(int offset) {
-        if (offset == 0) return I18N_DONE;
-        for (int i = offset - 1; i > 0; --i) {
-          if (!isSpace(i - 1) && isSpace(i)) return i;
-        }
-        return 0;
+      protected boolean isWhitespace(int i) {
+        return TestEnvironment.isWhitespace(s, i);
       }
 
       @Override
-      public int followingStart(int offset) {
-        if (offset == s.length()) return I18N_DONE;
-        for (int i = offset + 1; i <= s.length(); ++i) {
-          if (isSpace(i - 1) && !isSpace(i)) return i;
-        }
-        return s.length();
-      }
-
-      @Override
-      public int followingEnd(int offset) {
-        if (offset == s.length()) return I18N_DONE;
-        for (int i = offset + 1; i <= s.length(); ++i) {
-          if (!isSpace(i - 1) && isSpace(i)) return i;
-        }
+      protected int length() {
         return s.length();
       }
     };
   }
 
   @Override
-  public I18nWalker lineWalker(String s) {
-    return wordWalker(s);
+  public LineWalker lineWalker(String s) {
+    return new LineWalker() {
+      @Override
+      protected int anyBeforeOrAt(int offset) {
+        return TestEnvironment.anyBeforeOrAt(s, offset);
+      }
+
+      @Override
+      protected int anyAtOrAfter(int offset) {
+        return TestEnvironment.anyAtOrAfter(s, offset);
+      }
+
+      @Override
+      protected boolean isWhitespace(int i) {
+        return TestEnvironment.isWhitespace(s, i);
+      }
+
+      @Override
+      protected int length() {
+        return s.length();
+      }
+    };
   }
 
   @Override
-  public void destroy() {
-  }
+  public void destroy() {}
 }

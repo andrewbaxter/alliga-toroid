@@ -11,7 +11,7 @@ import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
-import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldArray;
+import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldArray;
 import com.zarbosoft.merman.editorcore.helper.BackRecordBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
@@ -87,7 +87,7 @@ public class TestCursorChanges {
         new TreeBuilder(infinity).build(),
         new SyntaxPath("named", "value", "0"),
         (editor, selected, changer) -> {
-          ((EditCursorFieldArray) editor.context.cursor).editDelete(editor);
+          ((BaseEditCursorFieldArray) editor.context.cursor).editDelete(editor);
         },
         new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build(),
         new SyntaxPath("named", "value", "0"));

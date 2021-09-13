@@ -1,20 +1,41 @@
-package com.zarbosoft.merman.jfxeditor1.modalinput;
+package com.zarbosoft.merman.jfxeditor1;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
+import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomBase;
 import com.zarbosoft.merman.editorcore.Editor;
-import com.zarbosoft.merman.editorcore.cursors.EditCursorAtom;
-import com.zarbosoft.merman.jfxeditor1.NotMain;
+import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorAtom;
+import com.zarbosoft.rendaw.common.ROPair;
 
 import static com.zarbosoft.merman.jfxeditor1.NotMain.controlKeys;
 
-public class ModalCursorAtom extends EditCursorAtom {
+public class CursorAtom extends BaseEditCursorAtom {
   public final NotMain main;
+  private ErrorPage errorPage;
 
-  public ModalCursorAtom(Context context, VisualAtom visual, int index, NotMain main) {
+  public CursorAtom(Context context, VisualAtom visual, int index, NotMain main) {
     super(context, visual, index);
     this.main = main;
+  }
+
+  @Override
+  public void destroy(Context context) {
+    super.destroy(context);
+    errorPage.destroy(Editor.get(context));
+  }
+
+  @Override
+  public void setIndex(Context context, int index) {
+    super.setIndex(context, index);
+    if (errorPage == null)
+      // Because we can't initialize it before this is called via constructor
+      errorPage = new ErrorPage();
+    ROPair<String, Visual> selectable = visual.selectable.get(index);
+    if (selectable.second instanceof VisualFieldAtomBase) {
+      errorPage.setAtom(Editor.get(context), ((VisualFieldAtomBase) selectable.second).atomGet());
+    }
   }
 
   public boolean handleKey(Context context, ButtonEvent hidEvent) {

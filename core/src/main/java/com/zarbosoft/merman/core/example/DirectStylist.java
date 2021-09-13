@@ -4,6 +4,7 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Stylist;
 import com.zarbosoft.merman.core.display.Blank;
 import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.display.TextStylable;
 import com.zarbosoft.merman.core.display.derived.CourseGroup;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
@@ -80,12 +81,12 @@ public class DirectStylist implements Stylist {
   }
 
   @Override
-  public void styleChoiceDescription(Context context, Text text, CourseGroup textPad) {
+  public void styleChoiceDescription(Context context, TextStylable text, CourseGroup textPad) {
     text.setColor(context, choiceDescriptionStyle.color);
     text.setFont(
         context,
         Context.getFont(context, choiceDescriptionStyle.font, choiceDescriptionStyle.fontSize));
-    textPad.setPadding(context, choiceDescriptionStyle.padding);
+    if (textPad != null) textPad.setPadding(context, choiceDescriptionStyle.padding);
   }
 
   @Override

@@ -17,8 +17,8 @@ import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
 import com.zarbosoft.merman.core.wall.bricks.BrickLine;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
 import com.zarbosoft.merman.editorcore.Editor;
-import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldArray;
-import com.zarbosoft.merman.editorcore.cursors.EditCursorAtom;
+import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldArray;
+import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorAtom;
 import com.zarbosoft.merman.editorcore.display.MockeryText;
 import com.zarbosoft.merman.editorcore.history.Change;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -278,24 +278,24 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard editInsertBefore() {
-    ((EditCursorFieldArray) inner.editor.context.cursor).editInsertBefore(inner.editor);
+    ((BaseEditCursorFieldArray) inner.editor.context.cursor).editInsertBefore(inner.editor);
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
   }
 
   public GeneralTestWizard editInsertAfter() {
-    ((EditCursorFieldArray) inner.editor.context.cursor).editInsertAfter(inner.editor);
+    ((BaseEditCursorFieldArray) inner.editor.context.cursor).editInsertAfter(inner.editor);
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
   }
 
   public GeneralTestWizard editDelete() {
-    if (inner.editor.context.cursor instanceof EditCursorAtom) {
-      ((EditCursorAtom) inner.editor.context.cursor).editDelete(inner.editor);
+    if (inner.editor.context.cursor instanceof BaseEditCursorAtom) {
+      ((BaseEditCursorAtom) inner.editor.context.cursor).editDelete(inner.editor);
     } else if (inner.editor.context.cursor instanceof CursorFieldArray) {
-      ((EditCursorFieldArray) inner.editor.context.cursor).editDelete(inner.editor);
+      ((BaseEditCursorFieldArray) inner.editor.context.cursor).editDelete(inner.editor);
     } else throw new Assertion();
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();

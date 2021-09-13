@@ -30,7 +30,6 @@ import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.function.Function;
 
-import static com.zarbosoft.merman.core.Environment.I18N_DONE;
 import static com.zarbosoft.merman.core.syntax.style.SplitMode.ALWAYS;
 
 public class VisualFieldPrimitive extends Visual implements VisualLeaf {
@@ -418,17 +417,16 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
         final double width = measurer.getWidth(text);
         final double edge = converse + width;
         if (converse < context.edge && edge > context.edge) {
-          final Environment.I18nWalker lineIter = context.env.lineWalker(text);
+          final Environment.LineWalker lineIter = context.env.lineWalker(text);
           final double edgeOffset = context.edge - converse;
           final int under = measurer.getIndexAtConverse(context, text, edgeOffset);
           if (under == text.length()) split = under;
           else {
-            split = lineIter.precedingStart(under + 1);
-            if (split == 0 || split == I18N_DONE) {
-              final Environment.I18nWalker clusterIter = context.env.glyphWalker(text);
-              split = clusterIter.precedingStart(under + 1);
+            split = lineIter.beforeOrAt(under);
+            if (split == 0) {
+              split = under;
             }
-            if (split < 4 || split == I18N_DONE) {
+            if (split < 4) {
               split = text.length();
               result.compactLimit = true;
             }

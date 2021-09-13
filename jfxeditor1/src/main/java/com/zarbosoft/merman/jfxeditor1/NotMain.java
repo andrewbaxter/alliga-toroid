@@ -14,6 +14,7 @@ import com.zarbosoft.merman.core.Stylist;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.display.Blank;
 import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.display.TextStylable;
 import com.zarbosoft.merman.core.display.derived.CourseGroup;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
@@ -28,9 +29,6 @@ import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
-import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
-import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
-import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
@@ -40,17 +38,13 @@ import com.zarbosoft.merman.core.wall.bricks.BrickText;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.EditorCursorFactory;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldPrimitive;
-import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
+import com.zarbosoft.merman.editorcore.gap.BaseEditCursorGapFieldPrimitive;
 import com.zarbosoft.merman.editorcore.history.FileIds;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.ModifiedStateListener;
 import com.zarbosoft.merman.jfxcore.JFXEnvironment;
 import com.zarbosoft.merman.jfxcore.display.JavaFXDisplay;
 import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
-import com.zarbosoft.merman.jfxeditor1.modalinput.ModalCursorAtom;
-import com.zarbosoft.merman.jfxeditor1.modalinput.ModalCursorFieldArray;
-import com.zarbosoft.merman.jfxeditor1.modalinput.ModalCursorFieldPrimitive;
-import com.zarbosoft.merman.jfxeditor1.modalinput.ModalGapCursorFieldPrimitive;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertainAt;
 import com.zarbosoft.pidgoon.errors.InvalidStreamAt;
 import com.zarbosoft.pidgoon.errors.NoResults;
@@ -328,7 +322,7 @@ public class NotMain extends Application {
             }
 
             @Override
-            public void styleChoiceDescription(Context context, Text text, CourseGroup textPad) {
+            public void styleChoiceDescription(Context context, TextStylable text, CourseGroup textPad) {
               syntaxOut.stylist.styleChoiceDescription(context, text, textPad);
             }
 
@@ -362,6 +356,7 @@ public class NotMain extends Application {
                               errorAtoms.clear();
 
                               // Attach new errors
+                              TSMap<Atom, TSList<String>> errorMessages = new TSMap<>();
                               ModuleId moduleId = new LocalModuleId(path.toString());
                               for (Map.Entry<ImportSpec, Module> e : modules) {
                                 for (Error error : e.getValue().log.errors) {
@@ -376,10 +371,22 @@ public class NotMain extends Application {
                                   if (atom == null) {
                                     continue;
                                   }
+                                  StringBuilder message = new StringBuilder();
+                                  for (Map.Entry<String, Object> e1 : error.data) {
+                                      if ("location".equals(e1.getKey())) continue;
+                                    message.append(
+                                        Format.format("%s: %s", e1.getKey(), e1.getValue()));
+                                  }
                                   errorAtoms.add(atom);
-                                  atom.meta.put(META_KEY_ERROR, true);
+                                  errorMessages
+                                      .getCreate(atom, () -> new TSList<>())
+                                      .add(message.toString());
                                   changedAtoms.add(atom);
                                 }
+                              }
+
+                              for (Map.Entry<Atom, TSList<String>> e : errorMessages) {
+                                e.getKey().meta.put(META_KEY_ERROR, e.getValue());
                               }
 
                               for (Atom atom : changedAtoms) {
@@ -420,23 +427,24 @@ public class NotMain extends Application {
               e ->
                   new EditorCursorFactory(e) {
                     @Override
-                    public EditGapCursorFieldPrimitive createGapCursor(
+                    public BaseEditCursorGapFieldPrimitive createGapCursor(
                         VisualFieldPrimitive visualPrimitive,
                         boolean leadFirst,
                         int beginOffset,
                         int endOffset) {
-                      return new ModalGapCursorFieldPrimitive(
+                      return new CursorGapFieldPrimitive(
                           editor, visualPrimitive, leadFirst, beginOffset, endOffset, NotMain.this);
                     }
 
                     @Override
-                    public CursorFieldPrimitive createPrimitiveCursor1(
-                        Context context,
-                        VisualFieldPrimitive visualPrimitive,
-                        boolean leadFirst,
-                        int beginOffset,
-                        int endOffset) {
-                      return new ModalCursorFieldPrimitive(
+                    public com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive
+                        createPrimitiveCursor1(
+                            Context context,
+                            VisualFieldPrimitive visualPrimitive,
+                            boolean leadFirst,
+                            int beginOffset,
+                            int endOffset) {
+                      return new CursorFieldPrimitive(
                           context,
                           visualPrimitive,
                           leadFirst,
@@ -446,20 +454,21 @@ public class NotMain extends Application {
                     }
 
                     @Override
-                    public CursorFieldArray createFieldArrayCursor(
-                        Context context,
-                        VisualFieldArray visual,
-                        boolean leadFirst,
-                        int start,
-                        int end) {
-                      return new ModalCursorFieldArray(
+                    public com.zarbosoft.merman.core.visual.visuals.CursorFieldArray
+                        createFieldArrayCursor(
+                            Context context,
+                            VisualFieldArray visual,
+                            boolean leadFirst,
+                            int start,
+                            int end) {
+                      return new CursorFieldArray(
                           context, visual, leadFirst, start, end, NotMain.this);
                     }
 
                     @Override
-                    public CursorAtom createAtomCursor(
+                    public com.zarbosoft.merman.core.visual.visuals.CursorAtom createAtomCursor(
                         Context context, VisualAtom base, int index) {
-                      return new ModalCursorAtom(context, base, index, NotMain.this);
+                      return new CursorAtom(context, base, index, NotMain.this);
                     }
                   },
               new Editor.Config(

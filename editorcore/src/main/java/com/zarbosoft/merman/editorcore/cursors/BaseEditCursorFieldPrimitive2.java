@@ -8,15 +8,15 @@ import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
-import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
+import com.zarbosoft.merman.editorcore.gap.BaseEditCursorGapFieldPrimitive;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.function.Consumer;
 
-public class EditCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
-  public EditCursorFieldPrimitive(
+public class BaseEditCursorFieldPrimitive2 extends BaseEditCursorFieldPrimitive {
+  public BaseEditCursorFieldPrimitive2(
       Context context,
       VisualFieldPrimitive visualPrimitive,
       boolean leadFirst,
@@ -56,7 +56,7 @@ public class EditCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
               gap.namedFields.get(GapAtomType.PRIMITIVE_KEY).selectInto(editor.context);
 
               // Send new text + chopped text to suffix
-              ((EditGapCursorFieldPrimitive) editor.context.cursor)
+              ((BaseEditCursorGapFieldPrimitive) editor.context.cursor)
                   .editHandleTyping(editor, recorder1, text + after);
             };
         if (recorder != null) apply.accept(recorder);

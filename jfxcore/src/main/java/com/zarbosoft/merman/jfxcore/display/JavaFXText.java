@@ -15,8 +15,8 @@ import javafx.scene.Node;
 import javafx.scene.paint.Paint;
 
 public class JavaFXText implements Text {
-  private final javafx.scene.text.Text text;
-  private final JavaFXDisplay display;
+  protected final javafx.scene.text.Text text;
+  protected final JavaFXDisplay display;
   private double transverseBaseline;
   private double ascent;
   private double descent;

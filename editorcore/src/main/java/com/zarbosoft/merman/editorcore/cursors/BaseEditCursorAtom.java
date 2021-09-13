@@ -18,8 +18,8 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class EditCursorAtom extends CursorAtom {
-  public EditCursorAtom(Context context, VisualAtom visual, int index) {
+public class BaseEditCursorAtom extends CursorAtom {
+  public BaseEditCursorAtom(Context context, VisualAtom visual, int index) {
     super(context, visual, index);
   }
 
@@ -121,7 +121,7 @@ public class EditCursorAtom extends CursorAtom {
     Field.Parent<?> parent = visual.atom.fieldParentRef;
     while (parent != null) {
       if (parent instanceof FieldArray.Parent) {
-        EditCursorFieldArray.editInsertAfter(
+        BaseEditCursorFieldArray.editInsertAfter(
             editor, (FieldArray) parent.field, ((FieldArray.Parent) parent).index);
         break;
       }
@@ -133,7 +133,7 @@ public class EditCursorAtom extends CursorAtom {
     Field.Parent<?> parent = visual.atom.fieldParentRef;
     while (parent != null) {
       if (parent instanceof FieldArray.Parent) {
-        EditCursorFieldArray.editInsertBefore(
+        BaseEditCursorFieldArray.editInsertBefore(
             editor, (FieldArray) parent.field, ((FieldArray.Parent) parent).index);
         break;
       }

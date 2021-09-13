@@ -15,16 +15,16 @@ public class TestI18n {
     JFXEnvironment e = new JFXEnvironment(Locale.US);
     // 0-5 7-10 11-16 17
     String text = "these  are three ";
-    Environment.I18nWalker walker = e.wordWalker(text);
+    Environment.WordWalker walker = e.wordWalker(text);
     int[] precedingStart = new int[text.length() + 1];
     int[] precedingEnd = new int[text.length() + 1];
     int[] followingStart = new int[text.length() + 1];
     int[] followingEnd = new int[text.length() + 1];
-    for (int i = 0; i < precedingStart.length; ++i) {
-      precedingStart[i] = walker.precedingStart(i);
-      precedingEnd[i] = walker.precedingEnd(i);
-      followingStart[i] = walker.followingStart(i);
-      followingEnd[i] = walker.followingEnd(i);
+    for (int i = 0; i <= text.length(); ++i) {
+      precedingStart[i] = walker.startBefore(i);
+      precedingEnd[i] = walker.endBefore(i);
+      followingStart[i] = walker.startAfter(i);
+      followingEnd[i] = walker.endAfter(i);
     }
     Assert.assertThat(
         precedingStart,

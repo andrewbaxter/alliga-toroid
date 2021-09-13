@@ -9,7 +9,7 @@ import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.displayderived.Box;
 import com.zarbosoft.merman.editorcore.displayderived.BoxContainer;
 import com.zarbosoft.merman.editorcore.displayderived.ColumnarTableLayout;
-import com.zarbosoft.merman.editorcore.displayderived.Container;
+import com.zarbosoft.merman.core.display.Container;
 import com.zarbosoft.merman.editorcore.displayderived.ConvScrollContainer;
 import com.zarbosoft.merman.editorcore.displayderived.PadContainer;
 import com.zarbosoft.merman.editorcore.displayderived.StackGroup;

@@ -7,14 +7,14 @@ import com.zarbosoft.rendaw.common.ROList;
 public class PreGapChoice {
   public final FreeAtomType type;
   public final int consumePreceding;
-  public final ROList<EditGapCursorFieldPrimitive.PrepareAtomField> supplyFillAtoms;
+  public final ROList<BaseEditCursorGapFieldPrimitive.PrepareAtomField> supplyFillAtoms;
   public final ROList<FrontSpec> keySpecs;
   public final FrontSpec following;
 
   public PreGapChoice(
       FreeAtomType type,
       int consumePreceding,
-      ROList<EditGapCursorFieldPrimitive.PrepareAtomField> supplyFillAtoms,
+      ROList<BaseEditCursorGapFieldPrimitive.PrepareAtomField> supplyFillAtoms,
       ROList<FrontSpec> keySpecs,
       FrontSpec following) {
     this.type = type;

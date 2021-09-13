@@ -45,7 +45,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
 
-public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
+public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitive {
   public static Reference.Key<ROList<PrepareAtomField>> PRECEDING_ROOT_KEY = new Reference.Key<>();
   public static Reference.Key<
           ROPair<PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>>
@@ -54,7 +54,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
   public String currentText;
   public TwoColumnChoicePage choicePage;
 
-  public EditGapCursorFieldPrimitive(
+  public BaseEditCursorGapFieldPrimitive(
       Editor editor,
       VisualFieldPrimitive visualPrimitive,
       boolean leadFirst,
