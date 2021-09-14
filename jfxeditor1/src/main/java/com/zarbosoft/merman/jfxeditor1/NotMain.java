@@ -94,6 +94,7 @@ public class NotMain extends Application {
   private Editor editor;
   private Thread compileThread;
   private Delay delayFlush = new Delay(500, () -> flush(false));
+  public ErrorPage errorPage = new ErrorPage();
 
   public static void main(String[] args) {
     NotMain.launch(args);
@@ -351,7 +352,7 @@ public class NotMain extends Application {
 
                               // Clear existing errors
                               for (Atom atom : errorAtoms) {
-                                atom.meta.remove(META_KEY_ERROR);
+                                atom.metaRemove(editor.context, META_KEY_ERROR);
                                 changedAtoms.add(atom);
                               }
                               errorAtoms.clear();
@@ -381,7 +382,7 @@ public class NotMain extends Application {
                               }
 
                               for (Map.Entry<Atom, TSList<String>> e : errorMessages) {
-                                e.getKey().meta.put(META_KEY_ERROR, e.getValue());
+                                e.getKey().metaPut(editor.context, META_KEY_ERROR, e.getValue());
                               }
 
                               for (Atom atom : changedAtoms) {

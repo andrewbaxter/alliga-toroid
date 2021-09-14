@@ -6,12 +6,12 @@ import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldPrimitive2;
-import com.zarbosoft.merman.jfxeditor1.NotMain;
 
 import static com.zarbosoft.merman.jfxeditor1.NotMain.shiftKeys;
 
 public class CursorFieldPrimitive extends BaseEditCursorFieldPrimitive2 {
   public final NotMain main;
+  public ErrorPage errorPage;
   private SyntaxPath syntaxPath;
 
   public CursorFieldPrimitive(
@@ -24,6 +24,7 @@ public class CursorFieldPrimitive extends BaseEditCursorFieldPrimitive2 {
     super(context, visualPrimitive, leadFirst, beginOffset, endOffset);
     this.main = main;
     this.syntaxPath = syntaxPath;
+    main.errorPage.setAtom(Editor.get(context), visualPrimitive.parent.atomVisual().atom);
   }
 
   public boolean handleKey(Context context, ButtonEvent hidEvent) {

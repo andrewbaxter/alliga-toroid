@@ -504,10 +504,10 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
             this.visualFieldPrimitive.value.back.matcher.match(
                 context.env, this.visualFieldPrimitive.value.data.toString());
         Atom atom = visualFieldPrimitive.atomVisual().atom;
-        boolean oldValid = atom.meta.getOpt("invalid") == null;
+        boolean oldValid = atom.metaHas("invalid");
         if (newValid != oldValid) {
-          if (!newValid) atom.meta.put("invalid", newValid);
-          else atom.meta.remove("invalid");
+          if (!newValid) atom.metaPut(context, "invalid");
+          else atom.metaRemove(context, "invalid");
           for (Line line : this.visualFieldPrimitive.lines) {
             if (line.brick == null) continue;
             context.stylist.styleText(context, line.brick);

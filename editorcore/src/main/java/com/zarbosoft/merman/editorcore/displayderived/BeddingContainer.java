@@ -95,6 +95,16 @@ public class BeddingContainer {
     current.setPosition(new Vector(0, transverse), animate);
   }
 
+  public void removeInner(Editor editor, Container inner) {
+    if (inner != current) return;
+    Context context = editor.context;
+    if (current != null) {
+      context.midground.removeNode(current);
+      context.wall.removeBedding(context, bedding);
+      bedding = null;
+    }
+  }
+
   public void setInner(Editor editor, Container inner) {
     Context context = editor.context;
     if (current != null) {

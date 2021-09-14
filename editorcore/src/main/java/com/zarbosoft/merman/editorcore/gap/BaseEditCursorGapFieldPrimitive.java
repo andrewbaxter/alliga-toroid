@@ -263,7 +263,7 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
   public void destroy(Context context) {
     if (choicePage != null) {
       Editor editor = Editor.get(context);
-      editor.details.setInner(editor, null);
+      editor.details.removeInner(editor, choicePage.displayRoot);
       choicePage.destroy(context);
       choicePage = null;
     }
@@ -294,7 +294,7 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
 
     /// Clean up before new state
     if (choicePage != null) {
-      editor.details.setInner(editor, null);
+      editor.details.removeInner(editor, choicePage.displayRoot);
       choicePage.destroy(context);
     }
 
@@ -348,7 +348,7 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
       editor.details.setInner(editor, choicePage.displayRoot);
     } else {
       if (choicePage != null) {
-        editor.details.setInner(editor, null);
+        editor.details.setInner(editor, choicePage.displayRoot);
         choicePage.destroy(context);
         choicePage = null;
       }

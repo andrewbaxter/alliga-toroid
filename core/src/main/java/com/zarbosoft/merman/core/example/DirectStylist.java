@@ -63,8 +63,8 @@ public class DirectStylist implements Stylist {
   public void styleText(Context context, BrickText brick) {
     TextStyle style = (TextStyle) brick.meta().getOpt("style");
     if (style == null) return;
-    Object invalid = brick.getVisual().atomVisual().atom.meta.getOpt("invalid");
-    if (invalid != null && style.invalidColor != null) brick.setColor(context, style.invalidColor);
+    boolean invalid = brick.getVisual().atomVisual().atom.metaHas("invalid");
+    if (invalid && style.invalidColor != null) brick.setColor(context, style.invalidColor);
     else brick.setColor(context, style.color);
     brick.setFont(context, style.font, style.fontSize);
     brick.setPadding(context, style.padding);

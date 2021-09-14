@@ -11,7 +11,6 @@ import static com.zarbosoft.merman.jfxeditor1.NotMain.shiftKeys;
 
 public class CursorFieldArray extends BaseEditCursorFieldArray {
   public final NotMain main;
-  public ErrorPage errorPage;
 
   public CursorFieldArray(
       Context context,
@@ -22,6 +21,7 @@ public class CursorFieldArray extends BaseEditCursorFieldArray {
       NotMain main) {
     super(context, visual, leadFirst, start, end);
     this.main = main;
+    updateErrorPage(Editor.get(context));
   }
 
   @Override
@@ -37,17 +37,15 @@ public class CursorFieldArray extends BaseEditCursorFieldArray {
   }
 
   private void updateErrorPage(Editor editor) {
-    if (errorPage == null)
-      // Because we can't initialize it before this is called via constructor
-      errorPage = new ErrorPage();
-    if (beginIndex == endIndex) errorPage.setAtom(editor, visual.value.data.get(beginIndex));
-    else errorPage.setAtom(editor, null);
+    if (main == null) return;
+    if (beginIndex == endIndex) main.errorPage.setAtom(editor, visual.value.data.get(beginIndex));
+    else main.errorPage.setAtom(editor, null);
   }
 
   @Override
   public void destroy(Context context) {
     super.destroy(context);
-    errorPage.destroy(Editor.get(context));
+    main.errorPage.setAtom(Editor.get(context), null);
   }
 
   public boolean handleKey(Context context, ButtonEvent hidEvent) {

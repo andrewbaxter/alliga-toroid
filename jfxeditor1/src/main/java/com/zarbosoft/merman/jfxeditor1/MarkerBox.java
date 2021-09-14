@@ -50,7 +50,7 @@ public class MarkerBox implements Attachment {
   }
 
   public void update(Context context) {
-    if (atom.meta.has(META_KEY_ERROR)) {
+    if (atom.metaHas(META_KEY_ERROR)) {
       if (mark == null) {
         mark = context.display.text();
         mark.setText(context, "┄");

@@ -26,16 +26,52 @@ public class Atom {
   public static final String SYNTAX_PATH_UNNAMED = "unnamed";
   public static final String SYNTAX_PATH_NAMED = "named";
   public final AtomType type;
+  private final TSMap<String, Object> meta = new TSMap<>();
+  private final TSList<MetaListener> metaListeners = new TSList<>();
   public ROList<Field> unnamedFields;
   public ROMap<String, Field> namedFields;
   /** Null if root */
   public Field.Parent<?> fieldParentRef;
-  public final TSMap<String, Object> meta = new TSMap<>();
 
   public VisualAtom visual;
 
   public Atom(final AtomType type) {
     this.type = type;
+  }
+
+  public void metaPut(Context context, String key) {
+    metaPut(context, key, true);
+  }
+
+  public boolean metaHas(String key) {
+    return meta.has(key);
+  }
+
+  public void metaPut(Context context, String key, Object value) {
+    meta.put(key, value);
+    for (MetaListener m : metaListeners) {
+      m.metaChanged(context);
+    }
+  }
+
+  public void addMetaListener(Context context, MetaListener listener) {
+    metaListeners.add(listener);
+    listener.metaChanged(context);
+  }
+
+  public void removeMetaListener(MetaListener listener) {
+    metaListeners.removeVal(listener);
+  }
+
+  public void metaRemove(Context context, String key) {
+    meta.removeGet(key);
+    for (MetaListener l : metaListeners) {
+      l.metaChanged(context);
+    }
+  }
+
+  public Object metaGet(String key) {
+    return meta.getOpt(key);
   }
 
   public void initialSet(TSList<Field> unnamedFields, final TSMap<String, Field> fields) {
@@ -150,6 +186,10 @@ public class Atom {
       } else throw new Assertion();
     }
     stack.add(new WriteStateBack(childData, type.back().iterator()));
+  }
+
+  public interface MetaListener {
+    void metaChanged(Context context);
   }
 
   public abstract static class Parent {
