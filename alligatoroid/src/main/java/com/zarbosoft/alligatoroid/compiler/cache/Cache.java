@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.cache;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
+import com.zarbosoft.alligatoroid.compiler.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.Value;
@@ -209,7 +210,7 @@ public class Cache {
     }
   }
 
-  public void writeOutput(TSList<Error> warnings, Path moduleCacheRelPath, Value value) {
+  public void writeOutput(LocalModuleId moduleId, TSList<Error> warnings, Path moduleCacheRelPath, Value value) {
     Path outputPath = cachePath(moduleCacheRelPath).resolve(CACHE_FILENAME_OUTPUT);
     Utils.recursiveDelete(outputPath);
     Utils.recursiveDelete(cachePath(moduleCacheRelPath).resolve(CACHE_DIRECTORY_OBJECTS));
@@ -217,7 +218,7 @@ public class Cache {
       Writer writer = new Writer(stream, (byte) ' ', 4);
       serializeSubValue(moduleCacheRelPath, writer, value);
     } catch (Throwable e) {
-      warnings.add(Error.unexpected(e));
+      warnings.add(Error.unexpected(moduleId, e));
     }
   }
 

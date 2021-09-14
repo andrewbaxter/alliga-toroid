@@ -64,7 +64,7 @@ public class Deserializer {
     try (InputStream stream = Files.newInputStream(path)) {
       reader.feed(stream);
     } catch (Exception e) {
-      errors.add(Error.unexpected(e));
+      errors.add(Error.unexpected(path, e));
     }
     if (stack.some()) {
       errors.add(Error.deserializeIncompleteFile(path));

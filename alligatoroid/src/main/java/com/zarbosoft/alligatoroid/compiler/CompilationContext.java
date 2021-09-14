@@ -57,7 +57,7 @@ public class CompilationContext {
     } else if (e instanceof MultiError) {
       module.log.errors.addAll(((MultiError) e).errors);
     } else {
-      module.log.errors.add(Error.unexpected(e));
+      module.log.errors.add(Error.unexpected(module.id, e));
     }
   }
 
@@ -174,11 +174,11 @@ public class CompilationContext {
 
             // Cache result
             if (out != ErrorValue.error) {
-              cache.writeOutput(module.log.warnings, relCachePath, out);
+              cache.writeOutput(moduleId, module.log.warnings, relCachePath, out);
               try {
                 Files.writeString(hashPath, sourceHash);
               } catch (Throwable e) {
-                module.log.warnings.add(Error.unexpected(e));
+                module.log.warnings.add(Error.unexpected(module.id, e));
               }
             }
 

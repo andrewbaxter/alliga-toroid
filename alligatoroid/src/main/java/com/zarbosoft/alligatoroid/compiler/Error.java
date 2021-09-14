@@ -1,7 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
 import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.luxem.write.Writer;
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSList;
@@ -13,8 +15,8 @@ import java.nio.file.Path;
 public class Error implements TreeSerializable {
   public static final String DESCRIPTION_KEY = "description";
   public static final String LOCATION_KEY = "location";
-  private final String type;
   public final ROMap<String, Object> data;
+  private final String type;
 
   public Error(String type, TSMap<String, Object> data) {
     this.type = type;
@@ -26,7 +28,7 @@ public class Error implements TreeSerializable {
         "deserialize_not_array",
         new TSMap<String, Object>()
             .put("path", path.toString())
-            .put(DESCRIPTION_KEY, "a luxem array is not allowed at this location in the source"));
+            .put(DESCRIPTION_KEY, "A luxem array is not allowed at this location in the source"));
   }
 
   public static Error deserializeNotRecord(LuxemPath path) {
@@ -34,7 +36,7 @@ public class Error implements TreeSerializable {
         "deserialize_not_record",
         new TSMap<String, Object>()
             .put("path", path.toString())
-            .put(DESCRIPTION_KEY, "a luxem record is not allowed at this location in the source"));
+            .put(DESCRIPTION_KEY, "A luxem record is not allowed at this location in the source"));
   }
 
   public static Error deserializeNotPrimitive(LuxemPath path) {
@@ -44,7 +46,7 @@ public class Error implements TreeSerializable {
             .put("path", path.toString())
             .put(
                 DESCRIPTION_KEY,
-                "a luxem primitive is not allowed at this location in the source"));
+                "A luxem primitive is not allowed at this location in the source"));
   }
 
   public static Error deserializeNotTyped(LuxemPath path) {
@@ -54,7 +56,7 @@ public class Error implements TreeSerializable {
             .put("path", path.toString())
             .put(
                 DESCRIPTION_KEY,
-                "a typed luxem value is not allowed at this location in the source"));
+                "A typed luxem value is not allowed at this location in the source"));
   }
 
   public static Error deserializeUnknownType(
@@ -65,7 +67,7 @@ public class Error implements TreeSerializable {
             .put("path", path.toString())
             .put("got", type)
             .put("expected", knownTypes)
-            .put(DESCRIPTION_KEY, "this is not a known type"));
+            .put(DESCRIPTION_KEY, "This luxem type is not known"));
   }
 
   public static Error deserializeUnknownField(
@@ -77,7 +79,9 @@ public class Error implements TreeSerializable {
             .put("got", field)
             .put("expected", fields)
             .put("type", type)
-            .put(DESCRIPTION_KEY, "this type does not have a field with this name"));
+            .put(
+                DESCRIPTION_KEY,
+                Format.format("Luxem type %s does not have a field named %s", type, field)));
   }
 
   public static Error deserializeMissingField(LuxemPath path, String type, String field) {
@@ -87,7 +91,10 @@ public class Error implements TreeSerializable {
             .put("path", path.toString())
             .put("field", field)
             .put("type", type)
-            .put(DESCRIPTION_KEY, "a value was not provided for this field in the source"));
+            .put(
+                DESCRIPTION_KEY,
+                Format.format(
+                    "%s is required in luxem type %s but a value was not provided", field, type)));
   }
 
   public static Error deserializeUnknownLanguageVersion(LuxemPath path, String version) {
@@ -96,13 +103,16 @@ public class Error implements TreeSerializable {
         new TSMap<String, Object>()
             .put("path", path.toString())
             .put("version", version)
-            .put(DESCRIPTION_KEY, "this language version is not supported"));
+            .put(
+                DESCRIPTION_KEY,
+                Format.format("Language version (luxem root type) %s is unknown", version)));
   }
 
   public static Error deserializeMissingVersion() {
     return new Error(
         "deserialize_missing_version",
-        new TSMap<String, Object>().put(DESCRIPTION_KEY, "the source version is missing"));
+        new TSMap<String, Object>()
+            .put(DESCRIPTION_KEY, "The source version (luxem root type) is missing"));
   }
 
   public static Error deserializeNotInteger(LuxemPath path, String value) {
@@ -111,7 +121,9 @@ public class Error implements TreeSerializable {
         new TSMap<String, Object>()
             .put("path", path.toString())
             .put("got", value)
-            .put(DESCRIPTION_KEY, "expected an integer but got a value that is not an integer"));
+            .put(
+                DESCRIPTION_KEY,
+                Format.format("Expected an integer in luxem but got [%s]", value)));
   }
 
   public static Error incompatibleTargetValues(
@@ -122,16 +134,19 @@ public class Error implements TreeSerializable {
             .put(LOCATION_KEY, location)
             .put("got", gotTarget)
             .put("expected", expectedTarget)
-            .put(DESCRIPTION_KEY, "this block contains values for incompatible targets"));
+            .put(
+                DESCRIPTION_KEY, "ASSERTION! This block contains values for incompatible targets"));
   }
 
-  public static Error noField(Location location, Value field) {
+  public static Error noField(Location location, WholeValue field) {
     return new Error(
         "no_field",
         new TSMap<String, Object>()
             .put(LOCATION_KEY, location)
             .put("field", field)
-            .put(DESCRIPTION_KEY, "the field accessed does not exist"));
+            .put(
+                DESCRIPTION_KEY,
+                Format.format("Field [%s] doesn't exist", field.concreteValue())));
   }
 
   public static TSMap<String, Object> convertThrowable(Throwable e) {
@@ -149,11 +164,23 @@ public class Error implements TreeSerializable {
     return out;
   }
 
-  public static Error unexpected(Throwable e) {
+  public static Error unexpected(ModuleId id, Throwable e) {
     return new Error(
         "unexpected",
         convertThrowable(e)
-            .put(DESCRIPTION_KEY, "an unexpected error occurred while processing module"));
+            .put(
+                DESCRIPTION_KEY,
+                Format.format(
+                    "An unexpected error occurred while processing module %s: %s", id, e)));
+  }
+
+  public static Error unexpected(Path path, Throwable e) {
+    return new Error(
+        "unexpected",
+        convertThrowable(e)
+            .put(
+                DESCRIPTION_KEY,
+                Format.format("An unexpected error occurred while deserializing %s: %s", path, e)));
   }
 
   public static Error callNotSupported(Location location) {
@@ -161,7 +188,7 @@ public class Error implements TreeSerializable {
         "call_not_supported",
         new TSMap<String, Object>()
             .put(LOCATION_KEY, location)
-            .put(DESCRIPTION_KEY, "this value cannot be called"));
+            .put(DESCRIPTION_KEY, "This value cannot be called"));
   }
 
   public static Error accessNotSupported(Location location) {
@@ -169,7 +196,7 @@ public class Error implements TreeSerializable {
         "access_not_supported",
         new TSMap<String, Object>()
             .put(LOCATION_KEY, location)
-            .put(DESCRIPTION_KEY, "the base value doesn't have fields that can be accessed"));
+            .put(DESCRIPTION_KEY, "Fields of this value cannot be accessed"));
   }
 
   public static Error bindNotSupported(Location location) {
@@ -177,7 +204,7 @@ public class Error implements TreeSerializable {
         "bind_not_supported",
         new TSMap<String, Object>()
             .put(LOCATION_KEY, location)
-            .put(DESCRIPTION_KEY, "the base value cannot be bound to a variable"));
+            .put(DESCRIPTION_KEY, "This value cannot be bound to a variable"));
   }
 
   public static Error valueNotWhole(Location location, Value value) {

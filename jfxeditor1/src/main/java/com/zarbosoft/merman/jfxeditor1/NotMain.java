@@ -322,7 +322,8 @@ public class NotMain extends Application {
             }
 
             @Override
-            public void styleChoiceDescription(Context context, TextStylable text, CourseGroup textPad) {
+            public void styleChoiceDescription(
+                Context context, TextStylable text, CourseGroup textPad) {
               syntaxOut.stylist.styleChoiceDescription(context, text, textPad);
             }
 
@@ -371,16 +372,10 @@ public class NotMain extends Application {
                                   if (atom == null) {
                                     continue;
                                   }
-                                  StringBuilder message = new StringBuilder();
-                                  for (Map.Entry<String, Object> e1 : error.data) {
-                                      if ("location".equals(e1.getKey())) continue;
-                                    message.append(
-                                        Format.format("%s: %s", e1.getKey(), e1.getValue()));
-                                  }
                                   errorAtoms.add(atom);
                                   errorMessages
                                       .getCreate(atom, () -> new TSList<>())
-                                      .add(message.toString());
+                                      .add((String) error.data.get(Error.DESCRIPTION_KEY));
                                   changedAtoms.add(atom);
                                 }
                               }

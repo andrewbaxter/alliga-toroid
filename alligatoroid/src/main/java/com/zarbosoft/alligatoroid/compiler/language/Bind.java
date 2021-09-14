@@ -24,7 +24,10 @@ public class Bind extends LanguageValue {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     WholeValue key = WholeValue.getWhole(context, location, ectx.evaluate(this.key));
     Value value = ectx.evaluate(this.value);
-    if (key == null || value == ErrorValue.error) return EvaluateResult.error;
+    if (key == null) {
+      context.scope.error = true;
+      return EvaluateResult.error;
+    }
     Binding old = context.scope.remove(key);
     if (old != null) {
       ectx.recordPre(old.drop(context, location));

@@ -8,6 +8,7 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 public class Scope {
+  public boolean error = false;
   private final Scope parent;
   private final TSOrderedMap<Object, Binding> data = new TSOrderedMap<>();
 
@@ -24,6 +25,7 @@ public class Scope {
   }
 
   public Binding get(WholeValue key) {
+    if (error) return ErrorBinding.binding;
     Scope at = this;
     while (at != null) {
       Binding out = at.data.getOpt(key.concreteValue());

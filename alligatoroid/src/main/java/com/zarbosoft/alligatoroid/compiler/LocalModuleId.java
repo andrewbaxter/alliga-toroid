@@ -1,16 +1,17 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.luxem.write.Writer;
-import com.zarbosoft.rendaw.common.Assertion;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public final class LocalModuleId implements ModuleId {
   public final String path;
 
   public LocalModuleId(String path) {
     this.path = path;
+  }
+
+  @Override
+  public String toString() {
+    return path.toString();
   }
 
   @Override
