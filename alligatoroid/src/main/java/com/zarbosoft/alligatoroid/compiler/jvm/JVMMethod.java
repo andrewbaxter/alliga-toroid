@@ -5,35 +5,34 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.Scope;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.SimpleValue;
+import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSList;
 
 import static org.objectweb.asm.Opcodes.RETURN;
 
 public class JVMMethod implements SimpleValue {
   private final JVMClassType base;
-  private final String name;
-  private String externName;
+  private final ROTuple key;
+  private final JVMShallowMethodFieldType.MethodSpecDetails specDetails;
   private JVMCode built;
 
-  public JVMMethod(JVMClassType base, String name) {
+  public JVMMethod(
+      JVMClassType base,
+      ROTuple keyTuple,
+      JVMShallowMethodFieldType.MethodSpecDetails specDetails) {
     this.base = base;
-    this.name = name;
-    this.externName = name;
+    this.key = keyTuple;
+    this.specDetails = specDetails;
   }
 
-  public void setJvmName(String name) {
-    this.externName = name;
-  }
-
-  public void implement(Module module, Record spec, Value body) {
-    JVMShallowMethodFieldType.MethodSpecDetails specDetails =
-        JVMShallowMethodFieldType.specDetails(spec);
+  public void implement(Module module, Value body) {
+    String name = (String) key.get(0);
     JVMShallowMethodFieldType field =
-        new JVMShallowMethodFieldType(specDetails.returnType, externName, specDetails.jvmSigDesc);
+        new JVMShallowMethodFieldType(specDetails.returnType, name, specDetails.jvmSigDesc);
     field.base = base;
-    base.fields.putNew(name, field);
+    base.methodFields.put(key, field);
+    base.fields.add(name);
     JVMTargetModuleContext targetContext = new JVMTargetModuleContext();
     Context context = new Context(module, targetContext, new Scope(null));
 
@@ -44,7 +43,7 @@ public class JVMMethod implements SimpleValue {
       throw new MultiError(module.log.errors);
     }
     base.jvmClass.defineFunction(
-        externName, specDetails.jvmSigDesc, new JVMCode().add(built).add(RETURN), new TSList<>());
-    base.incompleteMethods.remove(name);
+        name, specDetails.jvmSigDesc, new JVMCode().add(built).add(RETURN), new TSList<>());
+    base.incompleteMethods.remove(key);
   }
 }

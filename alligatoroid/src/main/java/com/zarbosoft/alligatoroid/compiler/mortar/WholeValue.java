@@ -18,4 +18,10 @@ public interface WholeValue extends SimpleValue, TreeSerializable {
   }
 
   Object concreteValue();
+
+  public interface Dispatcher<T> {
+    T handleString(WholeString value);
+  }
+
+  public <T> T dispatch(Dispatcher<T> dispatcher);
 }

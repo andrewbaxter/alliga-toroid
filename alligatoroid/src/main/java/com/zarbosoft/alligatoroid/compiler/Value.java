@@ -20,7 +20,7 @@ public interface Value {
    * @param location
    * @return side effect, binding
    */
-  ROPair<EvaluateResult, Binding> bind(Context context, Location location);
+  ROPair<TargetCode, Binding> bind(Context context, Location location);
 
   /**
    * Location or null

@@ -15,8 +15,8 @@ public interface SimpleValue extends Binding, OkValue {
   }
 
   @Override
-  public default ROPair<EvaluateResult, Binding> bind(Context context, Location location) {
-    return new ROPair<>(new EvaluateResult(null, null, this), this);
+  public default ROPair<TargetCode, Binding> bind(Context context, Location location) {
+    return new ROPair<>(null, this);
   }
 
   @Override

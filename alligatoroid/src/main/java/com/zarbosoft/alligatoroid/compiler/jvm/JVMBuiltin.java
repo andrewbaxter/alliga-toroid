@@ -27,17 +27,39 @@ public class JVMBuiltin {
     return new JVMArrayType((JVMDataType) elementType);
   }
 
-  public static JVMClassType builtinNewClass(String qualifiedName) {
-    return new JVMClassType(qualifiedName);
+  public static RetClass builtinNewClass(String qualifiedName) {
+    JVMClassType type = new JVMClassType(qualifiedName);
+    return new RetClass(type, new JVMClassBuilder(type));
   }
 
-  public static JVMExternClassType builtinExternClass(String qualifiedName) {
-    return new JVMExternClassType(qualifiedName);
+  public static RetExternClass builtinExternClass(String qualifiedName) {
+    JVMExternClassType type = new JVMExternClassType(qualifiedName);
+    return new RetExternClass(type, new JVMExternClassBuilder(type));
   }
 
   public static Value builtinExternStaticField(
       String qualifiedClassName, String fieldName, Value spec) {
     JVMDataType spec1 = (JVMDataType) spec;
     return new JVMExternStaticField(qualifiedClassName, fieldName, spec1);
+  }
+
+  public static class RetClass {
+    public final JVMClassType type;
+    public final JVMClassBuilder builder;
+
+    public RetClass(JVMClassType type, JVMClassBuilder builder) {
+      this.type = type;
+      this.builder = builder;
+    }
+  }
+
+  public static class RetExternClass {
+    public final JVMExternClassType type;
+    public final JVMExternClassBuilder builder;
+
+    public RetExternClass(JVMExternClassType type, JVMExternClassBuilder builder) {
+      this.type = type;
+      this.builder = builder;
+    }
   }
 }

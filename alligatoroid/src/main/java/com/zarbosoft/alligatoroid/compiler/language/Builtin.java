@@ -1,12 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.language;
 
 import com.zarbosoft.alligatoroid.compiler.Context;
+import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMBuiltin;
+import com.zarbosoft.alligatoroid.compiler.jvm.MultiError;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.CreatedFile;
 import com.zarbosoft.alligatoroid.compiler.mortar.Function;
@@ -20,15 +22,22 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.Record;
+import com.zarbosoft.alligatoroid.compiler.mortar.Tuple;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
+import com.zarbosoft.rendaw.common.TSSet;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+
+import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Builtin extends LanguageValue {
   public static TSMap<Class, MortarClass> wrappedClasses = new TSMap<>();
@@ -45,6 +54,42 @@ public class Builtin extends LanguageValue {
 
   public Builtin(Location id) {
     super(id, false);
+  }
+
+  public static <T> T parseCheckArgument(TSList<Error> errors, TSList<String> path, Class<T> type, Object object) {
+    if (type.isAssignableFrom(object.getClass())) {
+      return (T)object;
+    } else {
+      Record record = (Record)object;
+      TSSet<Object> consumed = new TSSet<>();
+      Constructor<?> constructor = type.getConstructors()[0];
+      Object[] args = new Object[constructor.getParameters().length];
+      for (int i = 0; i < constructor.getParameters().length; i++) {
+        Parameter parameter = constructor.getParameters()[i];
+        Object value = record.data.getOpt(parameter.getName());
+        if (value == null) {
+          errors.add(Error.recordMissingField(path, parameter.getName()));
+          continue;
+        }
+        consumed.add(parameter.getName());
+        args[i] = parseCheckArgument(errors,path.mut().add(parameter.getName()), parameter.getType(), value);
+      }
+      for (Object key : record.data.keys()) {
+        if (consumed.contains(key)) continue;
+        errors.add(Error.recordExtraField( path, key));
+      }
+      if (errors.none()) {
+        return (T) uncheck(() -> constructor.newInstance(args));
+      } else {
+        return null;
+      }
+    }
+  }
+  public static <T> T parseCheckArgument(Class<T> type, Object object) {
+    TSList<Error> errors = new TSList<>();
+    T out = parseCheckArgument(errors,new TSList<>(),type,object);
+    if (errors.some()) throw new MultiError(errors);
+    return out;
   }
 
   public static void builtinLog(Module module, String message) {

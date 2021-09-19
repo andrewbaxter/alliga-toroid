@@ -16,9 +16,9 @@ public interface OkValue extends Value {
   }
 
   @Override
-  public default ROPair<EvaluateResult, Binding> bind(Context context, Location location) {
+  public default ROPair<TargetCode, Binding> bind(Context context, Location location) {
     context.module.log.errors.add(Error.bindNotSupported(location));
-    return new ROPair<>(EvaluateResult.error, null);
+    return new ROPair<>(null, null);
   }
 
   @Override

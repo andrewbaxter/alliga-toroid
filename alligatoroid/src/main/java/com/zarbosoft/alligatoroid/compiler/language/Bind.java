@@ -5,7 +5,9 @@ import com.zarbosoft.alligatoroid.compiler.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
 import com.zarbosoft.rendaw.common.ROPair;
 
@@ -32,8 +34,9 @@ public class Bind extends LanguageValue {
     if (old != null) {
       ectx.recordPre(old.drop(context, location));
     }
-    ROPair<EvaluateResult, Binding> bound = value.bind(context, location);
+    ROPair<TargetCode, Binding> bound = value.bind(context, location);
     context.scope.put(key, bound.second);
-    return ectx.build(ectx.record(bound.first));
+    ectx.recordPre(bound.first);
+    return ectx.build(NullValue.value);
   }
 }

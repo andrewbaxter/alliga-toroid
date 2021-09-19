@@ -1,15 +1,19 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.cache.GraphSerializable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.Tuple;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSMap;
 
-public class JVMShallowMethodFieldType implements JVMType, GraphSerializable {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+public class JVMShallowMethodFieldType implements GraphSerializable {
   public final JVMDataType returnType;
   public final String name;
   public final String jvmDesc;
@@ -21,7 +25,15 @@ public class JVMShallowMethodFieldType implements JVMType, GraphSerializable {
     this.jvmDesc = jvmDesc;
   }
 
-  public static MethodSpecDetails specDetails(Record spec) {
+  public static DataSpecDetails dataSpecDetails(Record spec) {
+    return new DataSpecDetails(
+        (JVMDataType) spec.data.get("type"),
+        Objects.equals(spec.data.getOpt("protected"), true),
+        Objects.equals(spec.data.getOpt("final"), true),
+        Objects.equals(spec.data.getOpt("static"), true));
+  }
+
+  public static MethodSpecDetails methodSpecDetails(Record spec) {
     Object outRaw = spec.data.get("out");
     JVMDataType returnType = null;
     String returnDescriptor;
@@ -34,16 +46,27 @@ public class JVMShallowMethodFieldType implements JVMType, GraphSerializable {
     }
     Object inRaw = spec.data.get("in");
     String[] argDescriptor;
+    List argTupleData = new ArrayList();
     if (inRaw instanceof Tuple) {
       ROList<Object> inTuple = ((Tuple) inRaw).data;
       argDescriptor = new String[inTuple.size()];
       for (int i = 0; i < inTuple.size(); i++) {
-        argDescriptor[i] = ((JVMDataType) inTuple.get(i)).jvmDesc();
+        JVMDataType jvmDataType = (JVMDataType) inTuple.get(i);
+        argDescriptor[i] = jvmDataType.jvmDesc();
+        argTupleData.add(jvmDataType);
       }
     } else {
-      argDescriptor = new String[] {((JVMDataType) inRaw).jvmDesc()};
+      JVMDataType jvmDataType = (JVMDataType) inRaw;
+      argDescriptor = new String[] {jvmDataType.jvmDesc()};
+      argTupleData.add(jvmDataType);
     }
-    return new MethodSpecDetails(returnType, JVMDescriptor.func(returnDescriptor, argDescriptor));
+    return new MethodSpecDetails(
+        returnType,
+        JVMDescriptor.func(returnDescriptor, argDescriptor),
+        new ROTuple(argTupleData),
+        Objects.equals(spec.data.getOpt("protected"), true),
+        Objects.equals(spec.data.getOpt("final"), true),
+        Objects.equals(spec.data.getOpt("static"), true));
   }
 
   public static JVMShallowMethodFieldType graphDeserialize(Record record) {
@@ -51,11 +74,6 @@ public class JVMShallowMethodFieldType implements JVMType, GraphSerializable {
         (JVMDataType) record.data.get("returnType"),
         (String) record.data.get("name"),
         (String) record.data.get("jvmDesc"));
-  }
-
-  @Override
-  public Value asValue(JVMProtocode code) {
-    return new JVMMethodField(code, this);
   }
 
   @Override
@@ -67,13 +85,42 @@ public class JVMShallowMethodFieldType implements JVMType, GraphSerializable {
             }));
   }
 
+  public static class DataSpecDetails {
+    public final JVMDataType type;
+    public final boolean isProtected;
+    public final boolean isFinal;
+    public final boolean isStatic;
+
+    public DataSpecDetails(
+        JVMDataType type, boolean isProtected, boolean isFinal, boolean isStatic) {
+      this.type = type;
+      this.isProtected = isProtected;
+      this.isFinal = isFinal;
+      this.isStatic = isStatic;
+    }
+  }
+
   public static class MethodSpecDetails {
     public final JVMDataType returnType;
     public final String jvmSigDesc;
+    public final ROTuple keyTuple;
+    public final boolean isProtected;
+    public final boolean isFinal;
+    public final boolean isStatic;
 
-    public MethodSpecDetails(JVMDataType returnType, String jvmSigDesc) {
+    public MethodSpecDetails(
+        JVMDataType returnType,
+        String jvmSigDesc,
+        ROTuple keyTuple,
+        boolean isProtected,
+        boolean isFinal,
+        boolean isStatic) {
       this.returnType = returnType;
       this.jvmSigDesc = jvmSigDesc;
+      this.keyTuple = keyTuple;
+      this.isProtected = isProtected;
+      this.isFinal = isFinal;
+      this.isStatic = isStatic;
     }
   }
 }

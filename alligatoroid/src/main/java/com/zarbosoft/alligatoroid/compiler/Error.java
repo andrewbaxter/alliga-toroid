@@ -6,6 +6,7 @@ import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -217,7 +218,7 @@ public class Error implements TreeSerializable {
                 DESCRIPTION_KEY, "this value needs to be known completely in phase 1 to use here"));
   }
 
-  public static Error methodsNotDefined(TSSet<String> incompleteMethods) {
+  public static Error methodsNotDefined(TSSet<ROTuple> incompleteMethods) {
     return new Error(
         "methods_not_defined",
         new TSMap<String, Object>()

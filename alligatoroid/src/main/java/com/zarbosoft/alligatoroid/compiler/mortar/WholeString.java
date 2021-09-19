@@ -16,6 +16,11 @@ public class WholeString implements WholeValue, OkValue {
   }
 
   @Override
+  public <T> T dispatch(Dispatcher<T> dispatcher) {
+    return dispatcher.handleString(this);
+  }
+
+  @Override
   public void serialize(Writer writer) {
     writer.type("string").primitive(value);
   }
