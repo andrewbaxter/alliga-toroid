@@ -21,9 +21,8 @@ public class Main {
     }
     CompilationContext compilationContext = new CompilationContext(cachePath);
     TSMap<ImportSpec, Module> modules;
-    Value out;
     try {
-      compilationContext.loadRootModule(Paths.get(path).toAbsolutePath().normalize().toString());
+      compilationContext.loadRootModule( Paths.get(path).toAbsolutePath().normalize().toString());
     } finally {
       modules = compilationContext.join();
     }
@@ -39,30 +38,30 @@ public class Main {
     Writer outWriter = new Writer(System.out, (byte) ' ', 4);
     outWriter.recordBegin();
 
-    outWriter.key("modules").arrayBegin(); // TODO complex luxem keys
+    outWriter.primitive("modules").arrayBegin();
     for (Module value : modules.values()) {
       if (value.sourcePath != null) {
-        outWriter.key("source").primitive(value.sourcePath);
+        outWriter.primitive("source").primitive(value.sourcePath);
       }
 
-      outWriter.recordBegin().key("id");
+      outWriter.recordBegin().primitive("id");
       value.id.serialize(outWriter);
 
-      outWriter.key("log");
+      outWriter.primitive("log");
       outWriter.arrayBegin();
       for (String message : value.log.log) {
         outWriter.primitive(message);
       }
       outWriter.arrayEnd();
 
-      outWriter.key("errors");
+      outWriter.primitive("errors");
       outWriter.arrayBegin();
       for (Error error : value.log.errors) {
         error.serialize(outWriter);
       }
       outWriter.arrayEnd();
 
-      outWriter.key("warnings");
+      outWriter.primitive("warnings");
       outWriter.arrayBegin();
       for (Error error : value.log.warnings) {
         error.serialize(outWriter);

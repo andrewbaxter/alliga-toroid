@@ -24,6 +24,6 @@ public class ModLocal extends LanguageValue {
     return ectx.build(
         new FutureValue(
             context.module.compilationContext.loadRelativeModule(
-                context.module.id, (String) path.concreteValue())));
+                context, location, (String) path.concreteValue())));
   }
 }

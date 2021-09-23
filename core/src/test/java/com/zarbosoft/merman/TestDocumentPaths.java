@@ -143,7 +143,7 @@ public class TestDocumentPaths {
 
   @Test
   public void testDataRecord() {
-    final Syntax syntax =
+      final Syntax syntax =
         new SyntaxBuilder("any")
             .type(
                 new TypeBuilder("base")
@@ -152,7 +152,7 @@ public class TestDocumentPaths {
                     .build())
             .type(
                 new TypeBuilder("element")
-                    .back(Helper.buildBackDataKey("k"))
+                    .back(Helper.buildBackDataPrimitive("k"))
                     .frontDataPrimitive("k")
                     .back(Helper.buildBackDataPrimitive("v"))
                     .frontDataPrimitive("v")

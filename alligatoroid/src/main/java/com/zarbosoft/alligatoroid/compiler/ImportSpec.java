@@ -1,6 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-public final class ImportSpec {
+import com.zarbosoft.luxem.write.Writer;
+
+public final class ImportSpec implements TreeSerializable {
   public final ModuleId moduleId;
 
   public ImportSpec(ModuleId moduleId) {
@@ -15,5 +17,11 @@ public final class ImportSpec {
   @Override
   public int hashCode() {
     return Utils.reflectHashCode(this);
+  }
+
+  @Override
+  public void serialize(Writer writer) {
+    // TODO encapsulate in another record when there are more fields
+    moduleId.serialize(writer);
   }
 }

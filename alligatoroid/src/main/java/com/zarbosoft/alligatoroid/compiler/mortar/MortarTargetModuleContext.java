@@ -12,6 +12,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -53,7 +54,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
           .add(callConstructorCode(TSMap.class));
   public static JVMRWSharedCode newTupleCode1 =
       new MortarCode().add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(Tuple.class))).add(DUP);
-  public static JVMRWSharedCode newTupleCode2 = callConstructorCode(Tuple.class, TSList.class);
+  public static JVMRWSharedCode newTupleCode2 = callConstructorCode(Tuple.class, ROList.class);
   public static JVMRWSharedCode newRecordCode1 =
       new MortarCode().add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(Record.class))).add(DUP);
   public static JVMRWSharedCode newRecordCode2 = callConstructorCode(Record.class, ROMap.class);
@@ -91,27 +92,36 @@ public class MortarTargetModuleContext implements TargetModuleContext {
   }
 
   public static LowerResult lower(Context context, Value value) {
+    if (value.getClass() == FutureValue.class) {
+      return lower(context, ((FutureValue) value).get());
+    }
     if (value == NullValue.value) {
       return new LowerResult(NullType.type, new MortarCode());
     } else if (value instanceof LooseTuple) {
       MortarCode out = new MortarCode();
+      TSList<Object> types = new TSList<>();
       out.add(newTupleCode1);
       out.add(newTSListCode);
       for (EvaluateResult e : ((LooseTuple) value).data) {
         if (e.preEffect != null) out.add((JVMSharedCode) e.preEffect);
-        out.add(lower(context, e.value).valueCode);
+        LowerResult lowerRes = lower(context, e.value);
+        types.add(lowerRes.dataType);
+        out.add(lowerRes.valueCode);
         out.add(tsListAddCode);
       }
       out.add(newTupleCode2);
-      return new LowerResult(null /* TODO */, out);
+      return new LowerResult(new Tuple(types), out);
     } else if (value instanceof LooseRecord) {
       MortarCode out = new MortarCode();
+      TSMap<Object, Object> types = new TSMap<>();
       out.add(newRecordCode1);
       out.add(newTSMapCode);
       for (ROPair<Object, EvaluateResult> e : ((LooseRecord) value).data) {
         if (e.second.preEffect != null) out.add((JVMSharedCode) e.second.preEffect);
         out.add(lowerRaw(context, e.first, true));
-        out.add(lower(context, e.second.value).valueCode);
+        LowerResult lowerRes = lower(context, e.second.value);
+        types.put(e.first, lowerRes.dataType);
+        out.add(lowerRes.valueCode);
         out.add(
             new MethodInsnNode(
                 INVOKEVIRTUAL,
@@ -124,7 +134,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                 false));
       }
       out.add(newRecordCode2);
-      return new LowerResult(null /* TODO */, out);
+      return new LowerResult(new Record(types), out);
     } else if (value instanceof WholeString) {
       return new LowerResult(
           MortarHalfStringType.type, new MortarCode().addString(((WholeString) value).value));

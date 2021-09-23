@@ -68,7 +68,7 @@ public class SyntaxLoadSave {
             .build();
     dataRecordElement =
         new TypeBuilder("dataRecordElement")
-            .back(Helper.buildBackDataKey("key"))
+            .back(Helper.buildBackDataPrimitive("key"))
             .back(Helper.buildBackDataAtom("value", "value"))
             .frontDataPrimitive("key")
             .frontDataNode("value")
@@ -154,7 +154,7 @@ public class SyntaxLoadSave {
               .frontDataArray("value")
               .build();
       final FreeAtomType dataRecordElement = new TypeBuilder("dataRecordElement")
-              .back(Helper.buildBackDataKey("key"))
+              .back(Helper.buildBackDataPrimitive("key"))
               .back(Helper.buildBackDataAtom("value", "value"))
               .frontDataPrimitive("key")
               .frontDataNode("value")

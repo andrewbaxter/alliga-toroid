@@ -48,7 +48,7 @@ public class WriterTest {
         rawWriter ->
             rawWriter
                 .recordBegin()
-                .key("a".getBytes(StandardCharsets.UTF_8))
+                .primitive("a".getBytes(StandardCharsets.UTF_8))
                 .primitive("b".getBytes(StandardCharsets.UTF_8))
                 .recordEnd());
   }

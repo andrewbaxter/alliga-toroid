@@ -27,15 +27,16 @@ public class TSList<T> implements ROList<T> {
     this.values = new ArrayList<>(Arrays.asList(values));
   }
 
+  private TSList(List<T> values) {
+    this.values = values;
+  }
+
   public static <T> TSList<T> fromList(List<T> value) {
     return new TSList<>(value);
   }
+
   public static <T> TSList<T> fromSet(ROSetRef<T> value) {
     return new TSList<>(new ArrayList<>(value.inner_()));
-  }
-
-  private TSList(List<T> values) {
-    this.values = values;
   }
 
   public static <T> TSList<T> of(T... values) {

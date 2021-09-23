@@ -7,7 +7,6 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import static org.objectweb.asm.Opcodes.POP;
@@ -19,12 +18,10 @@ public interface JVMDataType extends JVMType {
     return EvaluateResult.error;
   }
 
-  default ROPair<EvaluateResult, Binding> valueBind(JVMProtocode lower) {
+  default ROPair<TargetCode, Binding> valueBind(JVMProtocode lower) {
     Object key = new Object();
     return new ROPair<>(
-        new EvaluateResult(
-            new JVMCode().add(lower.lower()).addVarInsn(storeOpcode(), key), null, NullValue.value),
-        new JVMBinding(key, this));
+        new JVMCode().add(lower.lower()).addVarInsn(storeOpcode(), key), new JVMBinding(key, this));
   }
 
   default Value asValue(JVMProtocode lower) {

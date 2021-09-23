@@ -1,13 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.cache;
 
 import com.zarbosoft.alligatoroid.compiler.Error;
-import com.zarbosoft.alligatoroid.compiler.deserialize.BaseState;
+import com.zarbosoft.alligatoroid.compiler.deserialize.DefaultStateArray;
+import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateSingle;
+import com.zarbosoft.alligatoroid.compiler.deserialize.DefaultStateSingle;
 import com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer;
-import com.zarbosoft.alligatoroid.compiler.deserialize.State;
-import com.zarbosoft.alligatoroid.compiler.deserialize.StateArrayBegin;
-import com.zarbosoft.alligatoroid.compiler.deserialize.StateArrayEnd;
+import com.zarbosoft.alligatoroid.compiler.deserialize.StateErrorSingle;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StateInt;
-import com.zarbosoft.alligatoroid.compiler.deserialize.StateRecordBegin;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StateString;
 import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.rendaw.common.TSList;
@@ -18,62 +17,47 @@ import static com.zarbosoft.alligatoroid.compiler.cache.Cache.CACHE_SUBVALUE_TYP
 import static com.zarbosoft.alligatoroid.compiler.cache.Cache.CACHE_SUBVALUE_TYPE_NULL;
 import static com.zarbosoft.alligatoroid.compiler.cache.Cache.CACHE_SUBVALUE_TYPE_STRING;
 
-public class ValueState extends BaseState {
+public class ValueState extends DefaultStateSingle {
   public final Cache cache;
-  public State inner;
+  public BaseStateSingle inner;
 
   public ValueState(Cache cache) {
     this.cache = cache;
   }
 
   @Override
-  public void eatRecordBegin(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath) {
-    stack.removeLast();
-    stack.add(inner = new RecordState(cache));
-  }
-
-  @Override
-  public void eatType(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String name) {
-    stack.removeLast();
+  protected BaseStateSingle innerEatType(TSList<Error> errors, LuxemPath luxemPath, String name) {
     switch (name) {
       case CACHE_SUBVALUE_TYPE_NULL:
-        {
-          inner =
-              new BaseState() {
-                @Override
-                public Object build(TSList<Error> errors) {
-                  return null;
-                }
-              };
-          stack.add(StateArrayEnd.state);
-          stack.add(StateArrayBegin.state);
-          break;
-        }
+        return inner = new DefaultStateSingle() {
+          @Override
+          protected DefaultStateArray innerArrayBegin(TSList<Error> errors, LuxemPath luxemPath) {
+            return new DefaultStateArray() {
+              @Override
+              public BaseStateSingle createElementState(TSList<Error> errors, LuxemPath luxemPath) {
+                return StateErrorSingle.state;
+              }
+
+              @Override
+              public Object build(TSList<Error> errors) {
+                return null;
+              }
+            };
+          }
+        };
       case CACHE_SUBVALUE_TYPE_STRING:
-        {
-          stack.add(inner = new StateString());
-          break;
-        }
+      return inner = new StateString();
       case CACHE_SUBVALUE_TYPE_INT:
-        {
-          stack.add(inner = new StateInt());
-          break;
-        }
+      return inner = new StateInt();
       case CACHE_SUBVALUE_TYPE_BUILTIN:
-        {
-          stack.add(inner = new BuiltinState());
-          break;
-        }
+      return inner = new BuiltinState();
       case CACHE_SUBVALUE_TYPE_CACHE:
-        {
-          stack.add(inner = new ObjectState(cache));
-          break;
-        }
+      return inner = new ObjectState(cache);
       default:
-        {
-          ok = false;
-          errors.add(Error.deserializeCacheSubvalueUnknownType(luxemPath, name));
-        }
+      {
+        errors.add(Error.deserializeCacheSubvalueUnknownType(luxemPath, name));
+        return StateErrorSingle.state;
+      }
     }
   }
 

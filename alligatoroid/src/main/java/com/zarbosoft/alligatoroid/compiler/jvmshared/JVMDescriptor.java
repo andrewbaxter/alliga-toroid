@@ -14,6 +14,7 @@ public class JVMDescriptor {
   public static final String objectDescriptor = objDescriptorFromJvmName(objectJvmName);
   public static final String stringJvmName = jvmName(String.class);
   public static final String stringDescriptor = objDescriptorFromJvmName(stringJvmName);
+  public static final String boolDescriptor = "Z";
 
   public static String func(String returnDescriptor, String... argDescriptors) {
     StringBuilder builder = new StringBuilder();
@@ -28,10 +29,6 @@ public class JVMDescriptor {
 
   public static String voidDescriptor() {
     return "V";
-  }
-
-  public static String boolDescriptor() {
-    return "Z";
   }
 
   public static String shortDescriptor() {
@@ -63,11 +60,7 @@ public class JVMDescriptor {
   }
 
   public static String objDescriptorFromReal(Class klass) {
-    return objDescriptorFromNormalName(klass.getCanonicalName());
-  }
-
-  public static String objDescriptorFromNormalName(String normalName) {
-    return objDescriptorFromJvmName(jvmName(normalName));
+    return objDescriptorFromJvmName(jvmName(klass));
   }
 
   public static String objDescriptorFromJvmName(String jvmName) {
@@ -85,7 +78,11 @@ public class JVMDescriptor {
   }
 
   public static String jvmName(Class klass) {
-    return klass.getCanonicalName().replace('.', '/');
+    Class enclosing = klass.getNestHost();
+    if (enclosing == klass) return klass.getCanonicalName().replace('.', '/');
+    else {
+      return jvmName(enclosing) + "$" + klass.getSimpleName();
+    }
   }
 
   public static String arrayDescriptor(String child) {

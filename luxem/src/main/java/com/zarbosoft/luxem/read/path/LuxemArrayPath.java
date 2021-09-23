@@ -3,7 +3,6 @@ package com.zarbosoft.luxem.read.path;
 import com.zarbosoft.rendaw.common.DeadCode;
 
 public class LuxemArrayPath extends LuxemPath {
-
   private boolean type = false;
   private int index = -1;
 
@@ -26,11 +25,6 @@ public class LuxemArrayPath extends LuxemPath {
   public LuxemPath value() {
     if (this.type) return new LuxemArrayPath(parent, false, index);
     else return new LuxemArrayPath(parent, false, index + 1);
-  }
-
-  @Override
-  public LuxemPath key(final String data) {
-    throw new DeadCode();
   }
 
   @Override

@@ -49,12 +49,12 @@ public class JSFont implements Font {
 
     @Override
     public int getIndexAtConverse(Context context, String text, double converse) {
-      Environment.I18nWalker walker = context.env.glyphWalker(text);
+      Environment.GlyphWalker walker = context.env.glyphWalker(text);
       double lastTextConverse = 0;
       int lastIndex = 0;
       int index = 0;
       while (true) {
-        index = walker.startAfter(index);
+        index = walker.after(index);
         if (index == I18N_DONE) break;
         double textConverse = measure(text.substring(0, index)).width;
         if ((converse - lastTextConverse) / (textConverse - lastTextConverse) < 0.5) break;

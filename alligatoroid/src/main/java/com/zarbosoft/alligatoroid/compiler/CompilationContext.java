@@ -6,9 +6,9 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.DynamicClassLoader;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedClass;
 import com.zarbosoft.alligatoroid.compiler.language.Block;
+import com.zarbosoft.alligatoroid.compiler.languagedeserialize.LanguageDeserializer;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.sourcedeserialize.SourceDeserializer;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.Format;
@@ -16,18 +16,18 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSSet;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
@@ -35,15 +35,14 @@ public class CompilationContext {
   public static final String METHOD_NAME = "enter";
   public static final String METHOD_DESCRIPTOR = JVMDescriptor.func(JVMDescriptor.voidDescriptor());
   public static long uniqueClass = 0;
-  public final ExecutorService executor = Executors.newWorkStealingPool();
-  public final TSMap<Class, String> typeSpcs = new TSMap<>();
-
+  /*public final ExecutorService executor =
+  new ThreadPoolExecutor(1, Integer.MAX_VALUE, 1, TimeUnit.SECONDS, new SynchronousQueue<>());*/
+  public final TSMap<Class, String> typeSpecs = new TSMap<>();
   public final Object modulesLock = new Object();
   public final Cache cache;
+  private final WeakHashMap<Thread, Object> threads = new WeakHashMap<>();
   /** Map cache path -> module */
   private final TSMap<ImportSpec, Module> modules = new TSMap<>();
-
-  private final ConcurrentLinkedDeque<Future> newPending = new ConcurrentLinkedDeque<>();
 
   public CompilationContext(Path rootCachePath) {
     this.cache = new Cache(rootCachePath);
@@ -68,6 +67,9 @@ public class CompilationContext {
     uncheck(
         () ->
             loadModule(
+                    null,
+                    null,
+                    null,
                     importSpec,
                     new LoadModuleInner() {
                       @Override
@@ -85,7 +87,7 @@ public class CompilationContext {
         new MortarTargetModuleContext(JVMDescriptor.jvmName(className));
     Context context = new Context(module, targetContext, new Scope(null));
     ROList<Value> rootStatements =
-        new SourceDeserializer(module.id).deserialize(module.log.errors, sourcePath);
+        new LanguageDeserializer(module.id).deserialize(module.log.errors, sourcePath);
     if (rootStatements == null) return ErrorValue.error;
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
     MortarTargetModuleContext.LowerResult lowered =
@@ -125,11 +127,14 @@ public class CompilationContext {
     return lowered.dataType.unlower(uncheck(() -> klass.getMethod(METHOD_NAME).invoke(null)));
   }
 
-  public Future<Value> loadLocalModule(String path) {
+  public Future<Value> loadLocalModule(Context context, Location location, String path) {
     if (!Paths.get(path).isAbsolute()) throw new Assertion();
     LocalModuleId moduleId = new LocalModuleId(path);
     ImportSpec importSpec = new ImportSpec(moduleId);
     return loadModule(
+        context.module.log,
+        context.module.importPath,
+        location,
         importSpec,
         new LoadModuleInner() {
           @Override
@@ -187,25 +192,66 @@ public class CompilationContext {
         });
   }
 
-  private Future<Value> loadModule(ImportSpec importSpec, LoadModuleInner inner) {
+  private Future<Value> loadModule(
+      Log log,
+      ImportPath fromImportPath,
+      Location location,
+      ImportSpec importSpec,
+      LoadModuleInner inner) {
     synchronized (modulesLock) {
+      if (fromImportPath != null) {
+        TSList<ImportSpec> found = fromImportPath.find(new TSSet<>(),importSpec);
+        if (found != null) {
+          log.errors.add(Error.importLoop(location, found));
+          CompletableFuture<Value> out = new CompletableFuture<>();
+          out.complete(ErrorValue.error);
+          return out;
+        }
+      }
       Module module = modules.getOpt(importSpec);
       if (module == null) {
-        CompletableFuture<Value> result = new CompletableFuture<>();
-        module = new Module(importSpec.moduleId, this, result);
+        CompletableFuture<Value> result =
+            new CompletableFuture<>() {
+              ModuleId p = importSpec.moduleId;
+            };
+        ImportPath importPath = new ImportPath(importSpec);
+        if (fromImportPath != null) importPath.from.add(fromImportPath);
+        module = new Module(importSpec.moduleId, importPath, this, result);
         modules.put(importSpec, module);
         Module finalModule = module;
-        executor.submit(
-            () -> {
-              try {
-                Value value = inner.load(finalModule);
-                finalModule.result.complete(value);
-              } catch (Throwable e) {
-                processError(finalModule, e);
-                finalModule.result.complete(null);
-              }
-            });
-        newPending.add(module.result);
+        Thread thread =
+            new Thread(
+                () -> {
+                  try {
+                    Value value = inner.load(finalModule);
+                    finalModule.result.complete(value);
+                  } catch (Throwable e) {
+                    processError(finalModule, e);
+                    finalModule.result.complete(null);
+                  }
+                });
+        thread.start();
+        synchronized (threads) {
+          threads.put(thread, null);
+        }
+      } else {
+        TSList<ImportSpec> found = module.importPath.findBefore(new TSSet<>(),importSpec);
+        if (found != null) {
+          log.errors.add(Error.importLoop(location, found));
+          CompletableFuture<Value> out = new CompletableFuture<>();
+          out.complete(ErrorValue.error);
+          return out;
+        }
+        if (fromImportPath != null) {
+          boolean inFrom = false;
+          for (ImportPath seg : module.importPath.from) {
+            if (seg.spec.equals(fromImportPath.spec)) {
+              inFrom = true;
+              break;
+            }
+          }
+          if (!inFrom) module.importPath.from.add(fromImportPath);
+        }
       }
       return module.result;
     }
@@ -214,26 +260,28 @@ public class CompilationContext {
   public TSMap<ImportSpec, Module> join() {
     uncheck(
         () -> {
-          try {
-            while (true) {
-              Future got = newPending.pollLast();
-              if (got == null) break;
-              got.get();
+          List<Thread> joinThreads = new ArrayList<>();
+          while (true) {
+            joinThreads.clear();
+            synchronized (threads) {
+              joinThreads.addAll(threads.keySet());
             }
-          } finally {
-            executor.shutdown();
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            if (joinThreads.isEmpty()) break;
+            for (Thread thread : joinThreads) {
+              thread.join();
+            }
           }
         });
     return modules;
   }
 
-  public Future<Value> loadRelativeModule(ModuleId id, String path) {
-    return id.dispatch(
+  public Future<Value> loadRelativeModule(Context context, Location location, String path) {
+    return context.module.id.dispatch(
         new ModuleId.Dispatcher<Future<Value>>() {
           @Override
           public Future<Value> handle(LocalModuleId id) {
-            return loadLocalModule(Paths.get(id.path).resolveSibling(path).normalize().toString());
+            return loadLocalModule(
+                context, location, Paths.get(id.path).resolveSibling(path).normalize().toString());
           }
         });
   }

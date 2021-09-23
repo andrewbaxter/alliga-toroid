@@ -8,7 +8,6 @@ import com.zarbosoft.alligatoroid.compiler.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer;
-import com.zarbosoft.alligatoroid.compiler.deserialize.StateArrayEnd;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMExternClassType;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMExternStaticField;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMShallowMethodFieldType;
@@ -132,7 +131,7 @@ public class Cache {
     } else if (value.getClass() == Record.class) {
       writer.recordBegin();
       for (Map.Entry<Object, Object> e : ((Record) value).data) {
-        writer.key((String) e.getKey());
+        writer.primitive((String) e.getKey());
         serializeSubValue(currentModuleCachePath, writer, e.getValue());
       }
       writer.recordEnd();
@@ -200,7 +199,7 @@ public class Cache {
       }
       seenPaths.add(path.toString());
     }
-    Deserializer.deserialize(subErrors, path, new TSList<>(StateArrayEnd.state, typeState));
+    Deserializer.deserialize(subErrors, path, new TSList<>(typeState));
     Object out = typeState.build(subErrors);
     if (subErrors.some()) {
       errors.add(new Error.CacheError(objectRelPath, subErrors));

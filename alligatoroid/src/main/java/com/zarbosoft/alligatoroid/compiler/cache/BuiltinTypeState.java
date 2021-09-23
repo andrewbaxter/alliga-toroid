@@ -1,16 +1,18 @@
 package com.zarbosoft.alligatoroid.compiler.cache;
 
 import com.zarbosoft.alligatoroid.compiler.Error;
-import com.zarbosoft.alligatoroid.compiler.deserialize.BaseState;
-import com.zarbosoft.alligatoroid.compiler.deserialize.State;
-import com.zarbosoft.alligatoroid.compiler.deserialize.StateRecordBegin;
+import com.zarbosoft.alligatoroid.compiler.deserialize.DefaultStateArrayPair;
+import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateRecord;
+import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateSingle;
+import com.zarbosoft.alligatoroid.compiler.deserialize.DefaultStateSingle;
+import com.zarbosoft.alligatoroid.compiler.deserialize.StateString;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.rendaw.common.TSList;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class BuiltinTypeState extends BaseState {
+public class BuiltinTypeState extends DefaultStateArrayPair {
   private final Cache cache;
   private String type;
   private RecordState inner;
@@ -20,12 +22,19 @@ public class BuiltinTypeState extends BaseState {
   }
 
   @Override
-  public void eatPrimitive(
-      TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String value) {
-    type = value;
-    stack.removeLast();
-    stack.add(inner = new RecordState(cache));
-    stack.add(StateRecordBegin.state);
+  public BaseStateSingle createKeyState(TSList<Error> errors, LuxemPath luxemPath) {
+    return new StateString();
+  }
+
+  @Override
+  public BaseStateSingle createValueState(TSList<Error> errors, LuxemPath luxemPath, Object key) {
+    type = (String) key;
+    return new DefaultStateSingle() {
+      @Override
+      protected BaseStateRecord innerEatRecordBegin(TSList<Error> errors, LuxemPath luxemPath) {
+        return inner = new RecordState(cache);
+      }
+    };
   }
 
   @Override

@@ -16,7 +16,6 @@ import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedJSONSpecialPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackJSONSpecialPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.back.BackKeySpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
@@ -197,7 +196,7 @@ public class JsonSyntax {
                     new AtomType.Config(
                         TYPE_RECORD_PAIR,
                         TSList.of(
-                            new BackKeySpec(new BaseBackPrimitiveSpec.Config("key")),
+                            new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config("key")),
                             new BackAtomSpec(new BaseBackAtomSpec.Config("value", GROUP_ANY))),
                         TSList.of(
                             new FrontPrimitiveSpec(

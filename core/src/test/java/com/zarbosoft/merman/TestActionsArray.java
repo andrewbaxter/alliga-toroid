@@ -282,9 +282,9 @@ public class TestActionsArray {
             .frontMark("}")
             .autoComplete(true)
             .build();
-    FreeAtomType recordElement =
+      FreeAtomType recordElement =
         new TypeBuilder("recordElement")
-            .back(Helper.buildBackDataKey("key"))
+            .back(Helper.buildBackDataPrimitive("key"))
             .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")

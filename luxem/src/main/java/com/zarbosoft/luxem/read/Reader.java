@@ -2,7 +2,6 @@ package com.zarbosoft.luxem.read;
 
 import com.zarbosoft.luxem.events.LArrayCloseEvent;
 import com.zarbosoft.luxem.events.LArrayOpenEvent;
-import com.zarbosoft.luxem.events.LKeyEvent;
 import com.zarbosoft.luxem.events.LPrimitiveEvent;
 import com.zarbosoft.luxem.events.LRecordCloseEvent;
 import com.zarbosoft.luxem.events.LRecordOpenEvent;
@@ -80,12 +79,6 @@ public abstract class Reader {
 
   protected abstract void eatRecordEnd();
 
-  protected abstract void eatKey(byte next);
-
-  protected abstract void eatKeyBegin();
-
-  protected abstract void eatKeyEnd();
-
   protected abstract void eatPrimitive(byte next);
 
   protected abstract void eatPrimitiveBegin();
@@ -100,8 +93,6 @@ public abstract class Reader {
     Event arrayOpen();
 
     Event arrayClose();
-
-    Event key(String s);
 
     Event type(String s);
 
@@ -250,7 +241,7 @@ public abstract class Reader {
       raw.stack.addLast(new RecordBorder());
       raw.stack.addLast(new Value());
       raw.stack.addLast(new RecordSeparator());
-      raw.stack.addLast(new UndifferentiatedKey());
+      raw.stack.addLast(new Value());
       return false;
     }
   }
@@ -280,68 +271,6 @@ public abstract class Reader {
           return false;
       }
       throw new InvalidStream(raw.offset, "Expected [,] or [}].");
-    }
-  }
-
-  private static class UndifferentiatedKey extends State {
-
-    @Override
-    public boolean eat(final Reader raw, final byte next) {
-      finished(raw);
-      if (raw.eatInterstitial(next)) return true;
-      if (next == (byte) '"') {
-        raw.stack.addLast(new QuotedKey());
-        return true;
-      } else {
-        raw.stack.addLast(new Key());
-        return false;
-      }
-    }
-  }
-
-  private static class QuotedKey extends TextState {
-    @Override
-    public void begin(final Reader raw) {
-      raw.eatKeyBegin();
-    }
-
-    @Override
-    protected void end(final Reader raw) {
-      raw.eatKeyEnd();
-    }
-
-    @Override
-    protected void eatMiddle(final Reader raw, final byte next) {
-      raw.eatKey(next);
-    }
-
-    @Override
-    protected Resolution eatEnd(final Reader raw, final byte next) {
-      return next == (byte) '"' ? Resolution.ATE : Resolution.REJECTED;
-    }
-  }
-
-  private static class Key extends TextState {
-    @Override
-    public void begin(final Reader raw) {
-      raw.eatKeyBegin();
-    }
-
-    @Override
-    protected void end(final Reader raw) {
-      raw.eatKeyEnd();
-    }
-
-    @Override
-    protected void eatMiddle(final Reader raw, final byte next) {
-      raw.eatKey(next);
-    }
-
-    @Override
-    protected Resolution eatEnd(final Reader raw, final byte next) {
-      if (raw.eatInterstitial(next)) return Resolution.ATE;
-      if (next == (byte) ':') return Resolution.TASTED;
-      return Resolution.REJECTED;
     }
   }
 
@@ -482,11 +411,6 @@ public abstract class Reader {
     @Override
     public Event arrayClose() {
       return LArrayCloseEvent.instance;
-    }
-
-    @Override
-    public Event key(final String s) {
-      return new LKeyEvent(s);
     }
 
     @Override

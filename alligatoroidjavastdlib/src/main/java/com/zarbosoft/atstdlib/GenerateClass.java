@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
@@ -21,10 +22,15 @@ public class GenerateClass {
   public final Path path;
   public final Class klass;
 
-  public GenerateClass(Class klass) {
+  private GenerateClass(Class klass) {
     this.path = outPath(klass);
     this.klass = klass;
-    Main.sync.push(this);
+  }
+
+  public static Path generate(Class klass) {
+    GenerateClass g = new GenerateClass(klass);
+    Future f = Main.sync.push(g);
+    return g.path;
   }
 
   private Path outPath(Class klass) {
@@ -44,11 +50,13 @@ public class GenerateClass {
     return writer -> {
       writer.type("record").recordBegin();
       ids.write(writer);
-      writer.key("elements").arrayBegin();
+      writer.primitive("elements").arrayBegin();
       for (ROPair<LSubtree, LSubtree> value : values) {
-        writer.type("record-element").recordBegin().key("key");
+        writer.type("record_element").recordBegin();
+        ids.write(writer);
+        writer.primitive("key");
         value.first.write(writer);
-        writer.key("value");
+        writer.primitive("value");
         value.second.write(writer);
         writer.recordEnd();
       }
@@ -62,23 +70,14 @@ public class GenerateClass {
   }
 
   public LSubtree lTuple(IdManager ids, LSubtree... values) {
-    return writer -> {
-      writer.type("tuple").recordBegin();
-      ids.write(writer);
-      writer.key("values").arrayBegin();
-      for (LSubtree value : values) {
-        value.write(writer);
-      }
-      writer.arrayEnd();
-      writer.recordEnd();
-    };
+    return lTuple(ids, Arrays.asList(values));
   }
 
   public LSubtree lTuple(IdManager ids, List<LSubtree> values) {
     return writer -> {
       writer.type("tuple").recordBegin();
       ids.write(writer);
-      writer.key("values").arrayBegin();
+      writer.primitive("elements").arrayBegin();
       for (LSubtree value : values) {
         value.write(writer);
       }
@@ -91,7 +90,7 @@ public class GenerateClass {
     return writer -> {
       writer.type("literal_string").recordBegin();
       ids.write(writer);
-      writer.key("value").primitive(text);
+      writer.primitive("value").primitive(text);
       writer.recordEnd();
     };
   }
@@ -100,7 +99,7 @@ public class GenerateClass {
     return writer -> {
       writer.type("literal_bool").recordBegin();
       ids.write(writer);
-      writer.key("value").primitive(value ? "true" : "false");
+      writer.primitive("value").primitive(value ? "true" : "false");
       writer.recordEnd();
     };
   }
@@ -109,22 +108,22 @@ public class GenerateClass {
     return writer -> {
       writer.type("call").recordBegin();
       ids.write(writer);
-      writer.key("target");
+      writer.primitive("target");
       f.write(writer);
-      writer.key("argument");
+      writer.primitive("argument");
       args.write(writer);
       writer.recordEnd();
     };
   }
 
-  public LSubtree lAccess(IdManager ids, LSubtree target, LSubtree key) {
+  public LSubtree lAccess(IdManager ids, LSubtree target, LSubtree primitive) {
     return writer -> {
       writer.type("access").recordBegin();
       ids.write(writer);
-      writer.key("base");
+      writer.primitive("base");
       target.write(writer);
-      writer.key("key");
-      key.write(writer);
+      writer.primitive("key");
+      primitive.write(writer);
       writer.recordEnd();
     };
   }
@@ -138,23 +137,22 @@ public class GenerateClass {
   }
 
   public LSubtree lLocal(IdManager ids, LSubtree key) {
-    return lAccess(
-        ids,
-        writer -> {
-          writer.type("local").recordBegin();
-          ids.write(writer);
-          writer.recordEnd();
-        },
-        key);
+    return writer -> {
+      writer.type("local").recordBegin();
+      ids.write(writer);
+      writer.primitive("key");
+      key.write(writer);
+      writer.recordEnd();
+    };
   }
 
   public LSubtree lBind(IdManager ids, LSubtree name, LSubtree value) {
     return writer -> {
       writer.type("bind").recordBegin();
       ids.write(writer);
-      writer.key("name");
+      writer.primitive("key");
       name.write(writer);
-      writer.key("value");
+      writer.primitive("value");
       value.write(writer);
       writer.recordEnd();
     };
@@ -165,9 +163,7 @@ public class GenerateClass {
       return lLocal(ids, lString(ids, "type"));
     } else if (klass.isArray()) {
       return lCall(
-          ids,
-          lAccess(ids, lLocal(ids, lString(ids, "jvm")), lString(ids, "array")),
-          lType(ids, klass.getComponentType()));
+          ids, lAccess(ids, jvm(ids), lString(ids, "array")), lType(ids, klass.getComponentType()));
     } else if (klass == void.class) {
       return lAccess(ids, lBuiltin(ids), lString(ids, "void"));
     } else if (klass == int.class
@@ -178,12 +174,15 @@ public class GenerateClass {
         || klass == double.class
         || klass == boolean.class
         || klass == char.class) {
-      return lAccess(ids, lLocal(ids, lString(ids, "jvm")), lString(ids, klass.getName()));
+      return lAccess(ids, jvm(ids), lString(ids, klass.getName()));
     } else {
-      return lCall(
-          ids,
-          lAccess(ids, lBuiltin(ids), lString(ids, "module_local")),
-          lString(ids, path.relativize(new GenerateClass(klass).path).toString()));
+      return writer -> {
+        writer.type("mod_local").recordBegin();
+        ids.write(writer);
+        writer.primitive("path");
+        lString(ids, path.getParent().relativize(generate(klass)).toString()).write(writer);
+        writer.recordEnd();
+      };
     }
   }
 
@@ -195,16 +194,12 @@ public class GenerateClass {
     return lTuple(ids, values);
   }
 
-  public LSubtree lReturn(LSubtree value) {
-    return writer -> {
-      writer.type("return").recordBegin().key("value");
-      value.write(writer);
-      writer.recordEnd();
-    };
-  }
-
   public LSubtree accessBuilder(IdManager ids) {
     return lAccess(ids, lLocal(ids, lString(ids, "res")), lString(ids, "builder"));
+  }
+
+  public LSubtree jvm(IdManager ids) {
+    return lAccess(ids, lBuiltin(ids), lString(ids, "jvm"));
   }
 
   public void generate() {
@@ -219,15 +214,12 @@ public class GenerateClass {
 
             List<ROPair<LSubtree, LSubtree>> out = new ArrayList<>();
 
-            lBind(ids, lString(ids, "jvm"), lAccess(ids, lBuiltin(ids), lString(ids, "jvm")))
-                .write(writer);
-
             lBind(
                     ids,
                     lString(ids, "res"),
                     lCall(
                         ids,
-                        lAccess(ids, lLocal(ids, lString(ids, "jvm")), lString(ids, "externClass")),
+                        lAccess(ids, jvm(ids), lString(ids, "externClass")),
                         lString(ids, klass.getCanonicalName())))
                 .write(writer);
             if (klass.getSuperclass() != null) {
@@ -318,7 +310,7 @@ public class GenerateClass {
                           new ROPair<>(lString(ids, "static"), lBool(ids, isStatic)))));
             }
 
-            lReturn(lRecord(ids, out)).write(writer);
+            lRecord(ids, out).write(writer);
             writer.arrayEnd();
           }
         });
@@ -332,7 +324,7 @@ public class GenerateClass {
     public int nextId = 0;
 
     public void write(Writer writer) {
-      writer.key("id").primitive(Integer.toString(nextId++));
+      writer.primitive("id").primitive(Integer.toString(nextId++));
     }
   }
 

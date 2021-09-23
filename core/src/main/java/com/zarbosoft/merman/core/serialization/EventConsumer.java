@@ -13,7 +13,5 @@ public interface EventConsumer {
 
     void recordEnd();
 
-    void key(String s);
-
     void jsonSpecialPrimitive(String value);
 }

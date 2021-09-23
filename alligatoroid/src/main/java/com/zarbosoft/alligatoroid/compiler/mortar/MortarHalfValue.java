@@ -29,7 +29,7 @@ public class MortarHalfValue implements OkValue {
   }
 
   @Override
-  public ROPair<EvaluateResult, Binding> bind(Context context, Location location) {
+  public ROPair<TargetCode, Binding> bind(Context context, Location location) {
     return type.valueBind(lower);
   }
 

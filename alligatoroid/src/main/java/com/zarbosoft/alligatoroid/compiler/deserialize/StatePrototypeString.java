@@ -10,9 +10,7 @@ public class StatePrototypeString implements StatePrototype {
   private StatePrototypeString() {}
 
   @Override
-  public State create(TSList<Error> errors, LuxemPath luxemPath, TSList<State> stack) {
-    StateString out = new StateString();
-    stack.add(out);
-    return out;
+  public BaseStateSingle create(TSList<Error> errors, LuxemPath luxemPath) {
+    return new StateString();
   }
 }

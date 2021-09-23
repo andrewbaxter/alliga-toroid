@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -32,7 +33,7 @@ public class Utils {
           for (int i = 0; i < fields.length; i++) {
             values[i] = fields[i].get(o);
           }
-          return Objects.hash(values);
+          return Arrays.hashCode(values);
         });
   }
 

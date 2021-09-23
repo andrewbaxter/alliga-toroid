@@ -9,37 +9,64 @@ import java.util.Map;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class StateObject extends BaseState {
+public class StateObject extends BaseStateRecord {
   public final TSMap<String, State> fields = new TSMap<>();
   public final ObjectInfo info;
+  private final LuxemPath luxemPath;
+  private boolean ok = true;
 
-  public StateObject(ObjectInfo info) {
-    this.info = info;
-  }
-
-  @Override
-  public void eatKey(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String name) {
-    StatePrototype proto = info.fields.getOpt(name);
-    if (proto == null) {
-      errors.add(Error.deserializeUnknownField(luxemPath, info.luxemType, name, fields.keys().toList()));
-      ok = false;
-      return;
+  public StateObject(LuxemPath luxemPath, ObjectInfo info) {
+    if (info.luxemType.equals("mod_local")) {
+      System.out.format("");
     }
-    State fieldState = proto.create(errors, luxemPath, stack);
-    fields.put(name, fieldState);
+    this.info = info;
+    this.luxemPath = luxemPath;
   }
 
   @Override
-  public void eatRecordEnd(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath) {
-    stack.removeLast();
+  public BaseStateSingle createKeyState(TSList<Error> errors, LuxemPath luxemPath) {
+    return new StateString();
+  }
+
+  @Override
+  public BaseStateSingle createValueState(TSList<Error> errors, LuxemPath luxemPath, Object key0) {
+    String key = (String) key0;
+    if (key == null) {
+      ok = false;
+      return StateErrorSingle.state;
+    }
+    StatePrototype proto = info.fields.getOpt(key);
+    if (proto == null) {
+      errors.add(
+          Error.deserializeUnknownField(
+              luxemPath, info.luxemType, key, info.fields.keys().toList()));
+      ok = false;
+      return StateErrorSingle.state;
+    }
+    BaseStateSingle state = proto.create(errors, luxemPath);
+    fields.put(key, state);
+    return state;
   }
 
   @Override
   public Object build(TSList<Error> errors) {
-    Object[] args = new Object[fields.size()];
-    for (Map.Entry<String, State> field : fields) {
-      args[info.argOrder.get(field.getKey())] = field.getValue().build(errors);
+    if (!ok) return null;
+    Object[] args = new Object[info.fields.size()];
+    for (Map.Entry<String, Integer> field : info.argOrder) {
+      State fieldState = fields.getOpt(field.getKey());
+      if (fieldState == null) {
+        ok = false;
+        errors.add(Error.deserializeMissingField(luxemPath, info.luxemType, field.getKey()));
+        continue;
+      }
+      Object value = fieldState.build(errors);
+      if (value == null) {
+        ok = false;
+        continue;
+      }
+      args[field.getValue()] = value;
     }
-    return uncheck(() -> info.constructor.newInstance(args));
+    if (!ok) return null;
+    else return uncheck(() -> info.constructor.newInstance(args));
   }
 }

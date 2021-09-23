@@ -1,32 +1,22 @@
 package com.zarbosoft.alligatoroid.compiler.cache;
 
 import com.zarbosoft.alligatoroid.compiler.Error;
-import com.zarbosoft.alligatoroid.compiler.deserialize.BaseState;
+import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateRecord;
+import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.deserialize.State;
+import com.zarbosoft.alligatoroid.compiler.deserialize.StateString;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-public class RecordState extends BaseState {
+public class RecordState extends BaseStateRecord {
   private final Cache cache;
   TSList<ROPair<String, State>> children = new TSList<>();
 
   public RecordState(Cache cache) {
     this.cache = cache;
-  }
-
-  @Override
-  public void eatKey(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String name) {
-    ValueState state = new ValueState(cache);
-    children.add(new ROPair<>(name, state));
-    stack.add(state);
-  }
-
-  @Override
-  public void eatRecordEnd(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath) {
-    stack.removeLast();
   }
 
   @Override
@@ -36,5 +26,17 @@ public class RecordState extends BaseState {
       data.put(child.first, child.second.build(errors));
     }
     return new Record(data);
+  }
+
+  @Override
+  public BaseStateSingle createKeyState(TSList<Error> errors, LuxemPath luxemPath) {
+    return new StateString();
+  }
+
+  @Override
+  public BaseStateSingle createValueState(TSList<Error> errors, LuxemPath luxemPath, Object key) {
+    ValueState valueState = new ValueState(cache);
+    children.add(new ROPair<>((String)key, valueState));
+    return valueState;
   }
 }

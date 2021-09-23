@@ -16,7 +16,7 @@ public final class LocalModuleId implements ModuleId {
 
   @Override
   public void serialize(Writer writer) {
-    writer.type("local").recordBegin().key("path").primitive(path.toString()).recordEnd();
+    writer.type("local").recordBegin().primitive("path").primitive(path.toString()).recordEnd();
   }
 
   @Override
@@ -32,5 +32,15 @@ public final class LocalModuleId implements ModuleId {
   @Override
   public <T> T dispatch(Dispatcher<T> dispatcher) {
     return dispatcher.handle(this);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return Utils.reflectEquals(this, o);
+  }
+
+  @Override
+  public int hashCode() {
+    return Utils.reflectHashCode(this);
   }
 }

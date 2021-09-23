@@ -14,7 +14,7 @@ public interface TreeSerializable {
     } else if (ROMap.class.isAssignableFrom(object.getClass())) {
       writer.recordBegin();
       for (Map.Entry e : (Iterable<Map.Entry>) ((ROMap) object)) {
-        writer.key((String) e.getKey());
+        writer.primitive((String) e.getKey());
         serialize(writer, e.getValue());
       }
       writer.recordEnd();

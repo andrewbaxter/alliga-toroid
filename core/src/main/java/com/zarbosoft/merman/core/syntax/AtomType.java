@@ -15,7 +15,6 @@ import com.zarbosoft.merman.core.syntax.back.BackFixedArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedTypeSpec;
 import com.zarbosoft.merman.core.syntax.back.BackIdSpec;
-import com.zarbosoft.merman.core.syntax.back.BackKeySpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
@@ -222,8 +221,6 @@ public abstract class AtomType {
         if (((BackArraySpec) next).id.equals(id)) return next;
       } else if (next instanceof BackSubArraySpec) {
         if (((BackSubArraySpec) next).id.equals(id)) return next;
-      } else if (next instanceof BackKeySpec) {
-        if (((BackKeySpec) next).id.equals(id)) return next;
       } else if (next instanceof BackAtomSpec) {
         if (((BackAtomSpec) next).id.equals(id)) return next;
       } else if (next instanceof BackFixedTypeSpec) {

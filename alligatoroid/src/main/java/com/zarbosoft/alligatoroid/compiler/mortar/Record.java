@@ -1,12 +1,24 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.rendaw.common.ROMap;
 
-public final class Record {
+public final class Record extends MortarHalfObjectType {
   public final ROMap<Object, Object> data;
 
   public Record(ROMap<Object, Object> data) {
     this.data = data;
+  }
+
+  @Override
+  public String jvmDesc() {
+    return JVMDescriptor.objDescriptorFromReal(getClass());
+  }
+
+  @Override
+  public Value unlower(Object object) {
+    return (Record) object;
   }
 
   /*

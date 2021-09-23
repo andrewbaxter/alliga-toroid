@@ -21,6 +21,8 @@ public interface WholeValue extends SimpleValue, TreeSerializable {
 
   public interface Dispatcher<T> {
     T handleString(WholeString value);
+
+    T handleBool(WholeBool value);
   }
 
   public <T> T dispatch(Dispatcher<T> dispatcher);

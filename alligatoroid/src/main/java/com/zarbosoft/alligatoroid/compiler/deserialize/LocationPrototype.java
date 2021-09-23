@@ -14,18 +14,16 @@ public class LocationPrototype implements StatePrototype {
   }
 
   @Override
-  public State create(TSList<Error> errors, LuxemPath luxemPath, TSList<State> stack) {
-    StateInt out = new StateInt() {
+  public BaseStateSingle create(TSList<Error> errors, LuxemPath luxemPath) {
+    return new StateInt() {
       @Override
-      public Object build(TSList<Error> errors) {
-        Integer value = (Integer) super.build(errors);
+      public Object build(TSList<Error> errors1) {
+        Integer value = (Integer) super.build(errors1);
         if (value == null) {
           return null;
         }
         return new Location(module, value);
       }
     };
-    stack.add(out);
-    return out;
   }
 }

@@ -2,7 +2,6 @@ package com.zarbosoft.luxem.read.path;
 
 import com.zarbosoft.luxem.events.LArrayCloseEvent;
 import com.zarbosoft.luxem.events.LArrayOpenEvent;
-import com.zarbosoft.luxem.events.LKeyEvent;
 import com.zarbosoft.luxem.events.LPrimitiveEvent;
 import com.zarbosoft.luxem.events.LRecordCloseEvent;
 import com.zarbosoft.luxem.events.LRecordOpenEvent;
@@ -23,8 +22,6 @@ public abstract class LuxemPath {
       return new LuxemRecordPath(value());
     } else if (e.getClass() == LRecordCloseEvent.class) {
       return pop();
-    } else if (e.getClass() == LKeyEvent.class) {
-      return key(((LKeyEvent) e).value);
     } else if (e.getClass() == LTypeEvent.class) {
       return type();
     } else if (e.getClass() == LPrimitiveEvent.class) {
@@ -41,8 +38,6 @@ public abstract class LuxemPath {
   }
 
   public abstract LuxemPath value();
-
-  public abstract LuxemPath key(String data);
 
   public abstract LuxemPath type();
 

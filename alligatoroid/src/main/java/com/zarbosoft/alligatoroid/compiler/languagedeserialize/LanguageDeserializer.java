@@ -1,10 +1,12 @@
-package com.zarbosoft.alligatoroid.compiler.sourcedeserialize;
+package com.zarbosoft.alligatoroid.compiler.languagedeserialize;
 
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.deserialize.BaseState;
+import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateRecord;
+import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateSingle;
+import com.zarbosoft.alligatoroid.compiler.deserialize.DefaultStateSingle;
 import com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer;
 import com.zarbosoft.alligatoroid.compiler.deserialize.LocationPrototype;
 import com.zarbosoft.alligatoroid.compiler.deserialize.ObjectInfo;
@@ -13,14 +15,15 @@ import com.zarbosoft.alligatoroid.compiler.deserialize.StateErrorSingle;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StateObject;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototype;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototypeArray;
+import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototypeBool;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototypeInt;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototypeString;
-import com.zarbosoft.alligatoroid.compiler.deserialize.StateRecordBegin;
 import com.zarbosoft.alligatoroid.compiler.language.Access;
 import com.zarbosoft.alligatoroid.compiler.language.Bind;
 import com.zarbosoft.alligatoroid.compiler.language.Block;
 import com.zarbosoft.alligatoroid.compiler.language.Builtin;
 import com.zarbosoft.alligatoroid.compiler.language.Call;
+import com.zarbosoft.alligatoroid.compiler.language.LiteralBool;
 import com.zarbosoft.alligatoroid.compiler.language.LiteralString;
 import com.zarbosoft.alligatoroid.compiler.language.Local;
 import com.zarbosoft.alligatoroid.compiler.language.Lower;
@@ -43,11 +46,11 @@ import java.nio.file.Path;
 
 import static com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer.errorRet;
 
-public class SourceDeserializer {
+public class LanguageDeserializer {
   private final StatePrototype valuePrototype;
   private final TSMap<String, ObjectInfo> languageNodeInfos = new TSMap<>();
 
-  public SourceDeserializer(ModuleId module) {
+  public LanguageDeserializer(ModuleId module) {
     final Class[] language =
         new Class[] {
           Access.class,
@@ -56,6 +59,7 @@ public class SourceDeserializer {
           Builtin.class,
           Call.class,
           LiteralString.class,
+          LiteralBool.class,
           Local.class,
           Record.class,
           RecordElement.class,
@@ -67,35 +71,36 @@ public class SourceDeserializer {
     valuePrototype =
         new StatePrototype() {
           @Override
-          public State create(TSList<Error> errors, LuxemPath luxemPath, TSList<State> stack) {
-            BaseState out =
-                new BaseState() {
-                  State child;
+          public BaseStateSingle create(TSList<Error> errors, LuxemPath luxemPath) {
+            return new DefaultStateSingle() {
+              private StateObject child;
 
-                  @Override
-                  public void eatType(
-                      TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String name) {
-                    ObjectInfo info = languageNodeInfos.getOpt(name);
-                    stack.removeLast();
-                    if (info == null) {
-                      errors.add(
-                          Error.deserializeUnknownType(
-                              luxemPath, name, languageNodeInfos.keys().toList()));
-                      stack.add(StateErrorSingle.state);
-                      return;
-                    }
-                    child = new StateObject(info);
-                    stack.add(child);
-                    stack.add(StateRecordBegin.state);
-                  }
+              @Override
+              public Object build(TSList<Error> errors) {
+                if (child == null) return null;
+                return child.build(errors);
+              }
 
+              @Override
+              protected BaseStateSingle innerEatType(
+                  TSList<Error> errors, LuxemPath luxemPath, String name) {
+                ObjectInfo info = languageNodeInfos.getOpt(name);
+                if (info == null) {
+                  errors.add(
+                      Error.deserializeUnknownType(
+                          luxemPath, name, languageNodeInfos.keys().toList()));
+                  return StateErrorSingle.state;
+                }
+                return new DefaultStateSingle() {
                   @Override
-                  public Object build(TSList<Error> errors) {
-                    return child.build(errors);
+                  protected BaseStateRecord innerEatRecordBegin(
+                      TSList<Error> errors, LuxemPath luxemPath) {
+                    child = new StateObject(luxemPath, info);
+                    return child;
                   }
                 };
-            stack.add(out);
-            return out;
+              }
+            };
           }
         };
 
@@ -119,6 +124,8 @@ public class SourceDeserializer {
           prototype = StatePrototypeInt.instance;
         } else if (parameter.getType() == String.class) {
           prototype = StatePrototypeString.instance;
+        } else if (parameter.getType() == boolean.class) {
+          prototype = StatePrototypeBool.instance;
         } else if (parameter.getType() == ROList.class) {
           Type paramType =
               ((ParameterizedType) parameter.getParameterizedType()).getActualTypeArguments()[0];
@@ -153,27 +160,28 @@ public class SourceDeserializer {
 
   public ROList<Value> deserialize(TSList<Error> errors, Path path) {
     TSList<State> stack = new TSList<>();
-    State rootNodes = new StatePrototypeArray(valuePrototype).create(errors, null, stack);
+    State[] rootNodes = new State[1];
     stack.add(
-        new BaseState() {
+        new DefaultStateSingle() {
           @Override
-          public void eatType(
-              TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String name) {
+          protected BaseStateSingle innerEatType(
+              TSList<Error> errors, LuxemPath luxemPath, String name) {
             String expected = "alligatoroid:0.0.1";
             if (!expected.equals(name)) {
               errors.add(Error.deserializeUnknownLanguageVersion(luxemPath, expected));
-              ok = false;
+              return StateErrorSingle.state;
             }
-            stack.removeLast();
+            BaseStateSingle out = new StatePrototypeArray(valuePrototype).create(errors, luxemPath);
+            rootNodes[0] = out;
+            return out;
           }
         });
     Deserializer.deserialize(errors, path, stack);
-    Object out = rootNodes.build(errors);
+    Object out = rootNodes[0].build(errors);
     if (out == errorRet) {
       if (errors.none()) errors.add(Error.deserializeMissingSourceFile(path));
       return null;
     }
-    if (out == null) throw new Assertion();
     return (ROList<Value>) out;
   }
 }

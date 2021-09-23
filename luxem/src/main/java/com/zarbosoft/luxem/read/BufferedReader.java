@@ -24,22 +24,6 @@ public abstract class BufferedReader extends Reader {
   protected void eatTypeBegin() {}
 
   @Override
-  protected void eatKey(byte b) {
-    top.write(b);
-  }
-
-  protected abstract void eatKey(String value);
-
-  @Override
-  protected void eatKeyBegin() {}
-
-  @Override
-  protected void eatKeyEnd() {
-    eatKey(new String(top.toByteArray(), StandardCharsets.UTF_8));
-    top.reset();
-  }
-
-  @Override
   protected void eatPrimitive(byte b) {
     top.write(b);
   }

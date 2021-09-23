@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.jvm;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.FutureValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseRecord;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 

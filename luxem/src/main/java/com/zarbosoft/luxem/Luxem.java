@@ -2,7 +2,6 @@ package com.zarbosoft.luxem;
 
 import com.zarbosoft.luxem.events.LArrayCloseEvent;
 import com.zarbosoft.luxem.events.LArrayOpenEvent;
-import com.zarbosoft.luxem.events.LKeyEvent;
 import com.zarbosoft.luxem.events.LPrimitiveEvent;
 import com.zarbosoft.luxem.events.LRecordCloseEvent;
 import com.zarbosoft.luxem.events.LRecordOpenEvent;
@@ -68,14 +67,6 @@ public class Luxem {
             state.path = state.path.type();
             state.events.add(
                 new ROPair<>(factory.type(text), new Position(new LTypeEvent(text), state.path)));
-          }
-
-          @Override
-          protected void eatKey(String string) {
-            state.path = state.path.unkey();
-            state.events.add(
-                new ROPair<>(factory.key(string), new Position(new LKeyEvent(string), state.path)));
-            state.path = state.path.key(string);
           }
 
           @Override

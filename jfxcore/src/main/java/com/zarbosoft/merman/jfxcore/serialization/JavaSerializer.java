@@ -9,7 +9,6 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
-import com.zarbosoft.merman.core.backevents.EKeyEvent;
 import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
@@ -86,22 +85,28 @@ public class JavaSerializer implements Serializer {
       }
 
       @Override
-      public void key(final String s) {
-        writer.key(s);
-      }
-
-      @Override
       public void jsonSpecialPrimitive(final String value) {
         throw new AssertionError();
       }
     };
   }
 
+  private static enum JsonState {
+    RECORD_KEY,
+    RECORD_VALUE,
+    ARRAY,
+  }
   private static EventConsumer jsonEventConsumer(final JsonWriter generator) {
     return new EventConsumer() {
+      TSList<JsonState> state = new TSList<>(JsonState.RECORD_KEY);
       @Override
       public void primitive(final String value) {
-        uncheck(() -> generator.value(value));
+        if (state.last() == JsonState.RECORD_KEY) {
+          uncheck(() -> generator.name(value));
+        } else {
+          uncheck(() -> generator.value(value));
+        }
+        endValue();
       }
 
       @Override
@@ -111,27 +116,38 @@ public class JavaSerializer implements Serializer {
 
       @Override
       public void arrayBegin() {
+        state.add(JsonState.ARRAY);
         uncheck(() -> generator.beginArray());
+      }
+
+      private void endValue() {
+        if (state.last() == JsonState.RECORD_KEY) {
+          state.removeLast();
+          state.add(JsonState.RECORD_VALUE);
+        } else if (state.last() == JsonState.RECORD_VALUE) {
+          state.removeLast();
+          state.add(JsonState.RECORD_KEY);
+        }
       }
 
       @Override
       public void arrayEnd() {
         uncheck(() -> generator.endArray());
+        state.removeLast();
+        endValue();
       }
 
       @Override
       public void recordBegin() {
+        state.add(JsonState.RECORD_KEY);
         uncheck(() -> generator.beginObject());
       }
 
       @Override
       public void recordEnd() {
         uncheck(() -> generator.endObject());
-      }
-
-      @Override
-      public void key(final String s) {
-        uncheck(() -> generator.name(s));
+        state.removeLast();
+        endValue();
       }
 
       @Override
@@ -146,7 +162,7 @@ public class JavaSerializer implements Serializer {
                 try {
                   value1 = Integer.parseInt(value);
                 } catch (Exception e) {
-                  // TODO log
+                  // TODO sub in marked value
                   value1 = -12345;
                 }
                 generator.value(value1);
@@ -155,7 +171,7 @@ public class JavaSerializer implements Serializer {
                 try {
                   value1 = Double.parseDouble(value);
                 } catch (Exception e) {
-                  // TODO log
+                  // TODO sub in marked value
                   value1 = -12345;
                 }
                 generator.value(value1);
@@ -185,11 +201,6 @@ public class JavaSerializer implements Serializer {
       @Override
       public Event arrayClose() {
         return new EArrayCloseEvent();
-      }
-
-      @Override
-      public Event key(final String s) {
-        return new EKeyEvent(s);
       }
 
       @Override

@@ -17,7 +17,6 @@ import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedTypeSpec;
-import com.zarbosoft.merman.core.syntax.back.BackKeySpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
@@ -103,10 +102,6 @@ public class Helper {
 
   public static BackSpec buildBackDataRecord(final String id, String type) {
     return new BackRecordSpec(new BaseBackArraySpec.Config(id, type, ROList.empty));
-  }
-
-  public static BackKeySpec buildBackDataKey(final String id) {
-    return new BackKeySpec(new BaseBackPrimitiveSpec.Config(id));
   }
 
   public static BackArraySpec buildBackDataArray(final String id, String type) {

@@ -13,11 +13,17 @@ public class Module {
   public final Log log = new Log();
   public final TSList<Location> sourceMapReverse = new TSList<>();
   public final TSMap<Location, Integer> sourceMapForward = new TSMap<>();
+  public final ImportPath importPath;
   /** If present locally (ex: path in cache) */
   public String sourcePath;
 
-  public Module(ModuleId id, CompilationContext compilationContext, CompletableFuture<Value> result) {
+  public Module(
+      ModuleId id,
+      ImportPath importPath,
+      CompilationContext compilationContext,
+      CompletableFuture<Value> result) {
     this.id = id;
+    this.importPath = importPath;
     this.compilationContext = compilationContext;
     this.result = result;
   }

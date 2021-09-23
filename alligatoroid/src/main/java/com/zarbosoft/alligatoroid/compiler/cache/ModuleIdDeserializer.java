@@ -3,7 +3,9 @@ package com.zarbosoft.alligatoroid.compiler.cache;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.ModuleId;
-import com.zarbosoft.alligatoroid.compiler.deserialize.BaseState;
+import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateRecord;
+import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateSingle;
+import com.zarbosoft.alligatoroid.compiler.deserialize.DefaultStateSingle;
 import com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer;
 import com.zarbosoft.alligatoroid.compiler.deserialize.ObjectInfo;
 import com.zarbosoft.alligatoroid.compiler.deserialize.State;
@@ -12,7 +14,6 @@ import com.zarbosoft.alligatoroid.compiler.deserialize.StateObject;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototype;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototypeInt;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototypeString;
-import com.zarbosoft.alligatoroid.compiler.deserialize.StateRecordBegin;
 import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -33,40 +34,39 @@ public class ModuleIdDeserializer {
   static {
     final ROPair<String, Class>[] idTypes =
         new ROPair[] {
-          new ROPair<>("local",LocalModuleId.class),
+          new ROPair<>("local", LocalModuleId.class),
         };
     valuePrototype =
         new StatePrototype() {
           @Override
-          public State create(TSList<Error> errors, LuxemPath luxemPath, TSList<State> stack) {
-            BaseState out =
-                new BaseState() {
-                  State child;
+          public BaseStateSingle create(TSList<Error> errors, LuxemPath luxemPath) {
+            return new DefaultStateSingle() {
+              private StateObject child;
 
+              @Override
+              protected BaseStateSingle innerEatType(
+                  TSList<Error> errors, LuxemPath luxemPath, String name) {
+                ObjectInfo info = typeInfos.getOpt(name);
+                if (info == null) {
+                  errors.add(
+                      Error.deserializeUnknownType(luxemPath, name, typeInfos.keys().toList()));
+                  return StateErrorSingle.state;
+                }
+                return new DefaultStateSingle() {
                   @Override
-                  public void eatType(
-                      TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String name) {
-                    stack.removeLast();
-                    ObjectInfo info = typeInfos.getOpt(name);
-                    if (info == null) {
-                      errors.add(
-                          Error.deserializeUnknownType(luxemPath, name, typeInfos.keys().toList()));
-                      stack.add(StateErrorSingle.state);
-                      return;
-                    }
-                    child = new StateObject(info);
-                    stack.add(child);
-                    stack.add(StateRecordBegin.state);
-                  }
-
-                  @Override
-                  public Object build(TSList<Error> errors) {
-                    if (child == null) return null;
-                    return child.build(errors);
+                  protected BaseStateRecord innerEatRecordBegin(
+                      TSList<Error> errors, LuxemPath luxemPath) {
+                    return child = new StateObject(luxemPath, info);
                   }
                 };
-            stack.add(out);
-            return out;
+              }
+
+              @Override
+              public Object build(TSList<Error> errors) {
+                if (child == null) return null;
+                return child.build(errors);
+              }
+            };
           }
         };
 
@@ -105,9 +105,8 @@ public class ModuleIdDeserializer {
    */
   public static ModuleId deserialize(TSList<Error> errors, Path path) {
     if (!Files.exists(path)) return null;
-    TSList<State> stack = new TSList<>();
-    State state = valuePrototype.create(errors, null, stack);
-    Deserializer.deserialize(errors, path, stack);
+    State state = valuePrototype.create(errors, null);
+    Deserializer.deserialize(errors, path, new TSList<>(state));
     Object out = state.build(errors);
     if (out == errorRet) return null;
     return (ModuleId) out;

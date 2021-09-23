@@ -50,12 +50,6 @@ public class Deserializer {
           }
 
           @Override
-          protected void eatKey(String value) {
-            luxemPath = luxemPath.key(value);
-            stack.last().eatKey(errors, stack, luxemPath, value);
-          }
-
-          @Override
           protected void eatPrimitive(String value) {
             luxemPath = luxemPath.value();
             stack.last().eatPrimitive(errors, stack, luxemPath, value);

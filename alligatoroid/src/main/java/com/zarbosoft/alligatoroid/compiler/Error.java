@@ -116,6 +116,17 @@ public class Error implements TreeSerializable {
             .put(DESCRIPTION_KEY, "The source version (luxem root type) is missing"));
   }
 
+  public static Error deserializeNotBool(LuxemPath path, String value) {
+    return new Error(
+        "deserialize_not_bool",
+        new TSMap<String, Object>()
+            .put("path", path.toString())
+            .put("got", value)
+            .put(
+                DESCRIPTION_KEY,
+                Format.format("Expected a bool (true/false) in luxem but got [%s]", value)));
+  }
+
   public static Error deserializeNotInteger(LuxemPath path, String value) {
     return new Error(
         "deserialize_not_integer",
@@ -146,8 +157,7 @@ public class Error implements TreeSerializable {
             .put(LOCATION_KEY, location)
             .put("field", field)
             .put(
-                DESCRIPTION_KEY,
-                Format.format("Field [%s] doesn't exist", field.concreteValue())));
+                DESCRIPTION_KEY, Format.format("Field [%s] doesn't exist", field.concreteValue())));
   }
 
   public static TSMap<String, Object> convertThrowable(Throwable e) {
@@ -291,6 +301,25 @@ public class Error implements TreeSerializable {
         new TSMap<String, Object>()
             .put("file", path.toString())
             .put(DESCRIPTION_KEY, "this cache file eventually references itself"));
+  }
+
+  public static Error deserializePairTooManyValues(LuxemPath path) {
+    return new Error(
+        "deserialize_pair_too_many_values",
+        new TSMap<String, Object>()
+            .put("path", path.toString())
+            .put(
+                DESCRIPTION_KEY,
+                "This value is a 2-element array, but found more than 2 elements."));
+  }
+
+  public static Error importLoop(Location location, ROList<ImportSpec> loop) {
+    return new Error(
+        "import_loop",
+        new TSMap<String, Object>()
+            .put(LOCATION_KEY, location)
+            .put("loop", loop)
+            .put("description", "This import creates an import loop."));
   }
 
   @Override

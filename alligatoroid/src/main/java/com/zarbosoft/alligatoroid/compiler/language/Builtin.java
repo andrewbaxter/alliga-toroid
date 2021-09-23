@@ -1,43 +1,41 @@
 package com.zarbosoft.alligatoroid.compiler.language;
 
 import com.zarbosoft.alligatoroid.compiler.Context;
-import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Module;
+import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMBuiltin;
-import com.zarbosoft.alligatoroid.compiler.jvm.MultiError;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.CreatedFile;
 import com.zarbosoft.alligatoroid.compiler.mortar.Function;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarClass;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfArrayType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfByteType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfStringType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.Record;
-import com.zarbosoft.alligatoroid.compiler.mortar.Tuple;
 import com.zarbosoft.rendaw.common.ROPair;
-import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
-import com.zarbosoft.rendaw.common.TSSet;
+import org.objectweb.asm.tree.FieldInsnNode;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 
-import static com.zarbosoft.rendaw.common.Common.uncheck;
+import static org.objectweb.asm.Opcodes.GETFIELD;
 
 public class Builtin extends LanguageValue {
   public static TSMap<Class, MortarClass> wrappedClasses = new TSMap<>();
@@ -56,6 +54,7 @@ public class Builtin extends LanguageValue {
     super(id, false);
   }
 
+  /*
   public static <T> T parseCheckArgument(TSList<Error> errors, TSList<String> path, Class<T> type, Object object) {
     if (type.isAssignableFrom(object.getClass())) {
       return (T)object;
@@ -91,6 +90,7 @@ public class Builtin extends LanguageValue {
     if (errors.some()) throw new MultiError(errors);
     return out;
   }
+   */
 
   public static void builtinLog(Module module, String message) {
     module.log.log.add(message);
@@ -129,9 +129,6 @@ public class Builtin extends LanguageValue {
     }
   }
 
-  @Retention(RetentionPolicy.RUNTIME)
-  public @interface WrapExpose {}
-
   public static MortarHalfDataType wrapClass(Class klass) {
     /*
     if (klass == Value.class) {
@@ -139,8 +136,9 @@ public class Builtin extends LanguageValue {
     }
      */
     MortarClass out = wrappedClasses.getOpt(klass);
+    String jvmName = JVMDescriptor.jvmName(klass);
     if (out == null) {
-      out = new MortarClass(JVMDescriptor.jvmName(klass));
+      out = new MortarClass(jvmName);
       wrappedClasses.put(klass, out);
       TSMap<Object, MortarHalfType> fields = new TSMap<>();
       if (klass != Value.class)
@@ -153,13 +151,35 @@ public class Builtin extends LanguageValue {
               new MortarMethodFieldType(
                   out, method.getName(), info.descriptor, info.returnType, info.needsModule));
         }
-      /*
-      TODO
       for (Field field : klass.getDeclaredFields()) {
-        ROPair<String, MortarHalfType> desc = dataDescriptor(field.getType());
-        fields.putNew()
+        ROPair<String, MortarHalfDataType> desc = dataDescriptor(field.getType());
+        MortarHalfDataType dataType = desc.second;
+        String fieldName = field.getName();
+        fields.putNew(
+            fieldName,
+            new MortarHalfType() {
+              @Override
+              public Value asValue(MortarProtocode lower) {
+                return dataType.asValue(
+                    new MortarProtocode() {
+                      @Override
+                      public MortarCode lower() {
+                        return (MortarCode)
+                            new MortarCode()
+                                .add(lower.lower())
+                                .add(
+                                    new FieldInsnNode(
+                                        GETFIELD, jvmName, fieldName, dataType.jvmDesc()));
+                      }
+
+                      @Override
+                      public TargetCode drop(Context context, Location location) {
+                        return null;
+                      }
+                    });
+              }
+            });
       }
-       */
       out.fields = fields;
     }
     return out;
@@ -185,6 +205,9 @@ public class Builtin extends LanguageValue {
   public EvaluateResult evaluate(Context context) {
     return EvaluateResult.pure(builtin);
   }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface WrapExpose {}
 
   public static class FuncInfo {
     public final String descriptor;

@@ -23,8 +23,8 @@ public final class ErrorValue implements Value {
   }
 
   @Override
-  public ROPair<EvaluateResult, Binding> bind(Context context, Location location) {
-    return new ROPair<>(EvaluateResult.error, ErrorBinding.binding);
+  public ROPair<TargetCode, Binding> bind(Context context, Location location) {
+    return new ROPair<>(null, ErrorBinding.binding);
   }
 
   @Override

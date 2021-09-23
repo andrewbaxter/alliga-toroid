@@ -2,11 +2,9 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.Binding;
 import com.zarbosoft.alligatoroid.compiler.Context;
-import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import static org.objectweb.asm.Opcodes.POP;
@@ -36,17 +34,14 @@ public interface MortarHalfDataType extends MortarHalfType, MortarUnlowerer {
 
   int loadOpcode();
 
-  default ROPair<EvaluateResult, Binding> valueBind(MortarProtocode lower) {
+  default ROPair<TargetCode, Binding> valueBind(MortarProtocode lower) {
     Object key = new Object();
     return new ROPair<>(
-        new EvaluateResult(
-            new MortarCode().add(lower.lower()).addVarInsn(storeOpcode(), key),
-            null,
-            NullValue.value),
+        new MortarCode().add(lower.lower()).addVarInsn(storeOpcode(), key),
         new MortarHalfBinding(key, this));
   }
 
-    int returnOpcode();
+  int returnOpcode();
 
-    String jvmDesc();
+  String jvmDesc();
 }

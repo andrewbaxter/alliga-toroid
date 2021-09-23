@@ -7,6 +7,7 @@ import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseTuple;
+import com.zarbosoft.alligatoroid.compiler.mortar.WholeBool;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeString;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -60,6 +61,11 @@ public class JVMBaseClassType extends JVMObjectType {
                 @Override
                 public JVMDataType handleString(WholeString value) {
                   return JVMStringType.value;
+                }
+
+                @Override
+                public JVMDataType handleBool(WholeBool value) {
+                  return JVMBoolType.value;
                 }
               });
     } else if (value instanceof JVMDataType) {

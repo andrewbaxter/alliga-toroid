@@ -211,9 +211,9 @@ public class MiscSyntax {
             .frontMark("}")
             .autoComplete(true)
             .build();
-    recordElement =
+      recordElement =
         new TypeBuilder("record_element")
-            .back(Helper.buildBackDataKey("key"))
+            .back(Helper.buildBackDataPrimitive("key"))
             .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
@@ -508,9 +508,9 @@ public class MiscSyntax {
             .frontMark("}")
             .autoComplete(true)
             .build();
-    FreeAtomType recordElement =
+      FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .back(Helper.buildBackDataKey("key"))
+            .back(Helper.buildBackDataPrimitive("key"))
             .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")

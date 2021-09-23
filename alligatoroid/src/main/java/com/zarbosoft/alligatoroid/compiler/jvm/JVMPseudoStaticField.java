@@ -74,11 +74,11 @@ public class JVMPseudoStaticField implements SimpleValue {
   }
 
   @Override
-  public ROPair<EvaluateResult, Binding> bind(Context context, Location location) {
+  public ROPair<TargetCode, Binding> bind(Context context, Location location) {
     JVMDataType real = base.dataFields.getOpt(name);
     if (real == null) {
       context.module.log.errors.add(JVMError.noDataField(location, name));
-      return new ROPair<>(EvaluateResult.error, ErrorBinding.binding);
+      return new ROPair<>(null, ErrorBinding.binding);
     }
     return real.valueBind(
         new JVMProtocode() {

@@ -60,11 +60,6 @@ public class JsonEventConsumer implements JSEventConsumer {
   }
 
   @Override
-  public void key(final String s) {
-    stack.last().key(s);
-  }
-
-  @Override
   public void jsonSpecialPrimitive(String value) {
     if ("true".equals(value)) stack.last().value(true);
     else if ("false".equals(value)) stack.last().value(false);

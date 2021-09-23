@@ -2,7 +2,6 @@ package com.zarbosoft.luxem.write;
 
 import com.zarbosoft.luxem.events.LArrayCloseEvent;
 import com.zarbosoft.luxem.events.LArrayOpenEvent;
-import com.zarbosoft.luxem.events.LKeyEvent;
 import com.zarbosoft.luxem.events.LPrimitiveEvent;
 import com.zarbosoft.luxem.events.LRecordCloseEvent;
 import com.zarbosoft.luxem.events.LRecordOpenEvent;
@@ -16,36 +15,27 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Map;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Writer {
-  private static final ROMap<Byte, Byte> quotedKeyEscapes =
-      escapeMap()
-          .put((byte) '"', (byte) '"')
-          .put((byte) '\n', (byte) 'n')
-          .put((byte) '\t', (byte) 't')
-          .put((byte) '\r', (byte) 'r')
-          ;
   private static final ROMap<Byte, Byte> typeEscapes =
       escapeMap()
           .put((byte) ')', (byte) ')')
           .put((byte) '\n', (byte) 'n')
           .put((byte) '\t', (byte) 't')
-          .put((byte) '\r', (byte) 'r')
-          ;
+          .put((byte) '\r', (byte) 'r');
   private static final ROMap<Byte, Byte> quotedPrimitiveEscapes =
       escapeMap()
           .put((byte) '"', (byte) '"')
           .put((byte) '\n', (byte) 'n')
           .put((byte) '\t', (byte) 't')
-          .put((byte) '\r', (byte) 'r')
-          ;
+          .put((byte) '\r', (byte) 'r');
   private final boolean pretty;
   private final byte indentByte;
   private final int indentMultiple;
   private final OutputStream stream;
+  private int indentCount = 0;
   private final Deque<State> states = new ArrayDeque<>();
   private boolean first = true;
 
@@ -73,21 +63,25 @@ public class Writer {
     return new TSMap<Byte, Byte>().put((byte) '\\', (byte) '\\');
   }
 
-  private static void escape(
-      final OutputStream stream, final byte[] bytes, final ROMap<Byte, Byte> escapes) {
-    uncheck(
-        () -> {
-          int lastEscape = 0;
-          for (int i = 0; i < bytes.length; ++i) {
-            final Byte key = escapes.getOpt(bytes[i]);
-            if (key == null) continue;
-            stream.write(bytes, lastEscape, i - lastEscape);
-            stream.write('\\');
-            stream.write(key);
-            lastEscape = i + 1;
-          }
-          stream.write(bytes, lastEscape, bytes.length - lastEscape);
-        });
+  private void escape(final byte[] bytes, final ROMap<Byte, Byte> escapes) {
+    int lastEscape = 0;
+    for (int i = 0; i < bytes.length; ++i) {
+      final Byte key = escapes.getOpt(bytes[i]);
+      if (key == null) continue;
+      streamWrite(bytes, lastEscape, i);
+      streamWrite('\\');
+      streamWrite(key);
+      lastEscape = i + 1;
+    }
+    streamWrite(bytes, lastEscape, bytes.length);
+  }
+
+  private void streamWrite(char c) {
+    uncheck(() -> stream.write(c));
+  }
+
+  private void streamWrite(byte[] bytes, int start, int end) {
+    uncheck(() -> stream.write(bytes, start, end - start));
   }
 
   public Writer emit(final LuxemEvent event) {
@@ -106,8 +100,6 @@ public class Writer {
       return recordBegin();
     } else if (k == LRecordCloseEvent.class) {
       return recordEnd();
-    } else if (k == LKeyEvent.class) {
-      return key(((LKeyEvent) event).value);
     } else {
       throw new Assertion();
     }
@@ -121,181 +113,80 @@ public class Writer {
     return primitive(value.getBytes(StandardCharsets.UTF_8));
   }
 
-  public Writer key(final String key) {
-    return key(key.getBytes(StandardCharsets.UTF_8));
-  }
-
   private void valueBegin() {
     if (states.peekLast() == State.PREFIXED) {
-      states.pollLast();
-    } else if (first) {
-      first = false;
-    } else if (pretty) {
-      uncheck(
-          () -> {
-            stream.write('\n');
-          });
-      indent();
+      states.removeLast();
+    } else {
+      if (states.peekLast() == State.RECORD) {
+        states.addLast(State.KEY);
+      }
+      if (first) {
+        first = false;
+      } else if (pretty) {
+        streamWrite('\n');
+        indent();
+      }
     }
+  }
+
+  private void valueEnd() {
+    if (states.peekLast() == State.KEY) {
+      streamWrite((byte) ':');
+      if (pretty) streamWrite(' ');
+      states.removeLast();
+      states.addLast(State.PREFIXED);
+    } else {
+      streamWrite((byte) ',');
+    }
+  }
+
+  private void streamWrite(byte c) {
+    uncheck(() -> stream.write(c));
   }
 
   private void indent() {
     if (!pretty) return;
-    uncheck(
-        () -> {
-          for (int i = 0; i < states.size() - 1; ++i)
-            for (int j = 0; j < indentMultiple; ++j) stream.write(indentByte);
-        });
+    for (int i = 0; i < indentCount; ++i)
+      for (int j = 0; j < indentMultiple; ++j) streamWrite(indentByte);
   }
 
   public Writer recordBegin() {
-    uncheck(
-        () -> {
-          valueBegin();
-          stream.write((byte) '{');
-          states.addLast(State.RECORD);
-        });
+    valueBegin();
+    streamWrite((byte) '{');
+    indentCount += 1;
+    states.addLast(State.RECORD);
     return this;
   }
 
   public Writer recordEnd() {
-    uncheck(
-        () -> {
-          states.pollLast();
-          if (pretty) {
-            stream.write('\n');
-            indent();
-          }
-          stream.write((byte) '}');
-          stream.write((byte) ',');
-        });
+    states.removeLast();
+    indentCount -= 1;
+    if (pretty) {
+      streamWrite('\n');
+      indent();
+    }
+    streamWrite((byte) '}');
+    valueEnd();
     return this;
   }
 
   public Writer arrayBegin() {
-    uncheck(
-        () -> {
-          valueBegin();
-          stream.write((byte) '[');
-          states.addLast(State.ARRAY);
-        });
+    valueBegin();
+    streamWrite((byte) '[');
+    indentCount += 1;
+    states.addLast(State.ARRAY);
     return this;
   }
 
   public Writer arrayEnd() {
-    uncheck(
-        () -> {
-          states.pollLast();
-          if (pretty) {
-            stream.write('\n');
-            indent();
-          }
-          stream.write((byte) ']');
-          stream.write((byte) ',');
-        });
-    return this;
-  }
-
-  private boolean isAmbiguous(final byte b) {
-    switch (b) {
-      case '"':
-      case ':':
-      case ',':
-      case '[':
-      case ']':
-      case '{':
-      case '}':
-      case '(':
-      case ')':
-      case ' ':
-      case '\\':
-      case '\n':
-      case '\t':
-      case '\r':
-      case '*':
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  public Writer key(final byte[] bytes) {
+    states.removeLast();
+    indentCount -= 1;
     if (pretty) {
-      for (int i = 0; i < bytes.length; ++i) {
-        if (isAmbiguous(bytes[i])) return quotedKey(bytes);
-      }
-      return shortKey(bytes);
-    } else return quotedKey(bytes);
-  }
-
-  public Writer shortKey(final byte[] bytes) {
-    shortKeyBegin();
-    shortKeyChunk(bytes);
-    shortKeyEnd();
-    return this;
-  }
-
-  public Writer shortKeyBegin() {
-    if (pretty) {
-      uncheck(
-          () -> {
-            stream.write('\n');
-          });
+      streamWrite('\n');
       indent();
     }
-    return this;
-  }
-
-  private Writer shortKeyEnd() {
-    uncheck(
-        () -> {
-          stream.write(':');
-          if (pretty) stream.write(' ');
-          states.addLast(State.PREFIXED);
-        });
-    return this;
-  }
-
-  public Writer shortKeyChunk(final byte[] bytes) {
-    uncheck(
-        () -> {
-          stream.write(bytes);
-        });
-    return this;
-  }
-
-  public Writer quotedKey(final byte[] bytes) {
-    quotedKeyBegin();
-    quotedKeyChunk(bytes);
-    quotedKeyEnd();
-    return this;
-  }
-
-  public Writer quotedKeyBegin() {
-    uncheck(
-        () -> {
-          if (pretty) {
-            stream.write('\n');
-            indent();
-          }
-          stream.write('"');
-        });
-    return this;
-  }
-
-  private Writer quotedKeyEnd() {
-    uncheck(
-        () -> {
-          stream.write('"');
-          stream.write(':');
-          if (pretty) stream.write(' ');
-          states.addLast(State.PREFIXED);
-        });
-    return this;
-  }
-
-  public Writer quotedKeyChunk(final byte[] bytes) {
-    escape(stream, bytes, quotedKeyEscapes);
+    streamWrite((byte) ']');
+    valueEnd();
     return this;
   }
 
@@ -308,63 +199,24 @@ public class Writer {
 
   public Writer typeBegin() {
     valueBegin();
-    uncheck(
-        () -> {
-          stream.write('(');
-        });
+    streamWrite('(');
     return this;
   }
 
   public Writer typeEnd() {
-    uncheck(
-        () -> {
-          stream.write(')');
-          if (pretty) stream.write(' ');
-          states.addLast(State.PREFIXED);
-        });
+    streamWrite(')');
+    if (pretty) streamWrite(' ');
+    states.addLast(State.PREFIXED);
     return this;
   }
 
   public Writer typeChunk(final byte[] bytes) {
-    escape(stream, bytes, typeEscapes);
+    escape(bytes, typeEscapes);
     return this;
   }
 
   public Writer primitive(final byte[] bytes) {
-    if (pretty) {
-      for (int i = 0; i < bytes.length; ++i) {
-        if (isAmbiguous(bytes[i])) return quotedPrimitive(bytes);
-      }
-      return shortPrimitive(bytes);
-    } else return quotedPrimitive(bytes);
-  }
-
-  public Writer shortPrimitive(final byte[] bytes) {
-    shortPrimitiveBegin();
-    shortPrimitiveChunk(bytes);
-    shortPrimitiveEnd();
-    return this;
-  }
-
-  public Writer shortPrimitiveBegin() {
-    valueBegin();
-    return this;
-  }
-
-  private Writer shortPrimitiveEnd() {
-    uncheck(
-        () -> {
-          stream.write(',');
-        });
-    return this;
-  }
-
-  private Writer shortPrimitiveChunk(final byte[] bytes) {
-    uncheck(
-        () -> {
-          stream.write(bytes);
-        });
-    return this;
+    return quotedPrimitive(bytes);
   }
 
   public Writer quotedPrimitive(final byte[] bytes) {
@@ -376,24 +228,18 @@ public class Writer {
 
   public Writer quotedPrimitiveBegin() {
     valueBegin();
-    uncheck(
-        () -> {
-          stream.write('"');
-        });
+    streamWrite('"');
     return this;
   }
 
   public Writer quotedPrimitiveEnd() {
-    uncheck(
-        () -> {
-          stream.write('"');
-          stream.write(',');
-        });
+    streamWrite('"');
+    valueEnd();
     return this;
   }
 
   public Writer quotedPrimitiveChunk(final byte[] bytes) {
-    escape(stream, bytes, quotedPrimitiveEscapes);
+    escape(bytes, quotedPrimitiveEscapes);
     return this;
   }
 
@@ -401,5 +247,6 @@ public class Writer {
     ARRAY,
     RECORD,
     PREFIXED,
+    KEY,
   }
 }

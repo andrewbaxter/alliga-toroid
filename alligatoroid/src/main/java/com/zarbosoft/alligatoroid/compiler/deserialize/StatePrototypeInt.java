@@ -10,9 +10,7 @@ public class StatePrototypeInt implements StatePrototype {
   private StatePrototypeInt() {}
 
   @Override
-  public State create(TSList<Error> errors, LuxemPath luxemPath, TSList<State> stack) {
-    StateInt out = new StateInt();
-    stack.add(out);
-    return out;
+  public BaseStateSingle create(TSList<Error> errors, LuxemPath luxemPath) {
+    return new StateInt();
   }
 }

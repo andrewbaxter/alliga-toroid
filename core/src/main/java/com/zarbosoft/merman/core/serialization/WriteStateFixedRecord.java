@@ -27,7 +27,7 @@ public class WriteStateFixedRecord extends WriteState {
     if (iterator.hasNext()) {
       stack.add(this);
     }
-    writer.key(next.first);
+    writer.primitive(next.first);
     BackSpec part = next.second;
     part.write(env, stack, data, writer);
   }
