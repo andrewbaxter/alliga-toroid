@@ -4,9 +4,11 @@ import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseTuple;
+import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeBool;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeString;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
@@ -21,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 public class JVMBaseClassType extends JVMObjectType {
-  public final String jvmInternalClass;
+  public final String jvmName;
   public final TSMap<String, JVMDataType> dataFields;
   public final TSMap<ROTuple, JVMShallowMethodFieldType> methodFields;
   public final TSMap<String, JVMDataType> staticDataFields;
@@ -30,6 +32,10 @@ public class JVMBaseClassType extends JVMObjectType {
   public final TSSet<String> staticFields;
   public final TSList<JVMBaseClassType> inherits;
 
+  public void resolveMethods(Module module) {
+
+  }
+
   public JVMBaseClassType(
       String jvmExternalClass,
       TSMap<String, JVMDataType> dataFields,
@@ -37,7 +43,7 @@ public class JVMBaseClassType extends JVMObjectType {
       TSMap<String, JVMDataType> staticDataFields,
       TSMap<ROTuple, JVMShallowMethodFieldType> staticMethodFields,
       TSList<JVMBaseClassType> inherits) {
-    this.jvmInternalClass = JVMDescriptor.jvmName(jvmExternalClass);
+    this.jvmName = JVMDescriptor.jvmName(jvmExternalClass);
     this.dataFields = dataFields;
     this.methodFields = methodFields;
     fields = dataFields.keys().mut();
@@ -105,7 +111,7 @@ public class JVMBaseClassType extends JVMObjectType {
   }
 
   @Override
-  public String jvmDesc() {
-    return JVMDescriptor.objDescriptorFromJvmName(jvmInternalClass);
+  public String jvmDesc(Module module) {
+    return JVMDescriptor.objDescriptorFromJvmName(jvmName);
   }
 }

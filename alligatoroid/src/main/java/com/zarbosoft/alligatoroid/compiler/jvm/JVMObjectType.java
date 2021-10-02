@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.jvm;
 
 import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
@@ -27,7 +28,7 @@ public class JVMObjectType implements JVMDataType, SimpleValue {
         this,
         new JVMProtocode() {
           @Override
-          public JVMCode lower() {
+          public JVMCode lower(Module module) {
             return code;
           }
 
@@ -39,17 +40,17 @@ public class JVMObjectType implements JVMDataType, SimpleValue {
   }
 
   @Override
-  public int storeOpcode() {
+  public int storeOpcode(Module module) {
     return ASTORE;
   }
 
   @Override
-  public int loadOpcode() {
+  public int loadOpcode(Module module) {
     return ALOAD;
   }
 
   @Override
-  public String jvmDesc() {
+  public String jvmDesc(Module module) {
     return JVMDescriptor.objectDescriptor;
   }
 }

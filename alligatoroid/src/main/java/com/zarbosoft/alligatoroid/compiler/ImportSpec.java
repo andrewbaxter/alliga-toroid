@@ -20,8 +20,16 @@ public final class ImportSpec implements TreeSerializable {
   }
 
   @Override
-  public void serialize(Writer writer) {
+  public void treeSerialize(Writer writer) {
     // TODO encapsulate in another record when there are more fields
-    moduleId.serialize(writer);
+    moduleId.treeSerialize(writer);
+  }
+
+  public boolean equal1(ImportSpec other) {
+    return moduleId.equal1(other.moduleId);
+  }
+
+  public String hash() {
+    return moduleId.hash();
   }
 }

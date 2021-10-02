@@ -1,5 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
+import org.objectweb.asm.tree.MethodInsnNode;
+
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+
 /**
  * 3 types of strings:
  *
@@ -14,7 +18,28 @@ public class JVMDescriptor {
   public static final String objectDescriptor = objDescriptorFromJvmName(objectJvmName);
   public static final String stringJvmName = jvmName(String.class);
   public static final String stringDescriptor = objDescriptorFromJvmName(stringJvmName);
-  public static final String boolDescriptor = "Z";
+  public static final String BOOL_DESCRIPTOR = "Z";
+  public static final String LONG_DESCRIPTOR = "J";
+  public static final String INT_DESCRIPTOR = "I";
+  public static final String FLOAT_DESCRIPTOR = "F";
+  public static final String DOUBLE_DESCRIPTOR = "D";
+  public static final String BYTE_DESCRIPTOR = "B";
+  public static final String CHAR_DESCRIPTOR = "C";
+  public static final String SHORT_DESCRIPTOR = "S";
+  public static final String VOID_DESCRIPTOR = "V";
+  public static final MethodInsnNode boxBool = box(JVMDescriptor.BOOL_DESCRIPTOR, Boolean.class);
+  public static final MethodInsnNode boxByte = box(JVMDescriptor.BYTE_DESCRIPTOR, Byte.class);
+  public static final MethodInsnNode boxInt = box(JVMDescriptor.INT_DESCRIPTOR, Integer.class);
+
+  public static MethodInsnNode box(String primDescriptor, Class box) {
+    String jvmName = jvmName(box);
+    return new MethodInsnNode(
+        INVOKESTATIC,
+        jvmName,
+        "valueOf",
+        "(" + primDescriptor + ")" + objDescriptorFromJvmName(jvmName),
+        false);
+  }
 
   public static String func(String returnDescriptor, String... argDescriptors) {
     StringBuilder builder = new StringBuilder();
@@ -25,38 +50,6 @@ public class JVMDescriptor {
     builder.append(')');
     builder.append(returnDescriptor);
     return builder.toString();
-  }
-
-  public static String voidDescriptor() {
-    return "V";
-  }
-
-  public static String shortDescriptor() {
-    return "S";
-  }
-
-  public static String charDescriptor() {
-    return "C";
-  }
-
-  public static String byteDescriptor() {
-    return "B";
-  }
-
-  public static String doubleDescriptor() {
-    return "D";
-  }
-
-  public static String floatDescriptor() {
-    return "F";
-  }
-
-  public static String intDescriptor() {
-    return "I";
-  }
-
-  public static String longDescriptor() {
-    return "J";
   }
 
   public static String objDescriptorFromReal(Class klass) {

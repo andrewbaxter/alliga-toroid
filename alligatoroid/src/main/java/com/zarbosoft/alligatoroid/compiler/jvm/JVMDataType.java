@@ -5,6 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -18,10 +19,11 @@ public interface JVMDataType extends JVMType {
     return EvaluateResult.error;
   }
 
-  default ROPair<TargetCode, Binding> valueBind(JVMProtocode lower) {
+  default ROPair<TargetCode, Binding> valueBind(Module module, JVMProtocode lower) {
     Object key = new Object();
     return new ROPair<>(
-        new JVMCode().add(lower.lower()).addVarInsn(storeOpcode(), key), new JVMBinding(key, this));
+        new JVMCode().add(lower.lower(module)).addVarInsn(storeOpcode(module), key),
+        new JVMBinding(key, this));
   }
 
   default Value asValue(JVMProtocode lower) {
@@ -33,7 +35,7 @@ public interface JVMDataType extends JVMType {
         this,
         new JVMProtocode() {
           @Override
-          public JVMCode lower() {
+          public JVMCode lower(Module module) {
             return code;
           }
 
@@ -44,9 +46,9 @@ public interface JVMDataType extends JVMType {
         });
   }
 
-  int storeOpcode();
+  int storeOpcode(Module module);
 
-  int loadOpcode();
+  int loadOpcode(Module module);
 
-  String jvmDesc();
+  String jvmDesc(Module module);
 }

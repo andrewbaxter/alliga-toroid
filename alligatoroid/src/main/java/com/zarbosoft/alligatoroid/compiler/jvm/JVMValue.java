@@ -7,7 +7,6 @@ import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.OkValue;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.rendaw.common.ROPair;
 
 public class JVMValue implements OkValue {
@@ -31,10 +30,6 @@ public class JVMValue implements OkValue {
 
   @Override
   public ROPair<TargetCode, Binding> bind(Context context, Location location) {
-    return type.valueBind(lower);
-  }
-
-  public JVMSharedCode lower() {
-    return lower.lower();
+    return type.valueBind(context.module, lower);
   }
 }

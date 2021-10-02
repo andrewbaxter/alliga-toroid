@@ -175,6 +175,10 @@ public abstract class JVMRWSharedCode extends JVMSharedCode {
     return this;
   }
 
+  public JVMRWSharedCode addBool(boolean value) {
+    return add(value ? ICONST_1 : ICONST_0);
+  }
+
   public JVMRWSharedCode addInt(int value) {
     switch (value) {
       case -1:

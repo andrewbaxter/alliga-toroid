@@ -116,13 +116,13 @@ public class Builtin extends LanguageValue {
 
   public static ROPair<String, MortarHalfDataType> dataDescriptor(Class klass) {
     if (klass == void.class) {
-      return new ROPair<>(JVMDescriptor.voidDescriptor(), null);
+      return new ROPair<>(JVMDescriptor.VOID_DESCRIPTOR, null);
     } else if (klass == String.class) {
       return new ROPair<>(
           JVMDescriptor.objDescriptorFromReal(String.class), MortarHalfStringType.type);
     } else if (klass == byte[].class) {
       return new ROPair<>(
-          JVMDescriptor.arrayDescriptor(JVMDescriptor.byteDescriptor()),
+          JVMDescriptor.arrayDescriptor(JVMDescriptor.BYTE_DESCRIPTOR),
           new MortarHalfArrayType(MortarHalfByteType.type));
     } else {
       return new ROPair<>(JVMDescriptor.objDescriptorFromReal(klass), wrapClass(klass));

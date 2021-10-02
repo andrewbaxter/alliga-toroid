@@ -5,6 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.ErrorBinding;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
@@ -43,7 +44,7 @@ public class JVMPseudoStaticField implements SimpleValue {
     code.line(context.module.sourceLocation(location))
         .add(
             new MethodInsnNode(
-                INVOKESTATIC, real.base.jvmInternalClass, real.name, real.jvmDesc, false));
+                INVOKESTATIC, real.base.jvmName, real.name, real.jvmDesc, false));
     if (real.returnType == null) return new EvaluateResult(code, null, NullValue.value);
     else return EvaluateResult.pure(real.returnType.stackAsValue((JVMCode) code));
   }
@@ -66,9 +67,11 @@ public class JVMPseudoStaticField implements SimpleValue {
           }
 
           @Override
-          public JVMSharedCode lower() {
+          public JVMSharedCode lower(Module module) {
             return new JVMCode()
-                .add(new FieldInsnNode(GETSTATIC, base.jvmInternalClass, name, real.jvmDesc()));
+                .add(
+                    new FieldInsnNode(
+                        GETSTATIC, base.jvmName, name, real.jvmDesc(module)));
           }
         });
   }
@@ -81,6 +84,7 @@ public class JVMPseudoStaticField implements SimpleValue {
       return new ROPair<>(null, ErrorBinding.binding);
     }
     return real.valueBind(
+        context.module,
         new JVMProtocode() {
           @Override
           public TargetCode drop(Context context, Location location) {
@@ -88,9 +92,11 @@ public class JVMPseudoStaticField implements SimpleValue {
           }
 
           @Override
-          public JVMSharedCode lower() {
+          public JVMSharedCode lower(Module module) {
             return new JVMCode()
-                .add(new FieldInsnNode(GETSTATIC, base.jvmInternalClass, name, real.jvmDesc()));
+                .add(
+                    new FieldInsnNode(
+                        GETSTATIC, base.jvmName, name, real.jvmDesc(module)));
           }
         });
   }

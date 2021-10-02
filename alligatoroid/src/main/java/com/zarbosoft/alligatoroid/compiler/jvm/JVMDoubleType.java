@@ -4,26 +4,26 @@ import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.SimpleValue;
 
-import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.ISTORE;
+import static org.objectweb.asm.Opcodes.DLOAD;
+import static org.objectweb.asm.Opcodes.DSTORE;
 
-public class JVMBoolType implements SimpleValue, JVMDataType {
-  public static final JVMBoolType value = new JVMBoolType();
+public class JVMDoubleType implements JVMDataType, SimpleValue {
+  public static final JVMDoubleType value = new JVMDoubleType();
 
-  private JVMBoolType() {}
+  private JVMDoubleType() {}
 
   @Override
   public int storeOpcode(Module module) {
-    return ISTORE;
+    return DSTORE;
   }
 
   @Override
   public int loadOpcode(Module module) {
-    return ILOAD;
+    return DLOAD;
   }
 
   @Override
   public String jvmDesc(Module module) {
-    return JVMDescriptor.BOOL_DESCRIPTOR;
+    return JVMDescriptor.DOUBLE_DESCRIPTOR;
   }
 }

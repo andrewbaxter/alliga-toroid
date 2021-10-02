@@ -8,20 +8,20 @@ import com.zarbosoft.rendaw.common.ROMap;
 import java.util.Map;
 
 public interface TreeSerializable {
-  public static void serialize(Writer writer, Object object) {
+  public static void treeSerialize(Writer writer, Object object) {
     if (object instanceof TreeSerializable) {
-      ((TreeSerializable) object).serialize(writer);
+      ((TreeSerializable) object).treeSerialize(writer);
     } else if (ROMap.class.isAssignableFrom(object.getClass())) {
       writer.recordBegin();
       for (Map.Entry e : (Iterable<Map.Entry>) ((ROMap) object)) {
         writer.primitive((String) e.getKey());
-        serialize(writer, e.getValue());
+        treeSerialize(writer, e.getValue());
       }
       writer.recordEnd();
     } else if (ROList.class.isAssignableFrom(object.getClass())) {
       writer.arrayBegin();
       for (Object e : ((ROList) object)) {
-        serialize(writer, e);
+        treeSerialize(writer, e);
       }
       writer.arrayEnd();
     } else if (object.getClass() == String.class) {
@@ -31,5 +31,5 @@ public interface TreeSerializable {
     } else throw new Assertion();
   }
 
-  public void serialize(Writer writer);
+  public void treeSerialize(Writer writer);
 }

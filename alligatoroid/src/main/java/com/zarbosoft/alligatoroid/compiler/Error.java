@@ -175,14 +175,23 @@ public class Error implements TreeSerializable {
     return out;
   }
 
-  public static Error unexpected(ModuleId id, Throwable e) {
+  public static Error unexpectedAt(Location location, Throwable e) {
+    return new Error(
+        "unexpected",
+        convertThrowable(e)
+            .put(LOCATION_KEY, location)
+            .put(
+                DESCRIPTION_KEY,
+                Format.format("An unexpected error occurred while processing: %s", e)));
+  }
+
+  public static Error unexpected(Throwable e) {
     return new Error(
         "unexpected",
         convertThrowable(e)
             .put(
                 DESCRIPTION_KEY,
-                Format.format(
-                    "An unexpected error occurred while processing module %s: %s", id, e)));
+                Format.format("An unexpected error occurred while processing: %s", e)));
   }
 
   public static Error unexpected(Path path, Throwable e) {
@@ -322,10 +331,24 @@ public class Error implements TreeSerializable {
             .put("description", "This import creates an import loop."));
   }
 
+  public static Error wrongType(Location location, Value got, String expected) {
+    return new Error(
+        "wrong_type",
+        new TSMap<String, Object>()
+            .put(LOCATION_KEY, location)
+            .put("got", got)
+            .put("expected", expected)
+            .put(DESCRIPTION_KEY, Format.format("Expected %s but got value %s")));
+  }
+
   @Override
-  public void serialize(Writer writer) {
+  public void treeSerialize(Writer writer) {
     writer.type(type);
-    TreeSerializable.serialize(writer, data);
+    TreeSerializable.treeSerialize(writer, data);
+  }
+
+  public abstract static class PreError extends RuntimeException {
+    public abstract Error toError(Location location);
   }
 
   public static class CacheError extends Error {

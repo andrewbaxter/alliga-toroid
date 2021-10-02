@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.rendaw.common.Assertion;
 
 import static org.objectweb.asm.Opcodes.RETURN;
@@ -28,7 +29,12 @@ public class NullType implements MortarHalfDataType {
 
   @Override
   public String jvmDesc() {
-    return JVMDescriptor.voidDescriptor();
+    return JVMDescriptor.VOID_DESCRIPTOR;
+  }
+
+  @Override
+  public MortarTargetModuleContext.LowerResult box(JVMSharedCode valueCode) {
+    return new MortarTargetModuleContext.LowerResult(this, valueCode);
   }
 
   @Override

@@ -1,6 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.cache;
 
 import com.zarbosoft.alligatoroid.compiler.Error;
+import com.zarbosoft.alligatoroid.compiler.ImportSpec;
 import com.zarbosoft.alligatoroid.compiler.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateRecord;
@@ -27,7 +28,7 @@ import java.nio.file.Path;
 
 import static com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer.errorRet;
 
-public class ModuleIdDeserializer {
+public class ImportSpecDeserializer {
   private static final StatePrototype valuePrototype;
   private static final TSMap<String, ObjectInfo> typeInfos = new TSMap<>();
 
@@ -103,12 +104,12 @@ public class ModuleIdDeserializer {
    * @param path
    * @return
    */
-  public static ModuleId deserialize(TSList<Error> errors, Path path) {
+  public static ImportSpec deserialize(TSList<Error> errors, Path path) {
     if (!Files.exists(path)) return null;
     State state = valuePrototype.create(errors, null);
     Deserializer.deserialize(errors, path, new TSList<>(state));
     Object out = state.build(errors);
     if (out == errorRet) return null;
-    return (ModuleId) out;
+    return new ImportSpec((ModuleId) out);
   }
 }

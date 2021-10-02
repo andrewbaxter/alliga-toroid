@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.jvm;
 import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.cache.GraphSerializable;
@@ -49,9 +50,9 @@ public class JVMExternStaticField implements SimpleValue, GraphSerializable {
           }
 
           @Override
-          public JVMSharedCode lower() {
+          public JVMSharedCode lower(Module module) {
             return new JVMCode()
-                .add(new FieldInsnNode(GETSTATIC, jvmParentInternalClass, name, type.jvmDesc()));
+                .add(new FieldInsnNode(GETSTATIC, jvmParentInternalClass, name, type.jvmDesc(module)));
           }
         });
   }

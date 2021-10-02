@@ -7,10 +7,10 @@ import com.zarbosoft.alligatoroid.compiler.mortar.SimpleValue;
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.ISTORE;
 
-public class JVMBoolType implements SimpleValue, JVMDataType {
-  public static final JVMBoolType value = new JVMBoolType();
+public class JVMByteType implements JVMDataType, SimpleValue {
+  public static final JVMByteType value = new JVMByteType();
 
-  private JVMBoolType() {}
+  private JVMByteType() {}
 
   @Override
   public int storeOpcode(Module module) {
@@ -24,6 +24,6 @@ public class JVMBoolType implements SimpleValue, JVMDataType {
 
   @Override
   public String jvmDesc(Module module) {
-    return JVMDescriptor.BOOL_DESCRIPTOR;
+    return JVMDescriptor.BYTE_DESCRIPTOR;
   }
 }

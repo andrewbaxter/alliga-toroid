@@ -3,17 +3,20 @@ package com.zarbosoft.alligatoroid.compiler.cache;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.LocalModuleId;
-import com.zarbosoft.alligatoroid.compiler.ModuleId;
+import com.zarbosoft.alligatoroid.compiler.ImportSpec;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer;
+import com.zarbosoft.alligatoroid.compiler.jvm.JVMArrayType;
+import com.zarbosoft.alligatoroid.compiler.jvm.JVMDeferredDataType;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMExternClassType;
+import com.zarbosoft.alligatoroid.compiler.jvm.JVMExternConstructor;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMExternStaticField;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMShallowMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.language.Builtin;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
+import com.zarbosoft.alligatoroid.compiler.mortar.Tuple;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
@@ -44,10 +47,12 @@ public class Cache {
    */
   public static final ROMap<String, Method> builtinTypeMap;
 
+  public static final String CACHE_OBJECT_TYPE_IMPORT_SPEC = "importSpec";
   public static final String CACHE_OBJECT_TYPE_BUILTIN = "builtin";
   public static final String CACHE_OBJECT_TYPE_OUTPUT = "output";
   public static final String CACHE_SUBVALUE_TYPE_STRING = "string";
   public static final String CACHE_SUBVALUE_TYPE_INT = "int";
+  public static final String CACHE_SUBVALUE_TYPE_BOOL = "bool";
   public static final String CACHE_SUBVALUE_TYPE_BUILTIN = "builtin";
   public static final String CACHE_SUBVALUE_TYPE_CACHE = "cache";
   /** Builtin values - values appearing in builtin */
@@ -59,7 +64,12 @@ public class Cache {
   static {
     TSMap<String, Method> builtinTypeMap1 = new TSMap<>();
     Class[] builtinTypes = {
-      JVMExternClassType.class, JVMExternStaticField.class, JVMShallowMethodFieldType.class
+      JVMExternClassType.class,
+      JVMExternStaticField.class,
+      JVMShallowMethodFieldType.class,
+      JVMDeferredDataType.class,
+      JVMArrayType.class,
+      JVMExternConstructor.class
     };
     for (Class klass : builtinTypes) {
       builtinTypeMap1.put(
@@ -120,7 +130,8 @@ public class Cache {
     return klass.getName();
   }
 
-  public void serializeSubValue(Path currentModuleCachePath, Writer writer, Object value) {
+  public void serializeSubValue(
+      TSList<Error> warnings, Path currentModuleCachePath, Writer writer, Object value) {
     String key;
     if (value == null) {
       writer.type(CACHE_SUBVALUE_TYPE_NULL).arrayBegin().arrayEnd();
@@ -128,11 +139,19 @@ public class Cache {
       writer.type(CACHE_SUBVALUE_TYPE_STRING).primitive((String) value);
     } else if (value.getClass() == Integer.class) {
       writer.type(CACHE_SUBVALUE_TYPE_INT).primitive(((Integer) value).toString());
+    } else if (value.getClass() == Boolean.class) {
+      writer.type(CACHE_SUBVALUE_TYPE_BOOL).primitive(((Boolean) value) ? "true" : "false");
     } else if (value.getClass() == Record.class) {
       writer.recordBegin();
       for (Map.Entry<Object, Object> e : ((Record) value).data) {
         writer.primitive((String) e.getKey());
-        serializeSubValue(currentModuleCachePath, writer, e.getValue());
+        serializeSubValue(warnings, currentModuleCachePath, writer, e.getValue());
+      }
+      writer.recordEnd();
+    } else if (value.getClass() == Tuple.class) {
+      writer.recordBegin();
+      for (Object e : ((Tuple) value).data) {
+        serializeSubValue(warnings, currentModuleCachePath, writer, e);
       }
       writer.recordEnd();
     } else if ((key = builtinMapReverse.getOpt(value)) != null) {
@@ -142,13 +161,13 @@ public class Cache {
         key = loadedCacheReverse.getOpt(value);
       }
       if (key == null) {
-        key = serializeObject(currentModuleCachePath, value);
+        key = serializeObject(warnings, currentModuleCachePath, value);
       }
       writer.type(CACHE_SUBVALUE_TYPE_CACHE).primitive(key);
     }
   }
 
-  public String serializeObject(Path currentModuleCachePath, Object value) {
+  public String serializeObject(TSList<Error> warnings, Path currentModuleCachePath, Object value) {
     return uncheck(
         () -> {
           Path keyPath;
@@ -163,26 +182,35 @@ public class Cache {
           }
           try (OutputStream stream = Files.newOutputStream(cachePath(keyPath))) {
             Writer writer = new Writer(stream, (byte) ' ', 4);
-            String key;
-            String builtinKey = builtinTypeKey(value.getClass());
-            if (builtinTypeMap.has(builtinKey)) {
-              key = builtinKey;
-              writer.type(CACHE_OBJECT_TYPE_BUILTIN);
+            if (value.getClass() == ImportSpec.class) {
+              writer.type(CACHE_OBJECT_TYPE_IMPORT_SPEC);
+              Path path = ensureCachePath(warnings, (ImportSpec) value);
+              writer.primitive(path.toString());
             } else {
-              Object definition = value.getClass().getMethod("definition").invoke(null);
-              synchronized (cacheLock) {
-                key = loadedCacheReverse.getOpt(definition);
+              String key;
+              String builtinKey = builtinTypeKey(value.getClass());
+              if (builtinTypeMap.has(builtinKey)) {
+                key = builtinKey;
+                writer.type(CACHE_OBJECT_TYPE_BUILTIN);
+              } else {
+                Object definition = value.getClass().getMethod("definition").invoke(null);
+                synchronized (cacheLock) {
+                  key = loadedCacheReverse.getOpt(definition);
+                }
+                if (key == null) {
+                  key = serializeObject(warnings, currentModuleCachePath, definition);
+                }
+                writer.type(CACHE_OBJECT_TYPE_OUTPUT);
               }
-              if (key == null) {
-                key = serializeObject(currentModuleCachePath, definition);
-              }
-              writer.type(CACHE_OBJECT_TYPE_OUTPUT);
+              writer.arrayBegin();
+              writer.primitive(key);
+              serializeSubValue(
+                  warnings,
+                  currentModuleCachePath,
+                  writer,
+                  ((GraphSerializable) value).graphSerialize());
+              writer.arrayEnd();
             }
-            writer.arrayBegin();
-            writer.primitive(key);
-            serializeSubValue(
-                currentModuleCachePath, writer, ((GraphSerializable) value).graphSerialize());
-            writer.arrayEnd();
           }
           return keyPath.toString();
         });
@@ -209,15 +237,15 @@ public class Cache {
     }
   }
 
-  public void writeOutput(LocalModuleId moduleId, TSList<Error> warnings, Path moduleCacheRelPath, Value value) {
+  public void writeOutput(TSList<Error> warnings, Path moduleCacheRelPath, Value value) {
     Path outputPath = cachePath(moduleCacheRelPath).resolve(CACHE_FILENAME_OUTPUT);
     Utils.recursiveDelete(outputPath);
     Utils.recursiveDelete(cachePath(moduleCacheRelPath).resolve(CACHE_DIRECTORY_OBJECTS));
     try (OutputStream stream = Files.newOutputStream(outputPath)) {
       Writer writer = new Writer(stream, (byte) ' ', 4);
-      serializeSubValue(moduleCacheRelPath, writer, value);
+      serializeSubValue(warnings, moduleCacheRelPath, writer, value);
     } catch (Throwable e) {
-      warnings.add(Error.unexpected(moduleId, e));
+      warnings.add(Error.unexpected(e));
     }
   }
 
@@ -268,17 +296,17 @@ public class Cache {
   /**
    * Finds an existing or creates a new cache directory for a module.
    *
-   * Returns a relative cache path (get absolute via cachePath())
+   * <p>Returns a relative cache path (get absolute via cachePath())
    *
    * @param id
    * @return
    */
-  public Path ensureCachePath(TSList<Error> warnings, ModuleId id) {
+  public Path ensureCachePath(TSList<Error> warnings, ImportSpec importSpec) {
     return uncheck(
         () -> {
           synchronized (cacheDirLock) {
             Path tryCacheModuleRelPath = null;
-            String hash = id.hash();
+            String hash = importSpec.hash();
             int cuts = 3;
             for (int i = 0; i < cuts; ++i) {
               String seg = hash.substring(i * 2, (i + 1) * 2);
@@ -292,9 +320,9 @@ public class Cache {
                       Format.format("%s-%s", hash.substring(cuts * 2), i));
               TSList<Error> errors1 = new TSList<>();
               Path moduleIdPath = cachePath(tryCacheModuleRelPath).resolve(CACHE_FILENAME_ID);
-              ModuleId tryId = ModuleIdDeserializer.deserialize(errors1, moduleIdPath);
+              ImportSpec tryId = ImportSpecDeserializer.deserialize(errors1, moduleIdPath);
               if (errors1.some()) warnings.add(new Error.CacheError(moduleIdPath, errors1));
-              if (errors1.some() || tryId == null || tryId.equal1(id)) {
+              if (errors1.some() || tryId == null || tryId.equal1(importSpec)) {
                 useCacheModuleRelPath = tryCacheModuleRelPath;
                 break;
               }
@@ -307,7 +335,7 @@ public class Cache {
                 Files.newOutputStream(
                     cachePath(useCacheModuleRelPath).resolve(CACHE_FILENAME_ID))) {
               Writer writer = new Writer(s, (byte) ' ', 4);
-              id.serialize(writer);
+              importSpec.treeSerialize(writer);
             }
             return useCacheModuleRelPath;
           }

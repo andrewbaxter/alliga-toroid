@@ -12,9 +12,9 @@ public final class Location implements TreeSerializable {
   }
 
   @Override
-  public void serialize(Writer writer) {
+  public void treeSerialize(Writer writer) {
     writer.recordBegin().primitive("module");
-    module.serialize(writer);
+    module.treeSerialize(writer);
     writer.primitive("id").primitive(Integer.toString(id)).recordEnd();
   }
 }

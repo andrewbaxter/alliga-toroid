@@ -7,7 +7,7 @@ import java.util.concurrent.CompletableFuture;
 
 /** Module-wide context used when compiling. */
 public class Module {
-  public final ModuleId id;
+  public final ImportSpec spec;
   public final CompilationContext compilationContext;
   public final CompletableFuture<Value> result;
   public final Log log = new Log();
@@ -18,11 +18,11 @@ public class Module {
   public String sourcePath;
 
   public Module(
-      ModuleId id,
+      ImportSpec spec,
       ImportPath importPath,
       CompilationContext compilationContext,
       CompletableFuture<Value> result) {
-    this.id = id;
+    this.spec = spec;
     this.importPath = importPath;
     this.compilationContext = compilationContext;
     this.result = result;

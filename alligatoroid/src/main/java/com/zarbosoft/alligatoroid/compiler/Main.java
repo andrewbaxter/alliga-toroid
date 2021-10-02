@@ -45,7 +45,7 @@ public class Main {
       }
 
       outWriter.recordBegin().primitive("id");
-      value.id.serialize(outWriter);
+      value.spec.treeSerialize(outWriter);
 
       outWriter.primitive("log");
       outWriter.arrayBegin();
@@ -57,14 +57,14 @@ public class Main {
       outWriter.primitive("errors");
       outWriter.arrayBegin();
       for (Error error : value.log.errors) {
-        error.serialize(outWriter);
+        error.treeSerialize(outWriter);
       }
       outWriter.arrayEnd();
 
       outWriter.primitive("warnings");
       outWriter.arrayBegin();
       for (Error error : value.log.warnings) {
-        error.serialize(outWriter);
+        error.treeSerialize(outWriter);
       }
       outWriter.arrayEnd();
 

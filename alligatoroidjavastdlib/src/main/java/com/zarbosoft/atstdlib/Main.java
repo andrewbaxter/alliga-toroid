@@ -4,19 +4,11 @@ import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.ImportSpec;
 import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.luxem.write.Writer;
-import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import static com.zarbosoft.alligatoroid.compiler.Main.compile;
 
@@ -64,7 +56,7 @@ public class Main {
         }
 
         outWriter.primitive("id");
-        value.id.serialize(outWriter);
+        value.spec.treeSerialize(outWriter);
 
         outWriter.primitive("log");
         outWriter.arrayBegin();
@@ -76,14 +68,14 @@ public class Main {
         outWriter.primitive("errors");
         outWriter.arrayBegin();
         for (Error error : value.log.errors) {
-          error.serialize(outWriter);
+          error.treeSerialize(outWriter);
         }
         outWriter.arrayEnd();
 
         outWriter.primitive("warnings");
         outWriter.arrayBegin();
         for (Error error : value.log.warnings) {
-          error.serialize(outWriter);
+          error.treeSerialize(outWriter);
         }
         outWriter.arrayEnd();
 

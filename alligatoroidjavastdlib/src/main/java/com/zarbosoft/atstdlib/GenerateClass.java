@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Future;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
@@ -29,7 +28,7 @@ public class GenerateClass {
 
   public static Path generate(Class klass) {
     GenerateClass g = new GenerateClass(klass);
-    Future f = Main.sync.push(g);
+    Main.sync.push(g);
     return g.path;
   }
 
@@ -160,30 +159,41 @@ public class GenerateClass {
 
   public LSubtree lType(IdManager ids, Class klass) {
     if (klass == this.klass) {
-      return lLocal(ids, lString(ids, "type"));
+      return lAccess(ids, lLocal(ids, lString(ids, "res")), lString(ids, "type"));
     } else if (klass.isArray()) {
       return lCall(
           ids, lAccess(ids, jvm(ids), lString(ids, "array")), lType(ids, klass.getComponentType()));
     } else if (klass == void.class) {
-      return lAccess(ids, lBuiltin(ids), lString(ids, "void"));
+      return lAccess(ids, lBuiltin(ids), lString(ids, "nullType"));
+    } else if (klass == boolean.class) {
+      return lAccess(ids, jvm(ids), lString(ids, "bool"));
     } else if (klass == int.class
         || klass == short.class
         || klass == long.class
         || klass == byte.class
         || klass == float.class
         || klass == double.class
-        || klass == boolean.class
         || klass == char.class) {
       return lAccess(ids, jvm(ids), lString(ids, klass.getName()));
     } else {
       return writer -> {
-        writer.type("mod_local").recordBegin();
-        ids.write(writer);
-        writer.primitive("path");
-        lString(ids, path.getParent().relativize(generate(klass)).toString()).write(writer);
-        writer.recordEnd();
+        lCall(
+                ids,
+                lAccess(ids, jvm(ids), lString(ids, "deferredDataType")),
+                lLocalMod(ids, path.getParent().relativize(generate(klass)).toString()))
+            .write(writer);
       };
     }
+  }
+
+  private LSubtree lLocalMod(IdManager ids, String path) {
+    return writer -> {
+      writer.type("mod_local").recordBegin();
+      ids.write(writer);
+      writer.primitive("path");
+      lString(ids, path).write(writer);
+      writer.recordEnd();
+    };
   }
 
   public LSubtree lType(IdManager ids, Parameter[] params) {
@@ -249,23 +259,35 @@ public class GenerateClass {
             if (publicConstructors.size() > 0) {
               lBind(
                       ids,
-                      lString(ids, "new"),
+                      lString(ids, "constructor"),
                       lCall(
                           ids,
                           lAccess(ids, accessBuilder(ids), lString(ids, "constructor")),
                           lTuple(ids)))
                   .write(writer);
+              out.add(
+                  new ROPair<>(
+                      lString(ids, "new"),
+                      lAccess(
+                          ids,
+                          lLocal(ids, lString(ids, "constructor")),
+                          lString(ids, "constructor"))));
               for (Constructor constructor : publicConstructors) {
                 lCall(
                         ids,
-                        lAccess(ids, accessBuilder(ids), lString(ids, "declareConstructor")),
+                        lAccess(
+                            ids,
+                            lAccess(
+                                ids,
+                                lLocal(ids, lString(ids, "constructor")),
+                                lString(ids, "builder")),
+                            lString(ids, "declare")),
                         lRecord(
                             ids,
                             new ROPair<>(
                                 lString(ids, "in"), lType(ids, constructor.getParameters()))))
                     .write(writer);
               }
-              out.add(new ROPair<>(lString(ids, "new"), lLocal(ids, lString(ids, "new"))));
             }
 
             for (Method m : klass.getDeclaredMethods()) {

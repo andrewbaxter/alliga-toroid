@@ -1,13 +1,17 @@
 package com.zarbosoft.alligatoroid.compiler.cache;
 
 import com.zarbosoft.alligatoroid.compiler.Error;
+import com.zarbosoft.alligatoroid.compiler.ImportSpec;
 import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateArray;
 import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateSingle;
+import com.zarbosoft.alligatoroid.compiler.deserialize.DefaultStatePrimitive;
 import com.zarbosoft.alligatoroid.compiler.deserialize.DefaultStateSingle;
 import com.zarbosoft.alligatoroid.compiler.deserialize.State;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StateErrorSingle;
 import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.rendaw.common.TSList;
+
+import java.nio.file.Paths;
 
 public class ObjectRootState extends DefaultStateSingle {
   private final Cache cache;
@@ -20,6 +24,21 @@ public class ObjectRootState extends DefaultStateSingle {
   @Override
   protected BaseStateSingle innerEatType(TSList<Error> errors, LuxemPath luxemPath, String name) {
     switch (name) {
+      case Cache.CACHE_OBJECT_TYPE_IMPORT_SPEC:
+        return new DefaultStatePrimitive() {
+          ImportSpec out;
+
+          @Override
+          public Object build(TSList<Error> errors) {
+            return out;
+          }
+
+          @Override
+          protected void innerEatPrimitiveUntyped(
+              TSList<Error> errors, LuxemPath luxemPath, String value) {
+            out = ImportSpecDeserializer.deserialize(errors, Paths.get(value));
+          }
+        };
       case Cache.CACHE_OBJECT_TYPE_OUTPUT:
         return new DefaultStateSingle() {
           @Override

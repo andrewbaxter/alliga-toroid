@@ -15,7 +15,7 @@ public final class LocalModuleId implements ModuleId {
   }
 
   @Override
-  public void serialize(Writer writer) {
+  public void treeSerialize(Writer writer) {
     writer.type("local").recordBegin().primitive("path").primitive(path.toString()).recordEnd();
   }
 

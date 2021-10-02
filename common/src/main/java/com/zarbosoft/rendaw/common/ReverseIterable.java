@@ -1,13 +1,15 @@
 package com.zarbosoft.rendaw.common;
 
-import com.zarbosoft.rendaw.common.ROList;
-
 import java.util.Iterator;
+import java.util.List;
 
 public class ReverseIterable<T> implements Iterable<T> {
-  private final ROList<T> data;
+  private final List<T> data;
 
   public ReverseIterable(ROList<T> data) {
+    this.data = data.inner_();
+  }
+  public ReverseIterable(List<T> data) {
     this.data = data;
   }
 

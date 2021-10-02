@@ -74,7 +74,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     for (int i = 0; i < args.length; i++) {
       Class arg = args[i];
       if (arg == int.class) {
-        argDesc[i] = JVMDescriptor.intDescriptor();
+        argDesc[i] = JVMDescriptor.INT_DESCRIPTOR;
         continue;
       }
       if (arg.isPrimitive()) throw new Assertion(); // todo?
@@ -97,6 +97,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     }
     if (value == NullValue.value) {
       return new LowerResult(NullType.type, new MortarCode());
+
     } else if (value instanceof LooseTuple) {
       MortarCode out = new MortarCode();
       TSList<Object> types = new TSList<>();
@@ -105,12 +106,15 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       for (EvaluateResult e : ((LooseTuple) value).data) {
         if (e.preEffect != null) out.add((JVMSharedCode) e.preEffect);
         LowerResult lowerRes = lower(context, e.value);
+        if (lowerRes.dataType != null)
+          lowerRes = lowerRes.dataType.box(lowerRes.valueCode);
         types.add(lowerRes.dataType);
         out.add(lowerRes.valueCode);
         out.add(tsListAddCode);
       }
       out.add(newTupleCode2);
       return new LowerResult(new Tuple(types), out);
+
     } else if (value instanceof LooseRecord) {
       MortarCode out = new MortarCode();
       TSMap<Object, Object> types = new TSMap<>();
@@ -120,6 +124,8 @@ public class MortarTargetModuleContext implements TargetModuleContext {
         if (e.second.preEffect != null) out.add((JVMSharedCode) e.second.preEffect);
         out.add(lowerRaw(context, e.first, true));
         LowerResult lowerRes = lower(context, e.second.value);
+        if (lowerRes.dataType != null)
+        lowerRes = lowerRes.dataType.box(lowerRes.valueCode);
         types.put(e.first, lowerRes.dataType);
         out.add(lowerRes.valueCode);
         out.add(
@@ -135,15 +141,23 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       }
       out.add(newRecordCode2);
       return new LowerResult(new Record(types), out);
+
     } else if (value instanceof WholeString) {
       return new LowerResult(
           MortarHalfStringType.type, new MortarCode().addString(((WholeString) value).value));
 
+    } else if (value instanceof WholeBool) {
+      return new LowerResult(
+          MortarHalfBoolType.type, new MortarCode().addBool(((WholeBool) value).value));
+
     } else if (value instanceof MortarHalfValue) {
       return new LowerResult(((MortarHalfValue) value).type, ((MortarHalfValue) value).lower());
+
     } else {
+      if (value instanceof WholeValue) throw new Assertion();
       return new LowerResult(
           null /* TODO */, ((MortarTargetModuleContext) context.target).transfer(value));
+
     }
   }
 

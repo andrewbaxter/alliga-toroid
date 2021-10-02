@@ -4,6 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.Binding;
 import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 
 public class JVMBinding implements Binding {
@@ -21,8 +22,8 @@ public class JVMBinding implements Binding {
         type.asValue(
             new JVMProtocode() {
               @Override
-              public JVMCode lower() {
-                return (JVMCode) new JVMCode().addVarInsn(type.loadOpcode(), key);
+              public JVMCode lower(Module module) {
+                return (JVMCode) new JVMCode().addVarInsn(type.loadOpcode(module), key);
               }
 
               @Override

@@ -5,6 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import static org.objectweb.asm.Opcodes.POP;
@@ -44,4 +45,6 @@ public interface MortarHalfDataType extends MortarHalfType, MortarUnlowerer {
   int returnOpcode();
 
   String jvmDesc();
+
+  MortarTargetModuleContext.LowerResult box(JVMSharedCode valueCode);
 }

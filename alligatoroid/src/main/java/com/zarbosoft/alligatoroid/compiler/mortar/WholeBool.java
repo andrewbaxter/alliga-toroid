@@ -21,7 +21,7 @@ public class WholeBool implements WholeValue, OkValue {
   }
 
   @Override
-  public void serialize(Writer writer) {
+  public void treeSerialize(Writer writer) {
     writer.type("bool").primitive(value ? "true" : "false");
   }
 }

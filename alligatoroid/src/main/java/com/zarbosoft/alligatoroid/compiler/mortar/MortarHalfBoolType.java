@@ -9,10 +9,10 @@ import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.IRETURN;
 import static org.objectweb.asm.Opcodes.ISTORE;
 
-public class MortarHalfByteType implements MortarHalfDataType {
-  public static final MortarHalfByteType type = new MortarHalfByteType();
+public class MortarHalfBoolType implements MortarHalfDataType {
+  public static final MortarHalfBoolType type = new MortarHalfBoolType();
 
-  private MortarHalfByteType() {}
+  private MortarHalfBoolType() {}
 
   @Override
   public int storeOpcode() {
@@ -31,13 +31,16 @@ public class MortarHalfByteType implements MortarHalfDataType {
 
   @Override
   public String jvmDesc() {
-    return JVMDescriptor.BYTE_DESCRIPTOR;
+    return JVMDescriptor.BOOL_DESCRIPTOR;
   }
 
   @Override
   public MortarTargetModuleContext.LowerResult box(JVMSharedCode valueCode) {
     return new MortarTargetModuleContext.LowerResult(
-        MortarHalfBoxedByteType.type, new MortarCode().add(valueCode).add(JVMDescriptor.boxByte));
+        MortarHalfBoxedBoolType.type,
+        new MortarCode()
+            .add(valueCode)
+            .add(JVMDescriptor.boxBool));
   }
 
   @Override

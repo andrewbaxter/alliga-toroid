@@ -2,6 +2,7 @@ package com.zarbosoft.rendaw.common;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.function.Consumer;
@@ -23,7 +24,9 @@ public class Common {
     return a.compareTo(b) < 0;
   }
 
-  public static RuntimeException uncheck(final Exception e) {
+  public static RuntimeException uncheck(final Throwable e) {
+    if (e instanceof InvocationTargetException)
+      return uncheck(((InvocationTargetException) e).getTargetException());
     if (e instanceof RuntimeException) return (RuntimeException) e;
     if (e instanceof IOException) return new UncheckedIOException((IOException) e);
     return new UncheckedException(e);

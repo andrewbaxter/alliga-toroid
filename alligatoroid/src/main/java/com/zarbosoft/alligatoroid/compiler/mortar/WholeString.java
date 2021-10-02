@@ -21,7 +21,7 @@ public class WholeString implements WholeValue, OkValue {
   }
 
   @Override
-  public void serialize(Writer writer) {
+  public void treeSerialize(Writer writer) {
     writer.type("string").primitive(value);
   }
 }
