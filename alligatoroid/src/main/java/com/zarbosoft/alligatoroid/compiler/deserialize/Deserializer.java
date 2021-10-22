@@ -10,10 +10,22 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static com.zarbosoft.rendaw.common.Common.uncheck;
+
 public class Deserializer {
   public static final ErrorRet errorRet = new ErrorRet();
 
   public static void deserialize(TSList<Error> errors, Path path, TSList<State> stack) {
+    uncheck(
+        () -> {
+          try (InputStream stream = Files.newInputStream(path)) {
+            deserialize(errors, path.toString(), stream, stack);
+          }
+        });
+  }
+
+  public static void deserialize(
+      TSList<Error> errors, String path, InputStream source, TSList<State> stack) {
     // TODO luxem path
     BufferedReader reader =
         new BufferedReader() {
@@ -55,11 +67,7 @@ public class Deserializer {
             stack.last().eatPrimitive(errors, stack, luxemPath, value);
           }
         };
-    try (InputStream stream = Files.newInputStream(path)) {
-      reader.feed(stream);
-    } catch (Exception e) {
-      errors.add(Error.unexpected(path, e));
-    }
+    uncheck(() -> reader.feed(source));
     if (stack.some()) {
       errors.add(Error.deserializeIncompleteFile(path));
     }

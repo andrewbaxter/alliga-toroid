@@ -52,7 +52,7 @@ public class JVMExternStaticField implements SimpleValue, GraphSerializable {
           @Override
           public JVMSharedCode lower(Module module) {
             return new JVMCode()
-                .add(new FieldInsnNode(GETSTATIC, jvmParentInternalClass, name, type.jvmDesc(module)));
+                .add(new FieldInsnNode(GETSTATIC, jvmParentInternalClass, name, type.jvmDesc()));
           }
         });
   }

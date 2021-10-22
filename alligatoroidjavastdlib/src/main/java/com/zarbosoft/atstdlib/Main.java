@@ -6,11 +6,14 @@ import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.TSMap;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.zarbosoft.alligatoroid.compiler.Main.compile;
+import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Main {
   public static Sync sync = new Sync();
@@ -85,5 +88,14 @@ public class Main {
     }
     System.out.flush();
     if (hadErrors) throw new RuntimeException("Compile errors");
+
+    // Bundle
+    uncheck(() -> Files.deleteIfExists(Paths.get("bundle.zip")));
+    uncheck(
+        () ->
+            new ProcessBuilder("zip", "-r", "../bundle.zip", ".")
+                .directory(Paths.get("out").toFile())
+                .start()
+                .waitFor());
   }
 }

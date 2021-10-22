@@ -1,9 +1,18 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.alligatoroid.compiler.cache.GraphSerializable;
+import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.SimpleValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.Tuple;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSMap;
 
-public abstract class LanguageValue implements SimpleValue {
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
+
+import static com.zarbosoft.rendaw.common.Common.uncheck;
+
+public abstract class LanguageValue implements SimpleValue , GraphSerializable {
   public final Location location;
   public final boolean hasLowerInSubtree;
 
@@ -34,5 +43,35 @@ public abstract class LanguageValue implements SimpleValue {
   @Override
   public Location location() {
     return location;
+  }
+
+  @Override
+  public Record graphSerialize() {
+    TSMap<Object, Object> data = new TSMap<>();
+    for (Parameter parameter : getClass().getConstructors()[0].getParameters()) {
+        data.putNew(parameter.getName(), uncheck(() -> {
+          String fieldName = parameter.getName();
+          if ("id".equals(fieldName)) fieldName = "location";
+          Object fieldData = this.getClass().getField(fieldName).get(this);
+          if (fieldData instanceof ROList) {
+            fieldData = new Tuple((ROList<Object>) fieldData);
+          }
+          return fieldData;
+        }));
+    }
+    return new Record(data);
+  }
+
+  public static Object graphDeserialize(Class klass, Record data) {
+    Constructor constructor = klass.getConstructors()[0];
+    Object[] args = new Object[constructor.getParameterCount()];
+    for (int i = 0; i < constructor.getParameters().length; i++) {
+      Parameter param = constructor.getParameters()[i];
+      args[i] = data.data.get(param.getName());
+      if (args[i] instanceof Tuple) {
+        args[i] = ((Tuple) args[i]).data;
+      }
+    }
+    return uncheck(() -> constructor.newInstance(args));
   }
 }

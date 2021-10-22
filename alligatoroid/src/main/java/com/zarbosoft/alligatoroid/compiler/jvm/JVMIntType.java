@@ -13,17 +13,17 @@ public class JVMIntType implements JVMDataType, SimpleValue {
   private JVMIntType() {}
 
   @Override
-  public int storeOpcode(Module module) {
+  public int storeOpcode() {
     return ISTORE;
   }
 
   @Override
-  public int loadOpcode(Module module) {
+  public int loadOpcode() {
     return ILOAD;
   }
 
   @Override
-  public String jvmDesc(Module module) {
+  public String jvmDesc() {
     return JVMDescriptor.INT_DESCRIPTOR;
   }
 }

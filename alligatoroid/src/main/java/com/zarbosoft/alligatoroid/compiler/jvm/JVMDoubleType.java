@@ -13,17 +13,17 @@ public class JVMDoubleType implements JVMDataType, SimpleValue {
   private JVMDoubleType() {}
 
   @Override
-  public int storeOpcode(Module module) {
+  public int storeOpcode() {
     return DSTORE;
   }
 
   @Override
-  public int loadOpcode(Module module) {
+  public int loadOpcode() {
     return DLOAD;
   }
 
   @Override
-  public String jvmDesc(Module module) {
+  public String jvmDesc() {
     return JVMDescriptor.DOUBLE_DESCRIPTOR;
   }
 }

@@ -71,7 +71,7 @@ public class JVMPseudoStaticField implements SimpleValue {
             return new JVMCode()
                 .add(
                     new FieldInsnNode(
-                        GETSTATIC, base.jvmName, name, real.jvmDesc(module)));
+                        GETSTATIC, base.jvmName, name, real.jvmDesc()));
           }
         });
   }
@@ -96,7 +96,7 @@ public class JVMPseudoStaticField implements SimpleValue {
             return new JVMCode()
                 .add(
                     new FieldInsnNode(
-                        GETSTATIC, base.jvmName, name, real.jvmDesc(module)));
+                        GETSTATIC, base.jvmName, name, real.jvmDesc()));
           }
         });
   }

@@ -8,7 +8,6 @@ import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseTuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeBool;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeString;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
@@ -31,10 +30,6 @@ public class JVMBaseClassType extends JVMObjectType {
   public final TSSet<String> fields;
   public final TSSet<String> staticFields;
   public final TSList<JVMBaseClassType> inherits;
-
-  public void resolveMethods(Module module) {
-
-  }
 
   public JVMBaseClassType(
       String jvmExternalClass,
@@ -89,6 +84,8 @@ public class JVMBaseClassType extends JVMObjectType {
     } else return ROTuple.create(getArgTupleInner(value));
   }
 
+  public void resolveMethods(Module module) {}
+
   @Override
   public EvaluateResult access(Context context, Location location, Value field0) {
     WholeValue key = WholeValue.getWhole(context, location, field0);
@@ -111,7 +108,7 @@ public class JVMBaseClassType extends JVMObjectType {
   }
 
   @Override
-  public String jvmDesc(Module module) {
+  public String jvmDesc() {
     return JVMDescriptor.objDescriptorFromJvmName(jvmName);
   }
 }

@@ -23,6 +23,7 @@ import com.zarbosoft.alligatoroid.compiler.language.Bind;
 import com.zarbosoft.alligatoroid.compiler.language.Block;
 import com.zarbosoft.alligatoroid.compiler.language.Builtin;
 import com.zarbosoft.alligatoroid.compiler.language.Call;
+import com.zarbosoft.alligatoroid.compiler.language.Import;
 import com.zarbosoft.alligatoroid.compiler.language.LiteralBool;
 import com.zarbosoft.alligatoroid.compiler.language.LiteralString;
 import com.zarbosoft.alligatoroid.compiler.language.Local;
@@ -38,36 +39,37 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.nio.file.Path;
 
 import static com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer.errorRet;
 
 public class LanguageDeserializer {
+  public static final Class[] LANGUAGE =
+      new Class[] {
+        Access.class,
+        Bind.class,
+        Block.class,
+        Builtin.class,
+        Call.class,
+        LiteralString.class,
+        LiteralBool.class,
+        Local.class,
+        Record.class,
+        RecordElement.class,
+        Tuple.class,
+        Stage.class,
+        Lower.class,
+        Import.class,
+        ModLocal.class,
+      };
   private final StatePrototype valuePrototype;
   private final TSMap<String, ObjectInfo> languageNodeInfos = new TSMap<>();
 
   public LanguageDeserializer(ModuleId module) {
-    final Class[] language =
-        new Class[] {
-          Access.class,
-          Bind.class,
-          Block.class,
-          Builtin.class,
-          Call.class,
-          LiteralString.class,
-          LiteralBool.class,
-          Local.class,
-          Record.class,
-          RecordElement.class,
-          Tuple.class,
-          Stage.class,
-          Lower.class,
-          ModLocal.class,
-        };
     valuePrototype =
         new StatePrototype() {
           @Override
@@ -104,11 +106,11 @@ public class LanguageDeserializer {
           }
         };
 
-    for (Class klass : language) {
+    for (Class klass : LANGUAGE) {
       String type = toUnderscore(klass.getSimpleName());
       languageNodeInfos.put(type, new ObjectInfo(type));
     }
-    for (Class klass : language) {
+    for (Class klass : LANGUAGE) {
       Constructor constructor = klass.getConstructors()[0];
       TSMap<String, StatePrototype> fields = new TSMap<>();
       TSMap<String, Integer> argOrder = new TSMap<>();
@@ -158,7 +160,7 @@ public class LanguageDeserializer {
     return out.toString();
   }
 
-  public ROList<Value> deserialize(TSList<Error> errors, Path path) {
+  public ROList<Value> deserialize(TSList<Error> errors, String path, InputStream source) {
     TSList<State> stack = new TSList<>();
     State[] rootNodes = new State[1];
     stack.add(
@@ -176,7 +178,7 @@ public class LanguageDeserializer {
             return out;
           }
         });
-    Deserializer.deserialize(errors, path, stack);
+    Deserializer.deserialize(errors, path, source, stack);
     Object out = rootNodes[0].build(errors);
     if (out == errorRet) {
       if (errors.none()) errors.add(Error.deserializeMissingSourceFile(path));

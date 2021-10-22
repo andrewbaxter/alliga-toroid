@@ -23,6 +23,8 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.Record;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -38,7 +40,9 @@ import java.lang.reflect.Parameter;
 import static org.objectweb.asm.Opcodes.GETFIELD;
 
 public class Builtin extends LanguageValue {
+  /** Initialized statically, never modified after (thread safe for reads). */
   public static TSMap<Class, MortarClass> wrappedClasses = new TSMap<>();
+
   public static LooseRecord builtin =
       new LooseRecord(
           new TSOrderedMap()
@@ -192,6 +196,8 @@ public class Builtin extends LanguageValue {
       method = checkMethod;
       break;
     }
+    if (method == null)
+      throw Assertion.format("builtin wrap [%s] function [%s] missing", klass.getName(), name);
     FuncInfo info = funcDescriptor(method);
     return new Function(
         JVMDescriptor.jvmName(klass.getCanonicalName()), name, info.descriptor, info.returnType);
@@ -204,6 +210,9 @@ public class Builtin extends LanguageValue {
   @Override
   public EvaluateResult evaluate(Context context) {
     return EvaluateResult.pure(builtin);
+  }
+  public Object graphDeserialize(Record data) {
+    return graphDeserialize(this.getClass(), data);
   }
 
   @Retention(RetentionPolicy.RUNTIME)

@@ -32,4 +32,17 @@ public interface TreeSerializable {
   }
 
   public void treeSerialize(Writer writer);
+
+  public static class Url implements TreeSerializable {
+    private final String url;
+
+    public Url(String url) {
+      this.url = url;
+    }
+
+    @Override
+    public void treeSerialize(Writer writer) {
+      writer.primitive(url);
+    }
+  }
 }

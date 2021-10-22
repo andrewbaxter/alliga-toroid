@@ -7,6 +7,7 @@ import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -45,6 +46,9 @@ public class Block extends LanguageValue {
     return new EvaluateResult(context.target.merge(context, location, pre), post, last);
   }
 
+  public Object graphDeserialize(Record data) {
+    return graphDeserialize(this.getClass(), data);
+  }
   @Override
   public EvaluateResult evaluate(Context context) {
     return evaluate(context, location, statements);

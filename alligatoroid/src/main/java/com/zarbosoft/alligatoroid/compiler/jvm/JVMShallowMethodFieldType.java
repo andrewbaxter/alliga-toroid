@@ -1,6 +1,5 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.cache.GraphSerializable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
@@ -34,7 +33,7 @@ public class JVMShallowMethodFieldType implements GraphSerializable {
         Objects.equals(spec.data.getOpt("static"), true));
   }
 
-  public static MethodSpecDetails methodSpecDetails(Module module, Record spec) {
+  public static MethodSpecDetails methodSpecDetails(Record spec) {
     Object outRaw = spec.data.getOpt("out");
     JVMDataType returnType = null;
     String returnDescriptor;
@@ -42,7 +41,7 @@ public class JVMShallowMethodFieldType implements GraphSerializable {
       returnDescriptor = JVMDescriptor.VOID_DESCRIPTOR;
     } else {
       JVMDataType inJvmType = (JVMDataType) outRaw;
-      returnDescriptor = inJvmType.jvmDesc(module);
+      returnDescriptor = inJvmType.jvmDesc();
       returnType = inJvmType;
     }
     Object inRaw = spec.data.get("in");
@@ -53,12 +52,12 @@ public class JVMShallowMethodFieldType implements GraphSerializable {
       argDescriptor = new String[inTuple.size()];
       for (int i = 0; i < inTuple.size(); i++) {
         JVMDataType jvmDataType = (JVMDataType) inTuple.get(i);
-        argDescriptor[i] = jvmDataType.jvmDesc(module);
+        argDescriptor[i] = jvmDataType.jvmDesc();
         argTupleData.add(jvmDataType);
       }
     } else {
       JVMDataType jvmDataType = (JVMDataType) inRaw;
-      argDescriptor = new String[] {jvmDataType.jvmDesc(module)};
+      argDescriptor = new String[] {jvmDataType.jvmDesc()};
       argTupleData.add(jvmDataType);
     }
     return new MethodSpecDetails(

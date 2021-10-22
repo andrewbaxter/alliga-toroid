@@ -16,6 +16,7 @@ import java.nio.file.Path;
 public class Error implements TreeSerializable {
   public static final String DESCRIPTION_KEY = "description";
   public static final String LOCATION_KEY = "location";
+  public static final String PATH_KEY = "path";
   public final ROMap<String, Object> data;
   private final String type;
 
@@ -28,7 +29,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "deserialize_not_array",
         new TSMap<String, Object>()
-            .put("path", path.toString())
+            .put(PATH_KEY, path.toString())
             .put(DESCRIPTION_KEY, "A luxem array is not allowed at this location in the source"));
   }
 
@@ -36,7 +37,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "deserialize_not_record",
         new TSMap<String, Object>()
-            .put("path", path.toString())
+            .put(PATH_KEY, path.toString())
             .put(DESCRIPTION_KEY, "A luxem record is not allowed at this location in the source"));
   }
 
@@ -44,7 +45,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "deserialize_not_primitive",
         new TSMap<String, Object>()
-            .put("path", path.toString())
+            .put(PATH_KEY, path.toString())
             .put(
                 DESCRIPTION_KEY,
                 "A luxem primitive is not allowed at this location in the source"));
@@ -54,7 +55,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "deserialize_not_typed",
         new TSMap<String, Object>()
-            .put("path", path.toString())
+            .put(PATH_KEY, path.toString())
             .put(
                 DESCRIPTION_KEY,
                 "A typed luxem value is not allowed at this location in the source"));
@@ -65,7 +66,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "deserialize_unknown_type",
         new TSMap<String, Object>()
-            .put("path", path.toString())
+            .put(PATH_KEY, path.toString())
             .put("got", type)
             .put("expected", knownTypes)
             .put(DESCRIPTION_KEY, "This luxem type is not known"));
@@ -76,7 +77,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "deserialize_unknown_field",
         new TSMap<String, Object>()
-            .put("path", path.toString())
+            .put(PATH_KEY, path.toString())
             .put("got", field)
             .put("expected", fields)
             .put("type", type)
@@ -89,7 +90,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "deserialize_missing_field",
         new TSMap<String, Object>()
-            .put("path", path.toString())
+            .put(PATH_KEY, path.toString())
             .put("field", field)
             .put("type", type)
             .put(
@@ -102,7 +103,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "deserialize_unknown_language_version",
         new TSMap<String, Object>()
-            .put("path", path.toString())
+            .put(PATH_KEY, path.toString())
             .put("version", version)
             .put(
                 DESCRIPTION_KEY,
@@ -120,7 +121,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "deserialize_not_bool",
         new TSMap<String, Object>()
-            .put("path", path.toString())
+            .put(PATH_KEY, path.toString())
             .put("got", value)
             .put(
                 DESCRIPTION_KEY,
@@ -131,7 +132,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "deserialize_not_integer",
         new TSMap<String, Object>()
-            .put("path", path.toString())
+            .put(PATH_KEY, path.toString())
             .put("got", value)
             .put(
                 DESCRIPTION_KEY,
@@ -194,10 +195,11 @@ public class Error implements TreeSerializable {
                 Format.format("An unexpected error occurred while processing: %s", e)));
   }
 
-  public static Error unexpected(Path path, Throwable e) {
+  public static Error unexpected(String path, Throwable e) {
     return new Error(
         "unexpected",
         convertThrowable(e)
+            .put(PATH_KEY, path)
             .put(
                 DESCRIPTION_KEY,
                 Format.format("An unexpected error occurred while deserializing %s: %s", path, e)));
@@ -271,7 +273,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "deserialize_cache_subvalue_unknown_type",
         new TSMap<String, Object>()
-            .put("path", path.toString())
+            .put(PATH_KEY, path.toString())
             .put("type", type)
             .put(
                 DESCRIPTION_KEY,
@@ -282,13 +284,13 @@ public class Error implements TreeSerializable {
     return new Error(
         "deserialize_cache_object_unknown_type",
         new TSMap<String, Object>()
-            .put("path", path.toString())
+            .put(PATH_KEY, path.toString())
             .put("type", type)
             .put(
                 DESCRIPTION_KEY, "this object type is not recognized, maybe the cache is corrupt"));
   }
 
-  public static Error deserializeMissingSourceFile(Path path) {
+  public static Error deserializeMissingSourceFile(String path) {
     return new Error(
         "deserialize_missing_source_file",
         new TSMap<String, Object>()
@@ -296,7 +298,7 @@ public class Error implements TreeSerializable {
             .put(DESCRIPTION_KEY, "this source file was not found"));
   }
 
-  public static Error deserializeIncompleteFile(Path path) {
+  public static Error deserializeIncompleteFile(String path) {
     return new Error(
         "deserialize_incomplete_file",
         new TSMap<String, Object>()
@@ -316,7 +318,7 @@ public class Error implements TreeSerializable {
     return new Error(
         "deserialize_pair_too_many_values",
         new TSMap<String, Object>()
-            .put("path", path.toString())
+            .put(PATH_KEY, path.toString())
             .put(
                 DESCRIPTION_KEY,
                 "This value is a 2-element array, but found more than 2 elements."));
@@ -339,6 +341,29 @@ public class Error implements TreeSerializable {
             .put("got", got)
             .put("expected", expected)
             .put(DESCRIPTION_KEY, Format.format("Expected %s but got value %s")));
+  }
+
+  public static Error remoteModuleHashMismatch(String url, String wantHash, String foundHash) {
+    return new Error(
+        "remote_module_hash_mismatch",
+        new TSMap<String, Object>()
+            .put(LOCATION_KEY, url)
+            .put("got", foundHash)
+            .put("expected", wantHash)
+            .put(
+                DESCRIPTION_KEY,
+                Format.format(
+                    "Downloaded module at %s has hash %s but expected hash %s",
+                    url, foundHash, wantHash)));
+  }
+
+  public static Error unknownImportFileType(String path) {
+    return new Error(
+        "remote_module_hash_mismatch",
+        new TSMap<String, Object>()
+            .put(PATH_KEY, path)
+            .put(
+                DESCRIPTION_KEY, Format.format("Import of %s is not an expected file type", path)));
   }
 
   @Override

@@ -10,9 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.SimpleValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.Tuple;
 import com.zarbosoft.rendaw.common.ROTuple;
-import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
@@ -23,21 +21,15 @@ import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.NEW;
 
 public class JVMExternConstructor implements SimpleValue, GraphSerializable {
-  public final JVMBaseClassType base;
-  public final TSList<Record> preSigs;
-  public final TSMap<ROTuple, JVMShallowMethodFieldType.MethodSpecDetails> sigs = new TSMap<>();
-  private boolean resolved;
+  public final JVMExternClassType base;
 
-  public JVMExternConstructor(JVMBaseClassType base, TSList<Record> preSigs) {
+  public JVMExternConstructor(JVMExternClassType base) {
     this.base = base;
-    this.preSigs = preSigs;
   }
 
   public static JVMExternConstructor graphDeserialize(Record data) {
     JVMExternConstructor out =
-        new JVMExternConstructor(
-            (JVMBaseClassType) data.data.getOpt("base"),
-            (TSList) ((Tuple) data.data.getOpt("sigs")).data.mut());
+        new JVMExternConstructor((JVMExternClassType) data.data.getOpt("base"));
     return out;
   }
 
@@ -45,7 +37,7 @@ public class JVMExternConstructor implements SimpleValue, GraphSerializable {
   public EvaluateResult call(Context context, Location location, Value argument) {
     resolveSigs(context.module);
     ROTuple argTuple = getArgTuple(argument);
-    JVMShallowMethodFieldType.MethodSpecDetails real = sigs.getOpt(argTuple);
+    JVMShallowMethodFieldType.MethodSpecDetails real = base.constructorSigs.getOpt(argTuple);
     if (real == null) {
       context.module.log.errors.add(JVMError.noMethodField(location, "<init>", argTuple));
       return EvaluateResult.error;
@@ -60,23 +52,12 @@ public class JVMExternConstructor implements SimpleValue, GraphSerializable {
     return new EvaluateResult(code, null, NullValue.value);
   }
 
-  private void resolveOne(Module module, Record spec) {
-    JVMShallowMethodFieldType.MethodSpecDetails specDetails =
-        JVMShallowMethodFieldType.methodSpecDetails(module, spec);
-    sigs.put(specDetails.keyTuple, specDetails);
-  }
-
   public void resolveSigs(Module module) {
-    if (resolved) return;
-    for (Record spec : preSigs) {
-      resolveOne(module, spec);
-    }
-    resolved = true;
+    base.resolveMethods(module);
   }
 
   @Override
   public Record graphSerialize() {
-    return new Record(
-        new TSMap<>(s -> s.putNew("base", base).putNew("sigs", new Tuple((TSList) preSigs))));
+    return new Record(new TSMap<>(s -> s.putNew("base", base)));
   }
 }

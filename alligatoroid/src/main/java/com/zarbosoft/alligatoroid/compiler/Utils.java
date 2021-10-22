@@ -1,7 +1,13 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -57,13 +63,40 @@ public class Utils {
     }
 
     public SHA256 add(byte[] value) {
+      ByteBuffer bb = ByteBuffer.allocate(4);
+      bb.order(ByteOrder.LITTLE_ENDIAN);
+      bb.putLong(value.length);
+      digest.update(bb.array());
       digest.update(value);
       return this;
     }
 
     public SHA256 add(String value) {
-      digest.update(value.getBytes(StandardCharsets.UTF_8));
-      return this;
+      return add(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public SHA256 add(Path path) {
+      return uncheck(
+          () -> {
+            ByteBuffer bb = ByteBuffer.allocate(4);
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+            bb.putLong(Files.size(path));
+            digest.update(bb.array());
+            Files.copy(
+                path,
+                new OutputStream() {
+                  @Override
+                  public void write(int b) throws IOException {
+                    digest.update((byte) b);
+                  }
+
+                  @Override
+                  public void write(@NotNull byte[] b) throws IOException {
+                    digest.update(b);
+                  }
+                });
+            return this;
+          });
     }
 
     public String buildHex() {

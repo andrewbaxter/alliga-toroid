@@ -13,17 +13,17 @@ public class JVMLongType implements JVMDataType, SimpleValue {
   private JVMLongType() {}
 
   @Override
-  public int storeOpcode(Module module) {
+  public int storeOpcode() {
     return LSTORE;
   }
 
   @Override
-  public int loadOpcode(Module module) {
+  public int loadOpcode() {
     return LLOAD;
   }
 
   @Override
-  public String jvmDesc(Module module) {
+  public String jvmDesc() {
     return JVMDescriptor.LONG_DESCRIPTOR;
   }
 }

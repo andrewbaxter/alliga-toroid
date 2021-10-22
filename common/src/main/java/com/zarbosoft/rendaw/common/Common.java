@@ -1,5 +1,6 @@
 package com.zarbosoft.rendaw.common;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
@@ -28,6 +29,7 @@ public class Common {
     if (e instanceof InvocationTargetException)
       return uncheck(((InvocationTargetException) e).getTargetException());
     if (e instanceof RuntimeException) return (RuntimeException) e;
+    if (e instanceof FileNotFoundException) return new UncheckedFileNotFoundException((FileNotFoundException) e);
     if (e instanceof IOException) return new UncheckedIOException((IOException) e);
     return new UncheckedException(e);
   }
@@ -35,16 +37,28 @@ public class Common {
   public static <T> T uncheck(final Thrower1<T> code) {
     try {
       return code.get();
-    } catch (final Exception e) {
-      throw Common.uncheck(e);
+    } catch (InvocationTargetException e) {
+      throw uncheck(((InvocationTargetException) e).getTargetException());
+    } catch (FileNotFoundException e) {
+      throw new UncheckedFileNotFoundException( e);
+    } catch (IOException e) {
+      throw new UncheckedIOException((IOException) e);
+    } catch (Exception e) {
+      throw new UncheckedException(e);
     }
   }
 
   public static void uncheck(final Thrower2 code) {
     try {
       code.get();
-    } catch (final Exception e) {
-      throw Common.uncheck(e);
+    } catch (InvocationTargetException e) {
+      throw uncheck(((InvocationTargetException) e).getTargetException());
+    } catch (FileNotFoundException e) {
+      throw new UncheckedFileNotFoundException( e);
+    } catch (IOException e) {
+      throw new UncheckedIOException((IOException) e);
+    } catch (Exception e) {
+      throw new UncheckedException(e);
     }
   }
 
@@ -60,6 +74,12 @@ public class Common {
 
   public static class UncheckedException extends RuntimeException {
     public UncheckedException(final Throwable e) {
+      super(e);
+    }
+  }
+
+  public static class UncheckedFileNotFoundException extends RuntimeException {
+    public UncheckedFileNotFoundException(FileNotFoundException e) {
       super(e);
     }
   }

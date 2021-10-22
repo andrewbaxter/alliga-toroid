@@ -12,6 +12,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
+import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ReverseIterable;
@@ -29,6 +30,9 @@ import static org.objectweb.asm.Opcodes.NEW;
 
 public class Stage extends LanguageValue {
   public final Value child;
+  public Object graphDeserialize(Record data) {
+    return graphDeserialize(this.getClass(), data);
+  }
 
   public Stage(Location id, Value child) {
     super(id, hasLowerInSubtree(child));

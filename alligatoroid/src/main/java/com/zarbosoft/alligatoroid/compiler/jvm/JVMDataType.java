@@ -22,7 +22,7 @@ public interface JVMDataType extends JVMType {
   default ROPair<TargetCode, Binding> valueBind(Module module, JVMProtocode lower) {
     Object key = new Object();
     return new ROPair<>(
-        new JVMCode().add(lower.lower(module)).addVarInsn(storeOpcode(module), key),
+        new JVMCode().add(lower.lower(module)).addVarInsn(storeOpcode(), key),
         new JVMBinding(key, this));
   }
 
@@ -46,9 +46,9 @@ public interface JVMDataType extends JVMType {
         });
   }
 
-  int storeOpcode(Module module);
+  int storeOpcode();
 
-  int loadOpcode(Module module);
+  int loadOpcode();
 
-  String jvmDesc(Module module);
+  String jvmDesc();
 }

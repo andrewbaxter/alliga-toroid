@@ -15,9 +15,9 @@ public class JVMClassBuilder {
     }
 
     @Builtin.WrapExpose
-    public JVMMethod declareMethod(Module module, String name, Record spec) {
+    public JVMMethod declareMethod(String name, Record spec) {
         JVMShallowMethodFieldType.MethodSpecDetails specDetails =
-                JVMShallowMethodFieldType.methodSpecDetails(module, spec);
+                JVMShallowMethodFieldType.methodSpecDetails(spec);
         ROTuple keyTuple = ROTuple.create(name).append(specDetails.keyTuple);
         base.incompleteMethods.add(keyTuple);
         return new JVMMethod(base, keyTuple, specDetails);

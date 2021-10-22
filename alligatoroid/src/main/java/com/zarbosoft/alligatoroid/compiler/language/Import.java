@@ -9,10 +9,14 @@ import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.FutureValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 
 public class Import extends LanguageValue {
   public final Value spec;
 
+  public Object graphDeserialize(Record data) {
+    return graphDeserialize(this.getClass(), data);
+  }
   public Import(Location id, Value spec) {
     super(id, hasLowerInSubtree(spec));
     this.spec = spec;

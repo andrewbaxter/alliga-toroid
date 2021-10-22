@@ -2,9 +2,8 @@ package com.zarbosoft.alligatoroid.compiler.jvm;
 
 import com.zarbosoft.alligatoroid.compiler.language.Builtin;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
+import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSList;
-
-import java.util.Objects;
 
 public class JVMExternClassBuilder {
   public final JVMExternClassType base;
@@ -19,25 +18,28 @@ public class JVMExternClassBuilder {
   }
 
   @Builtin.WrapExpose
-  public RetConstructor constructor() {
-    JVMExternConstructor constructor = new JVMExternConstructor(base, new TSList<>());
-    return new RetConstructor(constructor, new JVMExternConstructorBuilder(constructor));
+  public void constructor(Record spec) {
+    JVMShallowMethodFieldType.MethodSpecDetails specDetails =
+            JVMShallowMethodFieldType.methodSpecDetails(spec);
+    base.constructorSigs.put(specDetails.keyTuple, specDetails);
   }
 
   @Builtin.WrapExpose
-  public void declareMethod(String name, Record spec) {
-    boolean isStatic = Objects.equals(spec.data.getOpt("static"), true);
-    if (isStatic) {
-      base.preStaticMethodFields.getCreate(name, () -> new TSList<>()).add(spec);
-      base.staticFields.add(name);
+  public void method(String name, Record spec) {
+    JVMShallowMethodFieldType.MethodSpecDetails specDetails =
+        JVMShallowMethodFieldType.methodSpecDetails(spec);
+    JVMShallowMethodFieldType field =
+        new JVMShallowMethodFieldType(specDetails.returnType, name, specDetails.jvmSigDesc);
+    field.base = base;
+    if (specDetails.isStatic) {
+      base.staticMethodFields.put(ROTuple.create(name).append(specDetails.keyTuple), field);
     } else {
-      base.preMethodFields.getCreate(name, () -> new TSList<>()).add(spec);
-      base.fields.add(name);
+      base.methodFields.put(ROTuple.create(name).append(specDetails.keyTuple), field);
     }
   }
 
   @Builtin.WrapExpose
-  public void declareData(String name, Record spec) {
+  public void data(String name, Record spec) {
     JVMShallowMethodFieldType.DataSpecDetails specDetails =
         JVMShallowMethodFieldType.dataSpecDetails(spec);
     if (specDetails.isStatic) {
@@ -46,16 +48,6 @@ public class JVMExternClassBuilder {
     } else {
       base.dataFields.putNew(name, specDetails.type);
       base.fields.add(name);
-    }
-  }
-
-  public static class RetConstructor {
-    public final JVMExternConstructor constructor;
-    public final JVMExternConstructorBuilder builder;
-
-    public RetConstructor(JVMExternConstructor constructor, JVMExternConstructorBuilder builder) {
-      this.constructor = constructor;
-      this.builder = builder;
     }
   }
 }

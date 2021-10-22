@@ -4,6 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.ImportSpecValue;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseRecord;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 import static com.zarbosoft.alligatoroid.compiler.language.Builtin.wrapFunction;
@@ -21,9 +22,6 @@ public class JVMBuiltin {
               .put(
                   "externStaticField",
                   EvaluateResult.pure(wrapFunction(JVMBuiltin.class, "builtinExternStaticField")))
-              .put(
-                  "deferredDataType",
-                  EvaluateResult.pure(wrapFunction(JVMBuiltin.class, "builtinDeferredDataType")))
               .put("string", EvaluateResult.pure(JVMStringType.value))
               .put("int", EvaluateResult.pure(JVMIntType.value))
               .put("byte", EvaluateResult.pure(JVMByteType.value))
@@ -42,14 +40,10 @@ public class JVMBuiltin {
     JVMClassType type = new JVMClassType(qualifiedName);
     return new RetClass(type, new JVMClassBuilder(type));
   }
-
-  public static JVMDataType builtinDeferredDataType(ImportSpecValue spec) {
-    return new JVMDeferredDataType(spec.spec);
-  }
-
-  public static RetExternClass builtinExternClass(String qualifiedName) {
-    JVMExternClassType type = new JVMExternClassType(qualifiedName);
-    return new RetExternClass(type, new JVMExternClassBuilder(type));
+  public static RetExternClass builtinExternClass(String qualifiedName, Value setup) {
+    JVMExternClassType type = new JVMExternClassType(qualifiedName, setup);
+    JVMExternConstructor constructor = new JVMExternConstructor(type);
+    return new RetExternClass(type, constructor);
   }
 
   public static Value builtinExternStaticField(
@@ -70,11 +64,11 @@ public class JVMBuiltin {
 
   public static class RetExternClass {
     public final JVMExternClassType type;
-    public final JVMExternClassBuilder builder;
+    public final JVMExternConstructor constructor;
 
-    public RetExternClass(JVMExternClassType type, JVMExternClassBuilder builder) {
+    public RetExternClass(JVMExternClassType type, JVMExternConstructor constructor) {
       this.type = type;
-      this.builder = builder;
+      this.constructor = constructor;
     }
   }
 }

@@ -7,6 +7,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
 
 public class Local extends LanguageValue {
@@ -15,6 +16,9 @@ public class Local extends LanguageValue {
   public Local(Location id, Value key) {
     super(id, hasLowerInSubtree(key));
     this.key = key;
+  }
+  public Object graphDeserialize(Record data) {
+    return graphDeserialize(this.getClass(), data);
   }
 
   @Override

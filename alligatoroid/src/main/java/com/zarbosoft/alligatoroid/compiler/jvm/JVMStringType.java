@@ -10,7 +10,7 @@ public class JVMStringType extends JVMObjectType implements SimpleValue {
   private JVMStringType() {}
 
   @Override
-  public String jvmDesc(Module module) {
+  public String jvmDesc() {
     return JVMDescriptor.stringDescriptor;
   }
 }

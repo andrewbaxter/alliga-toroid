@@ -76,7 +76,7 @@ public class JVMPseudoField implements SimpleValue {
           public JVMSharedCode lower(Module module) {
             return new JVMCode()
                 .add(lower.lower(module))
-                .add(new FieldInsnNode(GETFIELD, base.jvmName, name, real.jvmDesc(module)));
+                .add(new FieldInsnNode(GETFIELD, base.jvmName, name, real.jvmDesc()));
           }
         });
   }
@@ -100,7 +100,7 @@ public class JVMPseudoField implements SimpleValue {
           public JVMSharedCode lower(Module module) {
             return new JVMCode()
                 .add(lower.lower(module))
-                .add(new FieldInsnNode(GETFIELD, base.jvmName, name, real.jvmDesc(module)));
+                .add(new FieldInsnNode(GETFIELD, base.jvmName, name, real.jvmDesc()));
           }
         });
   }

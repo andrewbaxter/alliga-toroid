@@ -15,17 +15,17 @@ public class JVMFloatType implements JVMDataType, SimpleValue {
   private JVMFloatType() {}
 
   @Override
-  public int storeOpcode(Module module) {
+  public int storeOpcode() {
     return FSTORE;
   }
 
   @Override
-  public int loadOpcode(Module module) {
+  public int loadOpcode() {
     return FLOAD;
   }
 
   @Override
-  public String jvmDesc(Module module) {
+  public String jvmDesc() {
     return JVMDescriptor.FLOAT_DESCRIPTOR;
   }
 }

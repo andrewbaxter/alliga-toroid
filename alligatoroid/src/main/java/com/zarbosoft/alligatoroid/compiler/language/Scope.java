@@ -7,11 +7,15 @@ import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class Scope extends LanguageValue {
   public final Value inner;
+  public Object graphDeserialize(Record data) {
+    return graphDeserialize(this.getClass(), data);
+  }
 
   public Scope(Location id, Value inner) {
     super(id, hasLowerInSubtree(inner));

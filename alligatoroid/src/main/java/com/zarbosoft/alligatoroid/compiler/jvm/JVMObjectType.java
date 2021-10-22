@@ -40,17 +40,17 @@ public class JVMObjectType implements JVMDataType, SimpleValue {
   }
 
   @Override
-  public int storeOpcode(Module module) {
+  public int storeOpcode() {
     return ASTORE;
   }
 
   @Override
-  public int loadOpcode(Module module) {
+  public int loadOpcode() {
     return ALOAD;
   }
 
   @Override
-  public String jvmDesc(Module module) {
+  public String jvmDesc() {
     return JVMDescriptor.objectDescriptor;
   }
 }

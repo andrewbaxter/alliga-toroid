@@ -23,7 +23,7 @@ public class JVMBinding implements Binding {
             new JVMProtocode() {
               @Override
               public JVMCode lower(Module module) {
-                return (JVMCode) new JVMCode().addVarInsn(type.loadOpcode(module), key);
+                return (JVMCode) new JVMCode().addVarInsn(type.loadOpcode(), key);
               }
 
               @Override

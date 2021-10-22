@@ -28,7 +28,7 @@ public class GenerateClass {
 
   public static Path generate(Class klass) {
     GenerateClass g = new GenerateClass(klass);
-    Main.sync.push(g);
+    Main.sync.push( g);
     return g.path;
   }
 
@@ -177,16 +177,23 @@ public class GenerateClass {
       return lAccess(ids, jvm(ids), lString(ids, klass.getName()));
     } else {
       return writer -> {
-        lCall(
-                ids,
-                lAccess(ids, jvm(ids), lString(ids, "deferredDataType")),
-                lLocalMod(ids, path.getParent().relativize(generate(klass)).toString()))
+        lImport(ids, lLocal(ids, path.getParent().relativize(generate(klass)).toString()))
             .write(writer);
       };
     }
   }
 
-  private LSubtree lLocalMod(IdManager ids, String path) {
+  private LSubtree lImport(IdManager ids, LSubtree spec) {
+    return writer -> {
+      writer.type("import").recordBegin();
+      ids.write(writer);
+      writer.primitive("spec");
+      spec.write(writer);
+      writer.recordEnd();
+    };
+  }
+
+  private LSubtree lLocal(IdManager ids, String path) {
     return writer -> {
       writer.type("mod_local").recordBegin();
       ids.write(writer);
@@ -230,112 +237,164 @@ public class GenerateClass {
                     lCall(
                         ids,
                         lAccess(ids, jvm(ids), lString(ids, "externClass")),
-                        lString(ids, klass.getCanonicalName())))
-                .write(writer);
-            if (klass.getSuperclass() != null) {
-              lCall(
-                  ids,
-                  lAccess(ids, accessBuilder(ids), lString(ids, "inherit")),
-                  lType(ids, klass.getSuperclass()));
-            }
-            for (Class parent : klass.getInterfaces()) {
-              lCall(
-                  ids,
-                  lAccess(ids, accessBuilder(ids), lString(ids, "inherit")),
-                  lType(ids, parent));
-            }
+                        lTuple(
+                            ids,
+                            lString(ids, klass.getCanonicalName()),
+                            lStage(
+                                ids,
+                                writer1 -> {
+                                  if (klass.getSuperclass() != null) {
+                                    lCall(
+                                            ids,
+                                            lAccess(
+                                                ids, accessBuilder(ids), lString(ids, "inherit")),
+                                            lType( ids, klass.getSuperclass()))
+                                        .write(writer);
+                                  }
+                                  for (Class parent : klass.getInterfaces()) {
+                                    lCall(
+                                            ids,
+                                            lAccess(
+                                                ids, accessBuilder(ids), lString(ids, "inherit")),
+                                            lType( ids, parent))
+                                        .write(writer);
+                                  }
 
+                                  // Instance stuff
+                                  List<Constructor> publicConstructors = new ArrayList<>();
+                                  for (Constructor constructor : klass.getConstructors()) {
+                                    if (!Modifier.isPublic(constructor.getModifiers())) continue;
+                                    publicConstructors.add(constructor);
+                                  }
+                                  if (publicConstructors.size() > 0) {
+                                    lBind(
+                                            ids,
+                                            lString(ids, "constructor"),
+                                            lCall(
+                                                ids,
+                                                lAccess(
+                                                    ids,
+                                                    accessBuilder(ids),
+                                                    lString(ids, "constructor")),
+                                                lTuple(ids)))
+                                        .write(writer);
+                                    for (Constructor constructor : publicConstructors) {
+                                      lCall(
+                                              ids,
+                                              lAccess(
+                                                  ids,
+                                                  lAccess(
+                                                      ids,
+                                                      lLocal(ids, lString(ids, "constructor")),
+                                                      lString(ids, "builder")),
+                                                  lString(ids, "declare")),
+                                              lRecord(
+                                                  ids,
+                                                  new ROPair<>(
+                                                      lString(ids, "in"),
+                                                      lType( ids, constructor.getParameters()))))
+                                          .write(writer);
+                                    }
+                                  }
+
+                                  for (Method m : klass.getDeclaredMethods()) {
+                                    boolean isPublic = Modifier.isPublic(m.getModifiers());
+                                    boolean isProtected = Modifier.isProtected(m.getModifiers());
+                                    boolean isFinal = Modifier.isFinal(m.getModifiers());
+                                    boolean isStatic = Modifier.isStatic(m.getModifiers());
+                                    if (!(isPublic || isProtected)) continue;
+                                    lCall(
+                                            ids,
+                                            lAccess(
+                                                ids,
+                                                accessBuilder(ids),
+                                                lString(ids, "declareMethod")),
+                                            lTuple(
+                                                ids,
+                                                lString(ids, m.getName()),
+                                                lRecord(
+                                                    ids,
+                                                    new ROPair<>(
+                                                        lString(ids, "in"),
+                                                        lType( ids, m.getParameters())),
+                                                    new ROPair<>(
+                                                        lString(ids, "out"),
+                                                        lType( ids, m.getReturnType())),
+                                                    new ROPair<>(
+                                                        lString(ids, "protected"),
+                                                        lBool(ids, isProtected)),
+                                                    new ROPair<>(
+                                                        lString(ids, "final"), lBool(ids, isFinal)),
+                                                    new ROPair<>(
+                                                        lString(ids, "static"),
+                                                        lBool(ids, isStatic)))))
+                                        .write(writer);
+                                  }
+
+                                  for (Field f : klass.getDeclaredFields()) {
+                                    boolean isPublic = Modifier.isPublic(f.getModifiers());
+                                    boolean isProtected = Modifier.isProtected(f.getModifiers());
+                                    boolean isFinal = Modifier.isFinal(f.getModifiers());
+                                    boolean isStatic = Modifier.isStatic(f.getModifiers());
+                                    if (!(isPublic || isProtected)) continue;
+                                    lCall(
+                                        ids,
+                                        lAccess(
+                                            ids, accessBuilder(ids), lString(ids, "declareData")),
+                                        lTuple(
+                                            ids,
+                                            lString(ids, f.getName()),
+                                            lRecord(
+                                                ids,
+                                                new ROPair<>(
+                                                    lString(ids, "type"), lType( ids, f.getType())),
+                                                new ROPair<>(
+                                                    lString(ids, "protected"),
+                                                    lBool(ids, isProtected)),
+                                                new ROPair<>(
+                                                    lString(ids, "final"), lBool(ids, isFinal)),
+                                                new ROPair<>(
+                                                    lString(ids, "static"),
+                                                    lBool(ids, isStatic)))));
+                                  }
+                                }))))
+                .write(writer);
             out.add(
                 new ROPair<>(
                     lString(ids, "type"),
                     lAccess(ids, lLocal(ids, lString(ids, "res")), lString(ids, "type"))));
-
-            // Instance stuff
-            List<Constructor> publicConstructors = new ArrayList<>();
-            for (Constructor constructor : klass.getConstructors()) {
-              if (!Modifier.isPublic(constructor.getModifiers())) continue;
-              publicConstructors.add(constructor);
-            }
-            if (publicConstructors.size() > 0) {
-              lBind(
-                      ids,
-                      lString(ids, "constructor"),
-                      lCall(
-                          ids,
-                          lAccess(ids, accessBuilder(ids), lString(ids, "constructor")),
-                          lTuple(ids)))
-                  .write(writer);
-              out.add(
-                  new ROPair<>(
-                      lString(ids, "new"),
-                      lAccess(
-                          ids,
-                          lLocal(ids, lString(ids, "constructor")),
-                          lString(ids, "constructor"))));
-              for (Constructor constructor : publicConstructors) {
-                lCall(
-                        ids,
-                        lAccess(
-                            ids,
-                            lAccess(
-                                ids,
-                                lLocal(ids, lString(ids, "constructor")),
-                                lString(ids, "builder")),
-                            lString(ids, "declare")),
-                        lRecord(
-                            ids,
-                            new ROPair<>(
-                                lString(ids, "in"), lType(ids, constructor.getParameters()))))
-                    .write(writer);
-              }
-            }
-
-            for (Method m : klass.getDeclaredMethods()) {
-              boolean isPublic = Modifier.isPublic(m.getModifiers());
-              boolean isProtected = Modifier.isProtected(m.getModifiers());
-              boolean isFinal = Modifier.isFinal(m.getModifiers());
-              boolean isStatic = Modifier.isStatic(m.getModifiers());
-              if (!(isPublic || isProtected)) continue;
-              lCall(
-                      ids,
-                      lAccess(ids, accessBuilder(ids), lString(ids, "declareMethod")),
-                      lTuple(
-                          ids,
-                          lString(ids, m.getName()),
-                          lRecord(
-                              ids,
-                              new ROPair<>(lString(ids, "in"), lType(ids, m.getParameters())),
-                              new ROPair<>(lString(ids, "out"), lType(ids, m.getReturnType())),
-                              new ROPair<>(lString(ids, "protected"), lBool(ids, isProtected)),
-                              new ROPair<>(lString(ids, "final"), lBool(ids, isFinal)),
-                              new ROPair<>(lString(ids, "static"), lBool(ids, isStatic)))))
-                  .write(writer);
-            }
-
-            for (Field f : klass.getDeclaredFields()) {
-              boolean isPublic = Modifier.isPublic(f.getModifiers());
-              boolean isProtected = Modifier.isProtected(f.getModifiers());
-              boolean isFinal = Modifier.isFinal(f.getModifiers());
-              boolean isStatic = Modifier.isStatic(f.getModifiers());
-              if (!(isPublic || isProtected)) continue;
-              lCall(
-                  ids,
-                  lAccess(ids, accessBuilder(ids), lString(ids, "declareData")),
-                  lTuple(
-                      ids,
-                      lString(ids, f.getName()),
-                      lRecord(
-                          ids,
-                          new ROPair<>(lString(ids, "type"), lType(ids, f.getType())),
-                          new ROPair<>(lString(ids, "protected"), lBool(ids, isProtected)),
-                          new ROPair<>(lString(ids, "final"), lBool(ids, isFinal)),
-                          new ROPair<>(lString(ids, "static"), lBool(ids, isStatic)))));
-            }
+            out.add(
+                new ROPair<>(
+                    lString(ids, "new"),
+                    lAccess(ids, lLocal(ids, lString(ids, "res")), lString(ids, "constructor"))));
 
             lRecord(ids, out).write(writer);
             writer.arrayEnd();
           }
         });
+  }
+
+  private LSubtree lStage(IdManager ids, LSubtree... child) {
+    return writer -> {
+      writer.type("stage").recordBegin();
+      ids.write(writer);
+      writer.primitive("child");
+      lBlock(ids, child).write(writer);
+      writer.recordEnd();
+    };
+  }
+
+  private LSubtree lBlock(IdManager ids, LSubtree... children) {
+    return writer -> {
+      writer.type("block").recordBegin();
+      ids.write(writer);
+      writer.primitive("statements").arrayBegin();
+      for (LSubtree child : children) {
+        child.write(writer);
+      }
+      writer.arrayEnd();
+      writer.recordEnd();
+    };
   }
 
   private interface LSubtree {

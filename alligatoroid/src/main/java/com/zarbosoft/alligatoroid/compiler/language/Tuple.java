@@ -6,6 +6,7 @@ import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseTuple;
+import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -15,6 +16,10 @@ public class Tuple extends LanguageValue {
   public Tuple(Location id, ROList<Value> elements) {
     super(id, hasLowerInSubtree(elements));
     this.elements = elements;
+  }
+
+  public Object graphDeserialize(Record data) {
+    return graphDeserialize(this.getClass(), data);
   }
 
   @Override

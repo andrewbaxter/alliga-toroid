@@ -14,6 +14,9 @@ import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 public class Record extends LanguageValue {
   public final ROList<Value> elements;
+  public Object graphDeserialize(com.zarbosoft.alligatoroid.compiler.mortar.Record data) {
+    return graphDeserialize(this.getClass(), data);
+  }
 
   public Record(Location id, ROList<Value> elements) {
     super(id, hasLowerInSubtree(elements));

@@ -4,16 +4,19 @@ import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.ImportSpec;
+import com.zarbosoft.alligatoroid.compiler.LocalModuleId;
+import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.TreeSerializable;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMArrayType;
-import com.zarbosoft.alligatoroid.compiler.jvm.JVMDeferredDataType;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMExternClassType;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMExternConstructor;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMExternStaticField;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMShallowMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.language.Builtin;
+import com.zarbosoft.alligatoroid.compiler.languagedeserialize.LanguageDeserializer;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.Tuple;
@@ -26,11 +29,13 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Map;
 
 import static com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer.errorRet;
@@ -64,14 +69,19 @@ public class Cache {
   static {
     TSMap<String, Method> builtinTypeMap1 = new TSMap<>();
     Class[] builtinTypes = {
+      Location.class,
+      LocalModuleId.class,
       JVMExternClassType.class,
       JVMExternStaticField.class,
       JVMShallowMethodFieldType.class,
-      JVMDeferredDataType.class,
       JVMArrayType.class,
       JVMExternConstructor.class
     };
     for (Class klass : builtinTypes) {
+      builtinTypeMap1.put(
+          builtinTypeKey(klass), uncheck(() -> klass.getMethod("graphDeserialize", Record.class)));
+    }
+    for (Class klass : LanguageDeserializer.LANGUAGE) {
       builtinTypeMap1.put(
           builtinTypeKey(klass), uncheck(() -> klass.getMethod("graphDeserialize", Record.class)));
     }
@@ -184,7 +194,8 @@ public class Cache {
             Writer writer = new Writer(stream, (byte) ' ', 4);
             if (value.getClass() == ImportSpec.class) {
               writer.type(CACHE_OBJECT_TYPE_IMPORT_SPEC);
-              Path path = ensureCachePath(warnings, (ImportSpec) value);
+              ImportSpec importSpec = (ImportSpec) value;
+              Path path = ensureCachePath(warnings, importSpec.hash(), importSpec);
               writer.primitive(path.toString());
             } else {
               String key;
@@ -290,54 +301,47 @@ public class Cache {
   }
 
   public Path cachePath(Path rel) {
-    return rootCachePath.resolve("modules").resolve(rel);
+    return rootCachePath.resolve("specs").resolve(rel);
   }
 
-  /**
-   * Finds an existing or creates a new cache directory for a module.
-   *
-   * <p>Returns a relative cache path (get absolute via cachePath())
-   *
-   * @param id
-   * @return
-   */
-  public Path ensureCachePath(TSList<Error> warnings, ImportSpec importSpec) {
+  public Path ensureCachePath(TSList<Error> warnings, String hash, TreeSerializable spec) {
     return uncheck(
         () -> {
           synchronized (cacheDirLock) {
-            Path tryCacheModuleRelPath = null;
-            String hash = importSpec.hash();
+            byte[] wantIdBytes;
+            {
+              ByteArrayOutputStream wantIdBytes1 = new ByteArrayOutputStream();
+              Writer writer = new Writer(wantIdBytes1, (byte) ' ', 4);
+              spec.treeSerialize(writer);
+              wantIdBytes = wantIdBytes1.toByteArray();
+            }
+
+            Path tryRelPath = null;
             int cuts = 3;
             for (int i = 0; i < cuts; ++i) {
               String seg = hash.substring(i * 2, (i + 1) * 2);
-              if (tryCacheModuleRelPath == null) tryCacheModuleRelPath = Paths.get(seg);
-              else tryCacheModuleRelPath = tryCacheModuleRelPath.resolve(seg);
+              if (tryRelPath == null) tryRelPath = Paths.get(seg);
+              else tryRelPath = tryRelPath.resolve(seg);
             }
-            Path useCacheModuleRelPath = null;
+            Path useRelPath = null;
             for (int i = 0; i < 1000; ++i) {
-              tryCacheModuleRelPath =
-                  tryCacheModuleRelPath.resolve(
-                      Format.format("%s-%s", hash.substring(cuts * 2), i));
+              tryRelPath = tryRelPath.resolve(Format.format("%s-%s", hash.substring(cuts * 2), i));
               TSList<Error> errors1 = new TSList<>();
-              Path moduleIdPath = cachePath(tryCacheModuleRelPath).resolve(CACHE_FILENAME_ID);
-              ImportSpec tryId = ImportSpecDeserializer.deserialize(errors1, moduleIdPath);
+              Path moduleIdPath = cachePath(tryRelPath).resolve(CACHE_FILENAME_ID);
+              byte[] foundIdBytes = Files.readAllBytes(moduleIdPath);
               if (errors1.some()) warnings.add(new Error.CacheError(moduleIdPath, errors1));
-              if (errors1.some() || tryId == null || tryId.equal1(importSpec)) {
-                useCacheModuleRelPath = tryCacheModuleRelPath;
+              if (errors1.some() || Arrays.equals(foundIdBytes, wantIdBytes)) {
+                useRelPath = tryRelPath;
                 break;
               }
             }
-            if (useCacheModuleRelPath == null)
+            if (useRelPath == null)
               throw new Assertion(); // Something's probably wrong with the hashing code if this is
             // reached
-            Files.createDirectories(cachePath(useCacheModuleRelPath));
-            try (OutputStream s =
-                Files.newOutputStream(
-                    cachePath(useCacheModuleRelPath).resolve(CACHE_FILENAME_ID))) {
-              Writer writer = new Writer(s, (byte) ' ', 4);
-              importSpec.treeSerialize(writer);
-            }
-            return useCacheModuleRelPath;
+
+            Files.createDirectories(cachePath(useRelPath));
+            Files.write(cachePath(useRelPath).resolve(CACHE_FILENAME_ID), wantIdBytes);
+            return useRelPath;
           }
         });
   }

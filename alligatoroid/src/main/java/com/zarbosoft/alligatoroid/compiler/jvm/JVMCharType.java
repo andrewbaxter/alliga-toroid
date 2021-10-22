@@ -13,17 +13,17 @@ public class JVMCharType implements JVMDataType, SimpleValue {
   private JVMCharType() {}
 
   @Override
-  public int storeOpcode(Module module) {
+  public int storeOpcode() {
     return ISTORE;
   }
 
   @Override
-  public int loadOpcode(Module module) {
+  public int loadOpcode() {
     return ILOAD;
   }
 
   @Override
-  public String jvmDesc(Module module) {
+  public String jvmDesc() {
     return JVMDescriptor.CHAR_DESCRIPTOR;
   }
 }

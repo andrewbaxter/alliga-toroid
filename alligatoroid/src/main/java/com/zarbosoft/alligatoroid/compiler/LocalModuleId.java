@@ -1,12 +1,19 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.luxem.write.Writer;
+import com.zarbosoft.rendaw.common.TSMap;
 
 public final class LocalModuleId implements ModuleId {
+  public static final String GRAPH_KEY_PATH = "path";
   public final String path;
 
   public LocalModuleId(String path) {
     this.path = path;
+  }
+
+  public static LocalModuleId graphDeserialize(Record data) {
+    return new LocalModuleId((String) data.data.get(GRAPH_KEY_PATH));
   }
 
   @Override
@@ -42,5 +49,10 @@ public final class LocalModuleId implements ModuleId {
   @Override
   public int hashCode() {
     return Utils.reflectHashCode(this);
+  }
+
+  @Override
+  public Record graphSerialize() {
+    return new Record(new TSMap<>().put(GRAPH_KEY_PATH, path));
   }
 }

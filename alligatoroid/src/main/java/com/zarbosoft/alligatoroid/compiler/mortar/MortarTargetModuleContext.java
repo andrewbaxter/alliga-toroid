@@ -206,8 +206,8 @@ public class MortarTargetModuleContext implements TargetModuleContext {
   }
 
   @Override
-  public TargetCode merge(Context context, Location location, Iterable<TargetCode> chunks) {
-    JVMRWSharedCode code = new MortarCode();
+  public MortarCode merge(Context context, Location location, Iterable<TargetCode> chunks) {
+    MortarCode code = new MortarCode();
     for (TargetCode chunk : chunks) {
       if (chunk == null) continue;
       if (!(chunk instanceof MortarCode)) {
