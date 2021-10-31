@@ -4,8 +4,6 @@ public enum Key {
   MOUSE_1,
   MOUSE_2,
   MOUSE_3,
-  MOUSE_SCROLL_UP,
-  MOUSE_SCROLL_DOWN,
   ENTER,
   BACK_SPACE,
   TAB,

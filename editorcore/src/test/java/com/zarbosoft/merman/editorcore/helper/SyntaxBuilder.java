@@ -20,7 +20,8 @@ import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 public class SyntaxBuilder {
   private final TSList<AtomType> types = new TSList<>();
-  private final TSOrderedMap<String, ROList<String>> groups = new TSOrderedMap<String, ROList<String>>();
+  private final TSOrderedMap<String, ROList<String>> groups =
+      new TSOrderedMap<String, ROList<String>>();
   private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
   private final String rootChildType;
   private final FrontDataArrayBuilder front = new FrontDataArrayBuilder("value");
@@ -39,13 +40,14 @@ public class SyntaxBuilder {
     MultiError splayErrors = new MultiError();
     GapAtomType gap = new GapAtomType(new GapAtomType.Config());
     SuffixGapAtomType suffixGap = new SuffixGapAtomType(new SuffixGapAtomType.Config());
-    TSMap<String, ROOrderedSetRef<AtomType>> splayed = Syntax.splayGroups(splayErrors, types, gap, suffixGap, groups);
+    TSMap<String, ROOrderedSetRef<AtomType>> splayed =
+        Syntax.splayGroups(splayErrors, types, gap, suffixGap, groups);
     splayErrors.raise();
 
     RootAtomType root =
         new RootAtomType(
             new RootAtomType.Config(
-                TSList.of(Helper.buildBackDataRootArray("value", rootChildType)),
+                Helper.buildBackDataRootArray("value", rootChildType),
                 TSList.of(front.build()),
                 alignments));
 

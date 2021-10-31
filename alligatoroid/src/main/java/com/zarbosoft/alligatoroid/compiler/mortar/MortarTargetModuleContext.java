@@ -212,7 +212,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       if (chunk == null) continue;
       if (!(chunk instanceof MortarCode)) {
         context.module.log.errors.add(
-            Error.incompatibleTargetValues(location, MORTAR_TARGET_NAME, chunk.targetName()));
+                new Error.IncompatibleTargetValues(location, MORTAR_TARGET_NAME, chunk.targetName()));
         return null;
       }
       code.add((MortarCode) chunk);

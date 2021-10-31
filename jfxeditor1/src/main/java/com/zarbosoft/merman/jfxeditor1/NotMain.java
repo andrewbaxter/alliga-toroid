@@ -7,12 +7,14 @@ import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Main;
 import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.ModuleId;
+import com.zarbosoft.merman.core.BackPath;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.Hoverable;
 import com.zarbosoft.merman.core.Stylist;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.display.Blank;
+import com.zarbosoft.merman.core.display.Display;
 import com.zarbosoft.merman.core.display.Text;
 import com.zarbosoft.merman.core.display.TextStylable;
 import com.zarbosoft.merman.core.display.derived.CourseGroup;
@@ -64,7 +66,9 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.io.ByteArrayInputStream;
@@ -90,11 +94,11 @@ public class NotMain extends Application {
   public static final String META_KEY_ERROR = "error";
   public DragSelectState dragSelect;
   public Runnable flushCallback;
+  public ErrorPage errorPage = new ErrorPage();
   private Path path;
   private Editor editor;
   private Thread compileThread;
   private Delay delayFlush = new Delay(500, () -> flush(false));
-  public ErrorPage errorPage = new ErrorPage();
 
   public static void main(String[] args) {
     NotMain.launch(args);
@@ -290,7 +294,7 @@ public class NotMain extends Application {
               if (display == null) {
                 display = new MarkerBox(editor.context, atom, syntaxOut.markTransverseOffset);
                 brick.addAttachment(editor.context, display);
-                markDisplays.put(atom, new WeakReference<>(display));
+                markDisplays.putReplace(atom, new WeakReference<>(display));
               }
               display.update(editor.context);
             }
@@ -334,6 +338,8 @@ public class NotMain extends Application {
             }
           };
 
+      final Label messages = new Label();
+
       TSList<Atom> errorAtoms = new TSList<>();
       if ("at".equals(extension)) {
         flushCallback =
@@ -348,6 +354,8 @@ public class NotMain extends Application {
                         TSMap<ImportSpec, Module> modules = Main.compile(path.toString());
                         Platform.runLater(
                             () -> {
+                              messages.setVisible(false);
+                              messages.setText("");
                               TSSet<Atom> changedAtoms = new TSSet<>();
 
                               // Clear existing errors
@@ -362,22 +370,55 @@ public class NotMain extends Application {
                               ModuleId moduleId = new LocalModuleId(path.toString());
                               for (Map.Entry<ImportSpec, Module> e : modules) {
                                 for (Error error : e.getValue().log.errors) {
-                                  Location location = (Location) error.data.getOpt("location");
-                                  if (location == null) {
-                                    continue;
-                                  }
-                                  if (!moduleId.equal1(location.module)) {
-                                    continue;
-                                  }
-                                  Atom atom = editor.fileIdMap.getOpt(location.id);
-                                  if (atom == null) {
-                                    continue;
-                                  }
-                                  errorAtoms.add(atom);
-                                  errorMessages
-                                      .getCreate(atom, () -> new TSList<>())
-                                      .add((String) error.data.get(Error.DESCRIPTION_KEY));
-                                  changedAtoms.add(atom);
+                                  error.dispatch(
+                                      new Error.Dispatcher<Object>() {
+                                        @Override
+                                        public Object handle(Error.PreDeserializeError e) {
+                                          messages.setVisible(true);
+                                          messages.setText(
+                                              messages.getText() + "\n" + e.toString());
+                                          return null;
+                                        }
+
+                                        @Override
+                                        public Object handle(Error.LocationError e) {
+                                          final Location location = e.location;
+                                          if (!moduleId.equal1(location.module)) return null;
+                                          Atom atom = editor.fileIdMap.getOpt(location.id);
+                                          if (atom == null) return null;
+                                          errorAtoms.add(atom);
+                                          errorMessages
+                                              .getCreate(atom, () -> new TSList<>())
+                                              .add((String) error.toString());
+                                          changedAtoms.add(atom);
+                                          return null;
+                                        }
+
+                                        @Override
+                                        public Object handle(Error.DeserializeError e) {
+                                          Atom atom =
+                                              editor.context.backLocate(
+                                                  new BackPath(e.backPath.data));
+                                          if (atom == null) return null;
+                                          errorAtoms.add(atom);
+                                          errorMessages
+                                              .getCreate(atom, () -> new TSList<>())
+                                              .add((String) error.toString());
+                                          changedAtoms.add(atom);
+                                          return null;
+                                        }
+
+                                        @Override
+                                        public Object handle(Error.CacheFileError e) {
+                                          messages.setVisible(true);
+                                          messages.setText(
+                                              messages.getText()
+                                                  + Format.format(
+                                                      "\nCache file [%s]: %s",
+                                                      e.cachePath, e.toString()));
+                                          return null;
+                                        }
+                                      });
                                 }
                               }
 
@@ -575,7 +616,21 @@ public class NotMain extends Application {
               return false;
             }
           };
+      editor.context.display.addScrollListener(
+          new Display.ScrollListener() {
+            @Override
+            public void changed(double converse, double transverse) {
+              editor.context.scroll = editor.context.scroll + transverse;
+              editor.context.applyScroll();
+            }
+          });
       flushCallback.run();
+
+      final HBox layout = new HBox();
+      layout.getChildren().add(display.node);
+      messages.setMinWidth(100);
+      messages.setWrapText(true);
+      layout.getChildren().add(messages);
 
       primaryStage
           .getIcons()
@@ -583,7 +638,7 @@ public class NotMain extends Application {
               new Image(new ByteArrayInputStream(Embedded.icon128)),
               new Image(new ByteArrayInputStream(Embedded.icon64)),
               new Image(new ByteArrayInputStream(Embedded.icon16)));
-      primaryStage.setScene(new Scene(display.node, 800, 600));
+      primaryStage.setScene(new Scene(layout, 800, 600));
       primaryStage.setTitle(path + " - merman1");
       primaryStage.show();
       primaryStage.setOnCloseRequest(

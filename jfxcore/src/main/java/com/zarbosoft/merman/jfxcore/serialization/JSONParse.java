@@ -4,7 +4,6 @@ import com.google.gson.stream.JsonReader;
 import com.zarbosoft.merman.core.backevents.BackEvent;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
-import com.zarbosoft.merman.core.backevents.EKeyEvent;
 import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
@@ -73,7 +72,7 @@ public class JSONParse<O> extends BaseParseBuilder<O, JSONParse<O>> {
                 }
               case NAME:
                 {
-                  e = new EKeyEvent(stream1.nextName());
+                  e = new EPrimitiveEvent(stream1.nextName());
                   break;
                 }
               case STRING:

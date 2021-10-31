@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.NoSuchFileException;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.function.Consumer;
@@ -29,7 +30,10 @@ public class Common {
     if (e instanceof InvocationTargetException)
       return uncheck(((InvocationTargetException) e).getTargetException());
     if (e instanceof RuntimeException) return (RuntimeException) e;
-    if (e instanceof FileNotFoundException) return new UncheckedFileNotFoundException((FileNotFoundException) e);
+    if (e instanceof NoSuchFileException)
+      return new UncheckedFileNotFoundException((NoSuchFileException) e);
+    if (e instanceof FileNotFoundException)
+      return new UncheckedFileNotFoundException((FileNotFoundException) e);
     if (e instanceof IOException) return new UncheckedIOException((IOException) e);
     return new UncheckedException(e);
   }
@@ -39,8 +43,10 @@ public class Common {
       return code.get();
     } catch (InvocationTargetException e) {
       throw uncheck(((InvocationTargetException) e).getTargetException());
+    } catch (NoSuchFileException e) {
+      throw new UncheckedFileNotFoundException(e);
     } catch (FileNotFoundException e) {
-      throw new UncheckedFileNotFoundException( e);
+      throw new UncheckedFileNotFoundException(e);
     } catch (IOException e) {
       throw new UncheckedIOException((IOException) e);
     } catch (Exception e) {
@@ -53,13 +59,27 @@ public class Common {
       code.get();
     } catch (InvocationTargetException e) {
       throw uncheck(((InvocationTargetException) e).getTargetException());
+    } catch (NoSuchFileException e) {
+      throw new UncheckedFileNotFoundException(e);
     } catch (FileNotFoundException e) {
-      throw new UncheckedFileNotFoundException( e);
+      throw new UncheckedFileNotFoundException(e);
     } catch (IOException e) {
       throw new UncheckedIOException((IOException) e);
     } catch (Exception e) {
       throw new UncheckedException(e);
     }
+  }
+
+  public static ROList<String> split(String text, String delim) {
+    TSList<String> out = new TSList<>();
+    int at = 0;
+    while (at < text.length()) {
+      int nextAt = text.indexOf(delim, 0);
+      if (nextAt == -1) nextAt = text.length();
+      out.add(text.substring(at, nextAt));
+      at = nextAt + delim.length();
+    }
+    return out;
   }
 
   @FunctionalInterface
@@ -78,8 +98,8 @@ public class Common {
     }
   }
 
-  public static class UncheckedFileNotFoundException extends RuntimeException {
-    public UncheckedFileNotFoundException(FileNotFoundException e) {
+  public static class UncheckedFileNotFoundException extends UncheckedException {
+    public UncheckedFileNotFoundException(Exception e) {
       super(e);
     }
   }

@@ -2,10 +2,9 @@ package com.zarbosoft.alligatoroid.compiler.language;
 
 import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.ImportSpec;
-import com.zarbosoft.alligatoroid.compiler.ImportSpecValue;
 import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.ModuleIdValue;
 import com.zarbosoft.alligatoroid.compiler.RemoteModuleId;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
@@ -33,9 +32,7 @@ public class ModRemote extends LanguageValue {
     if (url0 == null || hash0 == null) return EvaluateResult.error;
 
     return ectx.build(
-        new ImportSpecValue(
-            new ImportSpec(
-                new RemoteModuleId(
-                    (String) url0.concreteValue(), (String) hash0.concreteValue()))));
+        new ModuleIdValue(
+            new RemoteModuleId((String) url0.concreteValue(), (String) hash0.concreteValue())));
   }
 }

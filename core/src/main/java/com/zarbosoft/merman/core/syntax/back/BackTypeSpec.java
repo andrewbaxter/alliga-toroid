@@ -12,7 +12,6 @@ import com.zarbosoft.merman.core.serialization.WriteStateBack;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.error.TypeInvalidAtLocation;
 import com.zarbosoft.merman.core.syntax.error.BackElementUnsupportedInBackFormat;
 import com.zarbosoft.pidgoon.events.nodes.Terminal;
 import com.zarbosoft.pidgoon.model.Node;
@@ -21,7 +20,6 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Map;
 
 public class BackTypeSpec extends BaseBackPrimitiveSpec {
@@ -36,8 +34,8 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
   }
 
   @Override
-  protected Iterator<BackSpec> walkStep() {
-    return value.walkStep();
+  protected ROList<BackSpec> walkTypeBackStep() {
+    return value.walkTypeBackStep();
   }
 
   @Override
@@ -50,8 +48,9 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
         return new ROPair<>(
             ok,
             ok
-                ? TSList.of(new AtomType.PrimitiveFieldParseResult(
-                    id, new FieldPrimitive(BackTypeSpec.this, ((ETypeEvent) event).value)))
+                ? TSList.of(
+                    new AtomType.PrimitiveFieldParseResult(
+                        id, new FieldPrimitive(BackTypeSpec.this, ((ETypeEvent) event).value)))
                 : ROList.empty);
       }
 
@@ -63,35 +62,19 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
   }
 
   @Override
-  public void write(Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
+  public void write(
+      Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.type(((StringBuilder) data.get(type)).toString());
     stack.add(new WriteStateBack(data, Arrays.asList(value).iterator()));
   }
 
-  @Override
-  protected boolean isSingularValue() {
-    return true;
-  }
-
-  @Override
-  protected boolean isTypedValue() {
-    return true;
-  }
-
-  public void finish(
-      MultiError errors,
-      final Syntax syntax,
-      SyntaxPath typePath,
-      boolean singularRestriction,
-      boolean typeRestriction) {
-    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
-    if (typeRestriction) {
-      errors.add(new TypeInvalidAtLocation(typePath));
-    }
+  public void finish(MultiError errors, final Syntax syntax, SyntaxPath typePath) {
+    super.finish(errors, syntax, typePath);
+    checkSingularNotTypeKey(errors, syntax, typePath.add("value"), value);
     if (syntax.backType != BackType.LUXEM) {
       errors.add(new BackElementUnsupportedInBackFormat("type", syntax.backType, typePath));
     }
-    value.finish(errors, syntax, typePath.add("value"), true, true);
+    value.finish(errors, syntax, typePath.add("value"));
     value.parent =
         new PartParent() {
           @Override

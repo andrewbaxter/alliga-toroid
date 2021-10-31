@@ -16,10 +16,10 @@ import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedJSONSpecialPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackJSONSpecialPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.back.BackKeySpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.builder.FrontArraySpecBuilder;
 import com.zarbosoft.merman.core.syntax.front.ConditionValue;
@@ -120,29 +120,28 @@ public class JsonSyntax {
                     "null",
                     new AtomType.Config(
                         TYPE_NULL,
-                        TSList.of(new BackFixedJSONSpecialPrimitiveSpec("null")),
+                        new BackFixedJSONSpecialPrimitiveSpec("null"),
                         TSList.of(textSym("null", specialStyle))))),
             new FreeAtomType(
                 new FreeAtomType.Config(
                     "true",
                     new AtomType.Config(
                         TYPE_TRUE,
-                        TSList.of(new BackFixedJSONSpecialPrimitiveSpec("true")),
+                        new BackFixedJSONSpecialPrimitiveSpec("true"),
                         TSList.of(textSym("true", specialStyle))))),
             new FreeAtomType(
                 new FreeAtomType.Config(
                     "false",
                     new AtomType.Config(
                         TYPE_FALSE,
-                        TSList.of(new BackFixedJSONSpecialPrimitiveSpec("false")),
+                        new BackFixedJSONSpecialPrimitiveSpec("false"),
                         TSList.of(textSym("false", specialStyle))))),
             new FreeAtomType(
                 new FreeAtomType.Config(
                     "string",
                     new AtomType.Config(
                         TYPE_STRING,
-                        TSList.of(
-                            new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(DEFAULT_ID))),
+                        new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(DEFAULT_ID)),
                         TSList.of(
                             textSym("\"", stringStyle),
                             new FrontPrimitiveSpec(
@@ -154,9 +153,8 @@ public class JsonSyntax {
                     "int",
                     new AtomType.Config(
                         TYPE_INT,
-                        TSList.of(
-                            new BackJSONSpecialPrimitiveSpec(
-                                BackJSONSpecialPrimitiveSpec.integerConfig(DEFAULT_ID))),
+                        new BackJSONSpecialPrimitiveSpec(
+                            BackJSONSpecialPrimitiveSpec.integerConfig(DEFAULT_ID)),
                         TSList.of(
                             new FrontPrimitiveSpec(
                                 new FrontPrimitiveSpec.Config(DEFAULT_ID)
@@ -166,9 +164,8 @@ public class JsonSyntax {
                     "decimal",
                     new AtomType.Config(
                         TYPE_DECIMAL,
-                        TSList.of(
-                            new BackJSONSpecialPrimitiveSpec(
-                                BackJSONSpecialPrimitiveSpec.decimalConfig(DEFAULT_ID))),
+                        new BackJSONSpecialPrimitiveSpec(
+                            BackJSONSpecialPrimitiveSpec.decimalConfig(DEFAULT_ID)),
                         TSList.of(
                             new FrontPrimitiveSpec(
                                 new FrontPrimitiveSpec.Config(DEFAULT_ID)
@@ -178,10 +175,9 @@ public class JsonSyntax {
                         "record",
                         new AtomType.Config(
                             TYPE_RECORD,
-                            TSList.of(
-                                new BackRecordSpec(
-                                    new BaseBackArraySpec.Config(
-                                        DEFAULT_ID, TYPE_RECORD_PAIR, ROList.empty))),
+                            new BackRecordSpec(
+                                new BaseBackArraySpec.Config(
+                                    DEFAULT_ID, TYPE_RECORD_PAIR, ROList.empty)),
                             TSList.of(
                                 textSym("{", symbolStyle),
                                 new FrontArraySpecBuilder(DEFAULT_ID)
@@ -195,9 +191,9 @@ public class JsonSyntax {
                     "record element",
                     new AtomType.Config(
                         TYPE_RECORD_PAIR,
-                        TSList.of(
+                        new BackKeySpec(
                             new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config("key")),
-                            new BackAtomSpec(new BaseBackAtomSpec.Config("value", GROUP_ANY))),
+                            new BackAtomSpec(new BackAtomSpec.Config("value", GROUP_ANY))),
                         TSList.of(
                             new FrontPrimitiveSpec(
                                 new FrontPrimitiveSpec.Config("key")
@@ -209,10 +205,8 @@ public class JsonSyntax {
                         "array",
                         new AtomType.Config(
                             TYPE_ARRAY,
-                            TSList.of(
-                                new BackArraySpec(
-                                    new BaseBackArraySpec.Config(
-                                        DEFAULT_ID, GROUP_ANY, TSList.of()))),
+                            new BackArraySpec(
+                                new BaseBackArraySpec.Config(DEFAULT_ID, GROUP_ANY, TSList.of())),
                             TSList.of(
                                 textSym("[", symbolStyle),
                                 new FrontArraySpecBuilder(DEFAULT_ID)
@@ -288,9 +282,7 @@ public class JsonSyntax {
                     splayedTypes,
                     new RootAtomType(
                         new RootAtomType.Config(
-                            TSList.of(
-                                new BackAtomSpec(
-                                    new BaseBackAtomSpec.Config(DEFAULT_ID, GROUP_ANY))),
+                            new BackAtomSpec(new BackAtomSpec.Config(DEFAULT_ID, GROUP_ANY)),
                             TSList.of(new FrontAtomSpec(new FrontAtomSpec.Config(DEFAULT_ID))),
                             ROMap.empty)),
                     gap,

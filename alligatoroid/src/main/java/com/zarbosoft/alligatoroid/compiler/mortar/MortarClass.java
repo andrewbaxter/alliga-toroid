@@ -22,7 +22,7 @@ public class MortarClass extends MortarHalfObjectType implements SimpleValue {
     WholeValue key = WholeValue.getWhole(context, location, field0);
     MortarHalfType field = fields.getOpt(key.concreteValue());
     if (field == null) {
-      context.module.log.errors.add(Error.noField(location, key));
+      context.module.log.errors.add(new Error.NoField(location, key));
       return EvaluateResult.error;
     }
     return EvaluateResult.pure(field.asValue(lower));

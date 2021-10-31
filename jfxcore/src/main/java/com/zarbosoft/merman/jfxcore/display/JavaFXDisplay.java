@@ -310,12 +310,9 @@ public class JavaFXDisplay extends Display {
     node.setOnScroll(
         e -> {
           node.requestFocus();
-          if (this.mouseButtonEventListener.apply(
-              buildHIDEvent(
-                  e.getDeltaY() > 0 ? Key.MOUSE_SCROLL_UP : Key.MOUSE_SCROLL_DOWN, true))) {
-            e.consume();
-          }
+          scroll(e.getDeltaX(), e.getDeltaY());
         });
+
     node.setOnKeyPressed(
         e -> {
           if (this.keyEventListener.apply(buildHIDEvent(convertButton(e.getCode()), true))) {
@@ -938,8 +935,6 @@ public class JavaFXDisplay extends Display {
   public ButtonEvent buildHIDEvent(final Key key, final boolean press) {
     final ButtonEvent out = new ButtonEvent(key, press, modifiers.roCopy());
     switch (key) {
-      case MOUSE_SCROLL_DOWN:
-      case MOUSE_SCROLL_UP:
       case MOUSE_1:
       case MOUSE_2:
       case MOUSE_3:

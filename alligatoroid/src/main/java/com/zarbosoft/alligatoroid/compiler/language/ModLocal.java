@@ -3,13 +3,13 @@ package com.zarbosoft.alligatoroid.compiler.language;
 import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.ImportSpec;
-import com.zarbosoft.alligatoroid.compiler.ImportSpecValue;
 import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.ModuleId;
+import com.zarbosoft.alligatoroid.compiler.ModuleIdValue;
 import com.zarbosoft.alligatoroid.compiler.RemoteModuleId;
+import com.zarbosoft.alligatoroid.compiler.RemoteModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
@@ -34,21 +34,23 @@ public class ModLocal extends LanguageValue {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     WholeValue path0 = WholeValue.getWhole(context, location, ectx.evaluate(this.path));
     if (path0 == null) return EvaluateResult.error;
+    final String path = (String) path0.concreteValue();
     ModuleId newId =
         context.module.spec.moduleId.dispatch(
             new ModuleId.Dispatcher<ModuleId>() {
+
               @Override
               public ModuleId handle(LocalModuleId id) {
-                Path path =
-                    Paths.get(id.path).resolveSibling((String) path0.concreteValue()).normalize();
-                return new LocalModuleId(path.toString());
+                return new LocalModuleId(
+                    Paths.get(id.path).resolveSibling(path).normalize().toString());
               }
 
               @Override
               public ModuleId handle(RemoteModuleId id) {
-                Path subpath = Paths.get((String) path0.concreteValue()).normalize();
+                Path subpath = Paths.get(path).normalize();
                 if (subpath.startsWith("..")) {
-                  context.module.log.errors.add(Error.importOutsideOwningRemoteModule(subpath, id));
+                    context.module.log.errors.add(
+                            new Error.ImportOutsideOwningRemoteModule(location, subpath.toString(), id));
                   return null;
                 }
                 return new RemoteModuleSubId(id, subpath.toString());
@@ -56,16 +58,16 @@ public class ModLocal extends LanguageValue {
 
               @Override
               public ModuleId handle(RemoteModuleSubId id) {
-                Path subpath =
-                    Paths.get(id.path).resolveSibling((String) path0.concreteValue()).normalize();
+                Path subpath = Paths.get(id.path).resolveSibling(path).normalize();
                 if (subpath.startsWith("..")) {
-                  context.module.log.errors.add(Error.importOutsideOwningRemoteModule(subpath, id));
+                    context.module.log.errors.add(
+                            new Error.ImportOutsideOwningRemoteModule(location, subpath.toString(), id.module));
                   return null;
                 }
                 return new RemoteModuleSubId(id.module, subpath.toString());
               }
             });
     if (newId == null) return EvaluateResult.error;
-    return ectx.build(new ImportSpecValue(new ImportSpec(newId)));
+    return ectx.build(new ModuleIdValue(newId));
   }
 }

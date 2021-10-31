@@ -55,6 +55,20 @@ public class Utils {
         });
   }
 
+  public static byte[] toBytes(int x) {
+    ByteBuffer bb = ByteBuffer.allocate(4);
+    bb.order(ByteOrder.LITTLE_ENDIAN);
+    bb.putInt(x);
+    return bb.array();
+  }
+
+  public static byte[] toBytes(long x) {
+    ByteBuffer bb = ByteBuffer.allocate(8);
+    bb.order(ByteOrder.LITTLE_ENDIAN);
+    bb.putLong(x);
+    return bb.array();
+  }
+
   public static class SHA256 {
     private final MessageDigest digest;
 
@@ -63,10 +77,7 @@ public class Utils {
     }
 
     public SHA256 add(byte[] value) {
-      ByteBuffer bb = ByteBuffer.allocate(4);
-      bb.order(ByteOrder.LITTLE_ENDIAN);
-      bb.putLong(value.length);
-      digest.update(bb.array());
+      digest.update(toBytes(value.length));
       digest.update(value);
       return this;
     }
@@ -78,10 +89,7 @@ public class Utils {
     public SHA256 add(Path path) {
       return uncheck(
           () -> {
-            ByteBuffer bb = ByteBuffer.allocate(4);
-            bb.order(ByteOrder.LITTLE_ENDIAN);
-            bb.putLong(Files.size(path));
-            digest.update(bb.array());
+            digest.update(toBytes(Files.size(path)));
             Files.copy(
                 path,
                 new OutputStream() {

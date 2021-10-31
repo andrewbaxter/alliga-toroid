@@ -7,7 +7,7 @@ import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
+import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -30,7 +30,7 @@ public class TreeBuilder {
   }
 
   public TreeBuilder add(final String key, final TreeBuilder builder) {
-    FieldAtom v = new FieldAtom((BaseBackAtomSpec) type.namedFields.get(key));
+    FieldAtom v = new FieldAtom((BackAtomSpec) type.namedFields.get(key));
     v.initialSet(builder.build());
     data.putNew(key, v);
     return this;
@@ -43,7 +43,7 @@ public class TreeBuilder {
   }
 
   public TreeBuilder add(final String key, final Atom atom) {
-    FieldAtom v = new FieldAtom((BaseBackAtomSpec) type.namedFields.get(key));
+    FieldAtom v = new FieldAtom((BackAtomSpec) type.namedFields.get(key));
     v.initialSet(atom);
     data.putNew(key, v);
     return this;

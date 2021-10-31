@@ -21,7 +21,7 @@ public final class Lower extends LanguageValue {
 
   @Override
   public EvaluateResult evaluate(Context context) {
-    context.module.log.errors.add(Error.lowerTooDeep(location));
+    context.module.log.errors.add(new Error.LowerTooDeep(location));
     return EvaluateResult.error;
   }
 }

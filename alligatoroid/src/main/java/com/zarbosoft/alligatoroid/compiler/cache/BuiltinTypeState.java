@@ -7,7 +7,7 @@ import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.deserialize.DefaultStateSingle;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StateString;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
-import com.zarbosoft.luxem.read.path.LuxemPath;
+import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.TSList;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
@@ -22,16 +22,16 @@ public class BuiltinTypeState extends DefaultStateArrayPair {
   }
 
   @Override
-  public BaseStateSingle createKeyState(TSList<Error> errors, LuxemPath luxemPath) {
+  public BaseStateSingle createKeyState(TSList<Error> errors, LuxemPathBuilder luxemPath) {
     return new StateString();
   }
 
   @Override
-  public BaseStateSingle createValueState(TSList<Error> errors, LuxemPath luxemPath, Object key) {
+  public BaseStateSingle createValueState(TSList<Error> errors, LuxemPathBuilder luxemPath, Object key) {
     type = (String) key;
     return new DefaultStateSingle() {
       @Override
-      protected BaseStateRecord innerEatRecordBegin(TSList<Error> errors, LuxemPath luxemPath) {
+      protected BaseStateRecord innerEatRecordBegin(TSList<Error> errors, LuxemPathBuilder luxemPath) {
         return inner = new RecordState(cache);
       }
     };

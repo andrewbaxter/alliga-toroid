@@ -29,8 +29,7 @@ public class Record extends LanguageValue {
     for (Value element : elements) {
       if (!(element instanceof RecordElement)) {
         context.module.log.errors.add(
-            Error.notRecordPair(
-                ((LanguageValue) element).location, element.getClass().getSimpleName()));
+                new Error.NotRecordPair(((LanguageValue) element).location, element.getClass().getSimpleName()));
         continue;
       }
       EvaluateResult keyRes = ((RecordElement) element).key.evaluate(context);

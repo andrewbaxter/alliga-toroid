@@ -22,10 +22,8 @@ import com.zarbosoft.merman.core.syntax.back.BackSpecData;
 import com.zarbosoft.merman.core.syntax.back.BackSubArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackTypeSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.error.AtomTypeErrors;
-import com.zarbosoft.merman.core.syntax.error.AtomTypeNoBack;
 import com.zarbosoft.merman.core.syntax.error.BackFieldWrongType;
 import com.zarbosoft.merman.core.syntax.error.DuplicateBackId;
 import com.zarbosoft.merman.core.syntax.error.MissingBack;
@@ -56,7 +54,7 @@ public abstract class AtomType {
   public final String id;
   public final AtomKey key;
   public final String defaultSelection;
-  private final ROList<BackSpec> back;
+  private final BackSpec back;
   private final ROList<FrontSpec> front;
 
   public AtomType(Config config) {
@@ -68,27 +66,22 @@ public abstract class AtomType {
     TSList<BackSpecData> unnamedFields = new TSList<>();
     TSMap<String, BackSpecData> namedFields = new TSMap<>();
     MultiError errors = new MultiError();
-    if (back.isEmpty()) {
-      errors.add(new AtomTypeNoBack());
-    } else
-      for (BackSpec backSpec : back) {
-        BackSpec.walk(
-            backSpec,
-            s -> {
-              if (!(s instanceof BackSpecData)) return true;
-              BackSpecData s1 = (BackSpecData) s;
-              if (s1.id == null) {
-                unnamedFields.add(s1);
-              } else {
-                BackSpecData old = namedFields.putReplace(s1.id, s1);
-                if (old != null) {
-                  errors.add(new DuplicateBackId(s1.id));
-                }
-                if (s instanceof BaseBackArraySpec) return false;
-              }
-              return true;
-            });
-      }
+    BackSpec.walkTypeBack(
+        back,
+        s -> {
+          if (!(s instanceof BackSpecData)) return true;
+          BackSpecData s1 = (BackSpecData) s;
+          if (s1.id == null) {
+            unnamedFields.add(s1);
+          } else {
+            BackSpecData old = namedFields.putReplace(s1.id, s1);
+            if (old != null) {
+              errors.add(new DuplicateBackId(s1.id));
+            }
+            if (s instanceof BaseBackArraySpec) return false;
+          }
+          return true;
+        });
     this.unnamedFields = unnamedFields;
     this.namedFields = namedFields;
     errors.raise();
@@ -145,14 +138,8 @@ public abstract class AtomType {
 
   public void finish(MultiError errors, final Syntax syntax) {
     MultiError subErrors = new MultiError();
-    if (back().isEmpty()) {
-      subErrors.add(new AtomTypeNoBack());
-    }
-    for (int i = 0; i < back().size(); ++i) {
-      BackSpec e = back().get(i);
-      e.finish(subErrors, syntax, new SyntaxPath("back").add(Integer.toString(i)), false, false);
-      e.parent = new NodeBackParent(i);
-    }
+    back.finish(subErrors, syntax, new SyntaxPath("back"));
+    back.parent = new AtomBackParent();
     {
       final TSSet<String> fieldsUsedFront = new TSSet<>();
       for (int i = 0; i < front().size(); ++i) {
@@ -182,15 +169,13 @@ public abstract class AtomType {
     return front;
   }
 
-  public final ROList<BackSpec> back() {
+  public final BackSpec back() {
     return back;
   }
 
   public Node<AtomParseResult> buildBackRule(Environment env, final Syntax syntax) {
     final MergeSequence<FieldParseResult> seq = new MergeSequence<>();
-    for (BackSpec p : back()) {
-      seq.add(p.buildBackRule(env, syntax));
-    }
+    seq.add(back.buildBackRule(env, syntax));
     return new Color<AtomParseResult>(
         "atom " + id,
         new Operator<ROList<FieldParseResult>, AtomParseResult>(seq) {
@@ -205,7 +190,7 @@ public abstract class AtomType {
 
   public BackSpec getBackPart(final String id) {
     final TSList<Iterator<BackSpec>> stack = new TSList<>();
-    stack.add(back().iterator());
+    stack.add(new TSList<>(back()).iterator());
     while (!stack.isEmpty()) {
       final Iterator<BackSpec> iterator = stack.last();
       if (!iterator.hasNext()) {
@@ -216,7 +201,7 @@ public abstract class AtomType {
       if (next instanceof BackFixedArraySpec) {
         stack.add(((BackFixedArraySpec) next).elements.iterator());
       } else if (next instanceof BackFixedRecordSpec) {
-        stack.add(((BackFixedRecordSpec) next).pairs.iterValues());
+        stack.add(((BackFixedRecordSpec) next).pairs.iterator());
       } else if (next instanceof BackArraySpec) {
         if (((BackArraySpec) next).id.equals(id)) return next;
       } else if (next instanceof BackSubArraySpec) {
@@ -257,11 +242,11 @@ public abstract class AtomType {
     return found;
   }
 
-  public BaseBackAtomSpec getDataAtom(
+  public BackAtomSpec getDataAtom(
       MultiError errors, SyntaxPath typePath, final String key, String forName) {
     BackSpecData found = getBack(errors, typePath, key, forName);
     try {
-      return (BaseBackAtomSpec) found;
+      return (BackAtomSpec) found;
     } catch (ClassCastException e) {
       errors.add(new BackFieldWrongType(typePath, id, found, "atom", forName));
       return null;
@@ -407,7 +392,7 @@ public abstract class AtomType {
 
   public static final class Config {
     public final String id;
-    public final ROList<BackSpec> back;
+    public final BackSpec back;
     public final ROList<FrontSpec> front;
     /**
      * If this has multiple selectable front elements, this is the default selection when selecting
@@ -415,7 +400,7 @@ public abstract class AtomType {
      */
     public String defaultSelection;
 
-    public Config(String id, ROList<BackSpec> back, ROList<FrontSpec> front) {
+    public Config(String id, BackSpec back, ROList<FrontSpec> front) {
       this.id = id;
       this.back = back;
       this.front = front;
@@ -427,11 +412,5 @@ public abstract class AtomType {
     }
   }
 
-  public static class NodeBackParent extends BackSpec.Parent {
-    public int index;
-
-    public NodeBackParent(final int index) {
-      this.index = index;
-    }
-  }
+  public static class AtomBackParent extends BackSpec.Parent {}
 }

@@ -1,10 +1,13 @@
 package com.zarbosoft.merman.core.syntax.builder;
 
+import com.zarbosoft.merman.core.syntax.back.BackDiscardKeySpec;
+import com.zarbosoft.merman.core.syntax.back.BackFixedPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedRecordSpec;
+import com.zarbosoft.merman.core.syntax.back.BackKeySpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
-import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
-import com.zarbosoft.rendaw.common.TSOrderedSet;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public class BackFixedRecordSpecBuilder {
@@ -22,6 +25,13 @@ public class BackFixedRecordSpecBuilder {
   }
 
   public BackSpec build() {
-    return new BackFixedRecordSpec(new BackFixedRecordSpec.Config(pairs, discard.ro()));
+    TSList<BackSpec> newPairs = new TSList<>();
+    for (ROPair<String, BackSpec> pair : pairs) {
+      newPairs.add(new BackKeySpec(new BackFixedPrimitiveSpec(pair.first), pair.second));
+    }
+    for (String key : discard) {
+      newPairs.add(new BackDiscardKeySpec(new BackFixedPrimitiveSpec(key)));
+    }
+    return new BackFixedRecordSpec(new BackFixedRecordSpec.Config(newPairs));
   }
 }

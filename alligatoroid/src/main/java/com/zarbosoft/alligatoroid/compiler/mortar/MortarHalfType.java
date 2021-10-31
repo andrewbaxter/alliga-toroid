@@ -11,7 +11,7 @@ public interface MortarHalfType extends SimpleValue {
 
   default EvaluateResult valueAccess(
       Context context, Location location, Value field, MortarProtocode lower) {
-    context.module.log.errors.add(Error.accessNotSupported(location));
+      context.module.log.errors.add(new Error.AccessNotSupported(location));
     return EvaluateResult.error;
   }
 }

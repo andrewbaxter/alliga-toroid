@@ -2,6 +2,8 @@ package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
 import com.zarbosoft.merman.core.document.Atom;
@@ -31,6 +33,15 @@ public class BackArraySpec extends BaseBackArraySpec {
   }
 
   @Override
+  public void finish(MultiError errors, Syntax syntax, SyntaxPath typePath) {
+    super.finish(errors, syntax, typePath);
+    checkNotKey(errors, syntax, type);
+    for (Map.Entry<String, BackSpec> e : boilerplate) {
+      checkNotKey(errors, syntax, boilerplatePath(typePath,e.getKey()), e.getValue());
+    }
+  }
+
+  @Override
   public void uncopy(Context context, Consumer<ROList<Atom>> consumer) {
     context.uncopy(
         buildBackRuleInner(context.env, context.syntax), Context.CopyContext.ARRAY, consumer);
@@ -46,7 +57,8 @@ public class BackArraySpec extends BaseBackArraySpec {
   }
 
   @Override
-  public void write(Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
+  public void write(
+      Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.arrayBegin();
     stack.add(new WriteStateArrayEnd());
     stack.add(writeContents((TSList<Atom>) data.get(id)));
@@ -54,10 +66,5 @@ public class BackArraySpec extends BaseBackArraySpec {
 
   private WriteState writeContents(ROList<Atom> atoms) {
     return new WriteStateDeepDataArray(atoms, splayedBoilerplate);
-  }
-
-  @Override
-  protected boolean isSingularValue() {
-    return true;
   }
 }

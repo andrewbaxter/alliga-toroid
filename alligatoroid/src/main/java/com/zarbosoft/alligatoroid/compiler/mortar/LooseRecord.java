@@ -53,7 +53,7 @@ public class LooseRecord implements OkValue {
       }
     }
     if (out == null) {
-      context.module.log.errors.add(Error.noField(location, key));
+      context.module.log.errors.add(new Error.NoField(location, key));
       return EvaluateResult.error;
     }
     return new EvaluateResult(

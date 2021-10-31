@@ -19,7 +19,6 @@ import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BackIdSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpecData;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Padding;
@@ -268,7 +267,7 @@ public class Editor {
   public static Field createEmptyField(
       Syntax syntax, FileIds fileIds, BackSpecData backSpecData, int depth) {
     if (backSpecData instanceof BackAtomSpec) {
-      FieldAtom field = new FieldAtom((BaseBackAtomSpec) backSpecData);
+      FieldAtom field = new FieldAtom((BackAtomSpec) backSpecData);
       ROOrderedSetRef<AtomType> candidates = syntax.splayedTypes.get(field.back().type);
       if (depth < 10 && candidates.size() == 1) {
         field.initialSet(createEmptyAtom(syntax, fileIds, candidates.iterator().next(), depth + 1));

@@ -5,6 +5,7 @@ import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
+import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateArrayEnd;
@@ -15,9 +16,10 @@ import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.MergeSequence;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSSet;
 
-import java.util.Iterator;
 import java.util.Map;
 
 public class BackFixedArraySpec extends BackSpec {
@@ -28,8 +30,22 @@ public class BackFixedArraySpec extends BackSpec {
   }
 
   @Override
-  protected Iterator<BackSpec> walkStep() {
-    return elements.iterator();
+  public ROPair<Atom, Integer> backLocate(
+      Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
+    if (segments.get(0).first != offset) return new ROPair<>(null, offset + 1);
+    segments = segments.subFrom(1);
+    offset = 0;
+    for (BackSpec element : elements) {
+      ROPair<Atom, Integer> res = element.backLocate(at, offset, segments);
+      if (res == null || res.first != null) return res;
+      offset = res.second;
+    }
+    return null;
+  }
+
+  @Override
+  protected ROList<BackSpec> walkTypeBackStep() {
+    return elements;
   }
 
   @Override
@@ -45,15 +61,14 @@ public class BackFixedArraySpec extends BackSpec {
 
   @Override
   public void finish(
-      MultiError errors,
-      final Syntax syntax,
-      final SyntaxPath typePath,
-      boolean singularRestriction,
-      boolean typeRestriction) {
-    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
+          MultiError errors,
+          final Syntax syntax,
+          final SyntaxPath typePath) {
+    super.finish(errors, syntax, typePath);
     for (int i = 0; i < elements.size(); ++i) {
       BackSpec element = elements.get(i);
-      element.finish(errors, syntax, typePath.add(Integer.toString(i)), false, false);
+      element.finish(errors, syntax, typePath.add(Integer.toString(i)));
+      checkNotKey(errors, syntax, typePath.add(Integer.toString(i)),element);
       int finalI = i;
       element.parent =
           new PartParent() {
@@ -76,16 +91,6 @@ public class BackFixedArraySpec extends BackSpec {
     writer.arrayBegin();
     stack.add(new WriteStateArrayEnd());
     stack.add(new WriteStateBack(data, elements.iterator()));
-  }
-
-  @Override
-  protected boolean isSingularValue() {
-    return true;
-  }
-
-  @Override
-  protected boolean isTypedValue() {
-    return false;
   }
 
   public static class Config {

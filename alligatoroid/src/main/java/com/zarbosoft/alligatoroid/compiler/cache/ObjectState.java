@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.cache;
 
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.deserialize.DefaultStateSingle;
-import com.zarbosoft.luxem.read.path.LuxemPath;
+import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.nio.file.Paths;
@@ -16,7 +16,7 @@ public class ObjectState extends DefaultStateSingle {
   }
 
   @Override
-  protected void innerEatPrimitiveUntyped(TSList<Error> errors, LuxemPath luxemPath, String value) {
+  protected void innerEatPrimitiveUntyped(TSList<Error> errors, LuxemPathBuilder luxemPath, String value) {
     cacheRelPath = value;
   }
 

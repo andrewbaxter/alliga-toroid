@@ -5,7 +5,7 @@ import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.syntax.AtomType;
-import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
+import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.merman.core.visual.Visual;
@@ -18,7 +18,7 @@ public class FrontAtomSpec extends FrontSpec {
   private final String fieldId;
   private final Symbol ellipsis;
   private final ROMap<String, Object> ellipsisMeta;
-  private BaseBackAtomSpec field;
+  private BackAtomSpec field;
 
   public FrontAtomSpec(Config config) {
     fieldId = config.fieldId;
@@ -26,7 +26,7 @@ public class FrontAtomSpec extends FrontSpec {
     ellipsisMeta = config.ellipsisMeta;
   }
 
-  public BaseBackAtomSpec field() {
+  public BackAtomSpec field() {
     return field;
   }
 

@@ -15,12 +15,12 @@ public class WriteStateDeepDataArray extends WriteState {
   public static final String INDEX_KEY = "__deep_index";
   public static final String INDEX_KEY_PREFIX = "__deep_index_";
   private final Iterator<Atom> iterator;
-  private final ROMap<String, ROList<BackSpec>> boilerplate;
+  private final ROMap<String, BackSpec> boilerplate;
   /** Used for creating consistent unique keys for gaps in records (hack?) */
   private int index = -1;
 
   public WriteStateDeepDataArray(
-      final ROList<Atom> values, final ROMap<String, ROList<BackSpec>> boilerplate) {
+      final ROList<Atom> values, final ROMap<String, BackSpec> boilerplate) {
     this.iterator = values.iterator();
     this.boilerplate = boilerplate;
   }
@@ -31,14 +31,12 @@ public class WriteStateDeepDataArray extends WriteState {
     final Atom next = iterator.next();
     if (iterator.hasNext()) stack.add(this);
     index += 1;
-    ROList<BackSpec> nextPlate = boilerplate.getOpt(next.type.id());
+    BackSpec nextPlate = boilerplate.getOpt(next.type.id());
     if (nextPlate != null) {
       Map<Object, Object> carryNext = new HashMap<>();
       carryNext.put(null, next);
       carryNext.put(INDEX_KEY, new StringBuilder(INDEX_KEY_PREFIX + index));
-      for (BackSpec plateSpec : nextPlate) {
-        plateSpec.write(env, stack, carryNext, writer);
-      }
+      nextPlate.write(env, stack, carryNext, writer);
     } else {
       next.write(stack);
     }

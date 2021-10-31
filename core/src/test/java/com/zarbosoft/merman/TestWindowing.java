@@ -96,7 +96,7 @@ public class TestWindowing {
             "a" + name,
             new AtomType.Config(
                 name,
-                TSList.of(Helper.buildBackPrimitive("a" + name)),
+                Helper.buildBackPrimitive("a" + name),
                 TSList.of(
                     new FrontSymbolSpec(
                         new FrontSymbolSpec.Config(

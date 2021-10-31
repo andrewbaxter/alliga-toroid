@@ -33,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -233,7 +234,7 @@ public class Cache {
     Path path = cachePath(objectRelPath);
     synchronized (cacheLock) {
       if (seenPaths.contains(path.toString())) {
-        errors.add(Error.deserializeCacheLoop(objectRelPath));
+        errors.add(new Error.CacheLoop(objectRelPath.toString()));
         return null;
       }
       seenPaths.add(path.toString());
@@ -241,7 +242,7 @@ public class Cache {
     Deserializer.deserialize(subErrors, path, new TSList<>(typeState));
     Object out = typeState.build(subErrors);
     if (subErrors.some()) {
-      errors.add(new Error.CacheError(objectRelPath, subErrors));
+      errors.add(new Error.CacheError(objectRelPath.toString(), subErrors));
       return null;
     } else {
       return out;
@@ -256,7 +257,7 @@ public class Cache {
       Writer writer = new Writer(stream, (byte) ' ', 4);
       serializeSubValue(warnings, moduleCacheRelPath, writer, value);
     } catch (Throwable e) {
-      warnings.add(Error.unexpected(e));
+      warnings.add(new Error.PreDeserializeUnexpected(e));
     }
   }
 
@@ -277,7 +278,7 @@ public class Cache {
     Deserializer.deserialize(errors, outputPath, new TSList<>(valueState));
     Object out = valueState.build(errors);
     if (errors.some()) {
-      warnings.add(new Error.CacheError(moduleCacheRelPath, errors));
+      warnings.add(new Error.CacheError(moduleCacheRelPath.toString(), errors));
       return ErrorValue.error;
     } else if (out == errorRet) {
       return ErrorValue.error;
@@ -326,11 +327,15 @@ public class Cache {
             Path useRelPath = null;
             for (int i = 0; i < 1000; ++i) {
               tryRelPath = tryRelPath.resolve(Format.format("%s-%s", hash.substring(cuts * 2), i));
-              TSList<Error> errors1 = new TSList<>();
               Path moduleIdPath = cachePath(tryRelPath).resolve(CACHE_FILENAME_ID);
-              byte[] foundIdBytes = Files.readAllBytes(moduleIdPath);
-              if (errors1.some()) warnings.add(new Error.CacheError(moduleIdPath, errors1));
-              if (errors1.some() || Arrays.equals(foundIdBytes, wantIdBytes)) {
+              byte[] foundIdBytes;
+              try {
+                foundIdBytes = Files.readAllBytes(moduleIdPath);
+              } catch (NoSuchFileException e) {
+                useRelPath = tryRelPath;
+                break;
+              }
+              if (Arrays.equals(foundIdBytes, wantIdBytes)) {
                 useRelPath = tryRelPath;
                 break;
               }

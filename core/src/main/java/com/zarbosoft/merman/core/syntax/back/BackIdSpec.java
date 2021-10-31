@@ -23,8 +23,8 @@ public class BackIdSpec extends BackSpecData {
   }
 
   @Override
-  protected Iterator<BackSpec> walkStep() {
-    return null;
+  protected ROList<BackSpec> walkTypeBackStep() {
+    return ROList.empty;
   }
 
   @Override
@@ -58,15 +58,5 @@ public class BackIdSpec extends BackSpecData {
           Map<Object, Object> data,
           EventConsumer writer) {
     writer.primitive(Integer.toString((int) data.get(this)));
-  }
-
-  @Override
-  protected boolean isSingularValue() {
-    return true;
-  }
-
-  @Override
-  protected boolean isTypedValue() {
-    return false;
   }
 }

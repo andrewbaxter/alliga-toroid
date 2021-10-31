@@ -5,15 +5,16 @@ import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 public class TypeBuilder {
   private final String id;
-  private final TSList<BackSpec> back = new TSList<>();
   private final TSList<FrontSpec> front = new TSList<>();
   private final String humanName;
   private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
+  private BackSpec back = null;
   private int depthScore = 1;
   private int precedence = Integer.MAX_VALUE;
   private boolean associateForward = false;
@@ -25,7 +26,8 @@ public class TypeBuilder {
   }
 
   public TypeBuilder back(BackSpec spec) {
-    back.add(spec);
+    if (back != null) throw new Assertion();
+    back = spec;
     return this;
   }
 
@@ -51,7 +53,7 @@ public class TypeBuilder {
 
   public FreeAtomType build() {
     return new FreeAtomType(
-        new FreeAtomType.Config(humanName, new AtomType.Config(id, back.mut(), front.mut()))
+        new FreeAtomType.Config(humanName, new AtomType.Config(id, back, front.mut()))
             .depthScore(depthScore)
             .alignments(alignments)
             .precedence(precedence)

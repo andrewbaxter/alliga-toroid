@@ -28,11 +28,11 @@ public class BackFixedJSONSpecialPrimitiveSpec extends BackSpec {
   }
 
   @Override
-  public void finish(MultiError errors, Syntax syntax, SyntaxPath typePath, boolean singularRestriction, boolean typeRestriction) {
+  public void finish(MultiError errors, Syntax syntax, SyntaxPath typePath) {
     if (syntax.backType != BackType.JSON) {
       errors.add(new BackElementUnsupportedInBackFormat("json special primitive", syntax.backType, typePath));
     }
-    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
+    super.finish(errors, syntax, typePath);
   }
 
   @Override
@@ -47,17 +47,7 @@ public class BackFixedJSONSpecialPrimitiveSpec extends BackSpec {
   }
 
   @Override
-  protected boolean isSingularValue() {
-    return true;
-  }
-
-  @Override
-  protected boolean isTypedValue() {
-    return false;
-  }
-
-  @Override
-  protected Iterator<BackSpec> walkStep() {
-    return null;
+  protected ROList<BackSpec> walkTypeBackStep() {
+    return ROList.empty;
   }
 }

@@ -22,40 +22,39 @@ import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.EnumerateIterable;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public abstract class BaseBackArraySpec extends BackSpecData {
+  public static SyntaxPath boilerplatePath(SyntaxPath base, String id) {
+    return base.add("boilerplate").add(id);
+  }
   public static final String NO_BOILERPLATE_YET = "";
   /** Base array element type */
   public final String type;
 
-  public ROMap<String, ROList<BackSpec>> boilerplate;
+  public ROMap<String, BackSpec> boilerplate;
   /** Non-group atom type to back spec, for writing */
-  public ROMap<String, ROList<BackSpec>> splayedBoilerplate;
+  public ROMap<String, BackSpec> splayedBoilerplate;
 
   protected BaseBackArraySpec(Config config) {
     super(config.id);
     this.type = config.element;
     MultiError errors = new MultiError();
     {
-      TSMap<String, ROList<BackSpec>> out = new TSMap<>();
+      TSMap<String, BackSpec> out = new TSMap<>();
       for (int i = 0; i < config.boilerplate.size(); ++i) {
-        ROList<BackSpec> boilerplate = config.boilerplate.get(i);
+        BackSpec boilerplate = config.boilerplate.get(i);
         final BackAtomSpec[] boilerplateAtom = {null};
-        for (BackSpec boilerplateSpec : boilerplate) {
-          BackSpec.walk(
-              boilerplateSpec,
+          BackSpec.walkTypeBack(
+              boilerplate,
               child -> {
                 if (!(child instanceof BackAtomSpec)) return true;
                 if (((BackAtomSpec) child).id != null)
@@ -67,7 +66,6 @@ public abstract class BaseBackArraySpec extends BackSpecData {
                 }
                 return false;
               });
-        }
         if (boilerplateAtom[0] == null) {
           errors.add(new ArrayBoilerplateMissingAtom(i));
         } else {
@@ -79,6 +77,21 @@ public abstract class BaseBackArraySpec extends BackSpecData {
       this.boilerplate = out;
     }
     errors.raise();
+  }
+
+  @Override
+  public ROPair<Atom, Integer> backLocate(
+      Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
+    if (segments.get(0).first != offset) return new ROPair<>(null, offset + 1);
+    segments = segments.subFrom(1);
+    offset = 0;
+    FieldArray data = (FieldArray) at.namedFields.get(id);
+    for (Atom element : data.data) {
+      ROPair<Atom, Integer> res = element.backLocate(offset, segments);
+      if (res == null || res.first != null) return res;
+      offset = res.second;
+    }
+    return null;
   }
 
   protected Node<ROList<AtomType.FieldParseResult>> buildBackRuleInnerEnd(
@@ -105,14 +118,12 @@ public abstract class BaseBackArraySpec extends BackSpecData {
                       for (AtomType core : syntax.splayedTypes.get(type)) {
                         remaining.add(core.id());
                       }
-                      for (Map.Entry<String, ROList<BackSpec>> plated : boilerplate) {
+                      for (Map.Entry<String, BackSpec> plated : boilerplate) {
                         for (AtomType sub : syntax.splayedTypes.get(plated.getKey())) {
                           remaining.remove(sub.id());
                         }
                         MergeSequence<AtomType.FieldParseResult> backSeq = new MergeSequence<>();
-                        for (BackSpec boilerplateSpec : plated.getValue()) {
-                          backSeq.add(boilerplateSpec.buildBackRule(env, syntax));
-                        }
+                          backSeq.add(plated.getValue().buildBackRule(env, syntax));
                         union.add(
                             new Operator<
                                 ROList<AtomType.FieldParseResult>, AtomType.AtomParseResult>(
@@ -124,7 +135,7 @@ public abstract class BaseBackArraySpec extends BackSpecData {
                                 for (AtomType.FieldParseResult field : value) {
                                   if (WriteStateDeepDataArray.INDEX_KEY.equals(field.key)) continue;
                                   if (out != null) throw new Assertion();
-                                  out = ((AtomType.AtomFieldParseResult)field).data;
+                                  out = ((AtomType.AtomFieldParseResult) field).data;
                                 }
                                 return out;
                               }
@@ -137,12 +148,12 @@ public abstract class BaseBackArraySpec extends BackSpecData {
   }
 
   @Override
-  protected final Iterator<BackSpec> walkStep() {
-    List<BackSpec> out = new ArrayList<>();
-    for (Map.Entry<String, ROList<BackSpec>> e : boilerplate) {
-      out.addAll(e.getValue().inner_());
+  protected final ROList<BackSpec> walkTypeBackStep() {
+    TSList<BackSpec> out = new TSList<>();
+    for (Map.Entry<String, BackSpec> e : boilerplate) {
+      out.add(e.getValue());
     }
-    return out.iterator();
+    return out;
   }
 
   public String elementAtomType() {
@@ -151,12 +162,10 @@ public abstract class BaseBackArraySpec extends BackSpecData {
 
   @Override
   public void finish(
-      MultiError errors,
-      final Syntax syntax,
-      final SyntaxPath typePath,
-      boolean singularRestriction,
-      boolean typeRestriction) {
-    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
+          MultiError errors,
+          final Syntax syntax,
+          final SyntaxPath typePath) {
+    super.finish(errors, syntax, typePath);
     TSMap<AtomType, String> overlapping = new TSMap<>();
     if (boilerplate.some()) {
       overlapping.put(syntax.gap, NO_BOILERPLATE_YET);
@@ -164,14 +173,14 @@ public abstract class BaseBackArraySpec extends BackSpecData {
       for (AtomType base : syntax.splayedTypes.get(type)) {
         overlapping.put(base, NO_BOILERPLATE_YET); // magic value
       }
-      TSMap<String, ROList<BackSpec>> splayedBoilerplate = new TSMap<>();
-      for (Map.Entry<String, ROList<BackSpec>> boilerplateEl : boilerplate) {
-        SyntaxPath boilerplatePath = typePath.add("boilerplate").add(boilerplateEl.getKey());
-        for (EnumerateIterable.El<BackSpec> el :
-            new EnumerateIterable<>(boilerplateEl.getValue())) {
-          el.value.finish(
-              errors, syntax, boilerplatePath.add(Integer.toString(el.index)), false, false);
-        }
+      TSMap<String, BackSpec> splayedBoilerplate = new TSMap<>();
+      for (Map.Entry<String, BackSpec> boilerplateEl : boilerplate) {
+        SyntaxPath boilerplatePath = boilerplatePath(typePath, boilerplateEl.getKey());
+          boilerplateEl.getValue().finish(
+              errors,
+              syntax,
+              boilerplatePath
+          );
         for (AtomType leaf : syntax.splayedTypes.get(boilerplateEl.getKey())) {
           String old = overlapping.putReplace(leaf, boilerplateEl.getKey());
           if (old == null)
@@ -188,11 +197,6 @@ public abstract class BaseBackArraySpec extends BackSpecData {
     }
   }
 
-  @Override
-  protected boolean isTypedValue() {
-    return false;
-  }
-
   public SyntaxPath getPath(final FieldArray value, final int actualIndex) {
     return value.getSyntaxPath().add(Integer.toString(actualIndex));
   }
@@ -203,6 +207,7 @@ public abstract class BaseBackArraySpec extends BackSpecData {
 
   /**
    * For creating synthetic wrappers when copying data - records need {}, non-luxem arrays []
+   *
    * @param context
    * @param children
    */
@@ -210,6 +215,7 @@ public abstract class BaseBackArraySpec extends BackSpecData {
 
   /**
    * For pasting out of synthetic wrappers - records have {}, non-luxem arrays []
+   *
    * @param context
    * @param consumer
    */
@@ -225,9 +231,9 @@ public abstract class BaseBackArraySpec extends BackSpecData {
      *
      * <p>Inner array is for multi-back boilerplate (for simple boilerplate use 1-element arrays)
      */
-    public final ROList<ROList<BackSpec>> boilerplate;
+    public final ROList<BackSpec> boilerplate;
 
-    public Config(String id, String element, ROList<ROList<BackSpec>> boilerplate) {
+    public Config(String id, String element, ROList<BackSpec> boilerplate) {
       this.id = id;
       this.element = element;
       this.boilerplate = boilerplate;

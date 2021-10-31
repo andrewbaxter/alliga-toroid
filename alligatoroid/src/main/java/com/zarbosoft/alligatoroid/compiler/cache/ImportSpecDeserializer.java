@@ -15,7 +15,7 @@ import com.zarbosoft.alligatoroid.compiler.deserialize.StateObject;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototype;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototypeInt;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StatePrototypeString;
-import com.zarbosoft.luxem.read.path.LuxemPath;
+import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -40,23 +40,23 @@ public class ImportSpecDeserializer {
     valuePrototype =
         new StatePrototype() {
           @Override
-          public BaseStateSingle create(TSList<Error> errors, LuxemPath luxemPath) {
+          public BaseStateSingle create(TSList<Error> errors, LuxemPathBuilder luxemPath) {
             return new DefaultStateSingle() {
               private StateObject child;
 
               @Override
               protected BaseStateSingle innerEatType(
-                  TSList<Error> errors, LuxemPath luxemPath, String name) {
+                      TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
                 ObjectInfo info = typeInfos.getOpt(name);
                 if (info == null) {
                   errors.add(
-                      Error.deserializeUnknownType(luxemPath, name, typeInfos.keys().toList()));
+                          new Error.DeserializeUnknownType(luxemPath.render(), name, typeInfos.keys().toList()));
                   return StateErrorSingle.state;
                 }
                 return new DefaultStateSingle() {
                   @Override
                   protected BaseStateRecord innerEatRecordBegin(
-                      TSList<Error> errors, LuxemPath luxemPath) {
+                      TSList<Error> errors, LuxemPathBuilder luxemPath) {
                     return child = new StateObject(luxemPath, info);
                   }
                 };

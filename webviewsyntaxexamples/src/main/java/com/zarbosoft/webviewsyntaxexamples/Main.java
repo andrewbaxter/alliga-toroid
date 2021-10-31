@@ -20,7 +20,6 @@ import com.zarbosoft.merman.core.syntax.back.BackJSONSpecialPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.builder.BackFixedRecordSpecBuilder;
 import com.zarbosoft.merman.core.syntax.builder.FrontArraySpecBuilder;
@@ -586,15 +585,13 @@ public class Main {
             new BaseBackArraySpec.Config(
                 "statements",
                 statementGroupType,
-                TSList.of(
-                    new TSList<>(
-                        estreeBackBuilder()
-                            .field("type", new BackFixedPrimitiveSpec("ExpressionStatement"))
-                            .field(
-                                "expression",
-                                new BackAtomSpec(
-                                    new BaseBackAtomSpec.Config(null, expresisonGroupType)))
-                            .build()))));
+                new TSList<>(
+                    estreeBackBuilder()
+                        .field("type", new BackFixedPrimitiveSpec("ExpressionStatement"))
+                        .field(
+                            "expression",
+                            new BackAtomSpec(new BackAtomSpec.Config(null, expresisonGroupType)))
+                        .build())));
     TSList<AtomType> types =
         TSList.of(
             frontFactory
@@ -636,7 +633,7 @@ public class Main {
                                 .field(
                                     "init",
                                     new BackAtomSpec(
-                                        new BaseBackAtomSpec.Config("init", expresisonGroupType)))
+                                        new BackAtomSpec.Config("init", expresisonGroupType)))
                                 .build()),
                     "id",
                     "init")
@@ -659,7 +656,7 @@ public class Main {
                                 .field(
                                     "object",
                                     new BackAtomSpec(
-                                        new BaseBackAtomSpec.Config("object", expresisonGroupType)))
+                                        new BackAtomSpec.Config("object", expresisonGroupType)))
                                 .field("property", identifierBack("property"))
                                 .field("computed", new BackFixedJSONSpecialPrimitiveSpec("false"))
                                 .field("optional", new BackFixedJSONSpecialPrimitiveSpec("false"))
@@ -741,19 +738,19 @@ public class Main {
                                 .field(
                                     "init",
                                     new BackAtomSpec(
-                                        new BaseBackAtomSpec.Config("init", declareGroupType)))
+                                        new BackAtomSpec.Config("init", declareGroupType)))
                                 .field(
                                     "test",
                                     new BackAtomSpec(
-                                        new BaseBackAtomSpec.Config("test", expresisonGroupType)))
+                                        new BackAtomSpec.Config("test", expresisonGroupType)))
                                 .field(
                                     "update",
                                     new BackAtomSpec(
-                                        new BaseBackAtomSpec.Config("update", expresisonGroupType)))
+                                        new BackAtomSpec.Config("update", expresisonGroupType)))
                                 .field(
                                     "body",
                                     new BackAtomSpec(
-                                        new BaseBackAtomSpec.Config("body", statementGroupType)))
+                                        new BackAtomSpec.Config("body", statementGroupType)))
                                 .build()),
                     "init",
                     "test",
@@ -769,12 +766,11 @@ public class Main {
                                 .field(
                                     "test",
                                     new BackAtomSpec(
-                                        new BaseBackAtomSpec.Config("test", expresisonGroupType)))
+                                        new BackAtomSpec.Config("test", expresisonGroupType)))
                                 .field(
                                     "consequent",
                                     new BackAtomSpec(
-                                        new BaseBackAtomSpec.Config(
-                                            "consequent", statementGroupType)))
+                                        new BackAtomSpec.Config("consequent", statementGroupType)))
                                 .field("alternate", new BackFixedJSONSpecialPrimitiveSpec("null"))
                                 .build()),
                     "test",
@@ -840,7 +836,7 @@ public class Main {
                                 .field(
                                     "callee",
                                     new BackAtomSpec(
-                                        new BaseBackAtomSpec.Config("callee", expresisonGroupType)))
+                                        new BackAtomSpec.Config("callee", expresisonGroupType)))
                                 .field(
                                     "arguments",
                                     new BackArraySpec(
@@ -953,11 +949,11 @@ public class Main {
                         .field("type", new BackFixedPrimitiveSpec(esType))
                         .field(
                             "left",
-                            new BackAtomSpec(new BaseBackAtomSpec.Config("left", leftChildType)))
+                            new BackAtomSpec(new BackAtomSpec.Config("left", leftChildType)))
                         .field("operator", new BackFixedPrimitiveSpec(symbol))
                         .field(
                             "right",
-                            new BackAtomSpec(new BaseBackAtomSpec.Config("right", rightChildType)))
+                            new BackAtomSpec(new BackAtomSpec.Config("right", rightChildType)))
                         .build()),
             symbol,
             "left",
@@ -984,7 +980,7 @@ public class Main {
                         .field("prefix", new BackFixedJSONSpecialPrimitiveSpec("true"))
                         .field(
                             "argument",
-                            new BackAtomSpec(new BaseBackAtomSpec.Config("argument", childType)))
+                            new BackAtomSpec(new BackAtomSpec.Config("argument", childType)))
                         .build()),
             symbol,
             "argument")

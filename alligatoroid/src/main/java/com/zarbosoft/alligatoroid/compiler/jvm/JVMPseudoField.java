@@ -44,7 +44,7 @@ public class JVMPseudoField implements SimpleValue {
     JVMShallowMethodFieldType real =
         base.methodFields.getOpt(ROTuple.create(name).append(argTuple));
     if (real == null) {
-      context.module.log.errors.add(JVMError.noMethodField(location, name, argTuple));
+      context.module.log.errors.add(JVMError.noMethodField(location, name));
       return EvaluateResult.error;
     }
     JVMRWSharedCode code = new JVMCode().add(lower.lower(context.module));

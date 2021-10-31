@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.jvm;
 
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedClass;
+import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -23,11 +24,18 @@ public class JVMClassType extends JVMBaseClassType {
     this.jvmClass = new JVMSharedClass(jvmExternalClass);
   }
 
+  public static class MethodsNotDefined extends RuntimeException {
+    public final ROSet<ROTuple> incompleteMethods;
+
+    public MethodsNotDefined(ROSet<ROTuple> incompleteMethods) {
+      this.incompleteMethods = incompleteMethods;
+    }
+  }
+
   public void build(TSList<Error> errors) {
     if (built != null) return;
     if (incompleteMethods.some()) {
-      errors.add(Error.methodsNotDefined(incompleteMethods));
-      return;
+      throw new MethodsNotDefined(incompleteMethods.ro());
     }
     built = jvmClass.render();
   }

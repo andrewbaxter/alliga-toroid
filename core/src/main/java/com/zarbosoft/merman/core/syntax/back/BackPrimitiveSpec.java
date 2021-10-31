@@ -23,8 +23,8 @@ public class BackPrimitiveSpec extends BaseBackPrimitiveSpec {
   }
 
   @Override
-  protected Iterator<BackSpec> walkStep() {
-    return null;
+  protected ROList<BackSpec> walkTypeBackStep() {
+    return ROList.empty;
   }
 
   @Override
@@ -52,15 +52,5 @@ public class BackPrimitiveSpec extends BaseBackPrimitiveSpec {
   @Override
   public void write(Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.primitive(((StringBuilder) data.get(id)).toString());
-  }
-
-  @Override
-  protected boolean isSingularValue() {
-    return true;
-  }
-
-  @Override
-  protected boolean isTypedValue() {
-    return false;
   }
 }

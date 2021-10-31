@@ -2,8 +2,8 @@ package com.zarbosoft.alligatoroid.compiler.deserialize;
 
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.luxem.read.BufferedReader;
-import com.zarbosoft.luxem.read.path.LuxemArrayPath;
-import com.zarbosoft.luxem.read.path.LuxemPath;
+import com.zarbosoft.luxem.read.path.LuxemArrayPathBuilder;
+import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.io.InputStream;
@@ -29,7 +29,7 @@ public class Deserializer {
     // TODO luxem path
     BufferedReader reader =
         new BufferedReader() {
-          LuxemPath luxemPath = new LuxemArrayPath(null);
+          LuxemPathBuilder luxemPath = new LuxemArrayPathBuilder(null);
 
           @Override
           protected void eatRecordBegin() {
@@ -69,7 +69,7 @@ public class Deserializer {
         };
     uncheck(() -> reader.feed(source));
     if (stack.some()) {
-      errors.add(Error.deserializeIncompleteFile(path));
+      errors.add(new Error.DeserializeIncompleteFile(path));
     }
   }
 

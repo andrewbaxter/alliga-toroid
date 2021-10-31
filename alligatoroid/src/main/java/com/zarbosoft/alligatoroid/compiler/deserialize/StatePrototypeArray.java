@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.deserialize;
 
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.luxem.read.path.LuxemPath;
+import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class StatePrototypeArray implements StatePrototype {
@@ -13,7 +13,7 @@ public class StatePrototypeArray implements StatePrototype {
   }
 
   @Override
-  public BaseStateSingle create(TSList<Error> errors, LuxemPath luxemPath) {
+  public BaseStateSingle create(TSList<Error> errors, LuxemPathBuilder luxemPath) {
     return new DefaultStateSingle() {
       TSList<State> elements = new TSList<>();
 
@@ -31,10 +31,10 @@ public class StatePrototypeArray implements StatePrototype {
       }
 
       @Override
-      protected DefaultStateArray innerArrayBegin(TSList<Error> errors, LuxemPath luxemPath) {
+      protected DefaultStateArray innerArrayBegin(TSList<Error> errors, LuxemPathBuilder luxemPath) {
         return new DefaultStateArray() {
           @Override
-          public BaseStateSingle createElementState(TSList<Error> errors, LuxemPath luxemPath) {
+          public BaseStateSingle createElementState(TSList<Error> errors, LuxemPathBuilder luxemPath) {
             BaseStateSingle state = inner.create(errors, luxemPath);
             elements.add(state);
             return state;

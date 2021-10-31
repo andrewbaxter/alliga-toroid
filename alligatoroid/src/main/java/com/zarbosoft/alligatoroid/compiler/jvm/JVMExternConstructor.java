@@ -39,7 +39,7 @@ public class JVMExternConstructor implements SimpleValue, GraphSerializable {
     ROTuple argTuple = getArgTuple(argument);
     JVMShallowMethodFieldType.MethodSpecDetails real = base.constructorSigs.getOpt(argTuple);
     if (real == null) {
-      context.module.log.errors.add(JVMError.noMethodField(location, "<init>", argTuple));
+      context.module.log.errors.add(JVMError.noMethodField(location, "<init>"));
       return EvaluateResult.error;
     }
     JVMRWSharedCode code =

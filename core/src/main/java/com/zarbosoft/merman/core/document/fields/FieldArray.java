@@ -40,20 +40,10 @@ public class FieldArray extends Field {
   }
 
   public void renumber(final int from) {
-    int sum;
-    if (from == 0) {
-      sum = 0;
-    } else {
-      final Atom prior = data.get(from - 1);
-      final Parent parent = (Parent) prior.fieldParentRef;
-      sum = parent.backIndex + prior.type.back().size();
-    }
     for (int i = from; i < data.size(); ++i) {
       Atom atom = data.get(i);
       final Parent parent = ((Parent) atom.fieldParentRef);
       parent.index = i;
-      parent.backIndex = sum;
-      sum += atom.type.back().size();
     }
   }
 
@@ -107,7 +97,6 @@ public class FieldArray extends Field {
 
   public static class Parent extends Field.Parent<FieldArray> {
     public int index = 0;
-    public int backIndex = 0;
 
     public Parent(FieldArray value) {
       super(value);
@@ -120,7 +109,7 @@ public class FieldArray extends Field {
 
     @Override
     public SyntaxPath path() {
-      return field.back.getPath(field, backIndex);
+      return field.back.getPath(field, index);
     }
 
     @Override

@@ -5,7 +5,6 @@ import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
-import com.zarbosoft.merman.core.backevents.EKeyEvent;
 import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
@@ -128,7 +127,7 @@ public class Syntax {
                     .add(
                         new Repeat(
                             new HomogenousSequence()
-                                .add(new MatchingEventTerminal<>(new EKeyEvent()))
+                                .add(new MatchingEventTerminal<>(new EPrimitiveEvent()))
                                 .add(new Reference(GRAMMAR_WILDCARD_KEY))))
                     .add(new MatchingEventTerminal<>(new EObjectCloseEvent()))));
     grammar.add(

@@ -75,6 +75,7 @@ public class Context {
   public final Group midground;
   /** Contains source borders. Scrolls. */
   public final Group background;
+
   public final Stylist stylist;
   public int ellipsizeThreshold;
   public int layBrickBatchSize;
@@ -692,6 +693,18 @@ public class Context {
 
   public void actionScrollReset() {
     scrollVisible();
+  }
+
+  public Atom backLocate(BackPath path) {
+    final Atom at = document.root;
+    ROPair<Atom, Integer> out = at.type.back().backLocate(at, 0, path.segments);
+    if (out == null) {
+      return null;
+    }
+    if (out.first != null) {
+      return out.first;
+    }
+    return null;
   }
 
   public static enum CopyContext {

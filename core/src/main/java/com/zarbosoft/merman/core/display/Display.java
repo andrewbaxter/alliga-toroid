@@ -20,6 +20,7 @@ public abstract class Display {
   private final TSList<Runnable> mouseLeaveListeners = new TSList<>();
   private final TSList<DoubleListener> converseEdgeListeners = new TSList<>();
   private final TSList<DoubleListener> transverseEdgeListeners = new TSList<>();
+  private final TSList<ScrollListener> scrollListeners = new TSList<>();
   protected Function<ButtonEvent, Boolean> keyEventListener;
   protected Function<ButtonEvent, Boolean> mouseButtonEventListener;
   protected Function<String, Boolean> typingListener;
@@ -493,6 +494,10 @@ public abstract class Display {
 
   public abstract Blank blank();
 
+  public final void addScrollListener(ScrollListener listener) {
+    scrollListeners.add(listener);
+  }
+
   public final void addMouseExitListener(Runnable listener) {
     mouseLeaveListeners.add(listener);
   }
@@ -564,6 +569,13 @@ public abstract class Display {
       for (DoubleListener l : transverseEdgeListeners) l.changed(oldTransverseEdge, transverseEdge);
   }
 
+  protected void scroll(double dx, double dy) {
+    final Vector converted = halfConvert.convert(dx, dy);
+    for (ScrollListener l : scrollListeners) {
+      l.changed(converted.converse, converted.transverse);
+    }
+  }
+
   public final void addConverseEdgeListener(DoubleListener listener) {
     converseEdgeListeners.add(listener);
   }
@@ -616,6 +628,11 @@ public abstract class Display {
   @FunctionalInterface
   public interface DoubleListener {
     void changed(double oldValue, double newValue);
+  }
+
+  @FunctionalInterface
+  public interface ScrollListener {
+    void changed(double converse, double transverse);
   }
 
   public static class UnconvertAxis {

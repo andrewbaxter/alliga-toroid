@@ -33,7 +33,7 @@ import com.zarbosoft.alligatoroid.compiler.language.Record;
 import com.zarbosoft.alligatoroid.compiler.language.RecordElement;
 import com.zarbosoft.alligatoroid.compiler.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.language.Tuple;
-import com.zarbosoft.luxem.read.path.LuxemPath;
+import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
@@ -73,7 +73,7 @@ public class LanguageDeserializer {
     valuePrototype =
         new StatePrototype() {
           @Override
-          public BaseStateSingle create(TSList<Error> errors, LuxemPath luxemPath) {
+          public BaseStateSingle create(TSList<Error> errors, LuxemPathBuilder luxemPath) {
             return new DefaultStateSingle() {
               private StateObject child;
 
@@ -85,18 +85,17 @@ public class LanguageDeserializer {
 
               @Override
               protected BaseStateSingle innerEatType(
-                  TSList<Error> errors, LuxemPath luxemPath, String name) {
+                      TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
                 ObjectInfo info = languageNodeInfos.getOpt(name);
                 if (info == null) {
                   errors.add(
-                      Error.deserializeUnknownType(
-                          luxemPath, name, languageNodeInfos.keys().toList()));
+                          new Error.DeserializeUnknownType(luxemPath.render(), name, languageNodeInfos.keys().toList()));
                   return StateErrorSingle.state;
                 }
                 return new DefaultStateSingle() {
                   @Override
                   protected BaseStateRecord innerEatRecordBegin(
-                      TSList<Error> errors, LuxemPath luxemPath) {
+                      TSList<Error> errors, LuxemPathBuilder luxemPath) {
                     child = new StateObject(luxemPath, info);
                     return child;
                   }
@@ -167,10 +166,10 @@ public class LanguageDeserializer {
         new DefaultStateSingle() {
           @Override
           protected BaseStateSingle innerEatType(
-              TSList<Error> errors, LuxemPath luxemPath, String name) {
+                  TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
             String expected = "alligatoroid:0.0.1";
             if (!expected.equals(name)) {
-              errors.add(Error.deserializeUnknownLanguageVersion(luxemPath, expected));
+              errors.add(new Error.DeserializeUnknownLanguageVersion(luxemPath.render(), expected));
               return StateErrorSingle.state;
             }
             BaseStateSingle out = new StatePrototypeArray(valuePrototype).create(errors, luxemPath);
@@ -181,7 +180,7 @@ public class LanguageDeserializer {
     Deserializer.deserialize(errors, path, source, stack);
     Object out = rootNodes[0].build(errors);
     if (out == errorRet) {
-      if (errors.none()) errors.add(Error.deserializeMissingSourceFile(path));
+      if (errors.none()) errors.add(new Error.DeserializeMissingSourceFile());
       return null;
     }
     return (ROList<Value>) out;

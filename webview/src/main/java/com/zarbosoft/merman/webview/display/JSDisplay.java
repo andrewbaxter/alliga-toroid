@@ -16,7 +16,6 @@ import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.webview.compat.ResizeObserver;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
-import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSSet;
 import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
@@ -25,7 +24,6 @@ import elemental2.dom.EventListener;
 import elemental2.dom.HTMLDivElement;
 import elemental2.dom.KeyboardEvent;
 import elemental2.dom.MouseEvent;
-import elemental2.dom.WheelEvent;
 import jsinterop.base.JsPropertyMap;
 
 import static com.zarbosoft.merman.core.syntax.Direction.DOWN;
@@ -96,6 +94,7 @@ public class JSDisplay extends Display {
           }
         },
         true);
+    /*
     this.base.addEventListener(
         "wheel",
         new EventListener() {
@@ -206,6 +205,7 @@ public class JSDisplay extends Display {
           }
         },
         true);
+     */
     DomGlobal.document.addEventListener(
         "keydown",
         new EventListener() {

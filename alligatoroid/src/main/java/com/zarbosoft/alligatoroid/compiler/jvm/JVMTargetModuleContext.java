@@ -58,8 +58,8 @@ public class JVMTargetModuleContext implements TargetModuleContext {
     for (TargetCode chunk : chunks) {
       if (chunk == null) continue;
       if (!(chunk instanceof JVMCode)) {
-        context.module.log.errors.add(
-            Error.incompatibleTargetValues(location, MORTAR_TARGET_NAME, chunk.targetName()));
+          context.module.log.errors.add(
+                  new Error.IncompatibleTargetValues(location, MORTAR_TARGET_NAME, chunk.targetName()));
         return null;
       }
       code.add((JVMCode) chunk);

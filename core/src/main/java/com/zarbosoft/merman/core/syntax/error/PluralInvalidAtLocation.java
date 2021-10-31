@@ -4,8 +4,8 @@ import com.zarbosoft.merman.core.SyntaxPath;
 
 public class PluralInvalidAtLocation extends BaseKVError{
 
-  public PluralInvalidAtLocation(SyntaxPath typePath) {
-        put("typePath", typePath);
+  public PluralInvalidAtLocation(SyntaxPath backPath, SyntaxPath pluralPath) {
+        put("path", backPath).put("pluralPath", pluralPath);
   }
 
   @Override

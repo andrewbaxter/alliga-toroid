@@ -5,161 +5,17 @@ import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROMap;
-import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
-import com.zarbosoft.rendaw.common.TSSet;
 
-import java.nio.file.Path;
+import java.lang.reflect.Field;
 
-public class Error implements TreeSerializable {
+import static com.zarbosoft.rendaw.common.Common.uncheck;
+
+public abstract class Error implements TreeSerializable {
   public static final String DESCRIPTION_KEY = "description";
   public static final String LOCATION_KEY = "location";
   public static final String PATH_KEY = "path";
-  public final ROMap<String, Object> data;
-  private final String type;
-
-  public Error(String type, TSMap<String, Object> data) {
-    this.type = type;
-    this.data = data;
-  }
-
-  public static Error deserializeNotArray(LuxemPath path) {
-    return new Error(
-        "deserialize_not_array",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path.toString())
-            .put(DESCRIPTION_KEY, "A luxem array is not allowed at this location in the source"));
-  }
-
-  public static Error deserializeNotRecord(LuxemPath path) {
-    return new Error(
-        "deserialize_not_record",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path.toString())
-            .put(DESCRIPTION_KEY, "A luxem record is not allowed at this location in the source"));
-  }
-
-  public static Error deserializeNotPrimitive(LuxemPath path) {
-    return new Error(
-        "deserialize_not_primitive",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path.toString())
-            .put(
-                DESCRIPTION_KEY,
-                "A luxem primitive is not allowed at this location in the source"));
-  }
-
-  public static Error deserializeNotTyped(LuxemPath path) {
-    return new Error(
-        "deserialize_not_typed",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path.toString())
-            .put(
-                DESCRIPTION_KEY,
-                "A typed luxem value is not allowed at this location in the source"));
-  }
-
-  public static Error deserializeUnknownType(
-      LuxemPath path, String type, TSList<String> knownTypes) {
-    return new Error(
-        "deserialize_unknown_type",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path.toString())
-            .put("got", type)
-            .put("expected", knownTypes)
-            .put(DESCRIPTION_KEY, "This luxem type is not known"));
-  }
-
-  public static Error deserializeUnknownField(
-      LuxemPath path, String type, String field, ROList<String> fields) {
-    return new Error(
-        "deserialize_unknown_field",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path.toString())
-            .put("got", field)
-            .put("expected", fields)
-            .put("type", type)
-            .put(
-                DESCRIPTION_KEY,
-                Format.format("Luxem type %s does not have a field named %s", type, field)));
-  }
-
-  public static Error deserializeMissingField(LuxemPath path, String type, String field) {
-    return new Error(
-        "deserialize_missing_field",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path.toString())
-            .put("field", field)
-            .put("type", type)
-            .put(
-                DESCRIPTION_KEY,
-                Format.format(
-                    "%s is required in luxem type %s but a value was not provided", field, type)));
-  }
-
-  public static Error deserializeUnknownLanguageVersion(LuxemPath path, String version) {
-    return new Error(
-        "deserialize_unknown_language_version",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path.toString())
-            .put("version", version)
-            .put(
-                DESCRIPTION_KEY,
-                Format.format("Language version (luxem root type) %s is unknown", version)));
-  }
-
-  public static Error deserializeMissingVersion() {
-    return new Error(
-        "deserialize_missing_version",
-        new TSMap<String, Object>()
-            .put(DESCRIPTION_KEY, "The source version (luxem root type) is missing"));
-  }
-
-  public static Error deserializeNotBool(LuxemPath path, String value) {
-    return new Error(
-        "deserialize_not_bool",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path.toString())
-            .put("got", value)
-            .put(
-                DESCRIPTION_KEY,
-                Format.format("Expected a bool (true/false) in luxem but got [%s]", value)));
-  }
-
-  public static Error deserializeNotInteger(LuxemPath path, String value) {
-    return new Error(
-        "deserialize_not_integer",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path.toString())
-            .put("got", value)
-            .put(
-                DESCRIPTION_KEY,
-                Format.format("Expected an integer in luxem but got [%s]", value)));
-  }
-
-  public static Error incompatibleTargetValues(
-      Location location, String expectedTarget, String gotTarget) {
-    return new Error(
-        "incompatible_target_values",
-        new TSMap<String, Object>()
-            .put(LOCATION_KEY, location)
-            .put("got", gotTarget)
-            .put("expected", expectedTarget)
-            .put(
-                DESCRIPTION_KEY, "ASSERTION! This block contains values for incompatible targets"));
-  }
-
-  public static Error noField(Location location, WholeValue field) {
-    return new Error(
-        "no_field",
-        new TSMap<String, Object>()
-            .put(LOCATION_KEY, location)
-            .put("field", field)
-            .put(
-                DESCRIPTION_KEY, Format.format("Field [%s] doesn't exist", field.concreteValue())));
-  }
 
   public static TSMap<String, Object> convertThrowable(Throwable e) {
     TSList<Object> stack = new TSList<>();
@@ -176,211 +32,510 @@ public class Error implements TreeSerializable {
     return out;
   }
 
-  public static Error unexpectedAt(Location location, Throwable e) {
-    return new Error(
-        "unexpected",
-        convertThrowable(e)
-            .put(LOCATION_KEY, location)
-            .put(
-                DESCRIPTION_KEY,
-                Format.format("An unexpected error occurred while processing: %s", e)));
-  }
-
-  public static Error unexpected(Throwable e) {
-    return new Error(
-        "unexpected",
-        convertThrowable(e)
-            .put(
-                DESCRIPTION_KEY,
-                Format.format("An unexpected error occurred while processing: %s", e)));
-  }
-
-  public static Error unexpected(String path, Throwable e) {
-    return new Error(
-        "unexpected",
-        convertThrowable(e)
-            .put(PATH_KEY, path)
-            .put(
-                DESCRIPTION_KEY,
-                Format.format("An unexpected error occurred while deserializing %s: %s", path, e)));
-  }
-
-  public static Error callNotSupported(Location location) {
-    return new Error(
-        "call_not_supported",
-        new TSMap<String, Object>()
-            .put(LOCATION_KEY, location)
-            .put(DESCRIPTION_KEY, "This value cannot be called"));
-  }
-
-  public static Error accessNotSupported(Location location) {
-    return new Error(
-        "access_not_supported",
-        new TSMap<String, Object>()
-            .put(LOCATION_KEY, location)
-            .put(DESCRIPTION_KEY, "Fields of this value cannot be accessed"));
-  }
-
-  public static Error bindNotSupported(Location location) {
-    return new Error(
-        "bind_not_supported",
-        new TSMap<String, Object>()
-            .put(LOCATION_KEY, location)
-            .put(DESCRIPTION_KEY, "This value cannot be bound to a variable"));
-  }
-
-  public static Error valueNotWhole(Location location, Value value) {
-    return new Error(
-        "value_not_known_at_phase_1",
-        new TSMap<String, Object>()
-            .put(LOCATION_KEY, location)
-            .put("value", value.getClass().getCanonicalName())
-            .put(
-                DESCRIPTION_KEY, "this value needs to be known completely in phase 1 to use here"));
-  }
-
-  public static Error methodsNotDefined(TSSet<ROTuple> incompleteMethods) {
-    return new Error(
-        "methods_not_defined",
-        new TSMap<String, Object>()
-            .put("methods", TSList.fromSet(incompleteMethods))
-            .put(DESCRIPTION_KEY, "these methods were declared but never defined"));
-  }
-
-  public static Error notRecordPair(Location location, String gotType) {
-    return new Error(
-        "record_element_not_record_pair",
-        new TSMap<String, Object>()
-            .put(LOCATION_KEY, location)
-            .put("got", gotType)
-            .put("expected", "record pair")
-            .put("description", "this element in a record literal is not a record pair"));
-  }
-
-  public static Error lowerTooDeep(Location location) {
-    return new Error(
-        "lower_too_deep",
-        new TSMap<String, Object>()
-            .put(LOCATION_KEY, location)
-            .put("got", "no matching containing stage element")
-            .put("expected", "at least one more containing element is a stage")
-            .put(
-                "description",
-                "This lower element isn't in a matching stage element. If multiple stage elements are nested, the number of corresponding nested lower elements can't exceed the number of stage elements."));
-  }
-
-  public static Error deserializeCacheSubvalueUnknownType(LuxemPath path, String type) {
-    return new Error(
-        "deserialize_cache_subvalue_unknown_type",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path.toString())
-            .put("type", type)
-            .put(
-                DESCRIPTION_KEY,
-                "this subvalue type is not recognized, maybe the cache is corrupt"));
-  }
-
-  public static Error deserializeCacheObjectUnknownType(LuxemPath path, String type) {
-    return new Error(
-        "deserialize_cache_object_unknown_type",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path.toString())
-            .put("type", type)
-            .put(
-                DESCRIPTION_KEY, "this object type is not recognized, maybe the cache is corrupt"));
-  }
-
-  public static Error deserializeMissingSourceFile(String path) {
-    return new Error(
-        "deserialize_missing_source_file",
-        new TSMap<String, Object>()
-            .put("file", path.toString())
-            .put(DESCRIPTION_KEY, "this source file was not found"));
-  }
-
-  public static Error deserializeIncompleteFile(String path) {
-    return new Error(
-        "deserialize_incomplete_file",
-        new TSMap<String, Object>()
-            .put("file", path.toString())
-            .put(DESCRIPTION_KEY, "this file ended before all expected data was read"));
-  }
-
-  public static Error deserializeCacheLoop(Path path) {
-    return new Error(
-        "deserialize_cache_loop",
-        new TSMap<String, Object>()
-            .put("file", path.toString())
-            .put(DESCRIPTION_KEY, "this cache file eventually references itself"));
-  }
-
-  public static Error deserializePairTooManyValues(LuxemPath path) {
-    return new Error(
-        "deserialize_pair_too_many_values",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path.toString())
-            .put(
-                DESCRIPTION_KEY,
-                "This value is a 2-element array, but found more than 2 elements."));
-  }
-
-  public static Error importLoop(Location location, ROList<ImportSpec> loop) {
-    return new Error(
-        "import_loop",
-        new TSMap<String, Object>()
-            .put(LOCATION_KEY, location)
-            .put("loop", loop)
-            .put("description", "This import creates an import loop."));
-  }
-
-  public static Error wrongType(Location location, Value got, String expected) {
-    return new Error(
-        "wrong_type",
-        new TSMap<String, Object>()
-            .put(LOCATION_KEY, location)
-            .put("got", got)
-            .put("expected", expected)
-            .put(DESCRIPTION_KEY, Format.format("Expected %s but got value %s")));
-  }
-
-  public static Error remoteModuleHashMismatch(String url, String wantHash, String foundHash) {
-    return new Error(
-        "remote_module_hash_mismatch",
-        new TSMap<String, Object>()
-            .put(LOCATION_KEY, url)
-            .put("got", foundHash)
-            .put("expected", wantHash)
-            .put(
-                DESCRIPTION_KEY,
-                Format.format(
-                    "Downloaded module at %s has hash %s but expected hash %s",
-                    url, foundHash, wantHash)));
-  }
-
-  public static Error unknownImportFileType(String path) {
-    return new Error(
-        "remote_module_hash_mismatch",
-        new TSMap<String, Object>()
-            .put(PATH_KEY, path)
-            .put(
-                DESCRIPTION_KEY, Format.format("Import of %s is not an expected file type", path)));
-  }
+  public abstract <T> T dispatch(Dispatcher<T> dispatcher);
 
   @Override
   public void treeSerialize(Writer writer) {
-    writer.type(type);
-    TreeSerializable.treeSerialize(writer, data);
+    writer.type(this.getClass().getName()).recordBegin();
+    for (Field field : this.getClass().getFields()) {
+      writer.primitive(field.getName());
+      TreeSerializable.treeSerialize(writer, uncheck(() -> field.get(this)));
+    }
+    writer.recordEnd();
+  }
+
+  public interface Dispatcher<T> {
+    T handle(PreDeserializeError e);
+
+    T handle(LocationError e);
+
+    T handle(DeserializeError e);
+
+    T handle(CacheFileError e);
+  }
+
+  public abstract static class PreDeserializeError extends Error {
+    @Override
+    public <T> T dispatch(Dispatcher<T> dispatcher) {
+      return dispatcher.handle(this);
+    }
+
+    @Override
+    public abstract String toString();
+  }
+
+  public abstract static class LocationError extends Error {
+    public final Location location;
+
+    public LocationError(Location location) {
+      this.location = location;
+    }
+
+    @Override
+    public <T> T dispatch(Dispatcher<T> dispatcher) {
+      return dispatcher.handle(this);
+    }
+
+    @Override
+    public abstract String toString();
+  }
+
+  public abstract static class DeserializeError extends Error {
+    public final LuxemPath backPath;
+
+    public DeserializeError(LuxemPath backPath) {
+      this.backPath = backPath;
+    }
+
+    @Override
+    public <T> T dispatch(Dispatcher<T> dispatcher) {
+      return dispatcher.handle(this);
+    }
+
+    @Override
+    public abstract String toString();
+  }
+
+  public static class DeserializeNotArray extends DeserializeError {
+    public DeserializeNotArray(LuxemPath path) {
+      super(path);
+    }
+
+    @Override
+    public String toString() {
+      return "A luxem array is not allowed at this location in the source";
+    }
+  }
+
+  public static class DeserializeNotRecord extends DeserializeError {
+    public DeserializeNotRecord(LuxemPath path) {
+      super(path);
+    }
+
+    @Override
+    public String toString() {
+      return "A luxem record is not allowed at this location in the source";
+    }
+  }
+
+  public static class DeserializeNotPrimitive extends DeserializeError {
+    public DeserializeNotPrimitive(LuxemPath path) {
+      super(path);
+    }
+
+    @Override
+    public String toString() {
+      return "A luxem primitive is not allowed at this location in the source";
+    }
+  }
+
+  public static class DeserializeNotTyped extends DeserializeError {
+    public DeserializeNotTyped(LuxemPath path) {
+      super(path);
+    }
+
+    @Override
+    public String toString() {
+      return "A luxem type is not allowed at this location in the source";
+    }
+  }
+
+  public static class DeserializeUnknownType extends DeserializeError {
+    public final String type;
+    public final ROList<String> knownTypes;
+
+    public DeserializeUnknownType(LuxemPath path, String type, ROList<String> knownTypes) {
+      super(path);
+      this.type = type;
+      this.knownTypes = knownTypes;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("Unknown luxem type [%s]", type);
+    }
+  }
+
+  public static class DeserializeUnknownField extends DeserializeError {
+    public final String type;
+    public final String field;
+    public final ROList<String> fields;
+
+    public DeserializeUnknownField(
+        LuxemPath path, String type, String field, ROList<String> fields) {
+      super(path);
+      this.type = type;
+      this.field = field;
+      this.fields = fields;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("Luxem type [%s] does not have a field named [%s]", type, field);
+    }
+  }
+
+  public static class DeserializeMissingField extends DeserializeError {
+    public final String type;
+    public final String field;
+
+    public DeserializeMissingField(LuxemPath path, String type, String field) {
+      super(path);
+      this.type = type;
+      this.field = field;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format(
+          "Luxem type [%s] requires a field [%s] but a value was not provided", type, field);
+    }
+  }
+
+  public static class DeserializeUnknownLanguageVersion extends DeserializeError {
+    public final String version;
+
+    public DeserializeUnknownLanguageVersion(LuxemPath path, String version) {
+      super(path);
+      this.version = version;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("Language version (luxem root type) %s is unknown", version);
+    }
+  }
+
+  public static class DeserializeNotBool extends DeserializeError {
+    public final String value;
+
+    public DeserializeNotBool(LuxemPath path, String value) {
+      super(path);
+      this.value = value;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("Expected a bool (true/false) in luxem but got [%s]", value);
+    }
+  }
+
+  public static class DeserializeNotInteger extends DeserializeError {
+    public final String value;
+
+    public DeserializeNotInteger(LuxemPath path, String value) {
+      super(path);
+      this.value = value;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("Expected an integer in luxem but got [%s]", value);
+    }
+  }
+
+  public static class IncompatibleTargetValues extends LocationError {
+    public final String expectedTarget;
+    public final String gotTarget;
+
+    public IncompatibleTargetValues(Location location, String expectedTarget, String gotTarget) {
+      super(location);
+      this.expectedTarget = expectedTarget;
+      this.gotTarget = gotTarget;
+    }
+
+    @Override
+    public String toString() {
+      return "ASSERTION! This block contains values for incompatible targets";
+    }
+  }
+
+  public static class NoField extends LocationError {
+    public final WholeValue field;
+
+    public NoField(Location location, WholeValue field) {
+      super(location);
+      this.field = field;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("Field [%s] doesn't exist", field.concreteValue());
+    }
+  }
+
+  public static class Unexpected extends LocationError {
+    public final Throwable exception;
+
+    public Unexpected(Location location, Throwable exception) {
+      super(location);
+      this.exception = exception;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("An unexpected error occurred while processing: %s", exception);
+    }
+  }
+
+  public static class PreDeserializeUnexpected extends PreDeserializeError {
+    public final Throwable exception;
+
+    public PreDeserializeUnexpected(Throwable exception) {
+      this.exception = exception;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("An unexpected error occurred while processing: %s", exception);
+    }
+  }
+
+  public static class CacheUnexpected extends CacheFileError {
+    public final Throwable exception;
+
+    public CacheUnexpected(String cachePath, Throwable exception) {
+      super(cachePath);
+      this.exception = exception;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("An unexpected error occurred while loading cache file: %s", exception);
+    }
+  }
+
+  public static class DeserializeUnexpected extends DeserializeError {
+    public final Throwable exception;
+
+    public DeserializeUnexpected(LuxemPath backPath, Throwable exception) {
+      super(backPath);
+      this.exception = exception;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("An unexpected error occurred while deserializing: %s", exception);
+    }
+  }
+
+  public static class CallNotSupported extends LocationError {
+    public CallNotSupported(Location location) {
+      super(location);
+    }
+
+    @Override
+    public String toString() {
+      return "This value cannot be called";
+    }
+  }
+
+  public static class AccessNotSupported extends LocationError {
+    public AccessNotSupported(Location location) {
+      super(location);
+    }
+
+    @Override
+    public String toString() {
+      return "Fields of this value cannot be accessed";
+    }
+  }
+
+  public static class BindNotSupported extends LocationError {
+    public BindNotSupported(Location location) {
+      super(location);
+    }
+
+    @Override
+    public String toString() {
+      return "This value cannot be bound to a variable";
+    }
+  }
+
+  public static class ValueNotWhole extends LocationError {
+    public final Value value;
+
+    public ValueNotWhole(Location location, Value value) {
+      super(location);
+      this.value = value;
+    }
+
+    @Override
+    public String toString() {
+      return "This value needs to be known completely in phase 1 for use here";
+    }
+  }
+
+  public static class NotRecordPair extends LocationError {
+    public final String gotType;
+
+    public NotRecordPair(Location location, String gotType) {
+      super(location);
+      this.gotType = gotType;
+    }
+
+    @Override
+    public String toString() {
+      return "This element in a record literal is not a record pair";
+    }
+  }
+
+  public static class LowerTooDeep extends LocationError {
+    public LowerTooDeep(Location location) {
+      super(location);
+    }
+
+    @Override
+    public String toString() {
+      return "This lower element isn't in a matching stage element. If multiple stage elements are nested, the number of corresponding nested lower elements can't exceed the number of stage elements.";
+    }
+  }
+
+  public static class DeserializeMissingSourceFile extends PreDeserializeError {
+    @Override
+    public String toString() {
+      return "The source file was not found";
+    }
+  }
+
+  public static class DeserializeIncompleteFile extends CacheFileError {
+    public DeserializeIncompleteFile(String cachePath) {
+      super(cachePath);
+    }
+
+    @Override
+    public String toString() {
+      return "This source file ended before all expected data was read";
+    }
+  }
+
+  public abstract static class CacheFileError extends Error {
+    public final String cachePath;
+
+    public CacheFileError(String cachePath) {
+      this.cachePath = cachePath;
+    }
+
+    @Override
+    public <T> T dispatch(Dispatcher<T> dispatcher) {
+      return dispatcher.handle(this);
+    }
+
+    @Override
+    public abstract String toString();
+  }
+
+  public static class CacheLoop extends CacheFileError {
+    public CacheLoop(String cachePath) {
+      super(cachePath);
+    }
+
+    @Override
+    public String toString() {
+      return "This cache file eventually references itself";
+    }
+  }
+
+  public static class DeserializePairTooManyValues extends DeserializeError {
+    public DeserializePairTooManyValues(LuxemPath backPath) {
+      super(backPath);
+    }
+
+    @Override
+    public String toString() {
+      return "This value is a 2-element array, but found more than 2 elements.";
+    }
+  }
+
+  public static class ImportLoop extends LocationError {
+    public final ROList<ImportSpec> loop;
+
+    public ImportLoop(Location location, ROList<ImportSpec> loop) {
+      super(location);
+      this.loop = loop;
+    }
+
+    @Override
+    public String toString() {
+      return "This import creates an import loop.";
+    }
+  }
+
+  public static class WrongType extends LocationError {
+    public final Value got;
+    public final String expected;
+
+    public WrongType(Location location, Value got, String expected) {
+      super(location);
+      this.got = got;
+      this.expected = expected;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("Expected [%s] but got value [%s]", expected, got);
+    }
+  }
+
+  public static class RemoteModuleHashMismatch extends PreDeserializeError {
+    public final String url;
+    public final String wantHash;
+    public final String foundHash;
+
+    public RemoteModuleHashMismatch(String url, String wantHash, String foundHash) {
+      this.url = url;
+      this.wantHash = wantHash;
+      this.foundHash = foundHash;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format(
+          "Downloaded module at %s has hash %s but expected hash %s", url, foundHash, wantHash);
+    }
+  }
+
+  public static class UnknownImportFileType extends PreDeserializeError {
+    @Override
+    public String toString() {
+      return "The file type of this module is not recognized";
+    }
+  }
+
+  public static class ImportOutsideOwningRemoteModule extends LocationError {
+    public final String subpath;
+    public final RemoteModuleId module;
+
+    public ImportOutsideOwningRemoteModule(
+        Location location, String subpath, RemoteModuleId module) {
+      super(location);
+      this.subpath = subpath;
+      this.module = module;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format(
+          "Local import of %s within remote submodule %s goes outside the module", subpath, module);
+    }
   }
 
   public abstract static class PreError extends RuntimeException {
     public abstract Error toError(Location location);
   }
 
-  public static class CacheError extends Error {
-    public CacheError(Path path, ROList<Error> errors) {
-      super(
-          "errors_accessing_cache",
-          new TSMap<String, Object>().put("cache_path", path.toString()).put("errors", errors));
+  public static class CacheError extends PreDeserializeError {
+    public final String path;
+    public final ROList<Error> errors;
+
+    public CacheError(String path, ROList<Error> errors) {
+      this.path = path;
+      this.errors = errors;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("Errors loading cache object %s", path);
     }
   }
 }

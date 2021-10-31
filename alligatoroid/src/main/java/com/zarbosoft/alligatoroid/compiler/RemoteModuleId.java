@@ -39,7 +39,7 @@ public final class RemoteModuleId implements ModuleId {
   }
 
   @Override
-  public String baseCacheHash() {
+  public String hash() {
     return new Utils.SHA256().add(url).add(hash).buildHex();
   }
 

@@ -4,42 +4,45 @@ import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.backevents.BackEvent;
-import com.zarbosoft.merman.core.backevents.EKeyEvent;
 import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
+import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateFixedRecord;
 import com.zarbosoft.merman.core.serialization.WriteStateRecordEnd;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.error.RecordDiscardDuplicateKey;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.MergeSequence;
 import com.zarbosoft.pidgoon.nodes.MergeSet;
-import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
-import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.Iterator;
 import java.util.Map;
 
 public class BackFixedRecordSpec extends BackSpec {
 
-  public final ROOrderedMap<String, BackSpec> pairs;
-  /**
-   * Discard these keys if they appear in the data - warning! Even if you don't perform any edits
-   * saving a loaded file will cause data in discard keys to be removed.
-   */
-  public final ROSet<String> discard;
+  public final ROList<BackSpec> pairs;
 
   public BackFixedRecordSpec(Config config) {
     this.pairs = config.pairs;
-    this.discard = config.discard;
+  }
+
+  @Override
+  public ROPair<Atom, Integer> backLocate(
+      Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
+    if (segments.get(0).first != offset) return new ROPair<>(null, offset + 1);
+    segments = segments.subFrom(1);
+    offset = 0;
+    for (BackSpec element : pairs) {
+      ROPair<Atom, Integer> res = element.backLocate(at, offset, segments);
+      if (res == null || res.first != null) return res;
+      offset = res.second;
+    }
+    return null;
   }
 
   @Override
@@ -47,19 +50,8 @@ public class BackFixedRecordSpec extends BackSpec {
     final MergeSequence<AtomType.FieldParseResult> sequence = new MergeSequence<>();
     sequence.addIgnored(new MatchingEventTerminal<BackEvent>(new EObjectOpenEvent()));
     final MergeSet<AtomType.FieldParseResult> set = new MergeSet<>();
-    for (ROPair<String, BackSpec> pair : pairs) {
-      set.add(
-          new MergeSequence<AtomType.FieldParseResult>()
-              .addIgnored(new MatchingEventTerminal<BackEvent>(new EKeyEvent(pair.first)))
-              .add(pair.second.buildBackRule(env, syntax)),
-          true);
-    }
-    for (String key : discard) {
-      set.add(
-          new MergeSequence<AtomType.FieldParseResult>()
-              .addIgnored(new MatchingEventTerminal<BackEvent>(new EKeyEvent(key)))
-              .addIgnored(new Reference<>(Syntax.GRAMMAR_WILDCARD_KEY)),
-          false);
+    for (BackSpec pair : pairs) {
+      set.add(pair.buildBackRule(env, syntax));
     }
     sequence.add(set);
     sequence.addIgnored(new MatchingEventTerminal<BackEvent>(new EObjectCloseEvent()));
@@ -68,62 +60,36 @@ public class BackFixedRecordSpec extends BackSpec {
 
   @Override
   public void finish(
-      MultiError errors,
-      final Syntax syntax,
-      final SyntaxPath typePath,
-      boolean singularRestriction,
-      boolean typeRestriction) {
-    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
-    for (ROPair<String, BackSpec> e : pairs) {
-      String k = e.first;
-      e.second.finish(errors, syntax, typePath.add(k), true, false);
-      e.second.parent =
-          new PartParent() {
-            @Override
-            public BackSpec part() {
-              return BackFixedRecordSpec.this;
-            }
-
-            @Override
-            public String pathSection() {
-              return k;
-            }
-          };
-    }
-    for (String s : discard) {
-      if (pairs.has(s)) errors.add(new RecordDiscardDuplicateKey(s));
+          MultiError errors,
+          final Syntax syntax,
+          final SyntaxPath typePath) {
+    super.finish(errors, syntax, typePath);
+    for (int i = 0; i < pairs.size(); i++) {
+      final BackSpec e = pairs.get(i);
+      final SyntaxPath ePath = typePath.add(Integer.toString(i));
+      checkKey(errors, syntax, ePath,e);
+      e.finish(errors, syntax, ePath);
     }
   }
 
   @Override
-  public void write(Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
+  public void write(
+      Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.recordBegin();
     stack.add(new WriteStateRecordEnd());
     stack.add(new WriteStateFixedRecord(data, pairs));
   }
 
   @Override
-  protected boolean isSingularValue() {
-    return true;
-  }
-
-  @Override
-  protected boolean isTypedValue() {
-    return false;
-  }
-
-  @Override
-  protected Iterator<BackSpec> walkStep() {
-    return pairs.iterValues();
+  protected ROList<BackSpec> walkTypeBackStep() {
+    return pairs;
   }
 
   public static class Config {
-    public final ROOrderedMap<String, BackSpec> pairs;
-    public final ROSet<String> discard;
+    public final ROList<BackSpec> pairs;
 
-    public Config(ROOrderedMap<String, BackSpec> pairs, ROSet<String> discard) {
+    public Config(ROList<BackSpec> pairs) {
       this.pairs = pairs;
-      this.discard = discard;
     }
   }
 }

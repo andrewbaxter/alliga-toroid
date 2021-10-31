@@ -1,13 +1,12 @@
 package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.core.AtomKey;
-import com.zarbosoft.merman.core.BackPath;
+import com.zarbosoft.merman.core.SerializerBackPath;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.backevents.BackEvent;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
-import com.zarbosoft.merman.core.backevents.EKeyEvent;
 import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
@@ -84,7 +83,8 @@ public class JSSerializer implements Serializer {
   }
 
   @Override
-  public String writeForClipboard(Environment env, Context.CopyContext copyContext, TSList<WriteState> stack) {
+  public String writeForClipboard(
+      Environment env, Context.CopyContext copyContext, TSList<WriteState> stack) {
     return uncheck(
         () -> {
           final JSEventConsumer writer;
@@ -105,7 +105,7 @@ public class JSSerializer implements Serializer {
         });
   }
 
-  private void walkJSJson(TSList<ROPair<BackEvent, BackPath>> events, Object o, BackPath path) {
+  private void walkJSJson(TSList<ROPair<BackEvent, SerializerBackPath>> events, Object o, SerializerBackPath path) {
     if (o == null) {
       events.add(new ROPair<>(new JSpecialPrimitiveEvent("null"), path));
     } else if (o instanceof Double) {
@@ -132,11 +132,11 @@ public class JSSerializer implements Serializer {
       for (String key : prioritizeKeys) {
         Integer i = keys.removeGet(key);
         if (i == null) continue;
-        events.add(new ROPair<>(new EKeyEvent(key), path));
+        events.add(new ROPair<>(new EPrimitiveEvent(key), path));
         walkJSJson(events, ((JsPropertyMap) o).get(key), path.add(i));
       }
       for (Map.Entry<String, Integer> pair : keys) {
-        events.add(new ROPair<>(new EKeyEvent(pair.getKey()), path));
+        events.add(new ROPair<>(new EPrimitiveEvent(pair.getKey()), path));
         walkJSJson(events, ((JsPropertyMap) o).get(pair.getKey()), path.add(pair.getValue()));
       }
       events.add(new ROPair<>(new EObjectCloseEvent(), path));
@@ -208,8 +208,8 @@ public class JSSerializer implements Serializer {
                 break;
               }
           }
-          TSList<ROPair<BackEvent, BackPath>> events = new TSList<>();
-          walkJSJson(events, Global.JSON.parse(data), BackPath.root);
+          TSList<ROPair<BackEvent, SerializerBackPath>> events = new TSList<>();
+          walkJSJson(events, Global.JSON.parse(data), SerializerBackPath.root);
           ROList<AtomType.AtomParseResult> result =
               new ParseBuilder<ROList<AtomType.AtomParseResult>>(ROOT_KEY)
                   .grammar(grammar)

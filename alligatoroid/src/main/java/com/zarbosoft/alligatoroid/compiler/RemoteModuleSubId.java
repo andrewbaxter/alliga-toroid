@@ -18,7 +18,7 @@ public final class RemoteModuleSubId implements ModuleId {
 
   public static RemoteModuleSubId graphDeserialize(Record data) {
     return new RemoteModuleSubId(
-        (ModuleId) data.data.get(GRAPH_KEY_MODULE), (String) data.data.get(GRAPH_KEY_PATH));
+        (RemoteModuleId) data.data.get(GRAPH_KEY_MODULE), (String) data.data.get(GRAPH_KEY_PATH));
   }
 
   @Override
@@ -28,15 +28,9 @@ public final class RemoteModuleSubId implements ModuleId {
 
   @Override
   public void treeSerialize(Writer writer) {
-    writer
-        .type("local")
-        .recordBegin()
-        .primitive("module");
+    writer.type("local").recordBegin().primitive("module");
     module.treeSerialize(writer);
-    writer
-        .primitive("path")
-        .primitive(path)
-        .recordEnd();
+    writer.primitive("path").primitive(path).recordEnd();
   }
 
   @Override

@@ -12,7 +12,6 @@ import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.BackElementUnsupportedInBackFormat;
-import com.zarbosoft.merman.core.syntax.error.TypeInvalidAtLocation;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.MergeSequence;
@@ -27,16 +26,6 @@ public class BackFixedTypeSpec extends BackSpec {
   public final String type;
   public final BackSpec value;
 
-  public static class Config {
-    public final String type;
-    public final BackSpec value;
-
-    public Config(String type, BackSpec value) {
-      this.type = type;
-      this.value = value;
-    }
-  }
-
   public BackFixedTypeSpec(Config config) {
     this.type = config.type;
     this.value = config.value;
@@ -45,26 +34,24 @@ public class BackFixedTypeSpec extends BackSpec {
   @Override
   public Node<ROList<AtomType.FieldParseResult>> buildBackRule(Environment env, Syntax syntax) {
     return new MergeSequence<AtomType.FieldParseResult>()
-            .addIgnored(new MatchingEventTerminal<BackEvent>(new ETypeEvent(type)))
-            .add(value.buildBackRule(env, syntax));
+        .addIgnored(new MatchingEventTerminal<BackEvent>(new ETypeEvent(type)))
+        .add(value.buildBackRule(env, syntax));
   }
-
 
   @Override
   public void finish(
           MultiError errors,
           final Syntax syntax,
-          final SyntaxPath typePath,
-          boolean singularRestriction,
-          boolean typeRestriction) {
-    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
-    if (typeRestriction) {
-      errors.add(new TypeInvalidAtLocation(typePath));
-    }
+          final SyntaxPath typePath) {
+    super.finish(errors, syntax, typePath);
     if (syntax.backType != BackType.LUXEM) {
       errors.add(new BackElementUnsupportedInBackFormat("type", syntax.backType, typePath));
     }
-    value.finish(errors, syntax, typePath.add("value"), true, true);
+    value.finish(
+        errors,
+        syntax,
+        typePath.add("value")
+    );
     value.parent =
         new PartParent() {
           @Override
@@ -77,27 +64,28 @@ public class BackFixedTypeSpec extends BackSpec {
             return null;
           }
         };
+    BackSpec.checkSingularNotTypeKey(errors, syntax,typePath.add("value"), value);
   }
 
   @Override
   public void write(
-          Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
+      Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.type(type);
     stack.add(new WriteStateBack(data, Arrays.asList(value).iterator()));
   }
 
   @Override
-  protected boolean isSingularValue() {
-    return true;
+  protected ROList<BackSpec> walkTypeBackStep() {
+    return TSList.of(value);
   }
 
-  @Override
-  protected boolean isTypedValue() {
-    return true;
-  }
+  public static class Config {
+    public final String type;
+    public final BackSpec value;
 
-  @Override
-  protected Iterator<BackSpec> walkStep() {
-    return TSList.of(value).iterator();
+    public Config(String type, BackSpec value) {
+      this.type = type;
+      this.value = value;
+    }
   }
 }

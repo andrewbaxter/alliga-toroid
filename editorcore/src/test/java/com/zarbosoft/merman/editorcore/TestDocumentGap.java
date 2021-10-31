@@ -12,7 +12,6 @@ import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
@@ -409,7 +408,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pref =
         new TypeBuilder("pref")
-            .back(new BackAtomSpec(new BaseBackAtomSpec.Config("value", "any")))
+            .back(new BackAtomSpec(new BackAtomSpec.Config("value", "any")))
             .frontMark("+")
             .frontDataAtom("value")
             .autoComplete(true)
@@ -497,7 +496,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType suf =
         new TypeBuilder("suf")
-            .back(new BackAtomSpec(new BaseBackAtomSpec.Config("pre1", "infinity")))
+            .back(new BackAtomSpec(new BackAtomSpec.Config("pre1", "infinity")))
             .frontDataAtom("pre1")
             .frontMark("+")
             .autoComplete(false)
@@ -573,7 +572,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType suf =
         new TypeBuilder("suf")
-            .back(new BackAtomSpec(new BaseBackAtomSpec.Config("pre1", "infinity")))
+            .back(new BackAtomSpec(new BackAtomSpec.Config("pre1", "infinity")))
             .frontDataAtom("pre1")
             .frontMark("+")
             .autoComplete(false)
@@ -607,7 +606,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType suf =
         new TypeBuilder("suf")
-            .back(new BackAtomSpec(new BaseBackAtomSpec.Config("pre1", "infinity")))
+            .back(new BackAtomSpec(new BackAtomSpec.Config("pre1", "infinity")))
             .back(new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config("post")))
             .frontDataAtom("pre1")
             .frontMark("+")
@@ -655,8 +654,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType suf =
         new TypeBuilder("suf")
-            .back(new BackAtomSpec(new BaseBackAtomSpec.Config("pre1", "infinity")))
-            .back(new BackAtomSpec(new BaseBackAtomSpec.Config("pre2", "one")))
+            .back(new BackAtomSpec(new BackAtomSpec.Config("pre1", "infinity")))
+            .back(new BackAtomSpec(new BackAtomSpec.Config("pre2", "one")))
             .back(new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config("post")))
             .frontDataAtom("pre1")
             .frontDataAtom("pre2")
@@ -745,7 +744,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType suf =
         new TypeBuilder("suf")
-            .back(new BackAtomSpec(new BaseBackAtomSpec.Config("pre1", "infinity")))
+            .back(new BackAtomSpec(new BackAtomSpec.Config("pre1", "infinity")))
             .frontDataAtom("pre1")
             .frontMark("+")
             .autoComplete(true)

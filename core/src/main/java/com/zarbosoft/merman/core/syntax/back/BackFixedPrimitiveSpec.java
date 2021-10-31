@@ -35,17 +35,7 @@ public class BackFixedPrimitiveSpec extends BackSpec {
   }
 
   @Override
-  protected boolean isSingularValue() {
-    return true;
-  }
-
-  @Override
-  protected boolean isTypedValue() {
-    return false;
-  }
-
-  @Override
-  protected Iterator<BackSpec> walkStep() {
-    return null;
+  protected ROList<BackSpec> walkTypeBackStep() {
+    return ROList.empty;
   }
 }

@@ -20,10 +20,10 @@ import com.zarbosoft.merman.core.syntax.back.BackFixedPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedTypeSpec;
 import com.zarbosoft.merman.core.syntax.back.BackIdSpec;
+import com.zarbosoft.merman.core.syntax.back.BackKeySpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.ConditionValue;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
@@ -50,7 +50,6 @@ import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.ROPair;
-import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -99,7 +98,7 @@ public class AlligatoroidSyntax {
   private static final String ACCESS_BACK_FIELD_BASE = "base";
   private static final String ACCESS_BACK_FIELD_FIELD = "key";
   private static final String TYPE_MODULE_LOCAL = "mod_local";
-  private static final String TYPE_MODULE_REMOTE_BUNDLE = "mod_git";
+  private static final String TYPE_MODULE_REMOTE = "mod_remote";
   private static final String BACK_TYPE_BIND = "bind";
   private static final String TYPE_BIND = "bind";
   private static final String TYPE_BIND_DYNAMIC = "bind_dynamic";
@@ -138,6 +137,7 @@ public class AlligatoroidSyntax {
   private static final String TYPE_LITERAL_TUPLE = "tuple";
   private static final String TYPE_EXIT = "exit";
   private static final String TYPE_RETURN = "return";
+  private static final String TYPE_IMPORT = "import";
   private static final double indent = 10;
   private static final String ALIGN_INDENT = "indent";
   public static final FrontSymbolSpec compactSplit =
@@ -210,7 +210,7 @@ public class AlligatoroidSyntax {
   }
 
   private static BackSpec literalStringBack(BackSpec value) {
-    return new ABackBuilder(BACK_TYPE_LITERAL_STRING).raw("value", value).build().get(0);
+    return new ABackBuilder(BACK_TYPE_LITERAL_STRING).raw("value", value).build();
   }
 
   private static DirectStylist.TextStyle baseCodeStyle() {
@@ -268,27 +268,6 @@ public class AlligatoroidSyntax {
     TypeGrouper types = new TypeGrouper();
 
     types.add(GROUP_EXPR, GROUP_STATEMENT);
-
-    // Imports (sugars)
-    types.add(
-        new ATypeBuilder(TYPE_MODULE_LOCAL, "Local Module")
-            .text("mod", COLOR_KEYWORD)
-            .space()
-            .compactSplit()
-            .atom("path", GROUP_EXPR)
-            .build(),
-        GROUP_EXPR);
-    types.add(
-        new ATypeBuilder(TYPE_MODULE_REMOTE_BUNDLE, "Bundle Module")
-            .text("mod", COLOR_KEYWORD)
-            .space()
-            .compactSplit()
-            .atom("uri", GROUP_EXPR)
-            .space()
-            .compactSplit()
-            .atom("hash", GROUP_EXPR)
-            .build(),
-        GROUP_EXPR);
 
     // Variables, fields
     types.add(
@@ -379,7 +358,6 @@ public class AlligatoroidSyntax {
             .startBracket("{", COLOR_OTHER)
             .space()
             .arraySuffix("statements", GROUP_STATEMENT, "; ")
-            .space()
             .endBracket("}", COLOR_OTHER)
             .build(),
         GROUP_EXPR);
@@ -435,6 +413,32 @@ public class AlligatoroidSyntax {
             .atom("value", GROUP_EXPR)
             .build(),
         GROUP_STATEMENT);
+    types.add(
+        new ATypeBuilder(TYPE_IMPORT, "Import")
+            .text("import", COLOR_KEYWORD)
+            .space()
+            .atom("spec", GROUP_EXPR)
+            .build(),
+        GROUP_EXPR);
+    types.add(
+        new ATypeBuilder(TYPE_MODULE_LOCAL, "Local Module")
+            .text("mod", COLOR_KEYWORD)
+            .space()
+            .compactSplit()
+            .atom("path", GROUP_EXPR)
+            .build(),
+        GROUP_EXPR);
+    types.add(
+        new ATypeBuilder(TYPE_MODULE_REMOTE, "Remote Module")
+            .text("mod", COLOR_KEYWORD)
+            .space()
+            .compactSplit()
+            .atom("url", GROUP_EXPR)
+            .space()
+            .compactSplit()
+            .atom("hash", GROUP_EXPR)
+            .build(),
+        GROUP_EXPR);
 
     // Staging
     types.add(unaryPrefix(TYPE_STAGE, "Stage", "`", COLOR_LITERAL_SYMBOL, GROUP_EXPR), GROUP_EXPR);
@@ -509,10 +513,10 @@ public class AlligatoroidSyntax {
     types.add(
         new ATypeBuilder(TYPE_LITERAL_RECORD, "Record")
             .type(BACK_TYPE_LITERAL_RECORD)
-            .text("rec", COLOR_LITERAL_TEXT)
+            .text("rec", COLOR_KEYWORD)
             .space()
             .startBracket("(", COLOR_LITERAL_SYMBOL)
-            .arraySep("elements", TYPE_LITERAL_RECORD_ELEMENT, ",")
+            .arraySep("elements", TYPE_LITERAL_RECORD_ELEMENT, ", ")
             .endBracket(")", COLOR_LITERAL_SYMBOL)
             .build(),
         GROUP_EXPR);
@@ -527,7 +531,7 @@ public class AlligatoroidSyntax {
     types.add(
         new ATypeBuilder(TYPE_LITERAL_TUPLE, "Tuple")
             .startBracket("(", COLOR_LITERAL_SYMBOL)
-            .arraySep("elements", GROUP_EXPR, ",")
+            .arraySep("elements", GROUP_EXPR, ", ")
             .endBracket(")", COLOR_LITERAL_SYMBOL)
             .build(),
         GROUP_EXPR); // TODO key/value tuple
@@ -701,13 +705,12 @@ public class AlligatoroidSyntax {
                     splayedTypes,
                     new RootAtomType(
                         new RootAtomType.Config(
-                            TSList.of(
-                                new BackFixedTypeSpec(
-                                    new BackFixedTypeSpec.Config(
-                                        "alligatoroid:0.0.1",
-                                        new BackArraySpec(
-                                            new BaseBackArraySpec.Config(
-                                                "root_elements", GROUP_STATEMENT, ROList.empty))))),
+                            new BackFixedTypeSpec(
+                                new BackFixedTypeSpec.Config(
+                                    "alligatoroid:0.0.1",
+                                    new BackArraySpec(
+                                        new BaseBackArraySpec.Config(
+                                            "root_elements", GROUP_STATEMENT, ROList.empty)))),
                             TSList.of(
                                 new FrontArraySpec(
                                     new FrontArraySpec.Config(
@@ -768,18 +771,18 @@ public class AlligatoroidSyntax {
     b.back.array("children", GROUP_COMMENT_BODY);
   }
 
-  private static ROList<BackSpec> backBuiltinField(BackSpec child) {
+  private static BackSpec backBuiltinField(BackSpec child) {
     return new ABackBuilder(BACK_TYPE_ACCESS)
-        .raw(ACCESS_BACK_FIELD_BASE, new ABackBuilder(BACK_TYPE_BUILTIN).build().get(0))
+        .raw(ACCESS_BACK_FIELD_BASE, new ABackBuilder(BACK_TYPE_BUILTIN).build())
         .raw(ACCESS_BACK_FIELD_FIELD, child)
         .build();
   }
 
-  public static ROList<BackSpec> backBuiltinFunc(String field, BackSpec args) {
+  public static BackSpec backBuiltinFunc(String field, BackSpec args) {
     return new ABackBuilder(BACK_TYPE_CALL)
         .raw(
             CALL_BACK_FIELD_TARGET,
-            backBuiltinField(literalStringBack(new BackFixedPrimitiveSpec(field))).get(0))
+            backBuiltinField(literalStringBack(new BackFixedPrimitiveSpec(field))))
         .raw(CALL_BACK_FIELD_ARGUMENT, args)
         .build();
   }
@@ -980,39 +983,41 @@ public class AlligatoroidSyntax {
   }
 
   public static class ABackBuilder {
-    private final TSOrderedMap<String, BackSpec> back = new TSOrderedMap<>();
+    private final TSList<BackSpec> back = new TSList<>();
     private String backType;
 
     public ABackBuilder(String backType) {
       this.backType = backType;
-      back.put("id", new BackIdSpec());
+      put("id", new BackIdSpec());
     }
 
-    public ROList<BackSpec> build() {
-      return new TSList<>(
-          new BackFixedTypeSpec(
-              new BackFixedTypeSpec.Config(
-                  backType,
-                  new BackFixedRecordSpec(new BackFixedRecordSpec.Config(back, ROSet.empty)))));
+    private void put(String key, BackSpec spec) {
+      back.add(new BackKeySpec(new BackFixedPrimitiveSpec(key), spec));
+    }
+
+    public BackSpec build() {
+      return new BackFixedTypeSpec(
+          new BackFixedTypeSpec.Config(
+              backType, new BackFixedRecordSpec(new BackFixedRecordSpec.Config(back))));
     }
 
     public ABackBuilder atom(String id, String elementType) {
-      back.put(id, new BackAtomSpec(new BaseBackAtomSpec.Config(id, elementType)));
+      put(id, new BackAtomSpec(new BackAtomSpec.Config(id, elementType)));
       return this;
     }
 
     public ABackBuilder array(String id, String elementType) {
-      back.put(id, new BackArraySpec(new BaseBackArraySpec.Config(id, elementType, ROList.empty)));
+      put(id, new BackArraySpec(new BaseBackArraySpec.Config(id, elementType, ROList.empty)));
       return this;
     }
 
     public ABackBuilder primitive(String id) {
-      back.put(id, new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id)));
+      put(id, new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id)));
       return this;
     }
 
     public ABackBuilder nestedIdentifier(String child) {
-      back.put(
+      put(
           child,
           literalStringBack(
               new BackPrimitiveSpec(
@@ -1027,12 +1032,12 @@ public class AlligatoroidSyntax {
     }
 
     public ABackBuilder raw(String field, BackSpec back) {
-      this.back.put(field, back);
+      put(field, back);
       return this;
     }
 
     public ABackBuilder pattern(String field, Pattern pattern, String patternDescription) {
-      this.back.put(
+      put(
           field,
           new BackPrimitiveSpec(
               new BaseBackPrimitiveSpec.Config(field).pattern(pattern, patternDescription)));
@@ -1082,7 +1087,7 @@ public class AlligatoroidSyntax {
               .precedence(this.precedence));
     }
 
-    public AtomType build(Function<ROOrderedMap<String, BackSpec>, ROList<BackSpec>> wrap) {
+    public AtomType build(Function<TSList< BackSpec>, BackSpec> wrap) {
       return new FreeAtomType(
           new FreeAtomType.Config(
               description, new AtomType.Config(id, wrap.apply(back.back), front.front)));

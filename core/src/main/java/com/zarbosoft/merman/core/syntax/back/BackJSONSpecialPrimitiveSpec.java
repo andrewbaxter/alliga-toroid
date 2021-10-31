@@ -22,7 +22,6 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.Iterator;
 import java.util.Map;
 
 public class BackJSONSpecialPrimitiveSpec extends BaseBackPrimitiveSpec {
@@ -46,23 +45,21 @@ public class BackJSONSpecialPrimitiveSpec extends BaseBackPrimitiveSpec {
   }
 
   @Override
-  protected Iterator<BackSpec> walkStep() {
-    return null;
+  protected ROList<BackSpec> walkTypeBackStep() {
+    return ROList.empty;
   }
 
   @Override
   public void finish(
-      MultiError errors,
-      Syntax syntax,
-      SyntaxPath typePath,
-      boolean singularRestriction,
-      boolean typeRestriction) {
+          MultiError errors,
+          Syntax syntax,
+          SyntaxPath typePath) {
     if (syntax.backType != BackType.JSON) {
       errors.add(
           new BackElementUnsupportedInBackFormat(
               "json special primitive", syntax.backType, typePath));
     }
-    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
+    super.finish(errors, syntax, typePath);
   }
 
   @Override
@@ -111,16 +108,6 @@ public class BackJSONSpecialPrimitiveSpec extends BaseBackPrimitiveSpec {
     } else {
       writer.primitive(invalidPrefix + value);
     }
-  }
-
-  @Override
-  protected boolean isSingularValue() {
-    return true;
-  }
-
-  @Override
-  protected boolean isTypedValue() {
-    return false;
   }
 
   public static class Config {

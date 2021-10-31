@@ -36,15 +36,13 @@ public class JVMPseudoStaticField implements SimpleValue {
     JVMShallowMethodFieldType real =
         base.methodFields.getOpt(ROTuple.create(name).append(argTuple));
     if (real == null) {
-      context.module.log.errors.add(JVMError.noMethodField(location, name, argTuple));
+      context.module.log.errors.add(JVMError.noMethodField(location, name));
       return EvaluateResult.error;
     }
     JVMRWSharedCode code = new JVMCode();
     JVMTargetModuleContext.convertFunctionArgument(code, argument);
     code.line(context.module.sourceLocation(location))
-        .add(
-            new MethodInsnNode(
-                INVOKESTATIC, real.base.jvmName, real.name, real.jvmDesc, false));
+        .add(new MethodInsnNode(INVOKESTATIC, real.base.jvmName, real.name, real.jvmDesc, false));
     if (real.returnType == null) return new EvaluateResult(code, null, NullValue.value);
     else return EvaluateResult.pure(real.returnType.stackAsValue((JVMCode) code));
   }
@@ -69,9 +67,7 @@ public class JVMPseudoStaticField implements SimpleValue {
           @Override
           public JVMSharedCode lower(Module module) {
             return new JVMCode()
-                .add(
-                    new FieldInsnNode(
-                        GETSTATIC, base.jvmName, name, real.jvmDesc()));
+                .add(new FieldInsnNode(GETSTATIC, base.jvmName, name, real.jvmDesc()));
           }
         });
   }
@@ -94,9 +90,7 @@ public class JVMPseudoStaticField implements SimpleValue {
           @Override
           public JVMSharedCode lower(Module module) {
             return new JVMCode()
-                .add(
-                    new FieldInsnNode(
-                        GETSTATIC, base.jvmName, name, real.jvmDesc()));
+                .add(new FieldInsnNode(GETSTATIC, base.jvmName, name, real.jvmDesc()));
           }
         });
   }

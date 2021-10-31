@@ -77,10 +77,10 @@ public class CompilationContext {
         if (e instanceof Error.PreError) {
           module.log.errors.add(((Error.PreError) e).toError(location));
         } else {
-          module.log.errors.add(Error.unexpectedAt(location, e));
+          module.log.errors.add(new Error.Unexpected(location, e));
         }
       } else {
-        module.log.errors.add(Error.unexpected(e));
+        module.log.errors.add(new Error.PreDeserializeUnexpected(e));
       }
     }
   }
@@ -166,7 +166,7 @@ public class CompilationContext {
                 try {
                   sourceBytes = Files.readAllBytes(Paths.get(id.path));
                 } catch (NoSuchFileException e) {
-                  module.log.errors.add(Error.deserializeMissingSourceFile(id.path));
+                  module.log.errors.add(new Error.DeserializeMissingSourceFile());
                   return ErrorValue.error;
                 } catch (Throwable e) {
                   processError(module, e);
@@ -198,7 +198,7 @@ public class CompilationContext {
                 try (InputStream stream = Files.newInputStream(path)) {
                   out = evaluate(module, id.path, stream);
                 } catch (Exception e) {
-                  module.log.warnings.add(Error.unexpected(id.path, e));
+                  module.log.warnings.add(new Error.CacheUnexpected(id.path, e));
                   out = ErrorValue.error;
                 }
 
@@ -206,7 +206,7 @@ public class CompilationContext {
                 try {
                   Files.writeString(hashPath, sourceHash);
                 } catch (Throwable e) {
-                  module.log.warnings.add(Error.unexpected(e));
+                  module.log.warnings.add(new Error.PreDeserializeUnexpected(e));
                 }
 
                 return out;
@@ -219,20 +219,20 @@ public class CompilationContext {
                   downloadPath = download(module.log.warnings, id.url, id.hash);
                 } catch (DownloadHashMismatch e) {
                   module.log.errors.add(
-                      Error.remoteModuleHashMismatch(id.url, id.hash, e.downloadHash));
+                          new Error.RemoteModuleHashMismatch(id.url, id.hash, e.downloadHash));
                   return ErrorValue.error;
                 }
                 if (downloadPath.toString().endsWith(".at")) {
                   try (InputStream stream = Files.newInputStream(downloadPath)) {
                     return evaluate(module, id.url, stream);
                   } catch (Exception e) {
-                    module.log.warnings.add(Error.unexpected(id.url, e));
+                    module.log.warnings.add(new Error.CacheUnexpected(id.url, e));
                     return ErrorValue.error;
                   }
                 } else if (downloadPath.toString().endsWith(".zip")) {
                   return new BundleValue(module.importPath, id, "");
                 } else {
-                  module.log.errors.add(Error.unknownImportFileType(id.url));
+                  module.log.errors.add(new Error.UnknownImportFileType());
                   return ErrorValue.error;
                 }
               }
@@ -244,8 +244,7 @@ public class CompilationContext {
                   downloadPath = download(module.log.warnings, id.module.url, id.module.hash);
                 } catch (DownloadHashMismatch e) {
                   module.log.errors.add(
-                      Error.remoteModuleHashMismatch(
-                          id.module.url, id.module.hash, e.downloadHash));
+                          new Error.RemoteModuleHashMismatch(id.module.url, id.module.hash, e.downloadHash));
                   return ErrorValue.error;
                 }
                 return uncheck(
@@ -254,7 +253,7 @@ public class CompilationContext {
                         ZipEntry e = bundle.getEntry(id.path);
                         String compPath = id.module.url + "/" + id.path;
                         if (e == null) {
-                          module.log.errors.add(Error.deserializeMissingSourceFile(compPath));
+                          module.log.errors.add(new Error.DeserializeMissingSourceFile());
                           return ErrorValue.error;
                         } else if (e.isDirectory()) {
                           return new BundleValue(module.importPath, id.module, id.path);
@@ -262,11 +261,11 @@ public class CompilationContext {
                           try (InputStream stream = Files.newInputStream(downloadPath)) {
                             return evaluate(module, compPath, stream);
                           } catch (Exception e2) {
-                            module.log.warnings.add(Error.unexpected(compPath, e2));
+                            module.log.warnings.add(new Error.CacheUnexpected(compPath, e2));
                             return ErrorValue.error;
                           }
                         } else {
-                          module.log.errors.add(Error.unknownImportFileType(compPath.toString()));
+                          module.log.errors.add(new Error.UnknownImportFileType());
                           return ErrorValue.error;
                         }
                       }
@@ -308,7 +307,7 @@ public class CompilationContext {
           } catch (Common.UncheckedFileNotFoundException e) {
             // nop
           } catch (Exception e) {
-            warnings.add(Error.unexpected(downloadPath.toString(), e));
+            warnings.add(new Error.CacheUnexpected(downloadPath.toString(), e));
           }
         }
 
@@ -448,7 +447,7 @@ public class CompilationContext {
 
     @Override
     public Error toError(Location location) {
-      return Error.importLoop(location, loop);
+      return new Error.ImportLoop(location, loop);
     }
   }
 }

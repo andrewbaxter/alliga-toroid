@@ -10,15 +10,18 @@ import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateBack;
 import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +40,10 @@ public class Atom {
 
   public Atom(final AtomType type) {
     this.type = type;
+  }
+
+  public ROPair<Atom, Integer> backLocate(int offset, ROList<ROPair<Integer, Boolean>> segments) {
+    return type.back().backLocate(this, offset, segments);
   }
 
   public void metaPut(Context context, String key) {
@@ -185,7 +192,7 @@ public class Atom {
         childData.put(entry.getKey(), ((FieldPrimitive) entry.getValue()).data);
       } else throw new Assertion();
     }
-    stack.add(new WriteStateBack(childData, type.back().iterator()));
+    stack.add(new WriteStateBack(childData, Arrays.asList(type.back()).iterator()));
   }
 
   public interface MetaListener {

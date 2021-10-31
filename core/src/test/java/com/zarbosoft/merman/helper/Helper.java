@@ -20,7 +20,6 @@ import com.zarbosoft.merman.core.syntax.back.BackRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSubArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
@@ -59,7 +58,7 @@ public class Helper {
   }
 
   public static BackSpec buildBackDataAtom(final String id, String type) {
-    return new BackAtomSpec(new BaseBackAtomSpec.Config(id, type));
+    return new BackAtomSpec(new BackAtomSpec.Config(id, type));
   }
 
   public static BackSpec buildBackDataPrimitive(final String id) {

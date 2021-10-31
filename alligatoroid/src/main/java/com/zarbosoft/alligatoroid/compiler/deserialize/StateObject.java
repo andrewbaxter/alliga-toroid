@@ -1,7 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.deserialize;
 
 import com.zarbosoft.alligatoroid.compiler.Error;
-import com.zarbosoft.luxem.read.path.LuxemPath;
+import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -12,10 +12,10 @@ import static com.zarbosoft.rendaw.common.Common.uncheck;
 public class StateObject extends BaseStateRecord {
   public final TSMap<String, State> fields = new TSMap<>();
   public final ObjectInfo info;
-  private final LuxemPath luxemPath;
+  private final LuxemPathBuilder luxemPath;
   private boolean ok = true;
 
-  public StateObject(LuxemPath luxemPath, ObjectInfo info) {
+  public StateObject(LuxemPathBuilder luxemPath, ObjectInfo info) {
     if (info.luxemType.equals("mod_local")) {
       System.out.format("");
     }
@@ -24,12 +24,12 @@ public class StateObject extends BaseStateRecord {
   }
 
   @Override
-  public BaseStateSingle createKeyState(TSList<Error> errors, LuxemPath luxemPath) {
+  public BaseStateSingle createKeyState(TSList<Error> errors, LuxemPathBuilder luxemPath) {
     return new StateString();
   }
 
   @Override
-  public BaseStateSingle createValueState(TSList<Error> errors, LuxemPath luxemPath, Object key0) {
+  public BaseStateSingle createValueState(TSList<Error> errors, LuxemPathBuilder luxemPath, Object key0) {
     String key = (String) key0;
     if (key == null) {
       ok = false;
@@ -37,9 +37,8 @@ public class StateObject extends BaseStateRecord {
     }
     StatePrototype proto = info.fields.getOpt(key);
     if (proto == null) {
-      errors.add(
-          Error.deserializeUnknownField(
-              luxemPath, info.luxemType, key, info.fields.keys().toList()));
+        errors.add(
+                new Error.DeserializeUnknownField(luxemPath.render(), info.luxemType, key, info.fields.keys().toList()));
       ok = false;
       return StateErrorSingle.state;
     }
@@ -56,7 +55,7 @@ public class StateObject extends BaseStateRecord {
       State fieldState = fields.getOpt(field.getKey());
       if (fieldState == null) {
         ok = false;
-        errors.add(Error.deserializeMissingField(luxemPath, info.luxemType, field.getKey()));
+        errors.add(new Error.DeserializeMissingField(luxemPath.render(), info.luxemType, field.getKey()));
         continue;
       }
       Object value = fieldState.build(errors);

@@ -12,11 +12,7 @@ import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateDeepDataArray;
 import com.zarbosoft.merman.core.serialization.WriteStateRecordEnd;
 import com.zarbosoft.merman.core.syntax.AtomType;
-import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.error.RecordChildMissingValue;
-import com.zarbosoft.merman.core.syntax.error.RecordChildNotKeyAt;
-import com.zarbosoft.merman.core.syntax.error.RecordChildNotValueAt;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.UnitSequence;
@@ -53,52 +49,28 @@ public class BackRecordSpec extends BaseBackArraySpec {
   }
 
   @Override
-  protected boolean isSingularValue() {
-    return true;
-  }
-
-  @Override
-  public void finish(
-      MultiError errors,
-      final Syntax syntax,
-      SyntaxPath typePath,
-      boolean singularRestriction,
-      boolean typeRestriction) {
+  public void finish(MultiError errors, final Syntax syntax, SyntaxPath typePath) {
     boilerplate =
         boilerplate
             .mut()
             .put(
                 syntax.gap.id,
-                new TSList<>(
+                new BackKeySpec(
                     new BackPrimitiveSpec(
                         new BaseBackPrimitiveSpec.Config(WriteStateDeepDataArray.INDEX_KEY)
                             .pattern(syntax.gapInRecordKeyPrefixPattern, "gap-in-record key")),
-                    new BackAtomSpec(new BaseBackAtomSpec.Config(null, syntax.gap.id))))
+                    new BackAtomSpec(new BackAtomSpec.Config(null, syntax.gap.id))))
             .put(
                 syntax.suffixGap.id,
-                new TSList<>(
+                new BackKeySpec(
                     new BackPrimitiveSpec(
                         new BaseBackPrimitiveSpec.Config(WriteStateDeepDataArray.INDEX_KEY)
                             .pattern(syntax.gapInRecordKeyPrefixPattern, "gap-in-record key")),
-                    new BackAtomSpec(new BaseBackAtomSpec.Config(null, syntax.suffixGap.id))));
-    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
-    for (final AtomType element : syntax.splayedTypes.get(type)) {
-      if (element.back().size() % 2 != 0) {
-        errors.add(new RecordChildMissingValue(typePath, element));
-      }
-      for (int i = 0; i < element.back().size(); ++i) {
-        BackSpec back = element.back().get(i);
-
-        if (!back.isSingularValue()) {
-          errors.add(new RecordChildNotValueAt(typePath, element, i, back));
-        }
-        if (i % 2 == 0
-            && syntax.backType == BackType.JSON
-            && !(back instanceof BackPrimitiveSpec)) {
-          errors.add(new RecordChildNotKeyAt(typePath, element, i, back));
-          break;
-        }
-      }
+                    new BackAtomSpec(new BackAtomSpec.Config(null, syntax.suffixGap.id))));
+    super.finish(errors, syntax, typePath);
+    checkKey(errors, syntax, type);
+    for (Map.Entry<String, BackSpec> e : boilerplate) {
+      checkKey(errors, syntax, boilerplatePath(typePath, e.getKey()), e.getValue());
     }
   }
 

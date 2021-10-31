@@ -8,9 +8,9 @@ import com.zarbosoft.luxem.events.LRecordOpenEvent;
 import com.zarbosoft.luxem.events.LTypeEvent;
 import com.zarbosoft.luxem.read.BufferedReader;
 import com.zarbosoft.luxem.read.Reader;
-import com.zarbosoft.luxem.read.path.LuxemArrayPath;
-import com.zarbosoft.luxem.read.path.LuxemPath;
-import com.zarbosoft.luxem.read.path.LuxemRecordPath;
+import com.zarbosoft.luxem.read.path.LuxemArrayPathBuilder;
+import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
+import com.zarbosoft.luxem.read.path.LuxemRecordPathBuilder;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.Position;
 import com.zarbosoft.rendaw.common.ROList;
@@ -24,7 +24,7 @@ public class Luxem {
   public static ROList<? extends ROPair> streamEvents(
       final InputStream source, final Reader.EventFactory factory) {
     class State {
-      LuxemPath path = new LuxemArrayPath(null);
+      LuxemPathBuilder path = new LuxemArrayPathBuilder(null);
       TSList<ROPair<Event, Position>> events = new TSList<>();
     }
     final State state = new State();
@@ -32,7 +32,7 @@ public class Luxem {
         new BufferedReader() {
           @Override
           protected void eatRecordBegin() {
-            state.path = new LuxemRecordPath(state.path.value());
+            state.path = new LuxemRecordPathBuilder(state.path.value());
             state.events.add(
                 new ROPair<>(
                     factory.objectOpen(), new Position(LRecordOpenEvent.instance, state.path)));
@@ -40,7 +40,7 @@ public class Luxem {
 
           @Override
           protected void eatArrayBegin() {
-            state.path = new LuxemArrayPath(state.path.value());
+            state.path = new LuxemArrayPathBuilder(state.path.value());
             state.events.add(
                 new ROPair<>(
                     factory.arrayOpen(), new Position(LArrayOpenEvent.instance, state.path)));

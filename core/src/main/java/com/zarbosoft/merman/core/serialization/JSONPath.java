@@ -3,7 +3,6 @@ package com.zarbosoft.merman.core.serialization;
 import com.zarbosoft.merman.core.backevents.BackEvent;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
-import com.zarbosoft.merman.core.backevents.EKeyEvent;
 import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
@@ -24,8 +23,6 @@ public abstract class JSONPath {
       return new JSONObjectPath(value());
     } else if (e instanceof EObjectCloseEvent) {
       return pop();
-    } else if (e instanceof EKeyEvent) {
-      return key(((EKeyEvent) e).value);
     } else if (e instanceof EPrimitiveEvent) {
       return value();
     } else if (e instanceof JSpecialPrimitiveEvent) {

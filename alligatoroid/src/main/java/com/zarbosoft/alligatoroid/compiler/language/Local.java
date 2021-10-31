@@ -28,7 +28,7 @@ public class Local extends LanguageValue {
     if (key == null) return EvaluateResult.error;
     Binding value = context.scope.get(key);
     if (value == null) {
-      context.module.log.errors.add(Error.noField(location, key));
+      context.module.log.errors.add(new Error.NoField(location, key));
       return EvaluateResult.error;
     }
     return ectx.build(ectx.record(value.fork(context, location)));

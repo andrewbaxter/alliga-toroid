@@ -41,12 +41,12 @@ public class RootAtomType extends AtomType {
   }
 
   public static class Config {
-    public final ROList<BackSpec> back;
+    public final BackSpec back;
     public final ROList<FrontSpec> front;
     public final ROMap<String, AlignmentSpec> alignments;
 
     public Config(
-        ROList<BackSpec> back, ROList<FrontSpec> front, ROMap<String, AlignmentSpec> alignments) {
+        BackSpec back, ROList<FrontSpec> front, ROMap<String, AlignmentSpec> alignments) {
       this.back = back;
       this.front = front;
       this.alignments = alignments;

@@ -6,7 +6,7 @@ import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.deserialize.State;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StateString;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
-import com.zarbosoft.luxem.read.path.LuxemPath;
+import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -29,12 +29,12 @@ public class RecordState extends BaseStateRecord {
   }
 
   @Override
-  public BaseStateSingle createKeyState(TSList<Error> errors, LuxemPath luxemPath) {
+  public BaseStateSingle createKeyState(TSList<Error> errors, LuxemPathBuilder luxemPath) {
     return new StateString();
   }
 
   @Override
-  public BaseStateSingle createValueState(TSList<Error> errors, LuxemPath luxemPath, Object key) {
+  public BaseStateSingle createValueState(TSList<Error> errors, LuxemPathBuilder luxemPath, Object key) {
     ValueState valueState = new ValueState(cache);
     children.add(new ROPair<>((String)key, valueState));
     return valueState;

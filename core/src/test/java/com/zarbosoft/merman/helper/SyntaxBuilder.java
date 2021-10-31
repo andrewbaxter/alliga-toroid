@@ -47,7 +47,7 @@ public class SyntaxBuilder {
     RootAtomType root =
         new RootAtomType(
             new RootAtomType.Config(
-                TSList.of(Helper.buildBackDataRootArray("value", rootChildType)),
+                Helper.buildBackDataRootArray("value", rootChildType),
                 TSList.of(front.build()),
                 alignments));
 

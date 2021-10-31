@@ -90,7 +90,7 @@ public class JVMBaseClassType extends JVMObjectType {
   public EvaluateResult access(Context context, Location location, Value field0) {
     WholeValue key = WholeValue.getWhole(context, location, field0);
     if (!staticFields.contains((String) key.concreteValue())) {
-      context.module.log.errors.add(Error.noField(location, key));
+      context.module.log.errors.add(new Error.NoField(location, key));
       return EvaluateResult.error;
     }
     return EvaluateResult.pure(new JVMPseudoStaticField(this, (String) key.concreteValue()));
@@ -101,7 +101,7 @@ public class JVMBaseClassType extends JVMObjectType {
       Context context, Location location, Value field0, JVMProtocode lower) {
     WholeValue key = WholeValue.getWhole(context, location, field0);
     if (!fields.contains((String) key.concreteValue())) {
-      context.module.log.errors.add(Error.noField(location, key));
+      context.module.log.errors.add(new Error.NoField(location, key));
       return EvaluateResult.error;
     }
     return EvaluateResult.pure(new JVMPseudoField(lower, this, (String) key.concreteValue()));
