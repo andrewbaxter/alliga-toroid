@@ -84,6 +84,7 @@ public abstract class BaseBackArraySpec extends BackSpecData {
       Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
     if (segments.get(0).first != offset) return new ROPair<>(null, offset + 1);
     segments = segments.subFrom(1);
+    if (segments.none()) return new ROPair<>(at, null);
     offset = 0;
     FieldArray data = (FieldArray) at.namedFields.get(id);
     for (Atom element : data.data) {

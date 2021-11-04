@@ -5,6 +5,7 @@ import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.backevents.BackEvent;
 import com.zarbosoft.merman.core.backevents.ETypeEvent;
+import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateBack;
@@ -16,6 +17,7 @@ import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.MergeSequence;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.Arrays;
@@ -29,6 +31,11 @@ public class BackFixedTypeSpec extends BackSpec {
   public BackFixedTypeSpec(Config config) {
     this.type = config.type;
     this.value = config.value;
+  }
+
+  @Override
+  public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
+    return value.backLocate(at, offset, segments);
   }
 
   @Override

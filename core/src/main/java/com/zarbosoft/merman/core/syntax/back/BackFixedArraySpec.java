@@ -34,6 +34,7 @@ public class BackFixedArraySpec extends BackSpec {
       Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
     if (segments.get(0).first != offset) return new ROPair<>(null, offset + 1);
     segments = segments.subFrom(1);
+    if (segments.none()) return new ROPair<>(at, null);
     offset = 0;
     for (BackSpec element : elements) {
       ROPair<Atom, Integer> res = element.backLocate(at, offset, segments);

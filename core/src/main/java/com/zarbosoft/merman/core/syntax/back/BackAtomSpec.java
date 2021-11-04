@@ -5,6 +5,7 @@ import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
@@ -16,6 +17,7 @@ import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.Map;
@@ -32,6 +34,12 @@ public class BackAtomSpec extends BackSpecData {
   @Override
   protected ROList<BackSpec> walkTypeBackStep() {
     return ROList.empty;
+  }
+
+  @Override
+  public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
+    FieldAtom data = (FieldAtom) at.namedFields.get(id);
+    return data.data.backLocate(offset, segments);
   }
 
   @Override

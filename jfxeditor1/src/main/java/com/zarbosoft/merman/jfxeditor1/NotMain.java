@@ -69,6 +69,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 
 import java.io.ByteArrayInputStream;
@@ -338,6 +339,7 @@ public class NotMain extends Application {
             }
           };
 
+      final HBox layout = new HBox();
       final Label messages = new Label();
 
       TSList<Atom> errorAtoms = new TSList<>();
@@ -351,88 +353,133 @@ public class NotMain extends Application {
               compileThread =
                   new Thread(
                       () -> {
-                        TSMap<ImportSpec, Module> modules = Main.compile(path.toString());
+                        Exception e0mut = null;
+                        TSMap<ImportSpec, Module> modules0 = null;
+                        try {
+                          modules0 = Main.compile(path.toString());
+                        } catch (Exception e1) {
+                          e0mut = e1;
+                        }
+                        Exception e0 = e0mut;
+                        TSMap<ImportSpec, Module> modules = modules0;
                         Platform.runLater(
                             () -> {
-                              messages.setVisible(false);
-                              messages.setText("");
-                              TSSet<Atom> changedAtoms = new TSSet<>();
+                              try {
+                                layout.getChildren().remove(messages);
+                                messages.setText("");
+                                TSSet<Atom> changedAtoms = new TSSet<>();
 
-                              // Clear existing errors
-                              for (Atom atom : errorAtoms) {
-                                atom.metaRemove(editor.context, META_KEY_ERROR);
-                                changedAtoms.add(atom);
-                              }
-                              errorAtoms.clear();
-
-                              // Attach new errors
-                              TSMap<Atom, TSList<String>> errorMessages = new TSMap<>();
-                              ModuleId moduleId = new LocalModuleId(path.toString());
-                              for (Map.Entry<ImportSpec, Module> e : modules) {
-                                for (Error error : e.getValue().log.errors) {
-                                  error.dispatch(
-                                      new Error.Dispatcher<Object>() {
-                                        @Override
-                                        public Object handle(Error.PreDeserializeError e) {
-                                          messages.setVisible(true);
-                                          messages.setText(
-                                              messages.getText() + "\n" + e.toString());
-                                          return null;
-                                        }
-
-                                        @Override
-                                        public Object handle(Error.LocationError e) {
-                                          final Location location = e.location;
-                                          if (!moduleId.equal1(location.module)) return null;
-                                          Atom atom = editor.fileIdMap.getOpt(location.id);
-                                          if (atom == null) return null;
-                                          errorAtoms.add(atom);
-                                          errorMessages
-                                              .getCreate(atom, () -> new TSList<>())
-                                              .add((String) error.toString());
-                                          changedAtoms.add(atom);
-                                          return null;
-                                        }
-
-                                        @Override
-                                        public Object handle(Error.DeserializeError e) {
-                                          Atom atom =
-                                              editor.context.backLocate(
-                                                  new BackPath(e.backPath.data));
-                                          if (atom == null) return null;
-                                          errorAtoms.add(atom);
-                                          errorMessages
-                                              .getCreate(atom, () -> new TSList<>())
-                                              .add((String) error.toString());
-                                          changedAtoms.add(atom);
-                                          return null;
-                                        }
-
-                                        @Override
-                                        public Object handle(Error.CacheFileError e) {
-                                          messages.setVisible(true);
-                                          messages.setText(
-                                              messages.getText()
-                                                  + Format.format(
-                                                      "\nCache file [%s]: %s",
-                                                      e.cachePath, e.toString()));
-                                          return null;
-                                        }
-                                      });
+                                // Clear existing errors
+                                for (Atom atom : errorAtoms) {
+                                  atom.metaRemove(editor.context, META_KEY_ERROR);
+                                  changedAtoms.add(atom);
                                 }
-                              }
+                                errorAtoms.clear();
 
-                              for (Map.Entry<Atom, TSList<String>> e : errorMessages) {
-                                e.getKey().metaPut(editor.context, META_KEY_ERROR, e.getValue());
-                              }
+                                // Attach new errors
+                                if (e0 != null) {
+                                  if (!layout.getChildren().contains(messages)) layout.getChildren().add(messages);
+                                  messages.setText(messages.getText() + "\n" + e0.toString());
+                                } else {
+                                  TSMap<Atom, TSList<String>> errorMessages = new TSMap<>();
+                                  ModuleId moduleId = new LocalModuleId(path.toString());
+                                  for (Map.Entry<ImportSpec, Module> e : modules) {
+                                    for (Error error : e.getValue().log.errors) {
+                                      error.dispatch(
+                                          new Error.Dispatcher<Object>() {
+                                            @Override
+                                            public Object handle(Error.PreDeserializeError e) {
+                                              if (!layout.getChildren().contains(messages)) layout.getChildren().add(messages);
+                                              messages.setText(
+                                                  messages.getText() + "\n" + e.toString());
+                                              System.out.format(
+                                                  "pre deserialize error %s: %s\n", e);
+                                              return null;
+                                            }
 
-                              for (Atom atom : changedAtoms) {
-                                MarkerBox display = null;
-                                WeakReference<MarkerBox> ref = markDisplays.get(atom);
-                                if (ref != null) display = ref.get();
-                                if (display != null) {
-                                  display.update(editor.context);
+                                            @Override
+                                            public Object handle(Error.LocationError e) {
+                                              final Location location = e.location;
+                                              if (!moduleId.equal1(location.module)) return null;
+                                              Atom atom = editor.fileIdMap.getOpt(location.id);
+                                              if (atom == null) {
+                                                if (!layout.getChildren().contains(messages)) layout.getChildren().add(messages);
+                                                System.out.format(
+                                                    "unlocatable location error %s: %s\n",
+                                                    e.location, e);
+                                                messages.setText(
+                                                    messages.getText()
+                                                        + Format.format(
+                                                            "\nLocation error at [%s]: %s",
+                                                            e.location, e));
+                                                return null;
+                                              }
+                                              errorAtoms.add(atom);
+                                              errorMessages
+                                                  .getCreate(atom, () -> new TSList<>())
+                                                  .add((String) error.toString());
+                                              changedAtoms.add(atom);
+                                              return null;
+                                            }
+
+                                            @Override
+                                            public Object handle(Error.DeserializeError e) {
+                                              Atom atom =
+                                                  editor.context.backLocate(
+                                                      new BackPath(e.backPath.data));
+                                              if (atom == null) {
+                                                if (!layout.getChildren().contains(messages)) layout.getChildren().add(messages);
+                                                System.out.format(
+                                                    "unlocatable deserialize error %s: %s\n",
+                                                    e.backPath, e);
+                                                messages.setText(
+                                                    messages.getText()
+                                                        + Format.format(
+                                                            "\nDeserialize error at [%s]: %s",
+                                                            e.backPath, e));
+                                                return null;
+                                              }
+                                              errorAtoms.add(atom);
+                                              errorMessages
+                                                  .getCreate(atom, () -> new TSList<>())
+                                                  .add((String) error.toString());
+                                              changedAtoms.add(atom);
+                                              return null;
+                                            }
+
+                                            @Override
+                                            public Object handle(Error.CacheFileError e) {
+                                              if (!layout.getChildren().contains(messages)) layout.getChildren().add(messages);
+                                              System.out.format(
+                                                  "cache file error %s: %s\n",
+                                                  e.cachePath, e.toString());
+                                              messages.setText(
+                                                  messages.getText()
+                                                      + Format.format(
+                                                          "\nCache file [%s]: %s",
+                                                          e.cachePath, e.toString()));
+                                              return null;
+                                            }
+                                          });
+                                    }
+                                  }
+
+                                  for (Map.Entry<Atom, TSList<String>> e : errorMessages) {
+                                    e.getKey()
+                                        .metaPut(editor.context, META_KEY_ERROR, e.getValue());
+                                  }
+
+                                  for (Atom atom : changedAtoms) {
+                                    MarkerBox display = null;
+                                    WeakReference<MarkerBox> ref = markDisplays.get(atom);
+                                    if (ref != null) display = ref.get();
+                                    if (display != null) {
+                                      display.update(editor.context);
+                                    }
+                                  }
                                 }
+                              } catch (Exception e1) {
+                                System.out.format("Error processing errors: %s\n", e1);
                               }
                             });
                       });
@@ -626,11 +673,10 @@ public class NotMain extends Application {
           });
       flushCallback.run();
 
-      final HBox layout = new HBox();
       layout.getChildren().add(display.node);
+      HBox.setHgrow(display.node, Priority.ALWAYS);
       messages.setMinWidth(100);
       messages.setWrapText(true);
-      layout.getChildren().add(messages);
 
       primaryStage
           .getIcons()

@@ -3,6 +3,7 @@ package com.zarbosoft.merman.core.syntax.back;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.syntax.AtomType;
@@ -10,6 +11,7 @@ import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.MergeSequence;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.Map;
@@ -26,6 +28,12 @@ public class BackKeySpec extends BackSpec {
   @Override
   protected ROList<BackSpec> walkTypeBackStep() {
     return new TSList<>(key, value);
+  }
+
+  @Override
+  public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
+    if (segments.get(0).second) return key.backLocate(at,offset,segments);
+    else return value.backLocate(at, offset, segments);
   }
 
   @Override

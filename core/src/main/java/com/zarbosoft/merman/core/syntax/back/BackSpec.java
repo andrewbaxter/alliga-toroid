@@ -26,6 +26,7 @@ public abstract class BackSpec {
   public Parent parent = null;
 
   public static void checkNotKey(MultiError errors, Syntax syntax, String rootType) {
+    if (rootType == null) return;
     for (AtomType atomType : syntax.splayedTypes.get(rootType)) {
       checkNotKey(errors, syntax, new SyntaxPath(atomType.id), atomType.back());
     }
