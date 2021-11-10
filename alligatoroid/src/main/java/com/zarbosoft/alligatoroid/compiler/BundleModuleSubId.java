@@ -5,19 +5,19 @@ import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.TSMap;
 
-public final class RemoteModuleSubId implements ModuleId {
+public final class BundleModuleSubId implements ModuleId {
   public static final String GRAPH_KEY_MODULE = "module";
   public static final String GRAPH_KEY_PATH = "path";
-  public final RemoteModuleId module;
+  public final ModuleId module;
   public final String path;
 
-  public RemoteModuleSubId(RemoteModuleId module, String path) {
+  public BundleModuleSubId(ModuleId module, String path) {
     this.module = module;
     this.path = path;
   }
 
-  public static RemoteModuleSubId graphDeserialize(Record data) {
-    return new RemoteModuleSubId(
+  public static BundleModuleSubId graphDeserialize(Record data) {
+    return new BundleModuleSubId(
         (RemoteModuleId) data.data.get(GRAPH_KEY_MODULE), (String) data.data.get(GRAPH_KEY_PATH));
   }
 
@@ -41,8 +41,8 @@ public final class RemoteModuleSubId implements ModuleId {
   @Override
   public boolean equal1(ModuleId other) {
     return other.getClass() == this.getClass()
-        && ((RemoteModuleSubId) other).module.equal1(module)
-        && ((RemoteModuleSubId) other).path.equals(path);
+        && ((BundleModuleSubId) other).module.equal1(module)
+        && ((BundleModuleSubId) other).path.equals(path);
   }
 
   @Override

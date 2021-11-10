@@ -47,7 +47,6 @@ import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
-import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -173,6 +172,7 @@ public class AlligatoroidSyntax {
   private static final String TYPE_LITERAL_HEX_FLOAT = "literal_hex_float";
   private static final String TYPE_LITERAL_TRUE = "literal_true";
   private static final String TYPE_LITERAL_FALSE = "literal_false";
+  private static final String BACK_TYPE_LITERAL_BOOL = "literal_bool";
   private static final String TYPE_LITERAL_UNIQUE = "literal_unique";
   private static final String TYPE_LITERAL_NULL = "literal_null";
   private static final String TYPE_EXPR_COMMENT = "comment_expr";
@@ -497,10 +497,18 @@ public class AlligatoroidSyntax {
             .build(),
         GROUP_EXPR);
     types.add(
-        new ATypeBuilder(TYPE_LITERAL_TRUE, "True").text("true", COLOR_LITERAL_TEXT).build(),
+        new ATypeBuilder(TYPE_LITERAL_TRUE, "True")
+            .type(BACK_TYPE_LITERAL_BOOL)
+            .fixedPrimitive("value", "true")
+            .text("true", COLOR_LITERAL_TEXT)
+            .build(),
         GROUP_EXPR);
     types.add(
-        new ATypeBuilder(TYPE_LITERAL_FALSE, "False").text("false", COLOR_LITERAL_TEXT).build(),
+        new ATypeBuilder(TYPE_LITERAL_FALSE, "False")
+            .type(BACK_TYPE_LITERAL_BOOL)
+            .fixedPrimitive("value", "false")
+            .text("false", COLOR_LITERAL_TEXT)
+            .build(),
         GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_LITERAL_UNIQUE, "Unique").text("unique", COLOR_LITERAL_TEXT).build(),
@@ -1043,6 +1051,10 @@ public class AlligatoroidSyntax {
               new BaseBackPrimitiveSpec.Config(field).pattern(pattern, patternDescription)));
       return this;
     }
+
+    public void fixedPrimitive(String key, String value) {
+      put(key, new BackFixedPrimitiveSpec(value));
+    }
   }
 
   /**
@@ -1087,7 +1099,7 @@ public class AlligatoroidSyntax {
               .precedence(this.precedence));
     }
 
-    public AtomType build(Function<TSList< BackSpec>, BackSpec> wrap) {
+    public AtomType build(Function<TSList<BackSpec>, BackSpec> wrap) {
       return new FreeAtomType(
           new FreeAtomType.Config(
               description, new AtomType.Config(id, wrap.apply(back.back), front.front)));
@@ -1207,6 +1219,11 @@ public class AlligatoroidSyntax {
 
     public ATypeBuilder custom(Consumer<ATypeBuilder> c) {
       c.accept(this);
+      return this;
+    }
+
+    public ATypeBuilder fixedPrimitive(String key, String value) {
+      back.fixedPrimitive(key, value);
       return this;
     }
   }

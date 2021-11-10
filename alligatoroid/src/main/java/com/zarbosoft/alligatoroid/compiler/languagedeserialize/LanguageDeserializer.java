@@ -29,6 +29,7 @@ import com.zarbosoft.alligatoroid.compiler.language.LiteralString;
 import com.zarbosoft.alligatoroid.compiler.language.Local;
 import com.zarbosoft.alligatoroid.compiler.language.Lower;
 import com.zarbosoft.alligatoroid.compiler.language.ModLocal;
+import com.zarbosoft.alligatoroid.compiler.language.ModRemote;
 import com.zarbosoft.alligatoroid.compiler.language.Record;
 import com.zarbosoft.alligatoroid.compiler.language.RecordElement;
 import com.zarbosoft.alligatoroid.compiler.language.Stage;
@@ -65,6 +66,7 @@ public class LanguageDeserializer {
         Lower.class,
         Import.class,
         ModLocal.class,
+              ModRemote.class
       };
   private final StatePrototype valuePrototype;
   private final TSMap<String, ObjectInfo> languageNodeInfos = new TSMap<>();
@@ -180,7 +182,6 @@ public class LanguageDeserializer {
     Deserializer.deserialize(errors, path, source, stack);
     Object out = rootNodes[0].build(errors);
     if (out == errorRet) {
-      if (errors.none()) errors.add(new Error.DeserializeMissingSourceFile());
       return null;
     }
     return (ROList<Value>) out;

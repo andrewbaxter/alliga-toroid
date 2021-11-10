@@ -393,7 +393,7 @@ public class NotMain extends Application {
                                               messages.setText(
                                                   messages.getText() + "\n" + e.toString());
                                               System.out.format(
-                                                  "pre deserialize error %s: %s\n", e);
+                                                  "pre deserialize error: %s\n", e);
                                               return null;
                                             }
 
@@ -444,20 +444,6 @@ public class NotMain extends Application {
                                                   .getCreate(atom, () -> new TSList<>())
                                                   .add((String) error.toString());
                                               changedAtoms.add(atom);
-                                              return null;
-                                            }
-
-                                            @Override
-                                            public Object handle(Error.CacheFileError e) {
-                                              if (!layout.getChildren().contains(messages)) layout.getChildren().add(messages);
-                                              System.out.format(
-                                                  "cache file error %s: %s\n",
-                                                  e.cachePath, e.toString());
-                                              messages.setText(
-                                                  messages.getText()
-                                                      + Format.format(
-                                                          "\nCache file [%s]: %s",
-                                                          e.cachePath, e.toString()));
                                               return null;
                                             }
                                           });

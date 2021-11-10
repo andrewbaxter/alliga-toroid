@@ -9,7 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.ModuleIdValue;
 import com.zarbosoft.alligatoroid.compiler.RemoteModuleId;
-import com.zarbosoft.alligatoroid.compiler.RemoteModuleSubId;
+import com.zarbosoft.alligatoroid.compiler.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
@@ -50,21 +50,21 @@ public class ModLocal extends LanguageValue {
                 Path subpath = Paths.get(path).normalize();
                 if (subpath.startsWith("..")) {
                     context.module.log.errors.add(
-                            new Error.ImportOutsideOwningRemoteModule(location, subpath.toString(), id));
+                            new Error.ImportOutsideOwningBundleModule(location, subpath.toString(), id));
                   return null;
                 }
-                return new RemoteModuleSubId(id, subpath.toString());
+                return new BundleModuleSubId(id, subpath.toString());
               }
 
               @Override
-              public ModuleId handle(RemoteModuleSubId id) {
+              public ModuleId handle(BundleModuleSubId id) {
                 Path subpath = Paths.get(id.path).resolveSibling(path).normalize();
                 if (subpath.startsWith("..")) {
                     context.module.log.errors.add(
-                            new Error.ImportOutsideOwningRemoteModule(location, subpath.toString(), id.module));
+                            new Error.ImportOutsideOwningBundleModule(location, subpath.toString(), id.module));
                   return null;
                 }
-                return new RemoteModuleSubId(id.module, subpath.toString());
+                return new BundleModuleSubId(id.module, subpath.toString());
               }
             });
     if (newId == null) return EvaluateResult.error;

@@ -29,8 +29,6 @@ public class FutureValue implements SimpleValue {
   }
 
   public Value get() {
-    Value res = uncheck(() -> future.get());
-    if (res == null) return ErrorValue.error;
-    return res;
+    return uncheck(() -> future.get());
   }
 }

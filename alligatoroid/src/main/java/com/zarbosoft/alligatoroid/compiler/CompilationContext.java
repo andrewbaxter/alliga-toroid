@@ -34,7 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
+import java.util.concurrent.ExecutionException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -63,6 +63,8 @@ public class CompilationContext {
   public static void processError(Module module, Throwable e) {
     if (e instanceof Common.UncheckedException) {
       processError(module, e.getCause());
+    } else if (e instanceof ExecutionException) {
+      processError(module, e.getCause());
     } else if (e instanceof MultiError) {
       module.log.errors.addAll(((MultiError) e).errors);
     } else {
@@ -87,9 +89,8 @@ public class CompilationContext {
 
   public void loadRootModule(String path) {
     if (!Paths.get(path).isAbsolute()) throw new Assertion();
-    ImportResult res = loadModule(null, new ImportSpec(new LocalModuleId(path)));
-    if (res.error != null) throw new Assertion();
-    uncheck(() -> res.value.get());
+    CompletableFuture<Value> res = loadModule(null, null, new ImportSpec(new LocalModuleId(path)));
+    uncheck(() -> res.get());
   }
 
   public <T> Value evaluate(
@@ -97,80 +98,95 @@ public class CompilationContext {
       ROList<Value> rootStatements,
       /** Only whole-ish values */
       ROOrderedMap<WholeValue, Value> initialScope) {
-    String className = GENERATED_CLASS_PREFIX + uniqueClass++;
-    // Do first pass flat evaluation
-    MortarTargetModuleContext targetContext =
-        new MortarTargetModuleContext(JVMDescriptor.jvmName(className));
-    Context context = new Context(module, targetContext, new Scope(null));
-    for (ROPair<WholeValue, Value> local : initialScope) {
-      context.scope.put(local.first, local.second.bind(context, null).second);
-    }
-    EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
-    MortarTargetModuleContext.LowerResult lowered =
-        MortarTargetModuleContext.lower(
-            context,
-            ectx.record(
-                new com.zarbosoft.alligatoroid.compiler.language.Scope(
-                        null, new Block(null, rootStatements))
-                    .evaluate(context)));
-    EvaluateResult evaluateResult = ectx.build(null);
-    MortarCode code = new MortarCode();
-    code.add(
-        targetContext.merge(
-            context,
-            null,
-            new TSList<>(evaluateResult.preEffect, lowered.valueCode, evaluateResult.postEffect)));
-    if (module.log.errors.some()) {
-      return ErrorValue.error;
-    }
+    try {
+      String className = GENERATED_CLASS_PREFIX + uniqueClass++;
+      // Do first pass flat evaluation
+      MortarTargetModuleContext targetContext =
+          new MortarTargetModuleContext(JVMDescriptor.jvmName(className));
+      Context context = new Context(module, targetContext, new Scope(null));
+      for (ROPair<WholeValue, Value> local : initialScope) {
+        context.scope.put(local.first, local.second.bind(context, null).second);
+      }
+      EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
+      MortarTargetModuleContext.LowerResult lowered =
+          MortarTargetModuleContext.lower(
+              context,
+              ectx.record(
+                  new com.zarbosoft.alligatoroid.compiler.language.Scope(
+                          null, new Block(null, rootStatements))
+                      .evaluate(context)));
+      EvaluateResult evaluateResult = ectx.build(null);
+      MortarCode code = new MortarCode();
+      code.add(
+          targetContext.merge(
+              context,
+              null,
+              new TSList<>(
+                  evaluateResult.preEffect, lowered.valueCode, evaluateResult.postEffect)));
+      if (module.log.errors.some()) {
+        return ErrorValue.error;
+      }
 
-    // Do 2nd pass jvm evaluation
-    JVMSharedClass preClass = new JVMSharedClass(className);
-    for (ROPair<Object, String> e : Common.iterable(targetContext.transfers.iterator())) {
-      preClass.defineStaticField(e.second, e.first.getClass());
+      // Do 2nd pass jvm evaluation
+      JVMSharedClass preClass = new JVMSharedClass(className);
+      for (ROPair<Object, String> e : Common.iterable(targetContext.transfers.iterator())) {
+        preClass.defineStaticField(e.second, e.first.getClass());
+      }
+      preClass.defineFunction(
+          ENTRY_METHOD_NAME,
+          JVMDescriptor.func(lowered.dataType.jvmDesc()),
+          new MortarCode().add(code).add(lowered.dataType.returnOpcode()),
+          new TSList<>());
+      Class klass =
+          DynamicClassLoader.loadTree(
+              className, new TSMap<String, byte[]>().put(className, preClass.render()));
+      for (ROPair<Object, String> e : Common.iterable(targetContext.transfers.iterator())) {
+        uncheck(() -> klass.getDeclaredField(e.second).set(null, e.first));
+      }
+      Object pass2;
+      try {
+        pass2 = uncheck(() -> klass.getMethod(ENTRY_METHOD_NAME).invoke(null));
+      } catch (Exception e) {
+        processError(module, e);
+        return ErrorValue.error;
+      }
+      return lowered.dataType.unlower(pass2);
+    } finally {
+      for (CompletableFuture<Error> e : module.deferredErrors) {
+        module.log.errors.add(uncheck(() -> e.get()));
+      }
     }
-    preClass.defineFunction(
-        ENTRY_METHOD_NAME,
-        JVMDescriptor.func(lowered.dataType.jvmDesc()),
-        new MortarCode().add(code).add(lowered.dataType.returnOpcode()),
-        new TSList<>());
-    Class klass =
-        DynamicClassLoader.loadTree(
-            className, new TSMap<String, byte[]>().put(className, preClass.render()));
-    for (ROPair<Object, String> e : Common.iterable(targetContext.transfers.iterator())) {
-      uncheck(() -> klass.getDeclaredField(e.second).set(null, e.first));
-    }
-    return lowered.dataType.unlower(uncheck(() -> klass.getMethod(ENTRY_METHOD_NAME).invoke(null)));
   }
 
   public <T> Value evaluate(Module module, String path, InputStream source) {
-    ROList<Value> rootStatements =
+    final ROList<Value> res =
         new LanguageDeserializer(module.spec.moduleId).deserialize(module.log.errors, path, source);
-    if (rootStatements == null) return ErrorValue.error;
-    return evaluate(module, rootStatements, ROOrderedMap.empty);
+    if (res == null) {
+      return ErrorValue.error;
+    }
+    return evaluate(module, res, ROOrderedMap.empty);
   }
 
+  /**
+   * Throws PreError or another Exception.
+   *
+   * @param module
+   * @return
+   */
   private Value loadModuleInner(Module module) {
     ImportSpec importSpec = module.spec;
-    Path relCachePath = cache.ensureCachePath(module.log.warnings, importSpec.hash(), importSpec);
+    Path relCachePath = cache.ensureCachePath(importSpec.hash(), importSpec);
 
     Value out =
         module.spec.moduleId.dispatch(
             new ModuleId.Dispatcher<Value>() {
               @Override
               public Value handle(LocalModuleId id) {
-                ImportSpec importSpec = module.spec;
-                Path relCachePath =
-                    cache.ensureCachePath(module.log.warnings, importSpec.hash(), importSpec);
                 byte[] sourceBytes;
                 try {
-                  sourceBytes = Files.readAllBytes(Paths.get(id.path));
-                } catch (NoSuchFileException e) {
-                  module.log.errors.add(new Error.DeserializeMissingSourceFile());
-                  return ErrorValue.error;
-                } catch (Throwable e) {
-                  processError(module, e);
-                  return ErrorValue.error;
+                  sourceBytes = uncheck(() -> Files.readAllBytes(Paths.get(id.path)));
+                } catch (Common.UncheckedFileNotFoundException e) {
+                  throw new Error.PreImportNotFound(id.path);
                 }
                 String sourceHash = new Utils.SHA256().add(sourceBytes).buildHex();
                 Path hashPath = cache.cachePath(relCachePath).resolve("hash");
@@ -188,18 +204,8 @@ public class CompilationContext {
                 if (sourceHash.equals(outputHash)) {
                   Value out = cache.loadOutput(module.log.warnings, relCachePath);
                   if (out != ErrorValue.error) {
-                    return ErrorValue.error;
+                    return out;
                   }
-                }
-
-                // Cache data bad - compile
-                Value out;
-                Path path = Paths.get(id.path);
-                try (InputStream stream = Files.newInputStream(path)) {
-                  out = evaluate(module, id.path, stream);
-                } catch (Exception e) {
-                  module.log.warnings.add(new Error.CacheUnexpected(id.path, e));
-                  out = ErrorValue.error;
                 }
 
                 // Write hash
@@ -209,64 +215,70 @@ public class CompilationContext {
                   module.log.warnings.add(new Error.PreDeserializeUnexpected(e));
                 }
 
-                return out;
+                // Cache data bad - compile
+                Path path = Paths.get(id.path);
+                return uncheck(
+                    () -> {
+                      try (InputStream stream = Files.newInputStream(path)) {
+                        return evaluate(module, id.path, stream);
+                      }
+                    });
               }
 
               @Override
               public Value handle(RemoteModuleId id) {
                 Path downloadPath;
-                try {
-                  downloadPath = download(module.log.warnings, id.url, id.hash);
-                } catch (DownloadHashMismatch e) {
-                  module.log.errors.add(
-                          new Error.RemoteModuleHashMismatch(id.url, id.hash, e.downloadHash));
-                  return ErrorValue.error;
-                }
+                downloadPath = download(module.log.warnings, id.url, id.hash);
                 if (downloadPath.toString().endsWith(".at")) {
-                  try (InputStream stream = Files.newInputStream(downloadPath)) {
-                    return evaluate(module, id.url, stream);
-                  } catch (Exception e) {
-                    module.log.warnings.add(new Error.CacheUnexpected(id.url, e));
-                    return ErrorValue.error;
-                  }
+                  return uncheck(
+                      () -> {
+                        try (InputStream stream = Files.newInputStream(downloadPath)) {
+                          return evaluate(module, id.url, stream);
+                        }
+                      });
                 } else if (downloadPath.toString().endsWith(".zip")) {
                   return new BundleValue(module.importPath, id, "");
                 } else {
-                  module.log.errors.add(new Error.UnknownImportFileType());
-                  return ErrorValue.error;
+                  throw new Error.PreUnknownImportFileType(id.url);
                 }
               }
 
               @Override
-              public Value handle(RemoteModuleSubId id) {
-                Path downloadPath;
-                try {
-                  downloadPath = download(module.log.warnings, id.module.url, id.module.hash);
-                } catch (DownloadHashMismatch e) {
-                  module.log.errors.add(
-                          new Error.RemoteModuleHashMismatch(id.module.url, id.module.hash, e.downloadHash));
-                  return ErrorValue.error;
-                }
+              public Value handle(BundleModuleSubId id) {
+                Path bundlePath =
+                    id.module.dispatch(
+                        new ModuleId.Dispatcher<Path>() {
+                          @Override
+                          public Path handle(LocalModuleId id) {
+                            return Paths.get(id.path);
+                          }
+
+                          @Override
+                          public Path handle(RemoteModuleId id) {
+                            return download(module.log.warnings, id.url, id.hash);
+                          }
+
+                          @Override
+                          public Path handle(BundleModuleSubId id) {
+                            throw new Assertion(); // Bundle bases are either local/remote, not sub
+                          }
+                        });
                 return uncheck(
                     () -> {
-                      try (ZipFile bundle = new ZipFile(downloadPath.toFile())) {
+                      try (ZipFile bundle = new ZipFile(bundlePath.toFile())) {
                         ZipEntry e = bundle.getEntry(id.path);
-                        String compPath = id.module.url + "/" + id.path;
                         if (e == null) {
-                          module.log.errors.add(new Error.DeserializeMissingSourceFile());
-                          return ErrorValue.error;
-                        } else if (e.isDirectory()) {
+                          throw new Error.PreImportNotFound(id.toString());
+                        }
+                        if (e.isDirectory()) {
                           return new BundleValue(module.importPath, id.module, id.path);
-                        } else if (id.path.endsWith(".at")) {
-                          try (InputStream stream = Files.newInputStream(downloadPath)) {
-                            return evaluate(module, compPath, stream);
-                          } catch (Exception e2) {
-                            module.log.warnings.add(new Error.CacheUnexpected(compPath, e2));
-                            return ErrorValue.error;
+                        }
+                        if (id.path.endsWith(".at")) {
+                          try (InputStream stream = Files.newInputStream(bundlePath)) {
+                            return evaluate(module, id.toString(), stream);
                           }
                         } else {
-                          module.log.errors.add(new Error.UnknownImportFileType());
-                          return ErrorValue.error;
+                          throw new Error.PreUnknownImportFileType(id.toString());
                         }
                       }
                     });
@@ -281,58 +293,104 @@ public class CompilationContext {
     return out;
   }
 
-  public Path download(TSList<Error> warnings, String url, String hash) {
-    CompletableFuture<Path> download;
-    synchronized (downloadMap) {
-      download = downloadMap.get(url);
-      if (download == null) {
-        download = new CompletableFuture<>();
-        downloadMap.put(url, download);
-
-        Path downloadDir =
-            cache.ensureCachePath(
-                warnings, new Utils.SHA256().add(url).buildHex(), new TreeSerializable.Url(url));
-        Path urlPath = uncheck(() -> Paths.get(new URL(url).getPath()));
-        Path downloadPath = downloadDir.resolve(urlPath.getFileName());
-
-        // Check existing file
+  private Path downloadInner(TSList<Error> warnings, String url, String hash) {
+    final URL url1 = uncheck(() -> new URL(url));
+    switch (url1.getProtocol()) {
+      case "file":
         {
+          Path downloadPath = Paths.get(url1.getPath());
           String downloadHash;
           try {
             downloadHash = new Utils.SHA256().add(downloadPath).buildHex();
-            if (downloadHash.equals(hash)) {
-              download.complete(downloadPath);
-              return downloadPath;
-            }
           } catch (Common.UncheckedFileNotFoundException e) {
-            // nop
+            throw new Error.PreImportNotFound(url);
           } catch (Exception e) {
-            warnings.add(new Error.CacheUnexpected(downloadPath.toString(), e));
+            throw new Error.PreCacheUnexpected(downloadPath.toString(), e);
+          }
+          if (!downloadHash.equals(hash)) {
+            throw new Error.PreRemoteModuleHashMismatch(url, hash, downloadHash);
+          }
+          return downloadPath;
+        }
+      case "http":
+      case "https":
+        {
+          Path downloadDir =
+              cache.ensureCachePath(
+                  new Utils.SHA256().add(url).buildHex(), new TreeSerializable.Url(url));
+          Path downloadPath = downloadDir.resolve(Paths.get(url1.getPath()).getFileName());
+
+          // Check existing file
+          {
+            String downloadHash;
+            do {
+              try {
+                downloadHash = new Utils.SHA256().add(downloadPath).buildHex();
+              } catch (Common.UncheckedFileNotFoundException e) {
+                // nop
+                break;
+              } catch (Exception e) {
+                warnings.add(new Error.WarnUnexpected(downloadPath.toString(), e));
+                break;
+              }
+              if (downloadHash.equals(hash)) {
+                return downloadPath;
+              }
+            } while (false);
+          }
+
+          // No/bad existing file - download
+          {
+            String downloadHash =
+                uncheck(
+                    () -> {
+                      OkHttpClient client = new OkHttpClient();
+                      try (Response response =
+                          client.newCall(new Request.Builder().get().build()).execute()) {
+                        Files.copy(response.body().byteStream(), downloadPath);
+                      }
+                      return new Utils.SHA256().add(downloadPath).buildHex();
+                    });
+            if (!downloadHash.equals(hash)) {
+              throw new Error.PreError() {
+                @Override
+                public Error toError(Location location) {
+                  return new Error.RemoteModuleHashMismatch(location, url, hash, downloadHash);
+                }
+              };
+            }
+            return downloadPath;
           }
         }
+      default:
+        throw new Error.PreError() {
+          @Override
+          public Error toError(Location location) {
+            return new Error.RemoteModuleProtocolUnsupported(location, url);
+          }
+        };
+    }
+  }
 
-        // No/bad existing file - download
+  public Path download(TSList<Error> warnings, String url, String hash) {
+    CompletableFuture<Path> download;
+    synchronized (downloadMap) {
+      download = downloadMap.getOpt(url);
+      if (download == null) {
+        download = new CompletableFuture<>();
+        downloadMap.put(url, download);
         CompletableFuture<Path> finalDownload = download;
         Thread downloadThread =
             new Thread(
                 () -> {
-                  String downloadHash;
+                  Path downloadPath;
                   try {
-                    OkHttpClient client = new OkHttpClient();
-                    try (Response response =
-                        client.newCall(new Request.Builder().get().build()).execute()) {
-                      Files.copy(response.body().byteStream(), downloadPath);
-                    }
-                    downloadHash = new Utils.SHA256().add(downloadPath).buildHex();
+                    downloadPath = downloadInner(warnings, url, hash);
                   } catch (Exception e) {
                     finalDownload.completeExceptionally(e);
                     return;
                   }
-                  if (!downloadHash.equals(hash)) {
-                    finalDownload.completeExceptionally(new DownloadHashMismatch(downloadHash));
-                  } else {
-                    finalDownload.complete(downloadPath);
-                  }
+                  finalDownload.complete(downloadPath);
                 });
         downloadThread.start();
         synchronized (threads) {
@@ -341,20 +399,37 @@ public class CompilationContext {
       }
     }
     CompletableFuture<Path> finalDownload = download;
-    return uncheck(() -> finalDownload.get());
+    return uncheck(() -> finalDownload.get()); // TODO preerror
   }
 
-  public ImportResult loadModule(ImportPath fromImportPath, ImportSpec importSpec) {
+  /**
+   * Future always resolves with value, no exceptions.
+   *
+   * @param fromImportPath
+   * @param importSpec
+   * @return
+   */
+  public CompletableFuture<Value> loadModule(
+      ROPair<Location, Module> loadFrom, ImportPath fromImportPath, ImportSpec importSpec) {
+    CompletableFuture<Error> deferredError;
+    if (loadFrom != null) {
+      deferredError = new CompletableFuture<>();
+      loadFrom.second.deferredErrors.add(deferredError);
+    } else {
+      deferredError = null;
+    }
     synchronized (modulesLock) {
-      if (fromImportPath != null) {
-        TSList<ImportSpec> found = fromImportPath.find(new TSSet<>(), importSpec);
-        if (found != null) {
-          return ImportResult.err(new ImportErrorLoop(found));
-        }
-      }
       Module module = modules.getOpt(importSpec);
       if (module == null) {
         CompletableFuture<Value> result = new CompletableFuture<>();
+
+        if (fromImportPath != null) {
+          TSList<ImportSpec> found = fromImportPath.find(new TSSet<>(), importSpec);
+          if (found != null) {
+            result.completeExceptionally(new ImportErrorLoop(found));
+          }
+        }
+
         ImportPath importPath = new ImportPath(importSpec);
         if (fromImportPath != null) importPath.from.add(fromImportPath);
         module = new Module(importSpec, importPath, this, result);
@@ -364,11 +439,29 @@ public class CompilationContext {
             new Thread(
                 () -> {
                   try {
-                    finalModule.result.complete(loadModuleInner(finalModule));
+                    final Value res = loadModuleInner(finalModule);
+                    if (deferredError != null)
+                      if (res == ErrorValue.error) {
+                        deferredError.complete(Error.importError.toError(loadFrom.first));
+                      } else {
+                        deferredError.complete(null);
+                      }
+                    finalModule.result.complete(res);
+                    return;
+                  } catch (Error.PreError e) {
+                    if (deferredError != null) {
+                      deferredError.complete(e.toError(loadFrom.first));
+                    } else {
+                      finalModule.log.errors.add(new Error.PreDeserializeUnexpected(e));
+                    }
                   } catch (Throwable e) {
-                    processError(finalModule, e);
-                    finalModule.result.complete(null);
+                    if (deferredError != null) {
+                      deferredError.complete(new Error.Unexpected(loadFrom.first, e));
+                    } else {
+                      finalModule.log.errors.add(new Error.PreDeserializeUnexpected(e));
+                    }
                   }
+                  finalModule.result.complete(ErrorValue.error);
                 });
         thread.start();
         synchronized (threads) {
@@ -377,7 +470,8 @@ public class CompilationContext {
       } else {
         TSList<ImportSpec> found = module.importPath.findBefore(new TSSet<>(), importSpec);
         if (found != null) {
-          return ImportResult.err(new ImportErrorLoop(found));
+          CompletableFuture<Value> result = new CompletableFuture<>();
+          result.completeExceptionally(new ImportErrorLoop(found));
         }
         if (fromImportPath != null) {
           boolean inFrom = false;
@@ -390,7 +484,7 @@ public class CompilationContext {
           if (!inFrom) module.importPath.from.add(fromImportPath);
         }
       }
-      return ImportResult.ok(module.result);
+      return module.result;
     }
   }
 
@@ -410,32 +504,6 @@ public class CompilationContext {
           }
         });
     return modules;
-  }
-
-  public static class DownloadHashMismatch extends RuntimeException {
-    private final String downloadHash;
-
-    public DownloadHashMismatch(String downloadHash) {
-      this.downloadHash = downloadHash;
-    }
-  }
-
-  public static class ImportResult {
-    public final Error.PreError error;
-    public final Future<Value> value;
-
-    private ImportResult(Error.PreError error, Future<Value> value) {
-      this.error = error;
-      this.value = value;
-    }
-
-    public static ImportResult ok(Future<Value> value) {
-      return new ImportResult(null, value);
-    }
-
-    public static ImportResult err(Error.PreError error) {
-      return new ImportResult(error, null);
-    }
   }
 
   public static class ImportErrorLoop extends Error.PreError {

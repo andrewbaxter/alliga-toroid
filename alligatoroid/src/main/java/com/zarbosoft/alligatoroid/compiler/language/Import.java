@@ -1,6 +1,5 @@
 package com.zarbosoft.alligatoroid.compiler.language;
 
-import com.zarbosoft.alligatoroid.compiler.CompilationContext;
 import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
@@ -11,6 +10,9 @@ import com.zarbosoft.alligatoroid.compiler.ModuleIdValue;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.FutureValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
+import com.zarbosoft.rendaw.common.ROPair;
+
+import java.util.concurrent.CompletableFuture;
 
 public class Import extends LanguageValue {
   public final Value spec;
@@ -32,13 +34,9 @@ public class Import extends LanguageValue {
       context.module.log.errors.add(new Error.WrongType(location, value, "import spec"));
       return EvaluateResult.error;
     }
-    CompilationContext.ImportResult importResult =
+    CompletableFuture<Value> importResult =
         context.module.compilationContext.loadModule(
-            context.module.importPath, new ImportSpec(((ModuleIdValue) value).id));
-    if (importResult.error != null) {
-      context.module.log.errors.add(importResult.error.toError(location));
-      return EvaluateResult.error;
-    }
-    return ectx.build(new FutureValue(importResult.value));
+            new ROPair<>(location, context.module), context.module.importPath, new ImportSpec(((ModuleIdValue) value).id));
+    return ectx.build(new FutureValue(importResult));
   }
 }

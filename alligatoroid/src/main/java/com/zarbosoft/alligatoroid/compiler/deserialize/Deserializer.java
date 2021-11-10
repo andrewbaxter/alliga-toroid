@@ -69,7 +69,7 @@ public class Deserializer {
         };
     uncheck(() -> reader.feed(source));
     if (stack.some()) {
-      errors.add(new Error.DeserializeIncompleteFile(path));
+      throw new Error.PreDeserializeIncompleteFile(path);
     }
   }
 

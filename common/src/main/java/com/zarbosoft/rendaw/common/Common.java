@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.NoSuchFileException;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 public class Common {
@@ -29,6 +30,7 @@ public class Common {
   public static RuntimeException uncheck(final Throwable e) {
     if (e instanceof InvocationTargetException)
       return uncheck(((InvocationTargetException) e).getTargetException());
+    if (e instanceof ExecutionException) return uncheck(((ExecutionException) e).getCause());
     if (e instanceof RuntimeException) return (RuntimeException) e;
     if (e instanceof NoSuchFileException)
       return new UncheckedFileNotFoundException((NoSuchFileException) e);
@@ -43,6 +45,8 @@ public class Common {
       return code.get();
     } catch (InvocationTargetException e) {
       throw uncheck(((InvocationTargetException) e).getTargetException());
+    } catch (ExecutionException e) {
+      throw uncheck(((ExecutionException) e).getCause());
     } catch (NoSuchFileException e) {
       throw new UncheckedFileNotFoundException(e);
     } catch (FileNotFoundException e) {
@@ -59,6 +63,8 @@ public class Common {
       code.get();
     } catch (InvocationTargetException e) {
       throw uncheck(((InvocationTargetException) e).getTargetException());
+    } catch (ExecutionException e) {
+      throw uncheck(((ExecutionException) e).getCause());
     } catch (NoSuchFileException e) {
       throw new UncheckedFileNotFoundException(e);
     } catch (FileNotFoundException e) {

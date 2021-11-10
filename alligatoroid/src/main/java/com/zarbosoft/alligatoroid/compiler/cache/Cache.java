@@ -196,7 +196,7 @@ public class Cache {
             if (value.getClass() == ImportSpec.class) {
               writer.type(CACHE_OBJECT_TYPE_IMPORT_SPEC);
               ImportSpec importSpec = (ImportSpec) value;
-              Path path = ensureCachePath(warnings, importSpec.hash(), importSpec);
+              Path path = ensureCachePath(importSpec.hash(), importSpec);
               writer.primitive(path.toString());
             } else {
               String key;
@@ -305,7 +305,7 @@ public class Cache {
     return rootCachePath.resolve("specs").resolve(rel);
   }
 
-  public Path ensureCachePath(TSList<Error> warnings, String hash, TreeSerializable spec) {
+  public Path ensureCachePath(String hash, TreeSerializable spec) {
     return uncheck(
         () -> {
           synchronized (cacheDirLock) {

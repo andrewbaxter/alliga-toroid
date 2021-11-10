@@ -12,10 +12,25 @@ import java.lang.reflect.Field;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
+/**
+ * LocationErrors/Deserialization/other Errors get logged in the module that's being processed (they
+ * are tied to a location in the source). While compiling, syntax/logic errors will be gathered with
+ * this type. This will also trigger a generic PreError for importers.
+ *
+ * <p>PreErrors are thrown during module processing and get turned into LocationErrons in the
+ * module(s) that imported the processed module, or used as is if in the root module.
+ */
 public abstract class Error implements TreeSerializable {
   public static final String DESCRIPTION_KEY = "description";
   public static final String LOCATION_KEY = "location";
   public static final String PATH_KEY = "path";
+  public static final PreError importError =
+      new PreError() {
+        @Override
+        public Error toError(Location location) {
+          return new ImportError(location);
+        }
+      };
 
   public static TSMap<String, Object> convertThrowable(Throwable e) {
     TSList<Object> stack = new TSList<>();
@@ -50,8 +65,6 @@ public abstract class Error implements TreeSerializable {
     T handle(LocationError e);
 
     T handle(DeserializeError e);
-
-    T handle(CacheFileError e);
   }
 
   public abstract static class PreDeserializeError extends Error {
@@ -264,6 +277,22 @@ public abstract class Error implements TreeSerializable {
     }
   }
 
+  public static class WarnUnexpected extends PreDeserializeError {
+    public final Throwable exception;
+    public final String path;
+
+    public WarnUnexpected(String path, Throwable exception) {
+      this.exception = exception;
+      this.path = path;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format(
+          "An unexpected error occurred while processing [%s]: %s", path, exception);
+    }
+  }
+
   public static class Unexpected extends LocationError {
     public final Throwable exception;
 
@@ -291,31 +320,32 @@ public abstract class Error implements TreeSerializable {
     }
   }
 
+  public static class PreCacheUnexpected extends PreError {
+    public final String cachePath;
+    public final Throwable exception;
+
+    public PreCacheUnexpected(String cachePath, Throwable exception) {
+      this.cachePath = cachePath;
+      this.exception = exception;
+    }
+
+    @Override
+    public Error toError(Location location) {
+      return new CacheUnexpected(location, cachePath, exception);
+    }
+  }
+
   public static class CacheUnexpected extends CacheFileError {
     public final Throwable exception;
 
-    public CacheUnexpected(String cachePath, Throwable exception) {
-      super(cachePath);
+    public CacheUnexpected(Location location, String cachePath, Throwable exception) {
+      super(location, cachePath);
       this.exception = exception;
     }
 
     @Override
     public String toString() {
       return Format.format("An unexpected error occurred while loading cache file: %s", exception);
-    }
-  }
-
-  public static class DeserializeUnexpected extends DeserializeError {
-    public final Throwable exception;
-
-    public DeserializeUnexpected(LuxemPath backPath, Throwable exception) {
-      super(backPath);
-      this.exception = exception;
-    }
-
-    @Override
-    public String toString() {
-      return Format.format("An unexpected error occurred while deserializing: %s", exception);
     }
   }
 
@@ -391,16 +421,22 @@ public abstract class Error implements TreeSerializable {
     }
   }
 
-  public static class DeserializeMissingSourceFile extends PreDeserializeError {
+  public static class PreDeserializeIncompleteFile extends PreError {
+    public final String cachePath;
+
+    public PreDeserializeIncompleteFile(String cachePath) {
+      this.cachePath = cachePath;
+    }
+
     @Override
-    public String toString() {
-      return "The source file was not found";
+    public Error toError(Location location) {
+      return new DeserializeIncompleteFile(location, cachePath);
     }
   }
 
   public static class DeserializeIncompleteFile extends CacheFileError {
-    public DeserializeIncompleteFile(String cachePath) {
-      super(cachePath);
+    public DeserializeIncompleteFile(Location location, String cachePath) {
+      super(location, cachePath);
     }
 
     @Override
@@ -409,10 +445,11 @@ public abstract class Error implements TreeSerializable {
     }
   }
 
-  public abstract static class CacheFileError extends Error {
+  public abstract static class CacheFileError extends LocationError {
     public final String cachePath;
 
-    public CacheFileError(String cachePath) {
+    public CacheFileError(Location location, String cachePath) {
+      super(location);
       this.cachePath = cachePath;
     }
 
@@ -425,14 +462,16 @@ public abstract class Error implements TreeSerializable {
     public abstract String toString();
   }
 
-  public static class CacheLoop extends CacheFileError {
+  public static class CacheLoop extends PreDeserializeError {
+    private final String cachePath;
+
     public CacheLoop(String cachePath) {
-      super(cachePath);
+      this.cachePath = cachePath;
     }
 
     @Override
     public String toString() {
-      return "This cache file eventually references itself";
+      return Format.format("This cache file [%s] eventually references itself", cachePath);
     }
   }
 
@@ -444,6 +483,44 @@ public abstract class Error implements TreeSerializable {
     @Override
     public String toString() {
       return "This value is a 2-element array, but found more than 2 elements.";
+    }
+  }
+
+  public static class ImportError extends LocationError {
+    public ImportError(Location location) {
+      super(location);
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("There were errors compiling the imported module.");
+    }
+  }
+
+  public static class PreImportNotFound extends PreError {
+    public final String path;
+
+    public PreImportNotFound(String path) {
+      this.path = path;
+    }
+
+    @Override
+    public Error toError(Location location) {
+      return new ImportNotFound(location, path);
+    }
+  }
+
+  public static class ImportNotFound extends LocationError {
+    public final String url;
+
+    public ImportNotFound(Location location, String url) {
+      super(location);
+      this.url = url;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("The import [%s] could not be found", url);
     }
   }
 
@@ -477,12 +554,45 @@ public abstract class Error implements TreeSerializable {
     }
   }
 
-  public static class RemoteModuleHashMismatch extends PreDeserializeError {
+  public static class RemoteModuleProtocolUnsupported extends LocationError {
+    public final String url;
+
+    public RemoteModuleProtocolUnsupported(Location location, String url) {
+      super(location);
+      this.url = url;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("Remote module url [%s] has an unsupported protocol", url);
+    }
+  }
+
+  public static class PreRemoteModuleHashMismatch extends PreError {
     public final String url;
     public final String wantHash;
     public final String foundHash;
 
-    public RemoteModuleHashMismatch(String url, String wantHash, String foundHash) {
+    public PreRemoteModuleHashMismatch(String url, String wantHash, String foundHash) {
+      this.url = url;
+      this.wantHash = wantHash;
+      this.foundHash = foundHash;
+    }
+
+    @Override
+    public Error toError(Location location) {
+      return new RemoteModuleHashMismatch(location, url, wantHash, foundHash);
+    }
+  }
+
+  public static class RemoteModuleHashMismatch extends LocationError {
+    public final String url;
+    public final String wantHash;
+    public final String foundHash;
+
+    public RemoteModuleHashMismatch(
+        Location location, String url, String wantHash, String foundHash) {
+      super(location);
       this.url = url;
       this.wantHash = wantHash;
       this.foundHash = foundHash;
@@ -495,19 +605,38 @@ public abstract class Error implements TreeSerializable {
     }
   }
 
-  public static class UnknownImportFileType extends PreDeserializeError {
+  public static class PreUnknownImportFileType extends PreError {
+    public final String path;
+
+    public PreUnknownImportFileType(String path) {
+      this.path = path;
+    }
+
     @Override
-    public String toString() {
-      return "The file type of this module is not recognized";
+    public Error toError(Location location) {
+      return new UnknownImportFileType(location, path);
     }
   }
 
-  public static class ImportOutsideOwningRemoteModule extends LocationError {
-    public final String subpath;
-    public final RemoteModuleId module;
+  public static class UnknownImportFileType extends LocationError {
+    public final String path;
 
-    public ImportOutsideOwningRemoteModule(
-        Location location, String subpath, RemoteModuleId module) {
+    public UnknownImportFileType(Location location, String path) {
+      super(location);
+      this.path = path;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("The file type of the module [%s} is not recognized", path);
+    }
+  }
+
+  public static class ImportOutsideOwningBundleModule extends LocationError {
+    public final String subpath;
+    public final ModuleId module;
+
+    public ImportOutsideOwningBundleModule(Location location, String subpath, ModuleId module) {
       super(location);
       this.subpath = subpath;
       this.module = module;
