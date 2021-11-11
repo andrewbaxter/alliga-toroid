@@ -5,6 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.Scope;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.language.Builtin;
 import com.zarbosoft.alligatoroid.compiler.mortar.SimpleValue;
 import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSList;
@@ -26,6 +27,7 @@ public class JVMMethod implements SimpleValue {
     this.specDetails = specDetails;
   }
 
+  @Builtin.WrapExpose
   public void implement(Module module, Value body) {
     String name = (String) key.get(0);
     JVMShallowMethodFieldType field =

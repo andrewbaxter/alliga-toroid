@@ -98,64 +98,60 @@ public class CompilationContext {
       ROList<Value> rootStatements,
       /** Only whole-ish values */
       ROOrderedMap<WholeValue, Value> initialScope) {
-    try {
-      String className = GENERATED_CLASS_PREFIX + uniqueClass++;
-      // Do first pass flat evaluation
-      MortarTargetModuleContext targetContext =
-          new MortarTargetModuleContext(JVMDescriptor.jvmName(className));
-      Context context = new Context(module, targetContext, new Scope(null));
-      for (ROPair<WholeValue, Value> local : initialScope) {
-        context.scope.put(local.first, local.second.bind(context, null).second);
-      }
-      EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
-      MortarTargetModuleContext.LowerResult lowered =
-          MortarTargetModuleContext.lower(
-              context,
-              ectx.record(
-                  new com.zarbosoft.alligatoroid.compiler.language.Scope(
-                          null, new Block(null, rootStatements))
-                      .evaluate(context)));
-      EvaluateResult evaluateResult = ectx.build(null);
-      MortarCode code = new MortarCode();
-      code.add(
-          targetContext.merge(
-              context,
-              null,
-              new TSList<>(
-                  evaluateResult.preEffect, lowered.valueCode, evaluateResult.postEffect)));
-      if (module.log.errors.some()) {
-        return ErrorValue.error;
-      }
-
-      // Do 2nd pass jvm evaluation
-      JVMSharedClass preClass = new JVMSharedClass(className);
-      for (ROPair<Object, String> e : Common.iterable(targetContext.transfers.iterator())) {
-        preClass.defineStaticField(e.second, e.first.getClass());
-      }
-      preClass.defineFunction(
-          ENTRY_METHOD_NAME,
-          JVMDescriptor.func(lowered.dataType.jvmDesc()),
-          new MortarCode().add(code).add(lowered.dataType.returnOpcode()),
-          new TSList<>());
-      Class klass =
-          DynamicClassLoader.loadTree(
-              className, new TSMap<String, byte[]>().put(className, preClass.render()));
-      for (ROPair<Object, String> e : Common.iterable(targetContext.transfers.iterator())) {
-        uncheck(() -> klass.getDeclaredField(e.second).set(null, e.first));
-      }
-      Object pass2;
-      try {
-        pass2 = uncheck(() -> klass.getMethod(ENTRY_METHOD_NAME).invoke(null));
-      } catch (Exception e) {
-        processError(module, e);
-        return ErrorValue.error;
-      }
-      return lowered.dataType.unlower(pass2);
-    } finally {
-      for (CompletableFuture<Error> e : module.deferredErrors) {
-        module.log.errors.add(uncheck(() -> e.get()));
-      }
+    String className = GENERATED_CLASS_PREFIX + uniqueClass++;
+    // Do first pass flat evaluation
+    MortarTargetModuleContext targetContext =
+        new MortarTargetModuleContext(JVMDescriptor.jvmName(className));
+    Context context = new Context(module, targetContext, new Scope(null));
+    for (ROPair<WholeValue, Value> local : initialScope) {
+      context.scope.put(local.first, local.second.bind(context, null).second);
     }
+    EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
+    MortarTargetModuleContext.LowerResult lowered =
+        MortarTargetModuleContext.lower(
+            context,
+            ectx.record(
+                new com.zarbosoft.alligatoroid.compiler.language.Scope(
+                        null, new Block(null, rootStatements))
+                    .evaluate(context)));
+    EvaluateResult evaluateResult = ectx.build(null);
+    for (CompletableFuture<Error> e : module.deferredErrors) {
+      module.log.errors.add(uncheck(() -> e.get()));
+    }
+    MortarCode code = new MortarCode();
+    code.add(
+        targetContext.merge(
+            context,
+            null,
+            new TSList<>(evaluateResult.preEffect, lowered.valueCode, evaluateResult.postEffect)));
+    if (module.log.errors.some()) {
+      return ErrorValue.error;
+    }
+
+    // Do 2nd pass jvm evaluation
+    JVMSharedClass preClass = new JVMSharedClass(className);
+    for (ROPair<Object, String> e : Common.iterable(targetContext.transfers.iterator())) {
+      preClass.defineStaticField(e.second, e.first.getClass());
+    }
+    preClass.defineFunction(
+        ENTRY_METHOD_NAME,
+        JVMDescriptor.func(lowered.dataType.jvmDesc()),
+        new MortarCode().add(code).add(lowered.dataType.returnOpcode()),
+        new TSList<>());
+    Class klass =
+        DynamicClassLoader.loadTree(
+            className, new TSMap<String, byte[]>().put(className, preClass.render()));
+    for (ROPair<Object, String> e : Common.iterable(targetContext.transfers.iterator())) {
+      uncheck(() -> klass.getDeclaredField(e.second).set(null, e.first));
+    }
+    Object pass2;
+    try {
+      pass2 = uncheck(() -> klass.getMethod(ENTRY_METHOD_NAME).invoke(null));
+    } catch (Exception e) {
+      processError(module, e);
+      return ErrorValue.error;
+    }
+    return lowered.dataType.unlower(pass2);
   }
 
   public <T> Value evaluate(Module module, String path, InputStream source) {

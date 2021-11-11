@@ -1,5 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.language.Builtin;
+
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -15,6 +17,7 @@ public class CreatedFile {
     outputStream = uncheck(() -> Files.newOutputStream(Paths.get(path), CREATE));
   }
 
+  @Builtin.WrapExpose
   public void write(byte[] data) {
     uncheck(() -> outputStream.write(data));
   }

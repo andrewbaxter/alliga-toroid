@@ -23,6 +23,7 @@ public class JVMClassBuilder {
         return new JVMMethod(base, keyTuple, specDetails);
     }
 
+    @Builtin.WrapExpose
     public byte[] bytes() {
         TSList<Error> errors = new TSList<>();
         base.build(errors);
