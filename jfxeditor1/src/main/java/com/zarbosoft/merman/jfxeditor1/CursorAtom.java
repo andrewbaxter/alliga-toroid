@@ -35,6 +35,8 @@ public class CursorAtom extends BaseEditCursorAtom {
     ROPair<String, Visual> selectable = visual.selectable.get(index);
     if (selectable.second instanceof VisualFieldAtomBase) {
       errorPage.setAtom(Editor.get(context), ((VisualFieldAtomBase) selectable.second).atomGet());
+    } else {
+      errorPage.clearAtom(Editor.get(context));
     }
   }
 

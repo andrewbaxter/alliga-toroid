@@ -76,6 +76,23 @@ public class Common {
     }
   }
 
+  public static ROList<String> splitN(String text, String delim, int n) {
+    TSList<String> out = new TSList<>();
+    int at = 0;
+    while (at < text.length()) {
+      int nextAt;
+      if (out.size() == n) {
+        nextAt = text.length();
+      } else {
+        nextAt= text.indexOf(delim, 0);
+        if (nextAt == -1) nextAt = text.length();
+      }
+      out.add(text.substring(at, nextAt));
+      at = nextAt + delim.length();
+    }
+    return out;
+  }
+
   public static ROList<String> split(String text, String delim) {
     TSList<String> out = new TSList<>();
     int at = 0;
