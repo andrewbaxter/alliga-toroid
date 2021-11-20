@@ -198,7 +198,8 @@ public class Helper {
             new TestEnvironment(),
             new History(),
             new JavaSerializer(syntax.backType),
-            new DirectStylist(null, null, null, null, null, null, null, null),
+            new DirectStylist(null, null, null, null, null, null, null, null, null),
+            new TSList<>(),
             e -> new EditorCursorFactory(e),
             new Editor.Config(contextConfig));
     return editor;

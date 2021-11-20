@@ -19,6 +19,7 @@ import com.zarbosoft.merman.core.syntax.primitivepattern.CharacterEvent;
 import com.zarbosoft.merman.core.syntax.primitivepattern.ForceEndCharacterEvent;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
+import com.zarbosoft.merman.editorcore.DetailsPageChooser;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
@@ -36,7 +37,7 @@ import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.function.Consumer;
 
-public class GapChoice extends TwoColumnChoice {
+public class GapChoice implements DetailsPageChooser.Choice {
   public final Atom gap;
   public final FreeAtomType type;
   public final int consumePrecedingAtoms;
@@ -99,7 +100,6 @@ public class GapChoice extends TwoColumnChoice {
     return null;
   }
 
-  @Override
   public void choose(Editor editor, History.Recorder recorder) {
     Consumer<History.Recorder> apply =
         recorder1 -> {
@@ -302,7 +302,7 @@ public class GapChoice extends TwoColumnChoice {
   }
 
   @Override
-  public ROPair<CourseDisplayNode, CourseDisplayNode> display(Editor editor) {
+  public ROList<CourseDisplayNode> display(Editor editor) {
     final CourseGroup previewLayout = new CourseGroup(editor.context.display.group());
     previewLayout.setPadding(editor.context, editor.choicePreviewPadding);
     TSList<FrontSymbolSpec> spaces = new TSList<>();
@@ -334,7 +334,7 @@ public class GapChoice extends TwoColumnChoice {
     editor.context.stylist.styleChoiceDescription(editor.context, text, textPad);
     textPad.add(text);
 
-    return new ROPair<CourseDisplayNode, CourseDisplayNode>(previewLayout, textPad);
+    return new TSList<CourseDisplayNode>(previewLayout, textPad);
   }
 
   public static class ParsedField {

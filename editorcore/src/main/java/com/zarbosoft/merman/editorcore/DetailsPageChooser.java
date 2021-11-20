@@ -1,31 +1,29 @@
-package com.zarbosoft.merman.editorcore.gap;
+package com.zarbosoft.merman.editorcore;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Stylist;
+import com.zarbosoft.merman.core.display.Container;
 import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.DisplayNode;
 import com.zarbosoft.merman.core.visual.Vector;
-import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.displayderived.Box;
-import com.zarbosoft.merman.editorcore.displayderived.BoxContainer;
 import com.zarbosoft.merman.editorcore.displayderived.ColumnarTableLayout;
-import com.zarbosoft.merman.core.display.Container;
 import com.zarbosoft.merman.editorcore.displayderived.ConvScrollContainer;
 import com.zarbosoft.merman.editorcore.displayderived.PadContainer;
 import com.zarbosoft.merman.editorcore.displayderived.StackGroup;
-import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class TwoColumnChoicePage {
-  public final TSList<TwoColumnChoice> choices;
+public class DetailsPageChooser<T extends DetailsPageChooser.Choice> {
+  public final ROList<T> choices;
   private final Box highlight;
   private final Context.ContextDoubleListener edgeListener;
   private final ConvScrollContainer scroller = new ConvScrollContainer();
   public Container displayRoot;
-  TSList<ROPair<CourseDisplayNode, CourseDisplayNode>> rows = TSList.of();
-  private int index = 0;
+  public int index = 0;
+  TSList<ROList<CourseDisplayNode>> rows = TSList.of();
 
-  public TwoColumnChoicePage(Editor editor, TSList<TwoColumnChoice> choices) {
+  public DetailsPageChooser(Editor editor, ROList<T> choices) {
     this.choices = choices;
     this.edgeListener =
         new Context.ContextDoubleListener() {
@@ -38,7 +36,7 @@ public class TwoColumnChoicePage {
     final StackGroup group = new StackGroup(editor.context);
 
     highlight = new Box(editor.context);
-    editor.context.stylist.styleObbox(editor.context,highlight, Stylist.ObboxType.CHOICE_CURSOR);
+    editor.context.stylist.styleObbox(editor.context, highlight, Stylist.ObboxType.CHOICE_CURSOR);
     group.add(highlight.drawing);
 
     ColumnarTableLayout table =
@@ -48,26 +46,21 @@ public class TwoColumnChoicePage {
     table.setRowPadding(editor.context, editor.choiceRowPadding);
     group.addRoot(table);
 
-    for (final TwoColumnChoice choice : choices) {
-      ROPair<CourseDisplayNode, CourseDisplayNode> display = choice.display(editor);
+    for (final Choice choice : choices) {
+      ROList<CourseDisplayNode> display = choice.display(editor);
       rows.add(display);
-      table.add(TSList.of(display.first, display.second));
+      table.add(display);
     }
     table.layout();
     scroller.inner = group;
     changeChoice(editor.context, 0);
-    BoxContainer displayRootBox =
-        new BoxContainer(
-            editor.context, new PadContainer(editor.context, editor.detailPad).addRoot(scroller));
-    editor.context.stylist.styleObbox(
-        editor.context, displayRootBox, Stylist.ObboxType.DETAILS_BACKGROUND);
-    this.displayRoot = displayRootBox;
+    this.displayRoot = new PadContainer(editor.context, editor.detailPad, scroller);
   }
 
   public void updateScroll(final Context context) {
-    final ROPair<CourseDisplayNode, CourseDisplayNode> row = rows.get(index);
-    final DisplayNode preview = row.first;
-    final DisplayNode text = row.second;
+    final ROList<CourseDisplayNode> row = rows.get(index);
+    final DisplayNode preview = row.get(0);
+    final DisplayNode text = row.last();
     final double converse = preview.converse();
     final double converseEdge = text.converseEdge();
     scroller.scrollVisible(converse, converseEdge, context.animateDetails);
@@ -75,9 +68,9 @@ public class TwoColumnChoicePage {
 
   private void changeChoice(final Context context, final int index) {
     this.index = index;
-    final ROPair<CourseDisplayNode, CourseDisplayNode> row = rows.get(index);
-    final CourseDisplayNode preview = row.first;
-    final CourseDisplayNode text = row.second;
+    final ROList<CourseDisplayNode> row = rows.get(index);
+    final CourseDisplayNode preview = row.get(0);
+    final CourseDisplayNode text = row.last();
     final double converse = preview.converse();
     final double transverse = Math.min(preview.transverse(), text.transverse());
     final double converseEdge = text.converseEdge();
@@ -91,15 +84,15 @@ public class TwoColumnChoicePage {
     context.removeConverseEdgeListener(edgeListener);
   }
 
-  public void choose(Editor editor) {
-    choices.get(index).choose(editor, null);
-  }
-
   public void nextChoice(Context context) {
     changeChoice(context, (index + 1) % choices.size());
   }
 
   public void previousChoice(Context context) {
     changeChoice(context, (index + choices.size() - 1) % choices.size());
+  }
+
+  public interface Choice {
+    ROList<CourseDisplayNode> display(Editor editor);
   }
 }

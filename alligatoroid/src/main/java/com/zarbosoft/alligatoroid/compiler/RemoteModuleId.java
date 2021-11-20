@@ -23,7 +23,7 @@ public final class RemoteModuleId implements ModuleId {
 
   @Override
   public String toString() {
-    return Format.format("%s:%s", hash, url);
+    return url;
   }
 
   @Override

@@ -19,6 +19,7 @@ public class TextBlock implements Container, TextStylable {
   private double converseSpan = Double.MAX_VALUE;
   private ModelColor color;
   private double transverseSpan;
+  private Parent parent;
 
   public TextBlock(Context context) {
     this.group = context.display.group();
@@ -69,12 +70,23 @@ public class TextBlock implements Container, TextStylable {
       }
     }
     transverseSpan = transverse;
+    if (parent != null) parent.relayout(context);
   }
 
   @Override
   public void setConverseSpan(Context context, double span) {
     converseSpan = span;
     rewrap(context);
+  }
+
+  @Override
+  public void setParent(Parent parent) {
+    this.parent = parent;
+  }
+
+  @Override
+  public Parent getParent() {
+    return parent;
   }
 
   @Override

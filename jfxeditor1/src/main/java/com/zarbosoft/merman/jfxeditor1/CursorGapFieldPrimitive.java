@@ -28,25 +28,7 @@ public class CursorGapFieldPrimitive extends BaseEditCursorGapFieldPrimitive {
         context,
         main,
         this,
-        hidEvent,
-        new NotMain.PrimitiveKeyHandler() {
-          @Override
-          public boolean prev(ButtonEvent hidEvent) {
-            if (choicePage != null) choicePage.previousChoice(context);
-            return true;
-          }
-
-          @Override
-          public boolean next(ButtonEvent hidEvent) {
-            if (choicePage != null) choicePage.nextChoice(context);
-            return true;
-          }
-
-          @Override
-          public boolean enter(ButtonEvent hidEvent) {
-            if (choicePage != null) choicePage.choose(Editor.get(context));
-            return true;
-          }
-        });
+        hidEvent
+    );
   }
 }

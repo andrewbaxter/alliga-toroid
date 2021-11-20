@@ -116,8 +116,8 @@ public class NotMain extends Application {
     e.printStackTrace();
   }
 
-  public static boolean handleCommonNavigation(
-      Context context, NotMain main, ButtonEvent hidEvent) {
+  public static boolean handleCommonNavigation(Editor editor, NotMain main, ButtonEvent hidEvent) {
+    if (editor.details.handleKey(editor, hidEvent)) return true;
     if (hidEvent.press) {
       switch (hidEvent.key) {
         case F:
@@ -131,9 +131,9 @@ public class NotMain extends Application {
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
               if (hidEvent.modifiers.containsAny(shiftKeys)) {
-                Editor.get(context).redo();
+                editor.redo();
               } else {
-                Editor.get(context).undo();
+                editor.undo();
               }
               return true;
             }
@@ -141,7 +141,7 @@ public class NotMain extends Application {
         case Y:
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
-              Editor.get(context).redo();
+              editor.redo();
               return true;
             }
           }
@@ -151,17 +151,14 @@ public class NotMain extends Application {
   }
 
   public static boolean handlePrimitiveNavigation(
-      Context context,
-      NotMain main,
-      BaseEditCursorFieldPrimitive cursor,
-      ButtonEvent hidEvent,
-      PrimitiveKeyHandler handler) {
-    if (handleCommonNavigation(context, main, hidEvent)) return true;
+      Context context, NotMain main, BaseEditCursorFieldPrimitive cursor, ButtonEvent hidEvent) {
+    final Editor editor = Editor.get(context);
+    if (handleCommonNavigation(editor, main, hidEvent)) return true;
     if (hidEvent.press) {
       switch (hidEvent.key) {
         case ESCAPE:
           {
-            cursor.editExit(Editor.get(context));
+            cursor.editExit(editor);
             return true;
           }
         case DIR_DIVE:
@@ -194,10 +191,6 @@ public class NotMain extends Application {
             }
             return true;
           }
-        case DIR_PREV:
-          return handler.prev(hidEvent);
-        case DIR_NEXT:
-          return handler.next(hidEvent);
         case HOME:
           {
             cursor.actionLineBegin(context);
@@ -211,36 +204,33 @@ public class NotMain extends Application {
         case BACK_SPACE:
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
-              cursor.editCut(Editor.get(context));
+              cursor.editCut(editor);
             } else {
-              cursor.editDeletePrevious(Editor.get(context));
+              cursor.editDeletePrevious(editor);
             }
             return true;
           }
         case DELETE:
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
-              cursor.editCut(Editor.get(context));
+              cursor.editCut(editor);
             } else {
-              cursor.editDeleteNext(Editor.get(context));
+              cursor.editDeleteNext(editor);
             }
             return true;
           }
         case X:
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
-              if (cursor.range.beginOffset != cursor.range.endOffset)
-                cursor.editCut(Editor.get(context));
+              if (cursor.range.beginOffset != cursor.range.endOffset) cursor.editCut(editor);
               return true;
             }
             break;
           }
-        case ENTER:
-          return handler.enter(hidEvent);
         case V:
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
-              cursor.editPaste(Editor.get(context));
+              cursor.editPaste(editor);
               return true;
             }
             break;
@@ -260,22 +250,26 @@ public class NotMain extends Application {
       Environment env = new JFXEnvironment(Locale.getDefault());
 
       JavaSerializer serializer;
-      ROMap<String, SyntaxOut> syntaxes =
-          new TSMap<String, SyntaxOut>()
-              .put("json", JsonSyntax.create(env, new Padding(5, 5, 5, 5)))
+      ROMap<String, AlligatoroidSyntax.EditorSyntaxOut> syntaxes =
+          new TSMap<String, AlligatoroidSyntax.EditorSyntaxOut>()
+              .put(
+                  "json",
+                  new AlligatoroidSyntax.EditorSyntaxOut(
+                      JsonSyntax.create(env, new Padding(5, 5, 5, 5)), new TSList<>()))
               .put("at", AlligatoroidSyntax.create(env, new Padding(5, 5, 5, 5)));
 
       String rawPath = args.get(0);
       path = Paths.get(rawPath).toAbsolutePath();
       Document document;
       String extension = extension(rawPath);
-      SyntaxOut syntaxOut =
+      AlligatoroidSyntax.EditorSyntaxOut editorSyntaxOut =
           syntaxes.getOr(
               extension,
               () -> {
                 throw new RuntimeException(
                     Format.format("No syntax for files with extension [%s]", extension));
               });
+      SyntaxOut syntaxOut = editorSyntaxOut.syntaxOut;
       Syntax syntax = syntaxOut.syntax;
       TSMap<Atom, WeakReference<MarkerBox>> markDisplays = new TSMap<>();
       Stylist stylist =
@@ -337,6 +331,11 @@ public class NotMain extends Application {
             public void styleMarker(Context context, Text text, MarkerType type) {
               syntaxOut.stylist.styleMarker(context, text, type);
             }
+
+            @Override
+            public ObboxStyle tabStyle() {
+              return syntaxOut.stylist.tabStyle();
+            }
           };
 
       final HBox layout = new HBox();
@@ -378,10 +377,11 @@ public class NotMain extends Application {
 
                                 // Attach new errors
                                 if (e0 != null) {
-                                  if (!layout.getChildren().contains(messages)) layout.getChildren().add(messages);
+                                  if (!layout.getChildren().contains(messages))
+                                    layout.getChildren().add(messages);
                                   messages.setText(messages.getText() + "\n" + e0.toString());
                                 } else {
-                                  TSMap<Atom, TSList<String>> errorMessages = new TSMap<>();
+                                  TSMap<Atom, TSList<Object>> errorMessages = new TSMap<>();
                                   ModuleId moduleId = new LocalModuleId(path.toString());
                                   for (Map.Entry<ImportSpec, Module> e : modules) {
                                     for (Error error : e.getValue().log.errors) {
@@ -389,11 +389,11 @@ public class NotMain extends Application {
                                           new Error.Dispatcher<Object>() {
                                             @Override
                                             public Object handle(Error.PreDeserializeError e) {
-                                              if (!layout.getChildren().contains(messages)) layout.getChildren().add(messages);
+                                              if (!layout.getChildren().contains(messages))
+                                                layout.getChildren().add(messages);
                                               messages.setText(
                                                   messages.getText() + "\n" + e.toString());
-                                              System.out.format(
-                                                  "pre deserialize error: %s\n", e);
+                                              System.out.format("pre deserialize error: %s\n", e);
                                               return null;
                                             }
 
@@ -403,7 +403,8 @@ public class NotMain extends Application {
                                               if (!moduleId.equal1(location.module)) return null;
                                               Atom atom = editor.fileIdMap.getOpt(location.id);
                                               if (atom == null) {
-                                                if (!layout.getChildren().contains(messages)) layout.getChildren().add(messages);
+                                                if (!layout.getChildren().contains(messages))
+                                                  layout.getChildren().add(messages);
                                                 System.out.format(
                                                     "unlocatable location error %s: %s\n",
                                                     e.location, e);
@@ -417,7 +418,7 @@ public class NotMain extends Application {
                                               errorAtoms.add(atom);
                                               errorMessages
                                                   .getCreate(atom, () -> new TSList<>())
-                                                  .add((String) error.toString());
+                                                  .add(error);
                                               changedAtoms.add(atom);
                                               return null;
                                             }
@@ -428,7 +429,8 @@ public class NotMain extends Application {
                                                   editor.context.backLocate(
                                                       new BackPath(e.backPath.data));
                                               if (atom == null) {
-                                                if (!layout.getChildren().contains(messages)) layout.getChildren().add(messages);
+                                                if (!layout.getChildren().contains(messages))
+                                                  layout.getChildren().add(messages);
                                                 System.out.format(
                                                     "unlocatable deserialize error %s: %s\n",
                                                     e.backPath, e);
@@ -442,7 +444,7 @@ public class NotMain extends Application {
                                               errorAtoms.add(atom);
                                               errorMessages
                                                   .getCreate(atom, () -> new TSList<>())
-                                                  .add((String) error.toString());
+                                                  .add(error);
                                               changedAtoms.add(atom);
                                               return null;
                                             }
@@ -450,7 +452,7 @@ public class NotMain extends Application {
                                     }
                                   }
 
-                                  for (Map.Entry<Atom, TSList<String>> e : errorMessages) {
+                                  for (Map.Entry<Atom, TSList<Object>> e : errorMessages) {
                                     e.getKey()
                                         .metaPut(editor.context, META_KEY_ERROR, e.getValue());
                                   }
@@ -494,6 +496,7 @@ public class NotMain extends Application {
               new History(),
               serializer,
               stylist,
+              editorSyntaxOut.refactors,
               e ->
                   new EditorCursorFactory(e) {
                     @Override
@@ -758,14 +761,6 @@ public class NotMain extends Application {
         logException(e, "Failed to clean up backup %s", backupPath);
       }
     if (wasModified && flushCallback != null) flushCallback.run();
-  }
-
-  public static interface PrimitiveKeyHandler {
-    boolean prev(ButtonEvent hidEvent);
-
-    boolean next(ButtonEvent hidEvent);
-
-    boolean enter(ButtonEvent hidEvent);
   }
 
   public static class DragSelectState {

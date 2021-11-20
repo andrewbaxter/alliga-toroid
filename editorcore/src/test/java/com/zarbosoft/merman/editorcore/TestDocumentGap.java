@@ -47,7 +47,7 @@ public class TestDocumentGap {
       assertThat(((BaseEditCursorGapFieldPrimitive) editor.context.cursor).choicePage, equalTo(null));
     else
       assertThat(
-          ((BaseEditCursorGapFieldPrimitive) editor.context.cursor).choicePage.choices.size(),
+          ((BaseEditCursorGapFieldPrimitive) editor.context.cursor).choicePage.chooser.choices.size(),
           is(count));
   }
 

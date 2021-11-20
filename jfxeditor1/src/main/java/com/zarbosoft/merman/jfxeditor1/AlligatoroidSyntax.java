@@ -1,7 +1,11 @@
 package com.zarbosoft.merman.jfxeditor1;
 
+import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.example.DirectStylist;
 import com.zarbosoft.merman.core.example.SyntaxOut;
 import com.zarbosoft.merman.core.syntax.AtomType;
@@ -45,6 +49,10 @@ import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
+import com.zarbosoft.merman.editorcore.Editor;
+import com.zarbosoft.merman.editorcore.Refactor;
+import com.zarbosoft.merman.editorcore.RefactorMatch;
+import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
@@ -57,6 +65,8 @@ import com.zarbosoft.rendaw.common.TSSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static com.zarbosoft.merman.jfxeditor1.NotMain.META_KEY_ERROR;
 
 public class AlligatoroidSyntax {
   public static final Pattern PATTERN_IDENTIFIER = new Repeat1(new SymbolCharacter());
@@ -86,6 +96,8 @@ public class AlligatoroidSyntax {
       new FrontSymbolSpec(
           new FrontSymbolSpec.Config(
               new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(SplitMode.ALWAYS))));
+  public static final String FIELD_IMPORT_SPEC = "spec";
+  public static final String FIELD_MODULE_REMOTE_HASH = "hash";
   private static final double fontSize = 6;
   private static final String GROUP_EXPR = "expr";
   private static final String GROUP_STATEMENT = "statement";
@@ -264,7 +276,7 @@ public class AlligatoroidSyntax {
         .build();
   }
 
-  public static SyntaxOut create(Environment env, Padding pad) {
+  public static EditorSyntaxOut create(Environment env, Padding pad) {
     TypeGrouper types = new TypeGrouper();
 
     types.add(GROUP_EXPR, GROUP_STATEMENT);
@@ -417,7 +429,7 @@ public class AlligatoroidSyntax {
         new ATypeBuilder(TYPE_IMPORT, "Import")
             .text("import", COLOR_KEYWORD)
             .space()
-            .atom("spec", GROUP_EXPR)
+            .atom(FIELD_IMPORT_SPEC, GROUP_EXPR)
             .build(),
         GROUP_EXPR);
     types.add(
@@ -436,7 +448,7 @@ public class AlligatoroidSyntax {
             .atom("url", GROUP_EXPR)
             .space()
             .compactSplit()
-            .atom("hash", GROUP_EXPR)
+            .atom(FIELD_MODULE_REMOTE_HASH, GROUP_EXPR)
             .build(),
         GROUP_EXPR);
 
@@ -662,96 +674,112 @@ public class AlligatoroidSyntax {
       splayedTypes = Syntax.splayGroups(errors, types.types, gap, suffixGap, types.groups);
       errors.raise();
     }
-    return new SyntaxOut(
-        new DirectStylist(
-            new ObboxStyle(
-                new ObboxStyle.Config()
-                    .padding(Padding.same(1))
-                    .roundStart(true)
-                    .roundEnd(true)
-                    .lineThickness(0.3)
-                    .roundRadius(3)
-                    .lineColor(COLOR_CURSOR)),
-            new ObboxStyle(
-                new ObboxStyle.Config()
-                    .padding(Padding.same(1))
-                    .roundEnd(true)
-                    .roundStart(true)
-                    .lineThickness(0.3)
-                    .roundRadius(3)
-                    .lineColor(COLOR_HOVER)),
-            new ObboxStyle(new ObboxStyle.Config().line(false)),
-            new DirectStylist.TextStyle().fontSize(5).color(COLOR_CHOICE),
-            new ObboxStyle(
-                new ObboxStyle.Config()
-                    .line(false)
-                    .fill(true)
-                    .fillColor(COLOR_POPUP_BG)
-                    .roundStart(true)
-                    .roundEnd(true)
-                    .roundOuterEdges(true)
-                    .roundRadius(2)
-                    .padding(Padding.ct(20, 1))),
-            new ObboxStyle(
-                new ObboxStyle.Config()
-                    .lineThickness(0.3)
-                    .padding(Padding.ct(1.5, 0.5))
-                    .roundStart(true)
-                    .roundEnd(true)
-                    .roundOuterEdges(true)
-                    .roundRadius(1)
-                    .lineColor(COLOR_CHOICE)),
-            new DirectStylist.TextStyle()
-                .fontSize(5)
-                .color(COLOR_CHOICE)
-                .padding(new Padding(4, 0, 1, 1)),
-            baseCodeStyle().color(COLOR_INCOMPLETE)),
-        COLOR_CHOICE,
-        new Syntax(
-            env,
-            new Syntax.Config(
-                    splayedTypes,
-                    new RootAtomType(
-                        new RootAtomType.Config(
-                            new BackFixedTypeSpec(
-                                new BackFixedTypeSpec.Config(
-                                    "alligatoroid:0.0.1",
-                                    new BackArraySpec(
-                                        new BaseBackArraySpec.Config(
-                                            "root_elements", GROUP_STATEMENT, ROList.empty)))),
-                            TSList.of(
-                                new FrontArraySpec(
-                                    new FrontArraySpec.Config(
-                                        "root_elements",
-                                        new FrontArraySpecBase.Config()
-                                            .prefix(
-                                                new TSList<>(
-                                                    new FrontSymbolSpec(
-                                                        new FrontSymbolSpec.Config(
-                                                            new SymbolSpaceSpec(
-                                                                new SymbolSpaceSpec.Config()
-                                                                    .splitMode(
-                                                                        SplitMode.ALWAYS))))))
-                                            .suffix(
-                                                new TSList<>(
-                                                    new FrontSymbolSpec(
-                                                        new FrontSymbolSpec.Config(
-                                                            new SymbolTextSpec(
-                                                                new SymbolTextSpec.Config(";")
-                                                                    .meta(
-                                                                        DirectStylist.meta(
-                                                                            baseCodeStyle()
-                                                                                .color(
-                                                                                    COLOR_OTHER))))))))))),
-                            ROMap.empty)),
-                    gap,
-                    suffixGap)
-                .backType(BackType.LUXEM)
-                .displayUnit(Syntax.DisplayUnit.MM)
-                .background(COLOR_BG)
-                .pad(pad)),
-        TSSet.of(TYPE_LOCAL, TYPE_ACCESS),
-        fontSize * 0.5);
+    return new EditorSyntaxOut(
+        new SyntaxOut(
+            new DirectStylist(
+                new ObboxStyle(
+                    new ObboxStyle.Config()
+                        .padding(Padding.same(1))
+                        .roundStart(true)
+                        .roundEnd(true)
+                        .lineThickness(0.3)
+                        .roundRadius(3)
+                        .lineColor(COLOR_CURSOR)),
+                new ObboxStyle(
+                    new ObboxStyle.Config()
+                        .padding(Padding.same(1))
+                        .roundEnd(true)
+                        .roundStart(true)
+                        .lineThickness(0.3)
+                        .roundRadius(3)
+                        .lineColor(COLOR_HOVER)),
+                new ObboxStyle(new ObboxStyle.Config().line(false)),
+                new DirectStylist.TextStyle().fontSize(5).color(COLOR_CHOICE),
+                new ObboxStyle(
+                    new ObboxStyle.Config()
+                        .line(false)
+                        .fill(true)
+                        .fillColor(COLOR_POPUP_BG)
+                        .roundStart(true)
+                        .roundEnd(true)
+                        .roundOuterEdges(true)
+                        .roundRadius(2)
+                        .padding(Padding.ct(20, 1))),
+                new ObboxStyle(
+                    new ObboxStyle.Config()
+                        .lineThickness(0.3)
+                        .padding(Padding.ct(1.5, 0.5))
+                        .roundStart(true)
+                        .roundEnd(true)
+                        .roundOuterEdges(true)
+                        .roundRadius(1)
+                        .lineColor(COLOR_CHOICE)),
+                new DirectStylist.TextStyle()
+                    .fontSize(5)
+                    .color(COLOR_CHOICE)
+                    .padding(new Padding(4, 0, 1, 1)),
+                baseCodeStyle().color(COLOR_INCOMPLETE),
+                new ObboxStyle(
+                    new ObboxStyle.Config()
+                        .lineThickness(0.4)
+                        .roundRadius(0.75)
+                        .lineColor(COLOR_BG))),
+            COLOR_CHOICE,
+            new Syntax(
+                env,
+                new Syntax.Config(
+                        splayedTypes,
+                        new RootAtomType(
+                            new RootAtomType.Config(
+                                new BackFixedTypeSpec(
+                                    new BackFixedTypeSpec.Config(
+                                        "alligatoroid:0.0.1",
+                                        new BackArraySpec(
+                                            new BaseBackArraySpec.Config(
+                                                "root_elements", GROUP_STATEMENT, ROList.empty)))),
+                                TSList.of(
+                                    new FrontArraySpec(
+                                        new FrontArraySpec.Config(
+                                            "root_elements",
+                                            new FrontArraySpecBase.Config()
+                                                .prefix(
+                                                    new TSList<>(
+                                                        new FrontSymbolSpec(
+                                                            new FrontSymbolSpec.Config(
+                                                                new SymbolSpaceSpec(
+                                                                    new SymbolSpaceSpec.Config()
+                                                                        .splitMode(
+                                                                            SplitMode.ALWAYS))))))
+                                                .suffix(
+                                                    new TSList<>(
+                                                        new FrontSymbolSpec(
+                                                            new FrontSymbolSpec.Config(
+                                                                new SymbolTextSpec(
+                                                                    new SymbolTextSpec.Config(";")
+                                                                        .meta(
+                                                                            DirectStylist.meta(
+                                                                                baseCodeStyle()
+                                                                                    .color(
+                                                                                        COLOR_OTHER))))))))))),
+                                ROMap.empty)),
+                        gap,
+                        suffixGap)
+                    .backType(BackType.LUXEM)
+                    .displayUnit(Syntax.DisplayUnit.MM)
+                    .background(COLOR_BG)
+                    .pad(pad)),
+            TSSet.of(TYPE_LOCAL, TYPE_ACCESS),
+            fontSize * 0.5),
+        new TSList<>(new RefactorFixRemoteHash()));
+  }
+
+  private static void commentArray(ATypeBuilder b) {
+    b.front.front.add(
+        new FrontArraySpec(
+            new FrontArraySpec.Config(
+                "children", new FrontArraySpecBase.Config().prefix(new TSList<>(zeroSplit)))));
+    b.front.vspacer(0, fontSize * 1.5);
+    b.back.array("children", GROUP_COMMENT_BODY);
   }
 
   /*
@@ -770,15 +798,6 @@ public class AlligatoroidSyntax {
   }
    */
 
-  private static void commentArray(ATypeBuilder b) {
-    b.front.front.add(
-        new FrontArraySpec(
-            new FrontArraySpec.Config(
-                "children", new FrontArraySpecBase.Config().prefix(new TSList<>(zeroSplit)))));
-    b.front.vspacer(0, fontSize * 1.5);
-    b.back.array("children", GROUP_COMMENT_BODY);
-  }
-
   private static BackSpec backBuiltinField(BackSpec child) {
     return new ABackBuilder(BACK_TYPE_ACCESS)
         .raw(ACCESS_BACK_FIELD_BASE, new ABackBuilder(BACK_TYPE_BUILTIN).build())
@@ -793,6 +812,16 @@ public class AlligatoroidSyntax {
             backBuiltinField(literalStringBack(new BackFixedPrimitiveSpec(field))))
         .raw(CALL_BACK_FIELD_ARGUMENT, args)
         .build();
+  }
+
+  public static class EditorSyntaxOut {
+    public final SyntaxOut syntaxOut;
+    public final ROList<Refactor> refactors;
+
+    public EditorSyntaxOut(SyntaxOut syntaxOut, ROList<Refactor> refactors) {
+      this.syntaxOut = syntaxOut;
+      this.refactors = refactors;
+    }
   }
 
   public static class TypeGrouper {
@@ -1225,6 +1254,58 @@ public class AlligatoroidSyntax {
     public ATypeBuilder fixedPrimitive(String key, String value) {
       back.fixedPrimitive(key, value);
       return this;
+    }
+  }
+
+  public static class RefactorFixRemoteHash implements Refactor {
+    @Override
+    public RefactorMatch check(ROList<Atom> atoms) {
+      if (atoms.size() != 1) return null;
+      final Atom atom = atoms.get(0);
+      if (!atom.type.id.equals(TYPE_IMPORT)) return null;
+      TSList<Object> errors = (TSList<Object>) atom.metaGet(META_KEY_ERROR);
+      if (errors == null || errors.isEmpty()) {
+        return null;
+      }
+      String foundHash = null;
+      for (Object error : errors) {
+        if (error instanceof Error.RemoteModuleHashMismatch) {
+          foundHash = ((Error.RemoteModuleHashMismatch) error).foundHash;
+          break;
+        }
+      }
+      if (foundHash == null) return null;
+      final Atom spec = ((FieldAtom) atom.namedFields.get(FIELD_IMPORT_SPEC)).data;
+      if (!spec.type.id.equals(TYPE_MODULE_REMOTE)) return null;
+      FieldAtom hashAtomField = (FieldAtom) spec.namedFields.get(FIELD_MODULE_REMOTE_HASH);
+      final FieldPrimitive hashField =
+          (FieldPrimitive) hashAtomField.data.namedFields.get(FIELD_LITERAL_VALUE);
+      return new RefactorMatchFixRemoteHash(foundHash, hashField);
+    }
+  }
+
+  public static class RefactorMatchFixRemoteHash implements RefactorMatch {
+    private final String foundHash;
+    private final FieldPrimitive hashField;
+
+    public RefactorMatchFixRemoteHash(String foundHash, FieldPrimitive hashField) {
+      this.foundHash = foundHash;
+      this.hashField = hashField;
+    }
+
+    @Override
+    public void apply(Editor editor) {
+      editor.history.record(
+          editor,
+          null,
+          c -> {
+            c.apply(editor, new ChangePrimitive(hashField, 0, hashField.data.length(), foundHash));
+          });
+    }
+
+    @Override
+    public String text() {
+      return "Use detected hash";
     }
   }
 }

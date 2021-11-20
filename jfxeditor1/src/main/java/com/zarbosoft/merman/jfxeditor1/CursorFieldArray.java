@@ -1,16 +1,23 @@
 package com.zarbosoft.merman.jfxeditor1;
 
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
+import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomBase;
 import com.zarbosoft.merman.editorcore.Editor;
+import com.zarbosoft.merman.editorcore.Refactorer;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldArray;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 
 import static com.zarbosoft.merman.jfxeditor1.NotMain.controlKeys;
 import static com.zarbosoft.merman.jfxeditor1.NotMain.shiftKeys;
 
 public class CursorFieldArray extends BaseEditCursorFieldArray {
   public final NotMain main;
+  private Refactorer refactorer;
 
   public CursorFieldArray(
       Context context,
@@ -22,6 +29,7 @@ public class CursorFieldArray extends BaseEditCursorFieldArray {
     super(context, visual, leadFirst, start, end);
     this.main = main;
     updateErrorPage(Editor.get(context));
+    refactorer = new Refactorer();
   }
 
   @Override
@@ -45,12 +53,15 @@ public class CursorFieldArray extends BaseEditCursorFieldArray {
   @Override
   public void destroy(Context context) {
     super.destroy(context);
-    main.errorPage.setAtom(Editor.get(context), null);
+    final Editor editor = Editor.get(context);
+    main.errorPage.setAtom(editor, null);
+    refactorer.close(editor);
   }
 
   public boolean handleKey(Context context, ButtonEvent hidEvent) {
-    if (NotMain.handleCommonNavigation(context, main, hidEvent)) return true;
-    if (hidEvent.press)
+    final Editor editor = Editor.get(context);
+    if (NotMain.handleCommonNavigation(editor, main, hidEvent)) return true;
+    if (hidEvent.press) {
       switch (hidEvent.key) {
         case DIR_SURFACE:
         case H:
@@ -100,9 +111,9 @@ public class CursorFieldArray extends BaseEditCursorFieldArray {
         case X:
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
-              editCut(Editor.get(context));
+              editCut(editor);
             } else {
-              editDelete(Editor.get(context));
+              editDelete(editor);
             }
             return true;
           }
@@ -113,25 +124,32 @@ public class CursorFieldArray extends BaseEditCursorFieldArray {
           }
         case V:
           {
-            editPaste(Editor.get(context));
+            editPaste(editor);
             return true;
           }
         case S:
           {
-            editSuffix(Editor.get(context));
+            editSuffix(editor);
             return true;
           }
         case B:
           {
-            editInsertBefore(Editor.get(context));
+            editInsertBefore(editor);
             return true;
           }
         case A:
           {
-            editInsertAfter(Editor.get(context));
+            editInsertAfter(editor);
             return true;
           }
+        case R:
+        {
+          final TSList<Atom> selection = visual.value.data.sublist(beginIndex, endIndex);
+            refactorer.refactor(editor, selection);
+          return true;
+        }
       }
+    }
     return super.handleKey(context, hidEvent);
   }
 }

@@ -6,24 +6,30 @@ import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomBase;
 import com.zarbosoft.merman.editorcore.Editor;
+import com.zarbosoft.merman.editorcore.Refactorer;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorAtom;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 
 import static com.zarbosoft.merman.jfxeditor1.NotMain.controlKeys;
 
 public class CursorAtom extends BaseEditCursorAtom {
   public final NotMain main;
   private ErrorPage errorPage;
+  private Refactorer refactorer;
 
   public CursorAtom(Context context, VisualAtom visual, int index, NotMain main) {
     super(context, visual, index);
     this.main = main;
+    this.refactorer = new Refactorer();
   }
 
   @Override
   public void destroy(Context context) {
     super.destroy(context);
-    errorPage.destroy(Editor.get(context));
+    final Editor editor = Editor.get(context);
+    errorPage.destroy(editor);
+    refactorer.close(editor);
   }
 
   @Override
@@ -41,8 +47,9 @@ public class CursorAtom extends BaseEditCursorAtom {
   }
 
   public boolean handleKey(Context context, ButtonEvent hidEvent) {
-    if (NotMain.handleCommonNavigation(context, main, hidEvent)) return true;
-    if (hidEvent.press)
+    final Editor editor = Editor.get(context);
+    if (NotMain.handleCommonNavigation(editor, main, hidEvent)) return true;
+    if (hidEvent.press) {
       switch (hidEvent.key) {
         case DIR_SURFACE:
         case H:
@@ -72,9 +79,9 @@ public class CursorAtom extends BaseEditCursorAtom {
         case X:
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
-              editCut(Editor.get(context));
+              editCut(editor);
             } else {
-              editDelete(Editor.get(context));
+              editDelete(editor);
             }
             return true;
           }
@@ -85,25 +92,34 @@ public class CursorAtom extends BaseEditCursorAtom {
           }
         case V:
           {
-            editPaste(Editor.get(context));
+            editPaste(editor);
             return true;
           }
         case S:
           {
-            editSuffix(Editor.get(context));
+            editSuffix(editor);
             return true;
           }
         case B:
           {
-            editInsertBefore(Editor.get(context));
+            editInsertBefore(editor);
             return true;
           }
         case A:
           {
-            editInsertAfter(Editor.get(context));
+            editInsertAfter(editor);
+            return true;
+          }
+        case R:
+          {
+            ROPair<String, Visual> selectable = visual.selectable.get(index);
+            if (selectable.second instanceof VisualFieldAtomBase) {
+              refactorer.refactor(editor, new TSList<>(((VisualFieldAtomBase) selectable.second).atomGet()));
+            }
             return true;
           }
       }
+    }
     return super.handleKey(context, hidEvent);
   }
 }

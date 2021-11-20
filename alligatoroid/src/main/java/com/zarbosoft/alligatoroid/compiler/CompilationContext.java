@@ -116,7 +116,9 @@ public class CompilationContext {
                     .evaluate(context)));
     EvaluateResult evaluateResult = ectx.build(null);
     for (CompletableFuture<Error> e : module.deferredErrors) {
-      module.log.errors.add(uncheck(() -> e.get()));
+      final Error e1 = uncheck(() -> e.get());
+      if (e1 == null) continue;
+      module.log.errors.add(e1);
     }
     MortarCode code = new MortarCode();
     code.add(
@@ -233,7 +235,7 @@ public class CompilationContext {
                         }
                       });
                 } else if (downloadPath.toString().endsWith(".zip")) {
-                  return new BundleValue(module.importPath, id, "");
+                  return new BundleValue(new ImportSpec(id), "");
                 } else {
                   throw new Error.PreUnknownImportFileType(id.url);
                 }
@@ -267,7 +269,7 @@ public class CompilationContext {
                           throw new Error.PreImportNotFound(id.toString());
                         }
                         if (e.isDirectory()) {
-                          return new BundleValue(module.importPath, id.module, id.path);
+                          return new BundleValue(new ImportSpec(id.module), id.path);
                         }
                         if (id.path.endsWith(".at")) {
                           try (InputStream stream = Files.newInputStream(bundlePath)) {
@@ -492,6 +494,7 @@ public class CompilationContext {
             joinThreads.clear();
             synchronized (threads) {
               joinThreads.addAll(threads.keySet());
+              threads.clear();
             }
             if (joinThreads.isEmpty()) break;
             for (Thread thread : joinThreads) {

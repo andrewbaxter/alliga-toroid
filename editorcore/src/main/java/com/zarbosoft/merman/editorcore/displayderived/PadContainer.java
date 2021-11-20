@@ -4,30 +4,50 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.Container;
 import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.visual.Vector;
+import com.zarbosoft.rendaw.common.Assertion;
 
-public class PadContainer extends StackContainer {
+public class PadContainer implements Container {
   private final double padConverseStart;
   private final double padConverseEnd;
   private final double padTransverseStart;
   private final double padTransverseEnd;
+  private final Container root;
+  private Parent parent;
 
-  public PadContainer(Context context, Padding padding) {
-    super(context);
+  public PadContainer(Context context, Padding padding, Container root) {
     this.padConverseStart = padding.converseStart * context.toPixels;
     this.padConverseEnd = padding.converseEnd * context.toPixels;
     this.padTransverseStart = padding.transverseStart * context.toPixels;
     this.padTransverseEnd = padding.transverseEnd * context.toPixels;
-  }
+    this.root = root;
+    root.setParent(
+        new Parent() {
+          @Override
+          public void relayout(Context context) {
+            if (PadContainer.this.parent != null) {
+              PadContainer.this.parent.relayout(context);
+            }
+          }
 
-  @Override
-  public StackContainer addRoot(Container node) {
-    super.addRoot(node);
-    setPosition(Vector.zero, false);
-    return this;
+          @Override
+          public void remove(Context context) {
+            throw new Assertion();
+          }
+        });
   }
 
   public void setConverseSpan(Context context, double span) {
     root.setConverseSpan(context, span - padConverseStart - padConverseEnd);
+  }
+
+  @Override
+  public Parent getParent() {
+    return parent;
+  }
+
+  @Override
+  public void setParent(Parent parent) {
+    this.parent = parent;
   }
 
   @Override

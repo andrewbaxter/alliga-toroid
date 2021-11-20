@@ -1,11 +1,13 @@
 package com.zarbosoft.alligatoroid.compiler.cache;
 
+import com.zarbosoft.alligatoroid.compiler.BundleValue;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.ImportSpec;
 import com.zarbosoft.alligatoroid.compiler.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.RemoteModuleId;
 import com.zarbosoft.alligatoroid.compiler.TreeSerializable;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.Value;
@@ -72,6 +74,8 @@ public class Cache {
     Class[] builtinTypes = {
       Location.class,
       LocalModuleId.class,
+      RemoteModuleId.class,
+      BundleValue.class,
       JVMExternClassType.class,
       JVMExternStaticField.class,
       JVMShallowMethodFieldType.class,

@@ -274,7 +274,7 @@ public class JsonSyntax {
       errors.raise();
     }
     return new SyntaxOut(
-        new DirectStylist(cursorStyle, hoverStyle, null, null, null, null, null, null),
+        new DirectStylist(cursorStyle, hoverStyle, null, null, null, null, null, null, null),
         ModelColor.RGB.hex("938f8d"),
         new Syntax(
             env,

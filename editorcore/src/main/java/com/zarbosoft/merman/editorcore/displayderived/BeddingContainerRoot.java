@@ -11,7 +11,7 @@ import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Wall;
 import com.zarbosoft.merman.editorcore.Editor;
 
-public class BeddingContainer {
+public class BeddingContainerRoot {
   private final Wall.CornerstoneListener cornerstoneListener;
   private final Context.ContextDoubleListener edgeListener;
   private final boolean above;
@@ -20,12 +20,12 @@ public class BeddingContainer {
   private double transverse;
   private double transverseSpan;
   private Bedding bedding;
-  private BeddingContainer.IterationPlace idle;
+  private BeddingContainerRoot.IterationPlace idle;
   private final Attachment attachment =
       new Attachment() {
         @Override
         public void setTransverse(final Context context, final double transverse) {
-          BeddingContainer.this.transverse = transverse;
+          BeddingContainerRoot.this.transverse = transverse;
           iterationPlace(context, false);
         }
 
@@ -37,12 +37,12 @@ public class BeddingContainer {
         @Override
         public void setTransverseSpan(
             final Context context, final double ascent, final double descent) {
-          BeddingContainer.this.transverseSpan = ascent + descent;
+          BeddingContainerRoot.this.transverseSpan = ascent + descent;
           iterationPlace(context, false);
         }
       };
 
-  public BeddingContainer(final Context context, boolean above) {
+  public BeddingContainerRoot(final Context context, boolean above) {
     this.above = above;
     cornerstoneListener =
         new Wall.CornerstoneListener() {
@@ -69,22 +69,12 @@ public class BeddingContainer {
   private void updateEdge(Context context) {
     if (current == null) return;
     current.setConverseSpan(context, context.edge);
-    double transverseSpan = current.transverseSpan();
-    if (bedding == null
-        || (above && bedding.before != transverseSpan)
-        || (!above && bedding.after != transverseSpan)) {
-      if (bedding != null) {
-        context.wall.removeBedding(context, bedding);
-      }
-      bedding = above ? new Bedding(transverseSpan, 0) : new Bedding(0, transverseSpan);
-      context.wall.addBedding(context, bedding);
-    }
   }
 
   private void iterationPlace(final Context context, final boolean animate) {
     if (current == null) return;
     if (idle == null) {
-      idle = new BeddingContainer.IterationPlace(context);
+      idle = new BeddingContainerRoot.IterationPlace(context);
       context.addIteration(idle);
     }
     idle.animate = idle.animate && animate;
@@ -93,6 +83,19 @@ public class BeddingContainer {
   private void place(final boolean animate) {
     final double transverse = this.transverse + transverseSpan;
     current.setPosition(new Vector(0, transverse), animate);
+  }
+
+  public void relayout(Context context) {
+    double transverseSpan = current.transverseSpan();
+    if (bedding == null
+            || (above && bedding.before != transverseSpan)
+            || (!above && bedding.after != transverseSpan)) {
+      if (bedding != null) {
+        context.wall.removeBedding(context, bedding);
+      }
+      bedding = above ? new Bedding(transverseSpan, 0) : new Bedding(0, transverseSpan);
+      context.wall.addBedding(context, bedding);
+    }
   }
 
   public void removeInner(Editor editor, Container inner) {
@@ -114,6 +117,17 @@ public class BeddingContainer {
     }
     current = inner;
     if (current != null) {
+      inner.setParent(new Container.Parent() {
+        @Override
+        public void relayout(Context context) {
+          BeddingContainerRoot.this.relayout(context);
+        }
+
+        @Override
+        public void remove(Context context) {
+          removeInner(editor, inner);
+        }
+      });
       place(false);
       updateEdge(context);
       context.midground.add(current);

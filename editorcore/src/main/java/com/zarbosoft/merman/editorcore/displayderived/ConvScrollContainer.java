@@ -13,6 +13,7 @@ public class ConvScrollContainer implements Container {
   private double childMax;
   private boolean animate;
   private double scrollAbs;
+  private Parent parent;
 
   public ConvScrollContainer() {}
 
@@ -80,5 +81,16 @@ public class ConvScrollContainer implements Container {
   public void setConverseSpan(Context context, double span) {
     this.converseSpan = span;
     updateScroll();
+    if (parent != null) parent.relayout(context);
+  }
+
+  @Override
+  public Parent getParent() {
+    return parent;
+  }
+
+  @Override
+  public void setParent(Parent parent) {
+    this.parent = parent;
   }
 }

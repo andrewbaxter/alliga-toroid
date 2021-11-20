@@ -47,12 +47,11 @@ import java.util.Iterator;
 
 public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitive {
   public static Reference.Key<ROList<PrepareAtomField>> PRECEDING_ROOT_KEY = new Reference.Key<>();
-  public static Reference.Key<
-          ROPair<PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>>
+  public static Reference.Key<ROPair<PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>>
       GAP_ROOT_KEY = new Reference.Key<>();
   public final Grammar grammar;
   public String currentText;
-  public TwoColumnChoicePage choicePage;
+  public GapChoicePage choicePage;
 
   public BaseEditCursorGapFieldPrimitive(
       Editor editor,
@@ -113,12 +112,10 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
                   preChoice,
                   new Operator<
                       EscapableResult<ROList<GapChoice.ParsedField>>,
-                      ROPair<
-                          PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>>(
+                      ROPair<PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>>(
                       info.keyGrammar) {
                     @Override
-                    protected ROPair<
-                            PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>
+                    protected ROPair<PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>
                         process(EscapableResult<ROList<GapChoice.ParsedField>> value) {
                       return new ROPair<>(preChoice, value);
                     }
@@ -224,12 +221,10 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
                   preChoice,
                   new Operator<
                       EscapableResult<ROList<GapChoice.ParsedField>>,
-                      ROPair<
-                          PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>>(
+                      ROPair<PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>>(
                       info.keyGrammar) {
                     @Override
-                    protected ROPair<
-                            PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>
+                    protected ROPair<PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>
                         process(EscapableResult<ROList<GapChoice.ParsedField>> value) {
                       return new ROPair<>(preChoice, value);
                     }
@@ -263,8 +258,7 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
   public void destroy(Context context) {
     if (choicePage != null) {
       Editor editor = Editor.get(context);
-      editor.details.removeInner(editor, choicePage.displayRoot);
-      choicePage.destroy(context);
+      choicePage.close(editor);
       choicePage = null;
     }
     super.destroy(context);
@@ -294,8 +288,8 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
 
     /// Clean up before new state
     if (choicePage != null) {
-      editor.details.removeInner(editor, choicePage.displayRoot);
-      choicePage.destroy(context);
+      choicePage.close(editor);
+      choicePage = null;
     }
 
     TextChangedResult out = new TextChangedResult();
@@ -344,14 +338,10 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
 
     /// Update visual
     if (!out.choices.isEmpty()) {
-      choicePage = new TwoColumnChoicePage(editor, (TSList<TwoColumnChoice>) (TSList) out.choices);
-      editor.details.setInner(editor, choicePage.displayRoot);
-    } else {
-      if (choicePage != null) {
-        editor.details.setInner(editor, choicePage.displayRoot);
-        choicePage.destroy(context);
-        choicePage = null;
-      }
+      choicePage = GapChoicePage.create(editor, (TSList<GapChoice>) (TSList) out.choices);
+    } else if (choicePage != null) {
+      choicePage.close(editor);
+      choicePage = null;
     }
 
     return out;

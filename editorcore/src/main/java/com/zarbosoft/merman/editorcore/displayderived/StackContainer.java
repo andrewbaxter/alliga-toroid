@@ -5,10 +5,10 @@ import com.zarbosoft.merman.core.display.Container;
 import com.zarbosoft.merman.core.display.FreeDisplayNode;
 import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.merman.core.visual.Vector;
+import com.zarbosoft.rendaw.common.Assertion;
 
-public class StackContainer implements Container, FreeDisplayNode {
+public class StackContainer extends SingleChildContainer implements Container, FreeDisplayNode {
   private final Group group;
-  public Container root;
 
   public StackContainer(Context context) {
     this.group = context.display.group();
@@ -19,10 +19,15 @@ public class StackContainer implements Container, FreeDisplayNode {
     return this;
   }
 
-  public StackContainer addRoot(Container node) {
+  @Override
+  public void set(Context context, Container node) {
+    super.set(context, node);
     this.group.add(node);
-    this.root = node;
-    return this;
+  }
+
+  @Override
+  protected void remove(Context context) {
+    throw new Assertion();
   }
 
   @Override
@@ -37,12 +42,12 @@ public class StackContainer implements Container, FreeDisplayNode {
 
   @Override
   public double transverseSpan() {
-    return root.transverseSpan();
+    return child.transverseSpan();
   }
 
   @Override
   public double converseSpan() {
-    return root.converseSpan();
+    return child.converseSpan();
   }
 
   @Override
@@ -58,10 +63,5 @@ public class StackContainer implements Container, FreeDisplayNode {
   @Override
   public void setPosition(Vector vector, boolean animate) {
     group.setPosition(vector, animate);
-  }
-
-  @Override
-  public void setConverseSpan(Context context, double span) {
-    root.setConverseSpan(context, span);
   }
 }

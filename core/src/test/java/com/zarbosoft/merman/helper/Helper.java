@@ -173,7 +173,7 @@ public class Helper {
             new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
             new TestEnvironment(),
             null,
-            new DirectStylist(null, null, null, null, null, null, null, null),
+            new DirectStylist(null, null, null, null, null, null, null, null, null),
             new ViewerCursorFactory());
     return context;
   }

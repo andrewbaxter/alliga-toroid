@@ -1,7 +1,6 @@
 package com.zarbosoft.merman.core.display;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.display.FreeDisplayNode;
 
 /**
  * A container occupies a space and allocates that space to children. setConverseSpan will always be
@@ -9,4 +8,18 @@ import com.zarbosoft.merman.core.display.FreeDisplayNode;
  */
 public interface Container extends FreeDisplayNode {
   public void setConverseSpan(Context context, double span);
+
+  public Parent getParent();
+
+  public void setParent(Parent parent);
+
+  public default void removeFromParent(Context context) {
+    getParent().remove(context);
+  }
+
+  public interface Parent {
+    void relayout(Context context);
+
+    void remove(Context context);
+  }
 }

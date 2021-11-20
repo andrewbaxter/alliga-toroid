@@ -24,6 +24,7 @@ public class DirectStylist implements Stylist {
   public final ObboxStyle choiceCursorStyle;
   public final TextStyle choiceDescriptionStyle;
   public final TextStyle errorMarkStyle;
+  public final ObboxStyle tabStyle;
 
   public DirectStylist(
       ObboxStyle cursorStyle,
@@ -33,7 +34,8 @@ public class DirectStylist implements Stylist {
       ObboxStyle detailsBackgroundStyle,
       ObboxStyle choiceCursorStyle,
       TextStyle choiceDescriptionStyle,
-      TextStyle errorMarkStyle) {
+      TextStyle errorMarkStyle,
+      ObboxStyle tabStyle) {
     this.cursorStyle = cursorStyle;
     this.hoverStyle = hoverStyle;
     this.bannerBackgroundStyle = bannerBackgroundStyle;
@@ -42,6 +44,7 @@ public class DirectStylist implements Stylist {
     this.choiceCursorStyle = choiceCursorStyle;
     this.choiceDescriptionStyle = choiceDescriptionStyle;
     this.errorMarkStyle = errorMarkStyle;
+    this.tabStyle = tabStyle;
   }
 
   public static TSMap<String, Object> meta(TextStyle style) {
@@ -99,6 +102,11 @@ public class DirectStylist implements Stylist {
       default:
         throw new Assertion();
     }
+  }
+
+  @Override
+  public ObboxStyle tabStyle() {
+    return tabStyle;
   }
 
   @Override

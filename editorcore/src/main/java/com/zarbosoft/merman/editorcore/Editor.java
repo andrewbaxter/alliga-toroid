@@ -28,7 +28,6 @@ import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomFromArray;
 import com.zarbosoft.merman.editorcore.banner.Banner;
-import com.zarbosoft.merman.editorcore.displayderived.BeddingContainer;
 import com.zarbosoft.merman.editorcore.history.FileIds;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
@@ -58,8 +57,9 @@ public class Editor {
   public final double choiceColumnSpace;
   public final ROSetRef<String> suffixOnPatternMismatch;
   public final FileIds fileIds;
+  public final ROList<Refactor> refactors;
   public Banner banner;
-  public BeddingContainer details;
+  public Details details;
   public final TSMap<Integer, Atom> fileIdMap;
 
   public Editor(
@@ -71,6 +71,7 @@ public class Editor {
       final History history,
       Serializer serializer,
       Stylist stylist,
+      ROList<Refactor> refactors,
       Function<Editor, EditorCursorFactory> cursorFactory,
       Config config) {
     this.fileIds = fileIds;
@@ -99,9 +100,10 @@ public class Editor {
     this.banner = new Banner(this.context);
     suffixOnPatternMismatch = config.suffixOnPatternMismatch;
     this.bannerPad = config.bannerPad;
-    this.details = new BeddingContainer(this.context, false);
     this.detailPad = config.detailPad;
     this.detailSpan = config.detailSpan;
+    this.refactors = refactors;
+    this.details = new Details(this, stylist.tabStyle());
     history.record(
         this,
         null,
