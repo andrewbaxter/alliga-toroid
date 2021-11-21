@@ -1,5 +1,7 @@
 package com.zarbosoft.merman;
 
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.SplitMode;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
@@ -8,8 +10,6 @@ import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.core.syntax.FreeAtomType;
-import com.zarbosoft.merman.core.syntax.Syntax;
 import org.junit.Test;
 
 public class TestLayoutSpace {

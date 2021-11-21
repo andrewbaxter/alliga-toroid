@@ -15,11 +15,13 @@ public class JSpecialPrimitiveEvent implements BackEvent {
   @Override
   public boolean matches(final MatchingEvent event) {
     if (value == null) return event instanceof JSpecialPrimitiveEvent;
-    else return event instanceof JSpecialPrimitiveEvent && value.equals(((JSpecialPrimitiveEvent) event).value);
+    else
+      return event instanceof JSpecialPrimitiveEvent
+          && value.equals(((JSpecialPrimitiveEvent) event).value);
   }
 
   @Override
   public String toString() {
-    return Format.format("JSON NON-STRING %s", value == null ? "*" : "\""+value+"\"");
+    return Format.format("JSON NON-STRING %s", value == null ? "*" : "\"" + value + "\"");
   }
 }

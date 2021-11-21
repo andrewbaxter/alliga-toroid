@@ -9,7 +9,8 @@ public class BuiltinState extends DefaultStateSingle {
   private String key;
 
   @Override
-  protected void innerEatPrimitiveUntyped(TSList<Error> errors, LuxemPathBuilder luxemPath, String value) {
+  protected void innerEatPrimitiveUntyped(
+      TSList<Error> errors, LuxemPathBuilder luxemPath, String value) {
     key = value;
   }
 

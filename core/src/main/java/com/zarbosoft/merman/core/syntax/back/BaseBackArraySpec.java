@@ -33,17 +33,12 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public abstract class BaseBackArraySpec extends BackSpecData {
-  public static SyntaxPath boilerplatePath(SyntaxPath base, String id) {
-    return base.add("boilerplate").add(id);
-  }
   public static final String NO_BOILERPLATE_YET = "";
   /** Base array element type */
   public final String type;
-
   public ROMap<String, BackSpec> boilerplate;
   /** Non-group atom type to back spec, for writing */
   public ROMap<String, BackSpec> splayedBoilerplate;
-
   protected BaseBackArraySpec(Config config) {
     super(config.id);
     this.type = config.element;
@@ -53,19 +48,19 @@ public abstract class BaseBackArraySpec extends BackSpecData {
       for (int i = 0; i < config.boilerplate.size(); ++i) {
         BackSpec boilerplate = config.boilerplate.get(i);
         final BackAtomSpec[] boilerplateAtom = {null};
-          BackSpec.walkTypeBack(
-              boilerplate,
-              child -> {
-                if (!(child instanceof BackAtomSpec)) return true;
-                if (((BackAtomSpec) child).id != null)
-                  errors.add(new ArrayBoilerplateAtomIdNotNull(((BackAtomSpec) child).type));
-                if (boilerplateAtom[0] != null) {
-                  errors.add(new ArrayMultipleAtoms(this, boilerplateAtom[0], child));
-                } else {
-                  boilerplateAtom[0] = (BackAtomSpec) child;
-                }
-                return false;
-              });
+        BackSpec.walkTypeBack(
+            boilerplate,
+            child -> {
+              if (!(child instanceof BackAtomSpec)) return true;
+              if (((BackAtomSpec) child).id != null)
+                errors.add(new ArrayBoilerplateAtomIdNotNull(((BackAtomSpec) child).type));
+              if (boilerplateAtom[0] != null) {
+                errors.add(new ArrayMultipleAtoms(this, boilerplateAtom[0], child));
+              } else {
+                boilerplateAtom[0] = (BackAtomSpec) child;
+              }
+              return false;
+            });
         if (boilerplateAtom[0] == null) {
           errors.add(new ArrayBoilerplateMissingAtom(i));
         } else {
@@ -77,6 +72,10 @@ public abstract class BaseBackArraySpec extends BackSpecData {
       this.boilerplate = out;
     }
     errors.raise();
+  }
+
+  public static SyntaxPath boilerplatePath(SyntaxPath base, String id) {
+    return base.add("boilerplate").add(id);
   }
 
   @Override
@@ -124,7 +123,7 @@ public abstract class BaseBackArraySpec extends BackSpecData {
                           remaining.remove(sub.id());
                         }
                         MergeSequence<AtomType.FieldParseResult> backSeq = new MergeSequence<>();
-                          backSeq.add(plated.getValue().buildBackRule(env, syntax));
+                        backSeq.add(plated.getValue().buildBackRule(env, syntax));
                         union.add(
                             new Operator<
                                 ROList<AtomType.FieldParseResult>, AtomType.AtomParseResult>(
@@ -162,10 +161,7 @@ public abstract class BaseBackArraySpec extends BackSpecData {
   }
 
   @Override
-  public void finish(
-          MultiError errors,
-          final Syntax syntax,
-          final SyntaxPath typePath) {
+  public void finish(MultiError errors, final Syntax syntax, final SyntaxPath typePath) {
     super.finish(errors, syntax, typePath);
     TSMap<AtomType, String> overlapping = new TSMap<>();
     if (boilerplate.some()) {
@@ -177,11 +173,7 @@ public abstract class BaseBackArraySpec extends BackSpecData {
       TSMap<String, BackSpec> splayedBoilerplate = new TSMap<>();
       for (Map.Entry<String, BackSpec> boilerplateEl : boilerplate) {
         SyntaxPath boilerplatePath = boilerplatePath(typePath, boilerplateEl.getKey());
-          boilerplateEl.getValue().finish(
-              errors,
-              syntax,
-              boilerplatePath
-          );
+        boilerplateEl.getValue().finish(errors, syntax, boilerplatePath);
         for (AtomType leaf : syntax.splayedTypes.get(boilerplateEl.getKey())) {
           String old = overlapping.putReplace(leaf, boilerplateEl.getKey());
           if (old == null)

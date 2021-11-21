@@ -12,10 +12,6 @@ public class TSSet<T> implements ROSetRef<T> {
     data = new HashSet<>();
   }
 
-  public static <T> TSSet<T> of(T... values) {
-    return new TSSet<>(new HashSet<>(Arrays.asList(values)));
-  }
-
   public TSSet(Set<T> data) {
     this.data = new HashSet<>(data);
   }
@@ -26,6 +22,10 @@ public class TSSet<T> implements ROSetRef<T> {
 
   public TSSet(T[] initial) {
     this.data = new HashSet<>(Arrays.asList(initial));
+  }
+
+  public static <T> TSSet<T> of(T... values) {
+    return new TSSet<>(new HashSet<>(Arrays.asList(values)));
   }
 
   public ROSet<T> ro() {
@@ -40,6 +40,7 @@ public class TSSet<T> implements ROSetRef<T> {
 
   /**
    * True if new, false if existed
+   *
    * @param v
    * @return
    */

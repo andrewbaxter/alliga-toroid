@@ -22,16 +22,16 @@ import com.zarbosoft.rendaw.common.TSList;
 import java.util.function.Function;
 
 public class GapAtomType extends BaseGapAtomType {
-  public final static BackSpec jsonBack =
-          new BackFixedRecordSpec(
-              new BackFixedRecordSpec.Config(
-                  new TSList<>(
-                      new BackKeySpec(
-                          new BackFixedPrimitiveSpec("type"), new BackFixedPrimitiveSpec("gap")),
-                      new BackKeySpec(
-                          new BackFixedPrimitiveSpec("primitive"),
-                          new BackPrimitiveSpec(
-                              new BaseBackPrimitiveSpec.Config(GapAtomType.PRIMITIVE_KEY))))));
+  public static final BackSpec jsonBack =
+      new BackFixedRecordSpec(
+          new BackFixedRecordSpec.Config(
+              new TSList<>(
+                  new BackKeySpec(
+                      new BackFixedPrimitiveSpec("type"), new BackFixedPrimitiveSpec("gap")),
+                  new BackKeySpec(
+                      new BackFixedPrimitiveSpec("primitive"),
+                      new BackPrimitiveSpec(
+                          new BaseBackPrimitiveSpec.Config(GapAtomType.PRIMITIVE_KEY))))));
   public final String backType;
 
   public GapAtomType(Config config) {

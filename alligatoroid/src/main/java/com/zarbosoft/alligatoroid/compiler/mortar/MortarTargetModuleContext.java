@@ -106,8 +106,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       for (EvaluateResult e : ((LooseTuple) value).data) {
         if (e.preEffect != null) out.add((JVMSharedCode) e.preEffect);
         LowerResult lowerRes = lower(context, e.value);
-        if (lowerRes.dataType != null)
-          lowerRes = lowerRes.dataType.box(lowerRes.valueCode);
+        if (lowerRes.dataType != null) lowerRes = lowerRes.dataType.box(lowerRes.valueCode);
         types.add(lowerRes.dataType);
         out.add(lowerRes.valueCode);
         out.add(tsListAddCode);
@@ -124,8 +123,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
         if (e.second.preEffect != null) out.add((JVMSharedCode) e.second.preEffect);
         out.add(lowerRaw(context, e.first, true));
         LowerResult lowerRes = lower(context, e.second.value);
-        if (lowerRes.dataType != null)
-        lowerRes = lowerRes.dataType.box(lowerRes.valueCode);
+        if (lowerRes.dataType != null) lowerRes = lowerRes.dataType.box(lowerRes.valueCode);
         types.put(e.first, lowerRes.dataType);
         out.add(lowerRes.valueCode);
         out.add(
@@ -157,7 +155,6 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       if (value instanceof WholeValue) throw new Assertion();
       return new LowerResult(
           null /* TODO */, ((MortarTargetModuleContext) context.target).transfer(value));
-
     }
   }
 
@@ -212,7 +209,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       if (chunk == null) continue;
       if (!(chunk instanceof MortarCode)) {
         context.module.log.errors.add(
-                new Error.IncompatibleTargetValues(location, MORTAR_TARGET_NAME, chunk.targetName()));
+            new Error.IncompatibleTargetValues(location, MORTAR_TARGET_NAME, chunk.targetName()));
         return null;
       }
       code.add((MortarCode) chunk);

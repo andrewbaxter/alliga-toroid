@@ -8,7 +8,8 @@ import com.zarbosoft.rendaw.common.DeadCode;
 class HoverableFieldArrayPlaceholder extends HoverableFieldArrayBase {
   public final VisualFieldArray visual;
 
-  HoverableFieldArrayPlaceholder(final Context context, final Brick brick, VisualFieldArray visual) {
+  HoverableFieldArrayPlaceholder(
+      final Context context, final Brick brick, VisualFieldArray visual) {
     super(context, visual);
     this.visual = visual;
     border.setFirst(context, brick);

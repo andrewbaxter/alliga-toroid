@@ -50,7 +50,8 @@ public class Obbox {
                 post.first.converse - mid.first.converse,
                 post.first.transverse - mid.first.transverse);
         double radius = baseRadius;
-        // Math.max on converse/transverse assumes non-angled segments to select one (provides distance)
+        // Math.max on converse/transverse assumes non-angled segments to select one (provides
+        // distance)
         radius =
             Math.min(radius, Math.max(Math.abs(toPre.converse), Math.abs(toPre.transverse)) / 2);
         radius =

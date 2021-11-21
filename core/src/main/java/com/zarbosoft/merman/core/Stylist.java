@@ -4,7 +4,6 @@ import com.zarbosoft.merman.core.display.Blank;
 import com.zarbosoft.merman.core.display.Text;
 import com.zarbosoft.merman.core.display.TextStylable;
 import com.zarbosoft.merman.core.display.derived.CourseGroup;
-import com.zarbosoft.merman.core.display.derived.Obbox;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;

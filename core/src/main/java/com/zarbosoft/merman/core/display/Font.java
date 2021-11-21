@@ -10,6 +10,7 @@ public interface Font {
 
     /**
      * Get the nearest index to the converse - so halfway through 1 = 0, halfway through last = last
+     *
      * @param context
      * @param converse
      * @return

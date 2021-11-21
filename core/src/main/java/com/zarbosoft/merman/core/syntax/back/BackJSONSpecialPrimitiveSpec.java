@@ -50,10 +50,7 @@ public class BackJSONSpecialPrimitiveSpec extends BaseBackPrimitiveSpec {
   }
 
   @Override
-  public void finish(
-          MultiError errors,
-          Syntax syntax,
-          SyntaxPath typePath) {
+  public void finish(MultiError errors, Syntax syntax, SyntaxPath typePath) {
     if (syntax.backType != BackType.JSON) {
       errors.add(
           new BackElementUnsupportedInBackFormat(
@@ -101,7 +98,7 @@ public class BackJSONSpecialPrimitiveSpec extends BaseBackPrimitiveSpec {
 
   @Override
   public void write(
-          Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
+      Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     String value = ((StringBuilder) data.get(id)).toString();
     if (matcher.match(env, value)) {
       writer.jsonSpecialPrimitive(value);

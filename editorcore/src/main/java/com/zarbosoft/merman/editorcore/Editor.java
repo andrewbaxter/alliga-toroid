@@ -58,9 +58,9 @@ public class Editor {
   public final ROSetRef<String> suffixOnPatternMismatch;
   public final FileIds fileIds;
   public final ROList<Refactor> refactors;
+  public final TSMap<Integer, Atom> fileIdMap;
   public Banner banner;
   public Details details;
-  public final TSMap<Integer, Atom> fileIdMap;
 
   public Editor(
       final Syntax syntax,

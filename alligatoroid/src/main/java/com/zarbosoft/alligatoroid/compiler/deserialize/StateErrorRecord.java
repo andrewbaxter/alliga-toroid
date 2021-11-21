@@ -11,7 +11,8 @@ public class StateErrorRecord extends BaseStateRecord {
   }
 
   @Override
-  public BaseStateSingle createValueState(TSList<Error> errors, LuxemPathBuilder luxemPath, Object key) {
+  public BaseStateSingle createValueState(
+      TSList<Error> errors, LuxemPathBuilder luxemPath, Object key) {
     return StateErrorSingle.state;
   }
 

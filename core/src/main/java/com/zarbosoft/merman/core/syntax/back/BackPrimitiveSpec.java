@@ -14,7 +14,6 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.Iterator;
 import java.util.Map;
 
 public class BackPrimitiveSpec extends BaseBackPrimitiveSpec {
@@ -37,8 +36,11 @@ public class BackPrimitiveSpec extends BaseBackPrimitiveSpec {
         return new ROPair<>(
             ok,
             ok
-                ? TSList.of(new AtomType.PrimitiveFieldParseResult(
-                    id, new FieldPrimitive(BackPrimitiveSpec.this, ((EPrimitiveEvent) event).value)))
+                ? TSList.of(
+                    new AtomType.PrimitiveFieldParseResult(
+                        id,
+                        new FieldPrimitive(
+                            BackPrimitiveSpec.this, ((EPrimitiveEvent) event).value)))
                 : ROList.empty);
       }
 
@@ -50,7 +52,8 @@ public class BackPrimitiveSpec extends BaseBackPrimitiveSpec {
   }
 
   @Override
-  public void write(Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
+  public void write(
+      Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.primitive(((StringBuilder) data.get(id)).toString());
   }
 }

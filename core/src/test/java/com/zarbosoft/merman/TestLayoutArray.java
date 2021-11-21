@@ -10,7 +10,7 @@ public class TestLayoutArray {
   public void testStatic() {
     new GeneralTestWizard(
             MiscSyntax.syntax,
-             new TreeBuilder(MiscSyntax.array)
+            new TreeBuilder(MiscSyntax.array)
                 .addArray(
                     "value",
                     new TreeBuilder(MiscSyntax.one).build(),
@@ -28,7 +28,7 @@ public class TestLayoutArray {
     int index = 0;
     new GeneralTestWizard(
             MiscSyntax.syntax,
-             new TreeBuilder(MiscSyntax.array)
+            new TreeBuilder(MiscSyntax.array)
                 .addArray("value", new TreeBuilder(MiscSyntax.array).addArray("value").build())
                 .build())
         .checkTextBrick(0, index++, "[")

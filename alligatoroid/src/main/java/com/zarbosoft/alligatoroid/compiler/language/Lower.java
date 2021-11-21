@@ -15,6 +15,7 @@ public final class Lower extends LanguageValue {
     super(id, true);
     this.child = child;
   }
+
   public Object graphDeserialize(Record data) {
     return graphDeserialize(this.getClass(), data);
   }

@@ -10,27 +10,16 @@ import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.visuals.VisualSymbol;
-import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public class FrontSymbolSpec extends FrontSpec {
   public final Symbol type;
   /** Nullable */
   public final ConditionType condition;
-
-  @Override
-  public void finish(MultiError errors, SyntaxPath typePath, AtomType atomType, TSSet<String> middleUsed) {
-    super.finish(errors, typePath, atomType, middleUsed);
-    if (condition != null) condition.finish(errors, typePath, atomType);
-    if (type != null ) type.finish(errors, typePath, atomType);
-  }
-
   /**
-   * Null = use default key (text for text, not a gap key for image/space)
-   * "" = don't use as a gap key
-   * non-"" = use this as a gap key
-   * When filling a gap: Text to match non-text symbols, or override the text of text symbols.
+   * Null = use default key (text for text, not a gap key for image/space) "" = don't use as a gap
+   * key non-"" = use this as a gap key When filling a gap: Text to match non-text symbols, or
+   * override the text of text symbols.
    */
   public final String gapKey;
 
@@ -38,6 +27,14 @@ public class FrontSymbolSpec extends FrontSpec {
     type = config.type;
     condition = config.condition;
     gapKey = config.gapKey;
+  }
+
+  @Override
+  public void finish(
+      MultiError errors, SyntaxPath typePath, AtomType atomType, TSSet<String> middleUsed) {
+    super.finish(errors, typePath, atomType, middleUsed);
+    if (condition != null) condition.finish(errors, typePath, atomType);
+    if (type != null) type.finish(errors, typePath, atomType);
   }
 
   public Visual createVisual(

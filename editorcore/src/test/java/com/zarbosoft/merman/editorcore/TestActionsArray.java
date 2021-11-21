@@ -143,7 +143,8 @@ public class TestActionsArray {
             .build(),
         Helper.rootArray(editor.context.document));
     assertThat(
-        editor.context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("named", "value", "0", "named", "value", "1")));
+        editor.context.cursor.getSyntaxPath(),
+        equalTo(new SyntaxPath("named", "value", "0", "named", "value", "1")));
   }
 
   @Test
@@ -422,7 +423,8 @@ public class TestActionsArray {
     assertThat(selection.beginIndex, equalTo(5));
     assertThat(selection.endIndex, equalTo(5));
     assertThat(
-        editor.context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("named", "value", "0", "named", "value", "5")));
+        editor.context.cursor.getSyntaxPath(),
+        equalTo(new SyntaxPath("named", "value", "0", "named", "value", "5")));
   }
 
   @Test
@@ -464,7 +466,8 @@ public class TestActionsArray {
       assertThat(selection.endIndex, equalTo(3));
     }
     assertThat(
-        editor.context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("named", "value", "0", "named", "value", "3")));
+        editor.context.cursor.getSyntaxPath(),
+        equalTo(new SyntaxPath("named", "value", "0", "named", "value", "3")));
   }
 
   @Test
@@ -495,6 +498,6 @@ public class TestActionsArray {
         Helper.rootArray(editor.context.document));
     assertThat(
         editor.context.cursor.getSyntaxPath(),
-        equalTo(new SyntaxPath("named", "value", "0", "named", "value", "1", "named","gap", "0")));
+        equalTo(new SyntaxPath("named", "value", "0", "named", "value", "1", "named", "gap", "0")));
   }
 }

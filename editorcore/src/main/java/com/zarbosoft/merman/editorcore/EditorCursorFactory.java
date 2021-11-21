@@ -35,7 +35,7 @@ public class EditorCursorFactory implements com.zarbosoft.merman.core.CursorFact
   }
 
   public BaseEditCursorGapFieldPrimitive createGapCursor(
-          VisualFieldPrimitive visualPrimitive, boolean leadFirst, int beginOffset, int endOffset) {
+      VisualFieldPrimitive visualPrimitive, boolean leadFirst, int beginOffset, int endOffset) {
     return new BaseEditCursorGapFieldPrimitive(
         editor, visualPrimitive, leadFirst, beginOffset, endOffset);
   }

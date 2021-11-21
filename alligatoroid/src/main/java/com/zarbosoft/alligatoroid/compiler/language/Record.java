@@ -14,13 +14,14 @@ import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 public class Record extends LanguageValue {
   public final ROList<Value> elements;
-  public Object graphDeserialize(com.zarbosoft.alligatoroid.compiler.mortar.Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
 
   public Record(Location id, ROList<Value> elements) {
     super(id, hasLowerInSubtree(elements));
     this.elements = elements;
+  }
+
+  public Object graphDeserialize(com.zarbosoft.alligatoroid.compiler.mortar.Record data) {
+    return graphDeserialize(this.getClass(), data);
   }
 
   @Override
@@ -29,7 +30,8 @@ public class Record extends LanguageValue {
     for (Value element : elements) {
       if (!(element instanceof RecordElement)) {
         context.module.log.errors.add(
-                new Error.NotRecordPair(((LanguageValue) element).location, element.getClass().getSimpleName()));
+            new Error.NotRecordPair(
+                ((LanguageValue) element).location, element.getClass().getSimpleName()));
         continue;
       }
       EvaluateResult keyRes = ((RecordElement) element).key.evaluate(context);

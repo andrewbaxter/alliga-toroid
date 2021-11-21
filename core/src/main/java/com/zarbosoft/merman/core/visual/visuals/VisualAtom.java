@@ -73,7 +73,7 @@ public class VisualAtom extends Visual {
     }
     if (needIntermediateCursor && atom.type.defaultSelection != null) {
       for (int i = 0; i < selectable.size(); ++i) {
-        if (!selectable.get(i).first.equals(atom.type.defaultSelection))continue;
+        if (!selectable.get(i).first.equals(atom.type.defaultSelection)) continue;
         defaultSelection = i;
         break;
       }

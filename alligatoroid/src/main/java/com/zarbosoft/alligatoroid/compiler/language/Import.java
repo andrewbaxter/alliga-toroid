@@ -36,7 +36,9 @@ public class Import extends LanguageValue {
     }
     CompletableFuture<Value> importResult =
         context.module.compilationContext.loadModule(
-            new ROPair<>(location, context.module), context.module.importPath, new ImportSpec(((ModuleIdValue) value).id));
+            new ROPair<>(location, context.module),
+            context.module.importPath,
+            new ImportSpec(((ModuleIdValue) value).id));
     return ectx.build(new FutureValue(importResult));
   }
 }

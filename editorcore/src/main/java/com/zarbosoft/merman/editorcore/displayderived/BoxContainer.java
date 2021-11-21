@@ -5,7 +5,6 @@ import com.zarbosoft.merman.core.display.Container;
 import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.visual.Vector;
-import com.zarbosoft.rendaw.common.Assertion;
 
 public class BoxContainer extends SingleChildContainer implements ObboxStyle.Stylable {
   private final Group group;

@@ -85,6 +85,8 @@ public class AlligatoroidSyntax {
   public static final ModelColor COLOR_OTHER = ModelColor.RGB.hex("#a27878");
   public static final ModelColor COLOR_INCOMPLETE = ModelColor.RGB.hex("#ea4c3b");
   public static final ModelColor COLOR_BG = ModelColor.RGB.hex("#2b323a");
+  // public static final ModelColor COLOR_DETAIL_TAB = ModelColor.RGB.hex("#484e6c");
+  public static final ModelColor COLOR_DETAIL_TAB = ModelColor.RGB.hex("#6159a5");
   public static final ModelColor COLOR_POPUP_BG = new ModelColor.RGBA(14. / 255, 8. / 255, 0, 0.3);
   public static final ModelColor COLOR_HOVER = ModelColor.RGB.hex("#737373");
   public static final ModelColor COLOR_CURSOR = ModelColor.RGB.hex("#b9b9b9");
@@ -721,9 +723,12 @@ public class AlligatoroidSyntax {
                 baseCodeStyle().color(COLOR_INCOMPLETE),
                 new ObboxStyle(
                     new ObboxStyle.Config()
-                        .lineThickness(0.4)
-                        .roundRadius(0.75)
-                        .lineColor(COLOR_BG))),
+                        .lineThickness(0.3)
+                        .roundRadius(0.5)
+                        .roundStart(true)
+                        .roundEnd(true)
+                        .roundOuterEdges(true)
+                        .lineColor(COLOR_COMMENT))),
             COLOR_CHOICE,
             new Syntax(
                 env,

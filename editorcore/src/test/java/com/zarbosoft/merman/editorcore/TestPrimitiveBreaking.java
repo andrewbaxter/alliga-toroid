@@ -17,7 +17,6 @@ import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
 import org.hamcrest.number.IsCloseTo;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 public class TestPrimitiveBreaking {
@@ -84,15 +83,17 @@ public class TestPrimitiveBreaking {
         .run(
             editor ->
                 editor.history.record(
-                    editor,
-                    null,
-                    r -> r.apply(editor, new ChangePrimitive(primitive, 3, 2, ""))))
+                    editor, null, r -> r.apply(editor, new ChangePrimitive(primitive, 3, 2, ""))))
         .checkCourseCount(1)
         .checkCourse(0, -10, 0)
         .run(
             context -> {
-              assertThat(primitive.visual.cursor.range.cursor.drawing.transverse(), new IsCloseTo(-13.0, 0.01));
-              assertThat(primitive.visual.cursor.range.cursor.drawing.transverseEdge(), new IsCloseTo(1, 0.01));
+              assertThat(
+                  primitive.visual.cursor.range.cursor.drawing.transverse(),
+                  new IsCloseTo(-13.0, 0.01));
+              assertThat(
+                  primitive.visual.cursor.range.cursor.drawing.transverseEdge(),
+                  new IsCloseTo(1, 0.01));
             });
   }
 
@@ -135,15 +136,17 @@ public class TestPrimitiveBreaking {
         .run(
             editor ->
                 editor.history.record(
-                    editor,
-                    null,
-                    r -> r.apply(editor, new ChangePrimitive(primitive, 1, 5, ""))))
+                    editor, null, r -> r.apply(editor, new ChangePrimitive(primitive, 1, 5, ""))))
         .checkCourseCount(1)
         .checkCourse(0, -10, 0)
         .run(
             context -> {
-              assertThat(primitive.visual.cursor.range.cursor.drawing.transverse(), new IsCloseTo(-3, 0.01));
-              assertThat(primitive.visual.cursor.range.cursor.drawing.transverseEdge(), new IsCloseTo(11, 0.01));
+              assertThat(
+                  primitive.visual.cursor.range.cursor.drawing.transverse(),
+                  new IsCloseTo(-3, 0.01));
+              assertThat(
+                  primitive.visual.cursor.range.cursor.drawing.transverseEdge(),
+                  new IsCloseTo(11, 0.01));
             });
   }
 
@@ -174,9 +177,7 @@ public class TestPrimitiveBreaking {
         .run(
             editor -> {
               editor.history.record(
-                  editor,
-                  null,
-                  r -> r.apply(editor, new ChangePrimitive(primitive, 0, 8, "")));
+                  editor, null, r -> r.apply(editor, new ChangePrimitive(primitive, 0, 8, "")));
             })
         .checkCourseCount(1)
         .checkTextBrick(0, 1, "");
@@ -210,9 +211,7 @@ public class TestPrimitiveBreaking {
         .run(
             editor -> {
               editor.history.record(
-                  editor,
-                  null,
-                  r -> r.apply(editor, new ChangePrimitive(primitive, 5, 8, "")));
+                  editor, null, r -> r.apply(editor, new ChangePrimitive(primitive, 5, 8, "")));
             })
         .checkCourseCount(2)
         .checkTextBrick(1, 0, "");
@@ -246,9 +245,7 @@ public class TestPrimitiveBreaking {
         .run(
             editor -> {
               editor.history.record(
-                  editor,
-                  null,
-                  r -> r.apply(editor, new ChangePrimitive(primitive, 0, 8, "")));
+                  editor, null, r -> r.apply(editor, new ChangePrimitive(primitive, 0, 8, "")));
             })
         .checkCourseCount(2)
         .checkTextBrick(0, 1, "");

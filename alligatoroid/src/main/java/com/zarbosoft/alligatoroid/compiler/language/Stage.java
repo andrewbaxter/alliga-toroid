@@ -30,9 +30,6 @@ import static org.objectweb.asm.Opcodes.NEW;
 
 public class Stage extends LanguageValue {
   public final Value child;
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
 
   public Stage(Location id, Value child) {
     super(id, hasLowerInSubtree(child));
@@ -99,6 +96,10 @@ public class Stage extends LanguageValue {
     }
     return new StageLowerResult(
         pre, context.target.merge(context, location, new ReverseIterable<>(post)));
+  }
+
+  public Object graphDeserialize(Record data) {
+    return graphDeserialize(this.getClass(), data);
   }
 
   @Override

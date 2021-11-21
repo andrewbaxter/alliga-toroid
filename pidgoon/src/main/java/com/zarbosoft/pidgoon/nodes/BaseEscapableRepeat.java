@@ -58,8 +58,8 @@ public abstract class BaseEscapableRepeat<T, K> extends Node<EscapableResult<ROL
   }
 
   private static class RepParent<T, K> implements Parent<EscapableResult<T>> {
-    final int count;
     public final Parent<EscapableResult<ROList<K>>> parent;
+    final int count;
     final ROList<K> collected;
     private final BaseEscapableRepeat<T, K> self;
     private final Object color;

@@ -18,7 +18,6 @@ import com.zarbosoft.pidgoon.nodes.MergeSequence;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.Map;
 
@@ -61,15 +60,12 @@ public class BackFixedArraySpec extends BackSpec {
   }
 
   @Override
-  public void finish(
-          MultiError errors,
-          final Syntax syntax,
-          final SyntaxPath typePath) {
+  public void finish(MultiError errors, final Syntax syntax, final SyntaxPath typePath) {
     super.finish(errors, syntax, typePath);
     for (int i = 0; i < elements.size(); ++i) {
       BackSpec element = elements.get(i);
       element.finish(errors, syntax, typePath.add(Integer.toString(i)));
-      checkNotKey(errors, syntax, typePath.add(Integer.toString(i)),element);
+      checkNotKey(errors, syntax, typePath.add(Integer.toString(i)), element);
       int finalI = i;
       element.parent =
           new PartParent() {

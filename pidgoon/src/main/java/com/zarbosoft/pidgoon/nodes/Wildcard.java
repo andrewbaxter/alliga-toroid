@@ -12,11 +12,13 @@ import com.zarbosoft.rendaw.common.ROMap;
 public class Wildcard extends Node<Object> {
   @Override
   public void context(
-          Grammar grammar, final Step step,
-          final Parent<Object> parent,
-          Leaf leaf, final ROMap<Object, Reference.RefParent> seen,
-          final MismatchCause cause,
-          Object color) {
+      Grammar grammar,
+      final Step step,
+      final Parent<Object> parent,
+      Leaf leaf,
+      final ROMap<Object, Reference.RefParent> seen,
+      final MismatchCause cause,
+      Object color) {
     step.leaves.add(
         new Leaf<Object>() {
           @Override

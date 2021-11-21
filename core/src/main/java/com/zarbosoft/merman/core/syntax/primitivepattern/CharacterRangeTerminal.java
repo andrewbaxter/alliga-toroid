@@ -1,7 +1,5 @@
 package com.zarbosoft.merman.core.syntax.primitivepattern;
 
-import com.zarbosoft.pidgoon.events.EscapableResult;
-import com.zarbosoft.pidgoon.events.nodes.Terminal;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;

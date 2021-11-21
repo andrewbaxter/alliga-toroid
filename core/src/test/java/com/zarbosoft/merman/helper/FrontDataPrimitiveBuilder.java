@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.core.example.DirectStylist;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.style.SplitMode;
 

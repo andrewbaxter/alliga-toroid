@@ -11,7 +11,7 @@ public class Main {
   public static final AppDirs appDirs =
       new AppDirs().set_appname("alligatoroid").set_appauthor("zarbosoft");
 
-  public static TSMap<ImportSpec, Module> compile(String path) {
+  public static TSMap<ImportSpec, Module> compile(ImportSpec spec) {
     Path cachePath;
     String cachePath0 = System.getenv("ALLIGATOROID_CACHE");
     if (cachePath0 == null || cachePath0.isEmpty()) {
@@ -22,7 +22,7 @@ public class Main {
     CompilationContext compilationContext = new CompilationContext(cachePath);
     TSMap<ImportSpec, Module> modules;
     try {
-      compilationContext.loadRootModule( Paths.get(path).toAbsolutePath().normalize().toString());
+      compilationContext.loadRootModule(spec);
     } finally {
       modules = compilationContext.join();
     }
@@ -33,7 +33,8 @@ public class Main {
     if (args.length != 1) {
       throw new RuntimeException("Need one argument, path to root module");
     }
-    TSMap<ImportSpec, Module> modules = compile(args[0]);
+    TSMap<ImportSpec, Module> modules =
+        compile(CompilationContext.rootModuleSpec(Paths.get(args[0])));
 
     Writer outWriter = new Writer(System.out, (byte) ' ', 4);
     outWriter.recordBegin();

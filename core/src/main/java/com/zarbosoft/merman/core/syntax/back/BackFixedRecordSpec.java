@@ -60,15 +60,12 @@ public class BackFixedRecordSpec extends BackSpec {
   }
 
   @Override
-  public void finish(
-          MultiError errors,
-          final Syntax syntax,
-          final SyntaxPath typePath) {
+  public void finish(MultiError errors, final Syntax syntax, final SyntaxPath typePath) {
     super.finish(errors, syntax, typePath);
     for (int i = 0; i < pairs.size(); i++) {
       final BackSpec e = pairs.get(i);
       final SyntaxPath ePath = typePath.add(Integer.toString(i));
-      checkKey(errors, syntax, ePath,e);
+      checkKey(errors, syntax, ePath, e);
       e.finish(errors, syntax, ePath);
     }
   }

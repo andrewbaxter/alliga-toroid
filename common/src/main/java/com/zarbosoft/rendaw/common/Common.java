@@ -28,6 +28,7 @@ public class Common {
   }
 
   public static RuntimeException uncheck(final Throwable e) {
+    if (e instanceof RuntimeException) return (RuntimeException) e;
     if (e instanceof InvocationTargetException)
       return uncheck(((InvocationTargetException) e).getTargetException());
     if (e instanceof ExecutionException) return uncheck(((ExecutionException) e).getCause());
@@ -53,6 +54,8 @@ public class Common {
       throw new UncheckedFileNotFoundException(e);
     } catch (IOException e) {
       throw new UncheckedIOException((IOException) e);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new UncheckedException(e);
     }
@@ -71,6 +74,8 @@ public class Common {
       throw new UncheckedFileNotFoundException(e);
     } catch (IOException e) {
       throw new UncheckedIOException((IOException) e);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new UncheckedException(e);
     }
@@ -84,7 +89,7 @@ public class Common {
       if (out.size() == n) {
         nextAt = text.length();
       } else {
-        nextAt= text.indexOf(delim, 0);
+        nextAt = text.indexOf(delim, 0);
         if (nextAt == -1) nextAt = text.length();
       }
       out.add(text.substring(at, nextAt));

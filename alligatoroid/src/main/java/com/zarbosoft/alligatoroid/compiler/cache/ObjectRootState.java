@@ -23,7 +23,8 @@ public class ObjectRootState extends DefaultStateSingle {
   }
 
   @Override
-  protected BaseStateSingle innerEatType(TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
+  protected BaseStateSingle innerEatType(
+      TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
     switch (name) {
       case Cache.CACHE_OBJECT_TYPE_IMPORT_SPEC:
         return new DefaultStatePrimitive() {
@@ -36,14 +37,15 @@ public class ObjectRootState extends DefaultStateSingle {
 
           @Override
           protected void innerEatPrimitiveUntyped(
-                  TSList<Error> errors, LuxemPathBuilder luxemPath, String value) {
+              TSList<Error> errors, LuxemPathBuilder luxemPath, String value) {
             out = ImportSpecDeserializer.deserialize(errors, Paths.get(value));
           }
         };
       case Cache.CACHE_OBJECT_TYPE_OUTPUT:
         return new DefaultStateSingle() {
           @Override
-          protected BaseStateArray innerArrayBegin(TSList<Error> errors, LuxemPathBuilder luxemPath) {
+          protected BaseStateArray innerArrayBegin(
+              TSList<Error> errors, LuxemPathBuilder luxemPath) {
             OutputTypeState out = new OutputTypeState(cache);
             inner = out;
             return out;
@@ -52,7 +54,8 @@ public class ObjectRootState extends DefaultStateSingle {
       case Cache.CACHE_OBJECT_TYPE_BUILTIN:
         return new DefaultStateSingle() {
           @Override
-          protected BaseStateArray innerArrayBegin(TSList<Error> errors, LuxemPathBuilder luxemPath) {
+          protected BaseStateArray innerArrayBegin(
+              TSList<Error> errors, LuxemPathBuilder luxemPath) {
             BuiltinTypeState out = new BuiltinTypeState(cache);
             inner = out;
             return out;

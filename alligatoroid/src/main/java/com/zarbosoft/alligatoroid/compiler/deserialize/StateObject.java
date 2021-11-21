@@ -29,7 +29,8 @@ public class StateObject extends BaseStateRecord {
   }
 
   @Override
-  public BaseStateSingle createValueState(TSList<Error> errors, LuxemPathBuilder luxemPath, Object key0) {
+  public BaseStateSingle createValueState(
+      TSList<Error> errors, LuxemPathBuilder luxemPath, Object key0) {
     String key = (String) key0;
     if (key == null) {
       ok = false;
@@ -37,8 +38,9 @@ public class StateObject extends BaseStateRecord {
     }
     StatePrototype proto = info.fields.getOpt(key);
     if (proto == null) {
-        errors.add(
-                new Error.DeserializeUnknownField(luxemPath.render(), info.luxemType, key, info.fields.keys().toList()));
+      errors.add(
+          new Error.DeserializeUnknownField(
+              luxemPath.render(), info.luxemType, key, info.fields.keys().toList()));
       ok = false;
       return StateErrorSingle.state;
     }
@@ -55,7 +57,8 @@ public class StateObject extends BaseStateRecord {
       State fieldState = fields.getOpt(field.getKey());
       if (fieldState == null) {
         ok = false;
-        errors.add(new Error.DeserializeMissingField(luxemPath.render(), info.luxemType, field.getKey()));
+        errors.add(
+            new Error.DeserializeMissingField(luxemPath.render(), info.luxemType, field.getKey()));
         continue;
       }
       Object value = fieldState.build(errors);

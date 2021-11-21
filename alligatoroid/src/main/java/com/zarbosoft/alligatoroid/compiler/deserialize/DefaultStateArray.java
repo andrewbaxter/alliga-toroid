@@ -6,23 +6,26 @@ import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
 
 public abstract class DefaultStateArray implements BaseStateArray {
-  public abstract BaseStateSingle createElementState(TSList<Error> errors, LuxemPathBuilder luxemPath);
+  public abstract BaseStateSingle createElementState(
+      TSList<Error> errors, LuxemPathBuilder luxemPath);
 
   @Override
-  public final void eatType(TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath, String name) {
+  public final void eatType(
+      TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath, String name) {
     push(errors, stack, luxemPath);
     stack.last().eatType(errors, stack, luxemPath, name);
   }
 
   @Override
   public final void eatPrimitive(
-          TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath, String value) {
+      TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath, String value) {
     push(errors, stack, luxemPath);
     stack.last().eatPrimitive(errors, stack, luxemPath, value);
   }
 
   @Override
-  public final void eatArrayBegin(TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
+  public final void eatArrayBegin(
+      TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
     push(errors, stack, luxemPath);
     stack.last().eatArrayBegin(errors, stack, luxemPath);
   }
@@ -33,17 +36,20 @@ public abstract class DefaultStateArray implements BaseStateArray {
   }
 
   @Override
-  public final void eatArrayEnd(TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
+  public final void eatArrayEnd(
+      TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
     popSelf(stack);
   }
 
   @Override
-  public final void eatRecordEnd(TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
+  public final void eatRecordEnd(
+      TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
     throw new Assertion();
   }
 
   @Override
-  public final void eatRecordBegin(TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
+  public final void eatRecordBegin(
+      TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
     push(errors, stack, luxemPath);
     stack.last().eatRecordBegin(errors, stack, luxemPath);
   }

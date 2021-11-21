@@ -17,10 +17,6 @@ public class ObboxStyle {
   public final boolean fill;
   public final ModelColor fillColor;
 
-  public interface Stylable {
-    void setStyle(Context context, ObboxStyle style);
-  }
-
   public ObboxStyle(Config config) {
     this.padding = config.padding == null ? Padding.empty : config.padding;
     this.roundStart = config.roundStart == null ? false : config.roundStart;
@@ -34,6 +30,10 @@ public class ObboxStyle {
     this.lineThickness = config.lineThickness == null ? 1 : config.lineThickness;
     this.fill = config.fill == null ? false : config.fill;
     this.fillColor = config.fillColor == null ? ModelColor.RGB.white : config.fillColor;
+  }
+
+  public interface Stylable {
+    void setStyle(Context context, ObboxStyle style);
   }
 
   public static class Config {

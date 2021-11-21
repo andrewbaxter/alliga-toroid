@@ -1,15 +1,13 @@
 package com.zarbosoft.merman.core.document.fields;
 
-import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.syntax.back.BackSpecData;
 import com.zarbosoft.rendaw.common.Assertion;
 
 public abstract class Field {
-  /**
-   * The atom that contains this field
-   */
+  /** The atom that contains this field */
   public Atom.Parent atomParentRef = null;
 
   public void setAtomParentRef(final Atom.Parent atomParentRef) {

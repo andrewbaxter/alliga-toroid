@@ -17,8 +17,8 @@ import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
 import com.zarbosoft.merman.core.wall.bricks.BrickLine;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
 import com.zarbosoft.merman.editorcore.Editor;
-import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldArray;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorAtom;
+import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldArray;
 import com.zarbosoft.merman.editorcore.display.MockeryText;
 import com.zarbosoft.merman.editorcore.history.Change;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -308,8 +308,7 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard change(Change change) {
-    inner.editor.history.record(
-        inner.editor, null, r -> r.apply(inner.editor, change));
+    inner.editor.history.record(inner.editor, null, r -> r.apply(inner.editor, change));
     inner.flushIteration();
     return this;
   }

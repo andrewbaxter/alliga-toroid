@@ -28,7 +28,7 @@ public class GenerateClass {
 
   public static Path generate(Class klass) {
     GenerateClass g = new GenerateClass(klass);
-    Main.sync.push( g);
+    Main.sync.push(g);
     return g.path;
   }
 
@@ -248,7 +248,7 @@ public class GenerateClass {
                                             ids,
                                             lAccess(
                                                 ids, accessBuilder(ids), lString(ids, "inherit")),
-                                            lType( ids, klass.getSuperclass()))
+                                            lType(ids, klass.getSuperclass()))
                                         .write(writer);
                                   }
                                   for (Class parent : klass.getInterfaces()) {
@@ -256,7 +256,7 @@ public class GenerateClass {
                                             ids,
                                             lAccess(
                                                 ids, accessBuilder(ids), lString(ids, "inherit")),
-                                            lType( ids, parent))
+                                            lType(ids, parent))
                                         .write(writer);
                                   }
 
@@ -292,7 +292,7 @@ public class GenerateClass {
                                                   ids,
                                                   new ROPair<>(
                                                       lString(ids, "in"),
-                                                      lType( ids, constructor.getParameters()))))
+                                                      lType(ids, constructor.getParameters()))))
                                           .write(writer);
                                     }
                                   }
@@ -316,10 +316,10 @@ public class GenerateClass {
                                                     ids,
                                                     new ROPair<>(
                                                         lString(ids, "in"),
-                                                        lType( ids, m.getParameters())),
+                                                        lType(ids, m.getParameters())),
                                                     new ROPair<>(
                                                         lString(ids, "out"),
-                                                        lType( ids, m.getReturnType())),
+                                                        lType(ids, m.getReturnType())),
                                                     new ROPair<>(
                                                         lString(ids, "protected"),
                                                         lBool(ids, isProtected)),
@@ -347,7 +347,7 @@ public class GenerateClass {
                                             lRecord(
                                                 ids,
                                                 new ROPair<>(
-                                                    lString(ids, "type"), lType( ids, f.getType())),
+                                                    lString(ids, "type"), lType(ids, f.getType())),
                                                 new ROPair<>(
                                                     lString(ids, "protected"),
                                                     lBool(ids, isProtected)),

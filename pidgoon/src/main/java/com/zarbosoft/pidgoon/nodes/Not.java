@@ -18,12 +18,13 @@ public class Not extends Node<Void> {
 
   @Override
   public void context(
-          Grammar grammar, final Step step,
-          final Parent<Void> parent,
-          Leaf leaf,
-          ROMap<Object, Reference.RefParent> seen,
-          final MismatchCause cause,
-          Object color) {
+      Grammar grammar,
+      final Step step,
+      final Parent<Void> parent,
+      Leaf leaf,
+      ROMap<Object, Reference.RefParent> seen,
+      final MismatchCause cause,
+      Object color) {
     child.context(grammar, step, new OperatorParent(parent), leaf, ROMap.empty, cause, color);
   }
 
@@ -42,7 +43,7 @@ public class Not extends Node<Void> {
 
     @Override
     public void advance(
-            Grammar grammar, final Step step, Leaf leaf, Object result, final MismatchCause cause) {
+        Grammar grammar, final Step step, Leaf leaf, Object result, final MismatchCause cause) {
       error(grammar, step, leaf, cause);
     }
   }

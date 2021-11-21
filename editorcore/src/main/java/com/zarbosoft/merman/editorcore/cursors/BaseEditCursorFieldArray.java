@@ -56,7 +56,8 @@ public class BaseEditCursorFieldArray extends CursorFieldArray {
     if (visual.value.atomParentRef.atom().type instanceof RootAtomType
         && visual.value.data.size() == endIndex - beginIndex + 1)
       replacement = TSList.of(editor.createEmptyGap(editor.context.syntax.gap));
-    Editor.arrayChange(editor,recorder,visual.value, beginIndex, endIndex - beginIndex + 1, replacement);
+    Editor.arrayChange(
+        editor, recorder, visual.value, beginIndex, endIndex - beginIndex + 1, replacement);
   }
 
   public void editDelete(Editor editor) {

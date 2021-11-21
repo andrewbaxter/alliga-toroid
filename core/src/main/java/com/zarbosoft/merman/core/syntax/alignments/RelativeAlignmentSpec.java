@@ -8,6 +8,17 @@ public class RelativeAlignmentSpec implements AlignmentSpec {
   public final double offset;
   public final boolean collapse;
 
+  public RelativeAlignmentSpec(Config config) {
+    this.base = config.base;
+    this.offset = config.offset;
+    this.collapse = config.collapse;
+  }
+
+  @Override
+  public Alignment create() {
+    return new RelativeAlignment(base, offset, collapse);
+  }
+
   public static class Config {
     public final String base;
     public final double offset;
@@ -18,16 +29,5 @@ public class RelativeAlignmentSpec implements AlignmentSpec {
       this.offset = offset;
       this.collapse = collapse;
     }
-  }
-
-  public RelativeAlignmentSpec(Config config) {
-    this.base = config.base;
-    this.offset = config.offset;
-    this.collapse = config.collapse;
-  }
-
-  @Override
-  public Alignment create() {
-    return new RelativeAlignment(base, offset, collapse);
   }
 }

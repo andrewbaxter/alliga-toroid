@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.editorcore.history;
 
-import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.editorcore.Editor;
 
 public abstract class Change {

@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.webview.compat;
 
-import elemental2.core.JsArray;
 import elemental2.core.JsObject;
 import jsinterop.annotations.JsConstructor;
 import jsinterop.annotations.JsMethod;

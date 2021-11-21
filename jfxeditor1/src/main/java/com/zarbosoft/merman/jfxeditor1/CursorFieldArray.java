@@ -3,13 +3,10 @@ package com.zarbosoft.merman.jfxeditor1;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
-import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
-import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomBase;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.Refactorer;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldArray;
-import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 import static com.zarbosoft.merman.jfxeditor1.NotMain.controlKeys;
@@ -143,11 +140,11 @@ public class CursorFieldArray extends BaseEditCursorFieldArray {
             return true;
           }
         case R:
-        {
-          final TSList<Atom> selection = visual.value.data.sublist(beginIndex, endIndex);
+          {
+            final TSList<Atom> selection = visual.value.data.sublist(beginIndex, endIndex);
             refactorer.refactor(editor, selection);
-          return true;
-        }
+            return true;
+          }
       }
     }
     return super.handleKey(context, hidEvent);

@@ -1,9 +1,13 @@
 package com.zarbosoft.merman;
 
-import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.helper.BackArrayBuilder;
@@ -16,10 +20,6 @@ import com.zarbosoft.merman.helper.MiscSyntax;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.core.syntax.FreeAtomType;
-import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.rendaw.common.TSList;
 import org.junit.Test;
 
@@ -28,6 +28,16 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class TestActionsArray {
+
+  public static VisualFieldArray visual(final Context context) {
+    return (VisualFieldArray) context.cursor.getVisual();
+  }
+
+  public static void assertSelection(final Context context, final int begin, final int end) {
+    final CursorFieldArray selection = (CursorFieldArray) context.cursor;
+    assertThat(selection.beginIndex, equalTo(begin));
+    assertThat(selection.endIndex, equalTo(end));
+  }
 
   @Test
   public void testEnter() {
@@ -62,10 +72,6 @@ public class TestActionsArray {
     ((FieldArray) Helper.rootArray(context.document).data.get(0).namedFields.getOpt("value"))
         .selectInto(context);
     return context;
-  }
-
-  public static VisualFieldArray visual(final Context context) {
-    return (VisualFieldArray) context.cursor.getVisual();
   }
 
   @Test
@@ -282,7 +288,7 @@ public class TestActionsArray {
             .frontMark("}")
             .autoComplete(true)
             .build();
-      FreeAtomType recordElement =
+    FreeAtomType recordElement =
         new TypeBuilder("recordElement")
             .back(Helper.buildBackDataPrimitive("key"))
             .back(Helper.buildBackDataAtom("value", "any"))
@@ -414,12 +420,6 @@ public class TestActionsArray {
     assertSelection(context, 4, 4);
   }
 
-  public static void assertSelection(final Context context, final int begin, final int end) {
-    final CursorFieldArray selection = (CursorFieldArray) context.cursor;
-    assertThat(selection.beginIndex, equalTo(begin));
-    assertThat(selection.endIndex, equalTo(end));
-  }
-
   @Test
   public void testNextEnd() {
     final Context context = buildFive();
@@ -528,7 +528,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     (((VisualFieldArray)
             ((FieldArray)
-                    ((Atom) context.syntaxLocate(new SyntaxPath("named","value", "0")))
+                    ((Atom) context.syntaxLocate(new SyntaxPath("named", "value", "0")))
                         .namedFields.getOpt("value"))
                 .visual))
         .select(context, true, 1, 2);

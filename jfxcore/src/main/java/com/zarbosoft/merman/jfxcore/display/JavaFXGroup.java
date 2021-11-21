@@ -2,11 +2,7 @@ package com.zarbosoft.merman.jfxcore.display;
 
 import com.zarbosoft.merman.core.display.DisplayNode;
 import com.zarbosoft.merman.core.display.Group;
-import com.zarbosoft.rendaw.common.ROList;
-import javafx.geometry.Bounds;
 import javafx.scene.Node;
-
-import java.util.List;
 
 public class JavaFXGroup extends JavaFXFreeDisplayNode implements Group {
   protected JavaFXGroup(JavaFXDisplay display) {

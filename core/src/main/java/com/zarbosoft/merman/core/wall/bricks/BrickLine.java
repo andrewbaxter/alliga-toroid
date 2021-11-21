@@ -13,9 +13,9 @@ public class BrickLine extends BrickText {
   public BrickLine(
       final Context context,
       final VisualFieldPrimitive.Line line,
-      SplitMode splitMode,String alignmentId,
-      String splitAlignmentId
-      ) {
+      SplitMode splitMode,
+      String alignmentId,
+      String splitAlignmentId) {
     super(context, line, splitMode, alignmentId, splitAlignmentId, 0);
     this.line = line;
     layoutPropertiesChanged(context);

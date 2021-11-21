@@ -14,6 +14,7 @@ public class LiteralString extends LanguageValue {
     super(id, false);
     this.value = value;
   }
+
   public Object graphDeserialize(Record data) {
     return graphDeserialize(this.getClass(), data);
   }

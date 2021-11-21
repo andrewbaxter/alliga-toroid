@@ -9,8 +9,9 @@ import com.zarbosoft.rendaw.common.ROList;
 public class Integer extends Pattern {
   @Override
   public Node<EscapableResult<ROList<String>>> build(boolean capture) {
-      return new MergeEscapableSequence<String>()
-          .add(new MergeEscapableRepeat<String>(new CharacterRangeTerminal(capture, "-", "-")).max(1))
-          .add(new MergeEscapableRepeat<String>(new CharacterRangeTerminal(capture, "0", "9")).min(1));
+    return new MergeEscapableSequence<String>()
+        .add(new MergeEscapableRepeat<String>(new CharacterRangeTerminal(capture, "-", "-")).max(1))
+        .add(
+            new MergeEscapableRepeat<String>(new CharacterRangeTerminal(capture, "0", "9")).min(1));
   }
 }

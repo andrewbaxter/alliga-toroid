@@ -1,6 +1,10 @@
 package com.zarbosoft.merman;
 
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.style.SplitMode;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.GroupBuilder;
@@ -8,10 +12,6 @@ import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.core.syntax.FreeAtomType;
-import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
-import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import org.junit.Test;
 
 public class TestLayoutRootArray {
@@ -38,7 +38,8 @@ public class TestLayoutRootArray {
             .addRootFrontPrefix(
                 new FrontSymbolSpec(
                     new FrontSymbolSpec.Config(
-                        new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
+                        new SymbolSpaceSpec(
+                            new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
             .build();
   }
 

@@ -211,6 +211,7 @@ public class Builtin extends LanguageValue {
   public EvaluateResult evaluate(Context context) {
     return EvaluateResult.pure(builtin);
   }
+
   public Object graphDeserialize(Record data) {
     return graphDeserialize(this.getClass(), data);
   }

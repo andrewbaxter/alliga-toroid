@@ -7,14 +7,15 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class PrimitiveTestWizard {
-  TestWizard inner;
   private final VisualFieldPrimitive primitive;
+  TestWizard inner;
 
   public PrimitiveTestWizard(final String string) {
     inner =
         new TestWizard(
             PrimitiveSyntax.syntax,
-                false, new TreeBuilder(PrimitiveSyntax.primitive).add("value", string).build());
+            false,
+            new TreeBuilder(PrimitiveSyntax.primitive).add("value", string).build());
     inner.context.retryExpandFactor = 1.05;
     this.primitive =
         ((FieldPrimitive)

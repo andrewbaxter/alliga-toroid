@@ -4,7 +4,8 @@ import com.zarbosoft.merman.core.display.FreeDisplayNode;
 import com.zarbosoft.merman.core.visual.Vector;
 import javafx.scene.Node;
 
-public abstract class JavaFXFreeDisplayNode extends JavaFXCommonBaseNode implements FreeDisplayNode {
+public abstract class JavaFXFreeDisplayNode extends JavaFXCommonBaseNode
+    implements FreeDisplayNode {
   double converse;
   double transverse;
 

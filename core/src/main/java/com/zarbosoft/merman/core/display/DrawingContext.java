@@ -3,27 +3,27 @@ package com.zarbosoft.merman.core.display;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 
 public interface DrawingContext {
-    void setLineColor(ModelColor color);
+  void setLineColor(ModelColor color);
 
-    void setLineCapRound();
+  void setLineCapRound();
 
-    void setLineThickness(double lineThickness);
+  void setLineThickness(double lineThickness);
 
-    void setLineCapFlat();
+  void setLineCapFlat();
 
-    void setFillColor(ModelColor color);
+  void setFillColor(ModelColor color);
 
-    void beginStrokePath();
+  void beginStrokePath();
 
-    void beginFillPath();
+  void beginFillPath();
 
-    void moveTo(double c, double t);
+  void moveTo(double c, double t);
 
-    void lineTo(double c, double t);
+  void lineTo(double c, double t);
 
-    void closePath();
+  void closePath();
 
-    void arcTo(double c, double t, double c2, double t2, double radius);
+  void arcTo(double c, double t, double c2, double t2, double radius);
 
-    void translate(double c, double t);
+  void translate(double c, double t);
 }

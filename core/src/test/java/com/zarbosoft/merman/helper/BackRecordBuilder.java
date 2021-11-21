@@ -4,12 +4,7 @@ import com.zarbosoft.merman.core.syntax.back.BackFixedPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackKeySpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
-import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
-import com.zarbosoft.rendaw.common.TSOrderedMap;
-import com.zarbosoft.rendaw.common.TSOrderedSet;
 
 public class BackRecordBuilder {
   private final TSList<BackSpec> pairs = new TSList<>();

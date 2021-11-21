@@ -28,12 +28,13 @@ public class Union<T> extends Node<T> {
 
   @Override
   public void context(
-          Grammar grammar, final Step step,
-          final Parent<T> parent,
-          Leaf leaf,
-          final ROMap<Object, Reference.RefParent> seen,
-          final MismatchCause cause,
-          Object color) {
+      Grammar grammar,
+      final Step step,
+      final Parent<T> parent,
+      Leaf leaf,
+      final ROMap<Object, Reference.RefParent> seen,
+      final MismatchCause cause,
+      Object color) {
     for (Node<T> child : children) {
       child.context(grammar, step, new UnionParent<T>(parent), leaf, seen, cause, color);
     }
@@ -49,7 +50,7 @@ public class Union<T> extends Node<T> {
 
     @Override
     public void advance(
-            Grammar grammar, final Step step, Leaf leaf, T result, final MismatchCause cause) {
+        Grammar grammar, final Step step, Leaf leaf, T result, final MismatchCause cause) {
       parent.advance(grammar, step, leaf, result, cause);
     }
 

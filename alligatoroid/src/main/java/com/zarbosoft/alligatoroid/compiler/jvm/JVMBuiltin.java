@@ -38,6 +38,7 @@ public class JVMBuiltin {
     JVMClassType type = new JVMClassType(qualifiedName);
     return new RetClass(type, new JVMClassBuilder(type));
   }
+
   public static RetExternClass builtinExternClass(String qualifiedName, Value setup) {
     JVMExternClassType type = new JVMExternClassType(qualifiedName, setup);
     JVMExternConstructor constructor = new JVMExternConstructor(type);

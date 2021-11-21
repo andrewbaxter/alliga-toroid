@@ -15,12 +15,12 @@ public interface Serializer {
   Object writeDocument(Environment env, Document document);
 
   /**
-   *
    * @param env
    * @param copyContext
    * @return byte[] in java, string in js
    */
-  Object writeForClipboard(Environment env, Context.CopyContext copyContext, TSList<WriteState> stack);
+  Object writeForClipboard(
+      Environment env, Context.CopyContext copyContext, TSList<WriteState> stack);
 
   /**
    * Per clipboard, data is bytes or string depending on execution environment (js vs java)
@@ -32,5 +32,8 @@ public interface Serializer {
    * @return
    */
   ROList<Atom> loadFromClipboard(
-          Syntax syntax, Context.CopyContext copyContext, Node<ROList<AtomType.AtomParseResult>> type, Object data);
+      Syntax syntax,
+      Context.CopyContext copyContext,
+      Node<ROList<AtomType.AtomParseResult>> type,
+      Object data);
 }

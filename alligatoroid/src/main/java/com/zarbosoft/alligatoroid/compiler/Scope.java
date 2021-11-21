@@ -8,9 +8,9 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 public class Scope {
-  public boolean error = false;
   private final Scope parent;
   private final TSOrderedMap<Object, Binding> data = new TSOrderedMap<>();
+  public boolean error = false;
 
   public Scope(Scope parent) {
     this.parent = parent;

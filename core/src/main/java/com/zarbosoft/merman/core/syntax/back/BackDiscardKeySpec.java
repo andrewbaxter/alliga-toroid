@@ -42,6 +42,6 @@ public class BackDiscardKeySpec extends BackSpec {
   public void finish(MultiError errors, Syntax syntax, SyntaxPath typePath) {
     super.finish(errors, syntax, typePath);
     key.finish(errors, syntax, typePath);
-    checkSingularNotKey(errors, syntax, typePath.add("key"),key);
+    checkSingularNotKey(errors, syntax, typePath.add("key"), key);
   }
 }

@@ -87,9 +87,13 @@ public class CompilationContext {
     }
   }
 
-  public void loadRootModule(String path) {
-    if (!Paths.get(path).isAbsolute()) throw new Assertion();
-    CompletableFuture<Value> res = loadModule(null, null, new ImportSpec(new LocalModuleId(path)));
+  public static ImportSpec rootModuleSpec(Path path) {
+    path = path.toAbsolutePath().normalize();
+    return new ImportSpec(new LocalModuleId(path.toString()));
+  }
+
+  public void loadRootModule(ImportSpec spec) {
+    CompletableFuture<Value> res = loadModule(null, null, spec);
     uncheck(() -> res.get());
   }
 
@@ -264,15 +268,20 @@ public class CompilationContext {
                 return uncheck(
                     () -> {
                       try (ZipFile bundle = new ZipFile(bundlePath.toFile())) {
-                        ZipEntry e = bundle.getEntry(id.path);
+                        String path = id.path + ".at";
+                        ZipEntry e = bundle.getEntry(path);
+                        if (e == null) {
+                          path = id.path;
+                          e = bundle.getEntry(path);
+                        }
                         if (e == null) {
                           throw new Error.PreImportNotFound(id.toString());
                         }
                         if (e.isDirectory()) {
-                          return new BundleValue(new ImportSpec(id.module), id.path);
+                          return new BundleValue(new ImportSpec(id.module), path);
                         }
-                        if (id.path.endsWith(".at")) {
-                          try (InputStream stream = Files.newInputStream(bundlePath)) {
+                        if (path.endsWith(".at")) {
+                          try (InputStream stream = bundle.getInputStream(e)) {
                             return evaluate(module, id.toString(), stream);
                           }
                         } else {

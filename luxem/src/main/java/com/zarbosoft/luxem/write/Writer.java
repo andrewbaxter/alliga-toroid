@@ -35,8 +35,8 @@ public class Writer {
   private final byte indentByte;
   private final int indentMultiple;
   private final OutputStream stream;
-  private int indentCount = 0;
   private final Deque<State> states = new ArrayDeque<>();
+  private int indentCount = 0;
   private boolean first = true;
 
   public Writer(final OutputStream stream) {

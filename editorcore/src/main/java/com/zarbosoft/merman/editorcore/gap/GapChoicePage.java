@@ -6,19 +6,18 @@ import com.zarbosoft.merman.editorcore.Details;
 import com.zarbosoft.merman.editorcore.DetailsPageChooser;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.TSList;
 
 public class GapChoicePage implements Details.Page {
   public final DetailsPageChooser<GapChoice> chooser;
+
+  private GapChoicePage(Editor editor, ROList<GapChoice> choices) {
+    chooser = new DetailsPageChooser<>(editor, choices);
+  }
 
   public static GapChoicePage create(Editor editor, ROList<GapChoice> choices) {
     final GapChoicePage out = new GapChoicePage(editor, choices);
     editor.details.setTab(editor, GapChoicePage.class, out);
     return out;
-  }
-
-  private GapChoicePage(Editor editor, ROList<GapChoice> choices) {
-    chooser = new DetailsPageChooser<>(editor, choices);
   }
 
   @Override

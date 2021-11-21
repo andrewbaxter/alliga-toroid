@@ -13,13 +13,14 @@ import com.zarbosoft.rendaw.common.TSList;
 
 public class Scope extends LanguageValue {
   public final Value inner;
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
 
   public Scope(Location id, Value inner) {
     super(id, hasLowerInSubtree(inner));
     this.inner = inner;
+  }
+
+  public Object graphDeserialize(Record data) {
+    return graphDeserialize(this.getClass(), data);
   }
 
   @Override

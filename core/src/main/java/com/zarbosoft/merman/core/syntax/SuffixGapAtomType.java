@@ -30,21 +30,20 @@ import java.util.function.Function;
 public class SuffixGapAtomType extends BaseGapAtomType {
   public static final String PRECEDING_KEY = "preceding";
   public static final BackSpec jsonBack =
-          new BackFixedRecordSpec(
-              new BackFixedRecordSpec.Config(
-                  new TSList<BackSpec>(
-                      new BackKeySpec(
-                          new BackFixedPrimitiveSpec("type"),
-                          new BackFixedPrimitiveSpec("suffix_gap")),
-                      new BackKeySpec(
-                          new BackFixedPrimitiveSpec("primitive"),
-                          new BackPrimitiveSpec(
-                              new BaseBackPrimitiveSpec.Config(GapAtomType.PRIMITIVE_KEY))),
-                      new BackKeySpec(
-                          new BackFixedPrimitiveSpec("preceding"),
-                          new BackArraySpec(
-                              new BaseBackArraySpec.Config(
-                                  SuffixGapAtomType.PRECEDING_KEY, null, ROList.empty))))));
+      new BackFixedRecordSpec(
+          new BackFixedRecordSpec.Config(
+              new TSList<BackSpec>(
+                  new BackKeySpec(
+                      new BackFixedPrimitiveSpec("type"), new BackFixedPrimitiveSpec("suffix_gap")),
+                  new BackKeySpec(
+                      new BackFixedPrimitiveSpec("primitive"),
+                      new BackPrimitiveSpec(
+                          new BaseBackPrimitiveSpec.Config(GapAtomType.PRIMITIVE_KEY))),
+                  new BackKeySpec(
+                      new BackFixedPrimitiveSpec("preceding"),
+                      new BackArraySpec(
+                          new BaseBackArraySpec.Config(
+                              SuffixGapAtomType.PRECEDING_KEY, null, ROList.empty))))));
   public final String backType;
 
   public SuffixGapAtomType(Config config) {

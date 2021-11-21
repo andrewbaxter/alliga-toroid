@@ -4,9 +4,9 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.pidgoon.events.Event;
 
 public class AtomEvent implements Event {
-    public final Atom atom;
+  public final Atom atom;
 
-    AtomEvent(Atom atom) {
-        this.atom = atom;
-    }
+  AtomEvent(Atom atom) {
+    this.atom = atom;
+  }
 }

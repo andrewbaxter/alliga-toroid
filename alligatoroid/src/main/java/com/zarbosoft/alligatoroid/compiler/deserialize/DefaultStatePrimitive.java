@@ -8,7 +8,8 @@ public class DefaultStatePrimitive extends DefaultStateSingle {
   private String out;
 
   @Override
-  protected void innerEatPrimitiveUntyped(TSList<Error> errors, LuxemPathBuilder luxemPath, String value) {
+  protected void innerEatPrimitiveUntyped(
+      TSList<Error> errors, LuxemPathBuilder luxemPath, String value) {
     out = value;
   }
 

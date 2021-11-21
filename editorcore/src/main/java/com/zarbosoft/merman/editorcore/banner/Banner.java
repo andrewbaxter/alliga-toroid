@@ -84,7 +84,8 @@ public class Banner {
 
   private void updateStyle(final Editor editor) {
     if (text == null) return;
-    editor.context.stylist.styleObbox(editor.context, background, Stylist.ObboxType.BANNER_BACKGROUND);
+    editor.context.stylist.styleObbox(
+        editor.context, background, Stylist.ObboxType.BANNER_BACKGROUND);
     editor.context.stylist.styleBannerText(editor.context, text);
     if (bedding != null) editor.context.wall.removeBedding(editor.context, bedding);
     bedding =

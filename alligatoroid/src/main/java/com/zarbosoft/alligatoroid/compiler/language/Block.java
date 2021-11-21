@@ -49,6 +49,7 @@ public class Block extends LanguageValue {
   public Object graphDeserialize(Record data) {
     return graphDeserialize(this.getClass(), data);
   }
+
   @Override
   public EvaluateResult evaluate(Context context) {
     return evaluate(context, location, statements);

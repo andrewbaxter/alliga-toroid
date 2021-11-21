@@ -80,13 +80,13 @@ public class TextBlock implements Container, TextStylable {
   }
 
   @Override
-  public void setParent(Parent parent) {
-    this.parent = parent;
+  public Parent getParent() {
+    return parent;
   }
 
   @Override
-  public Parent getParent() {
-    return parent;
+  public void setParent(Parent parent) {
+    this.parent = parent;
   }
 
   @Override

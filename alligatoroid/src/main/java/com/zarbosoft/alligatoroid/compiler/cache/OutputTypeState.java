@@ -1,9 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler.cache;
 
 import com.zarbosoft.alligatoroid.compiler.Error;
-import com.zarbosoft.alligatoroid.compiler.deserialize.DefaultStateArrayPair;
 import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateRecord;
 import com.zarbosoft.alligatoroid.compiler.deserialize.BaseStateSingle;
+import com.zarbosoft.alligatoroid.compiler.deserialize.DefaultStateArrayPair;
 import com.zarbosoft.alligatoroid.compiler.deserialize.DefaultStateSingle;
 import com.zarbosoft.alligatoroid.compiler.deserialize.StateString;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
@@ -44,11 +44,13 @@ public class OutputTypeState extends DefaultStateArrayPair {
   }
 
   @Override
-  public BaseStateSingle createValueState(TSList<Error> errors, LuxemPathBuilder luxemPath, Object key) {
+  public BaseStateSingle createValueState(
+      TSList<Error> errors, LuxemPathBuilder luxemPath, Object key) {
     typeCacheRelPath = (String) key;
     return new DefaultStateSingle() {
       @Override
-      protected BaseStateRecord innerEatRecordBegin(TSList<Error> errors, LuxemPathBuilder luxemPath) {
+      protected BaseStateRecord innerEatRecordBegin(
+          TSList<Error> errors, LuxemPathBuilder luxemPath) {
         return inner = new RecordState(cache);
       }
     };

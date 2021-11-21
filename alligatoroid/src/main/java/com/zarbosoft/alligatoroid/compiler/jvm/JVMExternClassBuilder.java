@@ -3,7 +3,6 @@ package com.zarbosoft.alligatoroid.compiler.jvm;
 import com.zarbosoft.alligatoroid.compiler.language.Builtin;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.rendaw.common.ROTuple;
-import com.zarbosoft.rendaw.common.TSList;
 
 public class JVMExternClassBuilder {
   public final JVMExternClassType base;
@@ -20,7 +19,7 @@ public class JVMExternClassBuilder {
   @Builtin.WrapExpose
   public void constructor(Record spec) {
     JVMShallowMethodFieldType.MethodSpecDetails specDetails =
-            JVMShallowMethodFieldType.methodSpecDetails(spec);
+        JVMShallowMethodFieldType.methodSpecDetails(spec);
     base.constructorSigs.put(specDetails.keyTuple, specDetails);
   }
 

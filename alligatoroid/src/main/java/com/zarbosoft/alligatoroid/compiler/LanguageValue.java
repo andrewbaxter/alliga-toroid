@@ -12,7 +12,7 @@ import java.lang.reflect.Parameter;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public abstract class LanguageValue implements SimpleValue , GraphSerializable {
+public abstract class LanguageValue implements SimpleValue, GraphSerializable {
   public final Location location;
   public final boolean hasLowerInSubtree;
 
@@ -37,6 +37,19 @@ public abstract class LanguageValue implements SimpleValue , GraphSerializable {
     return out;
   }
 
+  public static Object graphDeserialize(Class klass, Record data) {
+    Constructor constructor = klass.getConstructors()[0];
+    Object[] args = new Object[constructor.getParameterCount()];
+    for (int i = 0; i < constructor.getParameters().length; i++) {
+      Parameter param = constructor.getParameters()[i];
+      args[i] = data.data.get(param.getName());
+      if (args[i] instanceof Tuple) {
+        args[i] = ((Tuple) args[i]).data;
+      }
+    }
+    return uncheck(() -> constructor.newInstance(args));
+  }
+
   @Override
   public abstract EvaluateResult evaluate(Context context);
 
@@ -49,29 +62,19 @@ public abstract class LanguageValue implements SimpleValue , GraphSerializable {
   public Record graphSerialize() {
     TSMap<Object, Object> data = new TSMap<>();
     for (Parameter parameter : getClass().getConstructors()[0].getParameters()) {
-        data.putNew(parameter.getName(), uncheck(() -> {
-          String fieldName = parameter.getName();
-          if ("id".equals(fieldName)) fieldName = "location";
-          Object fieldData = this.getClass().getField(fieldName).get(this);
-          if (fieldData instanceof ROList) {
-            fieldData = new Tuple((ROList<Object>) fieldData);
-          }
-          return fieldData;
-        }));
+      data.putNew(
+          parameter.getName(),
+          uncheck(
+              () -> {
+                String fieldName = parameter.getName();
+                if ("id".equals(fieldName)) fieldName = "location";
+                Object fieldData = this.getClass().getField(fieldName).get(this);
+                if (fieldData instanceof ROList) {
+                  fieldData = new Tuple((ROList<Object>) fieldData);
+                }
+                return fieldData;
+              }));
     }
     return new Record(data);
-  }
-
-  public static Object graphDeserialize(Class klass, Record data) {
-    Constructor constructor = klass.getConstructors()[0];
-    Object[] args = new Object[constructor.getParameterCount()];
-    for (int i = 0; i < constructor.getParameters().length; i++) {
-      Parameter param = constructor.getParameters()[i];
-      args[i] = data.data.get(param.getName());
-      if (args[i] instanceof Tuple) {
-        args[i] = ((Tuple) args[i]).data;
-      }
-    }
-    return uncheck(() -> constructor.newInstance(args));
   }
 }

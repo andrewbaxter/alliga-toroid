@@ -25,7 +25,7 @@ public class JSGroup extends JSFreeDisplayNode implements Group {
     fixPosition(animate);
   }
 
-    @Override
+  @Override
   public void removeAt(int start, int count) {
     for (int i = 0; i < count; ++i) {
       ((HTMLElement) element.childNodes.getAt(start)).remove();
@@ -52,11 +52,11 @@ public class JSGroup extends JSFreeDisplayNode implements Group {
 
   @Override
   public double transverseSpan() {
-    return  this.element.getBoundingClientRect().height;
+    return this.element.getBoundingClientRect().height;
   }
 
   @Override
   public double converseSpan() {
-    return  this.element.getBoundingClientRect().width;
+    return this.element.getBoundingClientRect().width;
   }
 }

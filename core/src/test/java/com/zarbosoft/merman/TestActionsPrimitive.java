@@ -1,8 +1,8 @@
 package com.zarbosoft.merman;
 
+import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
-import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
@@ -19,14 +19,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 public class TestActionsPrimitive {
-  @Test
-  public void testExit() {
-    final Context context = buildFive();
-    assertThat(context.cursor.getVisual(), instanceOf(VisualFieldPrimitive.class));
-    Helper.cursorPrimitive(context).actionExit(context);
-    assertNotNull(((VisualFieldArray) Helper.rootArray(context.document).visual).cursor);
-  }
-
   public static Context buildFive() {
     return build("12345");
   }
@@ -39,23 +31,30 @@ public class TestActionsPrimitive {
     return context;
   }
 
+  public static VisualFieldPrimitive visual(final Context context) {
+    return (VisualFieldPrimitive) context.cursor.getVisual();
+  }
+
+  public static void assertSelection(final Context context, final int begin, final int end) {
+    final CursorFieldPrimitive selection = (CursorFieldPrimitive) context.cursor;
+    assertThat(selection.range.beginOffset, equalTo(begin));
+    assertThat(selection.range.endOffset, equalTo(end));
+  }
+
+  @Test
+  public void testExit() {
+    final Context context = buildFive();
+    assertThat(context.cursor.getVisual(), instanceOf(VisualFieldPrimitive.class));
+    Helper.cursorPrimitive(context).actionExit(context);
+    assertNotNull(((VisualFieldArray) Helper.rootArray(context.document).visual).cursor);
+  }
+
   @Test
   public void testNextElement() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.cursorPrimitive(context).actionNextGlyph(context);
     assertSelection(context, 3, 3);
-  }
-
-  public static VisualFieldPrimitive visual(final Context context) {
-    return (VisualFieldPrimitive) context.cursor.getVisual();
-  }
-
-  public static void assertSelection(final Context context, final int begin, final int end) {
-    final CursorFieldPrimitive selection =
-        (CursorFieldPrimitive) context.cursor;
-    assertThat(selection.range.beginOffset, equalTo(begin));
-    assertThat(selection.range.endOffset, equalTo(end));
   }
 
   @Test
@@ -293,7 +292,7 @@ public class TestActionsPrimitive {
   @Test
   public void testGatherNextNewline() {
     final Atom primitiveAtom = new TreeBuilder(MiscSyntax.quoted).add("value", "abc\n123").build();
-    new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
+    new GeneralTestWizard(MiscSyntax.syntax, primitiveAtom)
         .run(
             context ->
                 ((FieldPrimitive) primitiveAtom.namedFields.getOpt("value"))
@@ -306,7 +305,7 @@ public class TestActionsPrimitive {
   @Test
   public void testGatherNextNewlineShorter() {
     final Atom primitiveAtom = new TreeBuilder(MiscSyntax.quoted).add("value", "abc\n1").build();
-    new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
+    new GeneralTestWizard(MiscSyntax.syntax, primitiveAtom)
         .run(
             context ->
                 ((FieldPrimitive) primitiveAtom.namedFields.getOpt("value"))
@@ -375,7 +374,7 @@ public class TestActionsPrimitive {
   @Test
   public void testGatherPreviousNewlineShorter() {
     final Atom primitiveAtom = new TreeBuilder(MiscSyntax.quoted).add("value", "a\n1234").build();
-    new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
+    new GeneralTestWizard(MiscSyntax.syntax, primitiveAtom)
         .run(
             context ->
                 ((FieldPrimitive) primitiveAtom.namedFields.getOpt("value"))
@@ -387,7 +386,7 @@ public class TestActionsPrimitive {
   @Test
   public void testGatherPreviousNewlineStart() {
     final Atom primitiveAtom = new TreeBuilder(MiscSyntax.quoted).add("value", "abc\ndef").build();
-    new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
+    new GeneralTestWizard(MiscSyntax.syntax, primitiveAtom)
         .run(
             context ->
                 ((FieldPrimitive) primitiveAtom.namedFields.getOpt("value"))

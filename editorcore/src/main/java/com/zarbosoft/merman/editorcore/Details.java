@@ -28,7 +28,7 @@ public class Details {
 
   public Details(Editor editor, ObboxStyle tabStyle) {
     this.tabStyle = tabStyle;
-    tabTransverseSpan = tabStyle.lineThickness * 3 * editor.context.toPixels;
+    tabTransverseSpan = tabStyle.lineThickness * 4 * editor.context.toPixels;
     boxGroup = editor.context.display.group();
     vContainer = new VContainer(editor.context);
     vContainer.add(
@@ -129,10 +129,13 @@ public class Details {
       slots.add(slot);
       Box box = new Box(editor.context);
       box.setStyle(editor.context, tabStyle);
-      final double tabConverseSpan = tabStyle.lineThickness * 16 * editor.context.toPixels;
+      final double tabConverseSpan = tabStyle.lineThickness * 20 * editor.context.toPixels;
       box.setSize(editor.context, tabConverseSpan, tabTransverseSpan);
       if (boxes.some()) {
-        box.setConverse(boxes.last().converse() + tabConverseSpan + tabStyle.lineThickness * 3 * editor.context.toPixels);
+        box.setConverse(
+            boxes.last().converse()
+                + tabConverseSpan
+                + tabStyle.lineThickness * 3 * editor.context.toPixels);
       }
       boxes.add(box);
       boxGroup.add(box);

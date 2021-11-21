@@ -1,14 +1,13 @@
 package com.zarbosoft.merman.editorcore.history;
 
-import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.CursorState;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class ChangeLevel  {
+public class ChangeLevel {
   public final TSList<Change> subchanges = new TSList<>();
-  CursorState select;
   public final long unique;
+  CursorState select;
 
   ChangeLevel(long unique) {
     this.unique = unique;

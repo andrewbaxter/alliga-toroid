@@ -8,6 +8,7 @@ public abstract class Cursor {
 
   /**
    * Get the visual that owns the cursor
+   *
    * @return
    */
   public abstract Visual getVisual();

@@ -17,6 +17,7 @@ public class Local extends LanguageValue {
     super(id, hasLowerInSubtree(key));
     this.key = key;
   }
+
   public Object graphDeserialize(Record data) {
     return graphDeserialize(this.getClass(), data);
   }

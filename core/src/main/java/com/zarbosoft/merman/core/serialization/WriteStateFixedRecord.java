@@ -2,9 +2,7 @@ package com.zarbosoft.merman.core.serialization;
 
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
-import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.Iterator;
@@ -14,8 +12,7 @@ public class WriteStateFixedRecord extends WriteState {
   private final Map<Object, Object> data;
   private final Iterator<BackSpec> iterator;
 
-  public WriteStateFixedRecord(
-      final Map<Object, Object> data, final ROList<BackSpec> record) {
+  public WriteStateFixedRecord(final Map<Object, Object> data, final ROList<BackSpec> record) {
     this.data = data;
     this.iterator = record.iterator();
   }

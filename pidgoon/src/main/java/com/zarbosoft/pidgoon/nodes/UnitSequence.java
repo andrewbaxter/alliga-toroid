@@ -58,7 +58,7 @@ public class UnitSequence<T> extends Node<T> {
               grammar,
               step,
               new SeqParent<T>(this, parent, 0, null, color),
-                  leaf,
+              leaf,
               seen,
               cause,
               color);
@@ -87,11 +87,7 @@ public class UnitSequence<T> extends Node<T> {
 
     @Override
     public void advance(
-        Grammar grammar,
-        Step step,
-        Leaf leaf,
-        Object result,
-        MismatchCause mismatchCause) {
+        Grammar grammar, Step step, Leaf leaf, Object result, MismatchCause mismatchCause) {
       final int nextStep = this.step + 1;
       T newCollected;
       if (self.children.get(this.step).second) newCollected = (T) result;
@@ -106,7 +102,7 @@ public class UnitSequence<T> extends Node<T> {
                 grammar,
                 step,
                 new SeqParent<T>(self, parent, nextStep, newCollected, color),
-                    leaf,
+                leaf,
                 ROMap.empty,
                 mismatchCause,
                 color);

@@ -5,9 +5,9 @@ import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.wall.Brick;
 
 public class RelativeAlignment extends Alignment {
+  public final boolean collapse;
   private final String baseKey;
   private final double offset;
-  public final boolean collapse;
   private Alignment base;
 
   public RelativeAlignment(
@@ -57,7 +57,9 @@ public class RelativeAlignment extends Alignment {
 
   @Override
   public void changed(Context context) {
-    converse = (base == null ? 0 : base.converse) + (collapse && bricks.isEmpty() ? 0 : offset * context.toPixels);
+    converse =
+        (base == null ? 0 : base.converse)
+            + (collapse && bricks.isEmpty() ? 0 : offset * context.toPixels);
     super.changed(context);
   }
 }

@@ -57,7 +57,9 @@ public class TestActionsNested {
                 .build())
         .run(
             editor -> {
-              ((FieldAtom) editor.context.syntaxLocate(new SyntaxPath("named", "value", "0", "named", "value")))
+              ((FieldAtom)
+                      editor.context.syntaxLocate(
+                          new SyntaxPath("named", "value", "0", "named", "value")))
                   .selectInto(editor.context);
             })
         .editDelete()
@@ -210,6 +212,6 @@ public class TestActionsNested {
         Helper.rootArray(editor.context.document));
     assertThat(
         editor.context.cursor.getSyntaxPath(),
-        equalTo(new SyntaxPath("named", "value", "0", "named", "value", "named","gap", "0")));
+        equalTo(new SyntaxPath("named", "value", "0", "named", "value", "named", "gap", "0")));
   }
 }

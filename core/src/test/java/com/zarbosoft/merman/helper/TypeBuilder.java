@@ -22,8 +22,8 @@ import com.zarbosoft.rendaw.common.TSMap;
 public class TypeBuilder {
   private final String id;
   private final TSList<FrontSpec> front = new TSList<>();
-  private BackSpec back;
   private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
+  private BackSpec back;
   private boolean autoChooseUnambiguous = true;
   private int precedence = Integer.MAX_VALUE;
   private boolean associateForward = true;

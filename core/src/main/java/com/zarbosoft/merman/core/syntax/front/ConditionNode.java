@@ -41,8 +41,7 @@ public class ConditionNode extends ConditionType {
   }
 
   @Override
-  public void finish(MultiError errors, SyntaxPath typePath, AtomType atomType) {
-  }
+  public void finish(MultiError errors, SyntaxPath typePath, AtomType atomType) {}
 
   public static enum Is {
     PRECEDENT,

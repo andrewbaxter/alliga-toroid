@@ -37,7 +37,7 @@ public class BackArraySpec extends BaseBackArraySpec {
     super.finish(errors, syntax, typePath);
     checkNotKey(errors, syntax, type);
     for (Map.Entry<String, BackSpec> e : boilerplate) {
-      checkNotKey(errors, syntax, boilerplatePath(typePath,e.getKey()), e.getValue());
+      checkNotKey(errors, syntax, boilerplatePath(typePath, e.getKey()), e.getValue());
     }
   }
 

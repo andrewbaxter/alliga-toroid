@@ -128,7 +128,7 @@ public class Course {
       getIdlePlace(context);
       for (final Brick brick : transportAdd) {
         if (alignmentBrick == brick) {
-          alignment.removeBrick(context,alignmentBrick);
+          alignment.removeBrick(context, alignmentBrick);
           alignment = null;
           alignmentBrick = null;
         }

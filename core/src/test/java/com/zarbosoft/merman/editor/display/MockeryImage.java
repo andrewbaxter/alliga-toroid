@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.editor.display;
 
-import com.zarbosoft.merman.core.display.Image;
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.display.Image;
 
 public class MockeryImage extends MockeryCourseDisplayNode implements Image {
   @Override

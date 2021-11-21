@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.editorcore.history.changes;
 
-import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.editorcore.Editor;

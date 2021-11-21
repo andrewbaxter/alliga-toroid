@@ -2,11 +2,11 @@ package com.zarbosoft.merman.core.syntax.error;
 
 import com.zarbosoft.merman.core.syntax.Direction;
 
-public class NotTransverse extends BaseKVError{
+public class NotTransverse extends BaseKVError {
 
   public NotTransverse(Direction converseDirection, Direction transverseDirection) {
-        put("converse", converseDirection);
-        put("transverse", transverseDirection);
+    put("converse", converseDirection);
+    put("transverse", transverseDirection);
   }
 
   @Override

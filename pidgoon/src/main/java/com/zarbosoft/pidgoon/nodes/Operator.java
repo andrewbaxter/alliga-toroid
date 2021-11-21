@@ -21,11 +21,13 @@ public abstract class Operator<L, T> extends Node<T> {
 
   @Override
   public void context(
-          Grammar grammar, final Step step,
-          final Parent<T> parent,
-          Leaf leaf, ROMap<Object, Reference.RefParent> seen,
-          final MismatchCause cause,
-          Object color) {
+      Grammar grammar,
+      final Step step,
+      final Parent<T> parent,
+      Leaf leaf,
+      ROMap<Object, Reference.RefParent> seen,
+      final MismatchCause cause,
+      Object color) {
     root.context(grammar, step, new OperatorParent<L, T>(this, parent), leaf, seen, cause, color);
   }
 
@@ -49,7 +51,7 @@ public abstract class Operator<L, T> extends Node<T> {
 
     @Override
     public void advance(
-            Grammar grammar, final Step step, Leaf leaf, L result, final MismatchCause cause) {
+        Grammar grammar, final Step step, Leaf leaf, L result, final MismatchCause cause) {
       T out;
       try {
         out = operator.process(result);

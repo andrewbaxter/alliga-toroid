@@ -37,8 +37,7 @@ public class TestCompaction {
                         new FrontSymbolSpec(
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
-                                    new SymbolSpaceSpec.Config()
-                                        .splitMode(SplitMode.COMPACT)))))
+                                    new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(0)
             .depthScore(1)
@@ -91,8 +90,7 @@ public class TestCompaction {
                         new FrontSymbolSpec(
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
-                                    new SymbolSpaceSpec.Config()
-                                        .splitMode(SplitMode.COMPACT)))))
+                                    new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(0)
             .depthScore(1)
@@ -142,7 +140,8 @@ public class TestCompaction {
         .checkTextBrick(0, 0, "I am a banana")
         .checkTextBrick(0, 1, "123")
         .change(
-            new ChangePrimitive((FieldPrimitive) primitive.namedFields.getOpt("value"), 0, 0, "wigwam "))
+            new ChangePrimitive(
+                (FieldPrimitive) primitive.namedFields.getOpt("value"), 0, 0, "wigwam "))
         .checkTextBrick(0, 0, "wigwam I am a ")
         .checkTextBrick(1, 0, "banana")
         .checkTextBrick(1, 1, "123");
@@ -164,8 +163,7 @@ public class TestCompaction {
                         new FrontSymbolSpec(
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
-                                    new SymbolSpaceSpec.Config()
-                                        .splitMode(SplitMode.COMPACT)))))
+                                    new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(0)
             .depthScore(1)
@@ -174,7 +172,7 @@ public class TestCompaction {
         new TypeBuilder("unary")
             .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataAtom("value")
-                .frontMark("")
+            .frontMark("")
             .precedence(20)
             .depthScore(1)
             .build();
@@ -191,7 +189,7 @@ public class TestCompaction {
             .build();
     final FieldArray array = (FieldArray) lowAtom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, new TreeBuilder(unary).add("value", lowAtom).build())
-            .run(e -> e.context.retryExpandFactor = 1.0)
+        .run(e -> e.context.retryExpandFactor = 1.0)
         .resize(70)
         .checkCourseCount(1)
         .checkTextBrick(0, 1, "one")
@@ -223,8 +221,7 @@ public class TestCompaction {
                         new FrontSymbolSpec(
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
-                                    new SymbolSpaceSpec.Config()
-                                        .splitMode(SplitMode.COMPACT)))))
+                                    new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(0)
             .depthScore(1)
@@ -238,8 +235,7 @@ public class TestCompaction {
                         new FrontSymbolSpec(
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
-                                    new SymbolSpaceSpec.Config()
-                                        .splitMode(SplitMode.COMPACT)))))
+                                    new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(50)
             .depthScore(1)
@@ -253,8 +249,7 @@ public class TestCompaction {
                         new FrontSymbolSpec(
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
-                                    new SymbolSpaceSpec.Config()
-                                        .splitMode(SplitMode.COMPACT)))))
+                                    new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(100)
             .depthScore(1)
@@ -325,8 +320,7 @@ public class TestCompaction {
                         new FrontSymbolSpec(
                             new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
-                                    new SymbolSpaceSpec.Config()
-                                        .splitMode(SplitMode.COMPACT)))))
+                                    new SymbolSpaceSpec.Config().splitMode(SplitMode.COMPACT)))))
                     .build())
             .precedence(0)
             .depthScore(1)

@@ -26,6 +26,7 @@ public abstract class BaseSet<K, T> extends Node<ROList<T>> {
     children.put(child, required);
     return this;
   }
+
   public abstract TSList<T> combine(TSList<T> out, K value);
 
   @Override
@@ -65,8 +66,9 @@ public abstract class BaseSet<K, T> extends Node<ROList<T>> {
           .context(
               grammar,
               step,
-              new SetParent<K, T>(this, parent, remaining.mut().remove(c.getKey()), collected, color),
-                  leaf,
+              new SetParent<K, T>(
+                  this, parent, remaining.mut().remove(c.getKey()), collected, color),
+              leaf,
               seen,
               cause,
               color);
@@ -96,11 +98,11 @@ public abstract class BaseSet<K, T> extends Node<ROList<T>> {
 
     @Override
     public void advance(
-            Grammar grammar, final Step step, Leaf leaf, K result, final MismatchCause cause) {
+        Grammar grammar, final Step step, Leaf leaf, K result, final MismatchCause cause) {
       base.advance(
           grammar,
           step,
-              leaf,
+          leaf,
           parent,
           ROMap.empty,
           cause,
@@ -110,8 +112,7 @@ public abstract class BaseSet<K, T> extends Node<ROList<T>> {
     }
 
     @Override
-    public void error(
-            Grammar grammar, final Step step, Leaf leaf, final MismatchCause cause) {
+    public void error(Grammar grammar, final Step step, Leaf leaf, final MismatchCause cause) {
       parent.error(grammar, step, leaf, cause);
     }
   }

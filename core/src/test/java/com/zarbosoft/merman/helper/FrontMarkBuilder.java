@@ -17,8 +17,7 @@ public class FrontMarkBuilder {
   public FrontSymbolSpec build() {
     SymbolTextSpec.Config config = new SymbolTextSpec.Config(text);
     if (splitMode != null) config.splitMode(splitMode);
-    return new FrontSymbolSpec(
-        new FrontSymbolSpec.Config(new SymbolTextSpec(config)));
+    return new FrontSymbolSpec(new FrontSymbolSpec.Config(new SymbolTextSpec(config)));
   }
 
   public FrontMarkBuilder tag(final String tag) {

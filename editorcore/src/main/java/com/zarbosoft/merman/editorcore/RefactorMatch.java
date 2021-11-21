@@ -2,7 +2,6 @@ package com.zarbosoft.merman.editorcore;
 
 import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Text;
-import com.zarbosoft.merman.editorcore.displayderived.TextBlock;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 

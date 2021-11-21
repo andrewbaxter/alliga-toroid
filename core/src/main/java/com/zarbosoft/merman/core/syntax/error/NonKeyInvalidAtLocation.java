@@ -2,10 +2,10 @@ package com.zarbosoft.merman.core.syntax.error;
 
 import com.zarbosoft.merman.core.SyntaxPath;
 
-public class NonKeyInvalidAtLocation extends BaseKVError{
+public class NonKeyInvalidAtLocation extends BaseKVError {
 
   public NonKeyInvalidAtLocation(SyntaxPath backPath, SyntaxPath nonKeyPath) {
-        put("path", backPath).put("nonKeyPath", nonKeyPath);
+    put("path", backPath).put("nonKeyPath", nonKeyPath);
   }
 
   @Override

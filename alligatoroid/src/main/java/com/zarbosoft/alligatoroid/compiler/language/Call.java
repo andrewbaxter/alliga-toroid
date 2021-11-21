@@ -10,14 +10,15 @@ import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 public class Call extends LanguageValue {
   public final Value target;
   public final Value argument;
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
 
   public Call(Location id, Value target, Value argument) {
     super(id, hasLowerInSubtree(target, argument));
     this.target = target;
     this.argument = argument;
+  }
+
+  public Object graphDeserialize(Record data) {
+    return graphDeserialize(this.getClass(), data);
   }
 
   @Override

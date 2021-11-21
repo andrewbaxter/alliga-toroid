@@ -34,9 +34,10 @@ public class RecordState extends BaseStateRecord {
   }
 
   @Override
-  public BaseStateSingle createValueState(TSList<Error> errors, LuxemPathBuilder luxemPath, Object key) {
+  public BaseStateSingle createValueState(
+      TSList<Error> errors, LuxemPathBuilder luxemPath, Object key) {
     ValueState valueState = new ValueState(cache);
-    children.add(new ROPair<>((String)key, valueState));
+    children.add(new ROPair<>((String) key, valueState));
     return valueState;
   }
 }

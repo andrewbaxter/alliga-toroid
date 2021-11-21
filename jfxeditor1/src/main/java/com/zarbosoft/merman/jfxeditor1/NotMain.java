@@ -1,12 +1,11 @@
 package com.zarbosoft.merman.jfxeditor1;
 
+import com.zarbosoft.alligatoroid.compiler.CompilationContext;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.ImportSpec;
-import com.zarbosoft.alligatoroid.compiler.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Main;
 import com.zarbosoft.alligatoroid.compiler.Module;
-import com.zarbosoft.alligatoroid.compiler.ModuleId;
 import com.zarbosoft.merman.core.BackPath;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
@@ -341,6 +340,7 @@ public class NotMain extends Application {
       final HBox layout = new HBox();
       final Label messages = new Label();
 
+      ImportSpec rootModuleSpec = CompilationContext.rootModuleSpec(path);
       TSList<Atom> errorAtoms = new TSList<>();
       if ("at".equals(extension)) {
         flushCallback =
@@ -355,7 +355,7 @@ public class NotMain extends Application {
                         Exception e0mut = null;
                         TSMap<ImportSpec, Module> modules0 = null;
                         try {
-                          modules0 = Main.compile(path.toString());
+                          modules0 = Main.compile(rootModuleSpec);
                         } catch (Exception e1) {
                           e0mut = e1;
                         }
@@ -382,13 +382,14 @@ public class NotMain extends Application {
                                   messages.setText(messages.getText() + "\n" + e0.toString());
                                 } else {
                                   TSMap<Atom, TSList<Object>> errorMessages = new TSMap<>();
-                                  ModuleId moduleId = new LocalModuleId(path.toString());
-                                  for (Map.Entry<ImportSpec, Module> e : modules) {
-                                    for (Error error : e.getValue().log.errors) {
+                                  for (Map.Entry<ImportSpec, Module> module : modules) {
+                                    for (Error error : module.getValue().log.errors) {
                                       error.dispatch(
                                           new Error.Dispatcher<Object>() {
                                             @Override
                                             public Object handle(Error.PreDeserializeError e) {
+                                              if (!rootModuleSpec.moduleId.equals(
+                                                  module.getKey().moduleId)) return null;
                                               if (!layout.getChildren().contains(messages))
                                                 layout.getChildren().add(messages);
                                               messages.setText(
@@ -400,7 +401,8 @@ public class NotMain extends Application {
                                             @Override
                                             public Object handle(Error.LocationError e) {
                                               final Location location = e.location;
-                                              if (!moduleId.equal1(location.module)) return null;
+                                              if (!rootModuleSpec.moduleId.equal1(location.module))
+                                                return null;
                                               Atom atom = editor.fileIdMap.getOpt(location.id);
                                               if (atom == null) {
                                                 if (!layout.getChildren().contains(messages))
@@ -425,6 +427,8 @@ public class NotMain extends Application {
 
                                             @Override
                                             public Object handle(Error.DeserializeError e) {
+                                              if (!rootModuleSpec.moduleId.equals(
+                                                  module.getKey().moduleId)) return null;
                                               Atom atom =
                                                   editor.context.backLocate(
                                                       new BackPath(e.backPath.data));
@@ -459,7 +463,7 @@ public class NotMain extends Application {
 
                                   for (Atom atom : changedAtoms) {
                                     MarkerBox display = null;
-                                    WeakReference<MarkerBox> ref = markDisplays.get(atom);
+                                    WeakReference<MarkerBox> ref = markDisplays.getOpt(atom);
                                     if (ref != null) display = ref.get();
                                     if (display != null) {
                                       display.update(editor.context);

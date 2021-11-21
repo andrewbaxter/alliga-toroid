@@ -14,7 +14,7 @@ public class JSImage extends JSCourseDisplayNode implements Image {
 
   @Override
   public void setImage(Context context, String path) {
-    ((HTMLImageElement)element).src = path;
+    ((HTMLImageElement) element).src = path;
     ascent = element.clientHeight;
     fixPosition();
   }

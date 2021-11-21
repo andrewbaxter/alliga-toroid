@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.core.document.fields;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.core.syntax.back.BackSpecData;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 
 import java.util.HashSet;
 import java.util.Set;

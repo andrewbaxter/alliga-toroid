@@ -11,24 +11,25 @@ public abstract class BaseStateRecord implements State {
   public abstract BaseStateSingle createKeyState(TSList<Error> errors, LuxemPathBuilder luxemPath);
 
   public abstract BaseStateSingle createValueState(
-          TSList<Error> errors, LuxemPathBuilder luxemPath, Object key);
+      TSList<Error> errors, LuxemPathBuilder luxemPath, Object key);
 
   @Override
   public final void eatType(
-          TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath, String name) {
+      TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath, String name) {
     push(errors, stack, luxemPath);
     stack.last().eatType(errors, stack, luxemPath, name);
   }
 
   @Override
   public final void eatPrimitive(
-          TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath, String value) {
+      TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath, String value) {
     push(errors, stack, luxemPath);
     stack.last().eatPrimitive(errors, stack, luxemPath, value);
   }
 
   @Override
-  public final void eatArrayBegin(TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
+  public final void eatArrayBegin(
+      TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
     push(errors, stack, luxemPath);
     stack.last().eatArrayBegin(errors, stack, luxemPath);
   }
@@ -46,7 +47,8 @@ public abstract class BaseStateRecord implements State {
   }
 
   @Override
-  public final void eatRecordEnd(TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
+  public final void eatRecordEnd(
+      TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
     popSelf(stack);
   }
 
@@ -56,7 +58,8 @@ public abstract class BaseStateRecord implements State {
   }
 
   @Override
-  public final void eatRecordBegin(TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
+  public final void eatRecordBegin(
+      TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath) {
     push(errors, stack, luxemPath);
     stack.last().eatRecordBegin(errors, stack, luxemPath);
   }

@@ -3,9 +3,7 @@ package com.zarbosoft.alligatoroid.compiler;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
-/**
- * All accesses must occur within moduleLock
- */
+/** All accesses must occur within moduleLock */
 public class ImportPath {
   public final ImportSpec spec;
   public final TSList<ImportPath> from = new TSList<>();

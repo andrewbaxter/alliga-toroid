@@ -24,19 +24,19 @@ public class JVMClassType extends JVMBaseClassType {
     this.jvmClass = new JVMSharedClass(jvmExternalClass);
   }
 
-  public static class MethodsNotDefined extends RuntimeException {
-    public final ROSet<ROTuple> incompleteMethods;
-
-    public MethodsNotDefined(ROSet<ROTuple> incompleteMethods) {
-      this.incompleteMethods = incompleteMethods;
-    }
-  }
-
   public void build(TSList<Error> errors) {
     if (built != null) return;
     if (incompleteMethods.some()) {
       throw new MethodsNotDefined(incompleteMethods.ro());
     }
     built = jvmClass.render();
+  }
+
+  public static class MethodsNotDefined extends RuntimeException {
+    public final ROSet<ROTuple> incompleteMethods;
+
+    public MethodsNotDefined(ROSet<ROTuple> incompleteMethods) {
+      this.incompleteMethods = incompleteMethods;
+    }
   }
 }

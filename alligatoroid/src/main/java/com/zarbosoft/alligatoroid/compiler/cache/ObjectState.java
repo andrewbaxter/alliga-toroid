@@ -16,7 +16,8 @@ public class ObjectState extends DefaultStateSingle {
   }
 
   @Override
-  protected void innerEatPrimitiveUntyped(TSList<Error> errors, LuxemPathBuilder luxemPath, String value) {
+  protected void innerEatPrimitiveUntyped(
+      TSList<Error> errors, LuxemPathBuilder luxemPath, String value) {
     cacheRelPath = value;
   }
 

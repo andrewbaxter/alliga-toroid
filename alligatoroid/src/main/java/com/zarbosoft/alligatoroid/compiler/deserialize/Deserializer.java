@@ -67,7 +67,11 @@ public class Deserializer {
             stack.last().eatPrimitive(errors, stack, luxemPath, value);
           }
         };
-    uncheck(() -> reader.feed(source));
+    try {
+      reader.feed(source);
+    } catch (Exception e) {
+      throw new Error.PreCacheUnexpected(path, e);
+    }
     if (stack.some()) {
       throw new Error.PreDeserializeIncompleteFile(path);
     }

@@ -13,7 +13,6 @@ import com.zarbosoft.pidgoon.nodes.Discard;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.Iterator;
 import java.util.Map;
 
 public class BackFixedPrimitiveSpec extends BackSpec {
@@ -30,7 +29,8 @@ public class BackFixedPrimitiveSpec extends BackSpec {
   }
 
   @Override
-  public void write(Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
+  public void write(
+      Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.primitive(value);
   }
 

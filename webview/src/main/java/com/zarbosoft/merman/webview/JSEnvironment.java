@@ -37,6 +37,7 @@ public class JSEnvironment implements Environment {
   public Environment.GlyphWalker glyphWalker(String s) {
     return new GlyphWalker() {
       BaseI18nWalker inner = new BaseI18nWalker(glyphSegmenter, s);
+
       @Override
       public int before(int offset) {
         if (offset == 0) return I18N_DONE;
@@ -55,6 +56,7 @@ public class JSEnvironment implements Environment {
   public Environment.WordWalker wordWalker(String s) {
     return new WordWalker() {
       BaseI18nWalker inner = new BaseI18nWalker(wordSegmenter, s);
+
       @Override
       protected int anyBeforeOrAt(int offset) {
         return inner.anyBeforeOrAt(offset);
@@ -81,6 +83,7 @@ public class JSEnvironment implements Environment {
   public Environment.LineWalker lineWalker(String s) {
     return new LineWalker() {
       BaseI18nWalker inner = new BaseI18nWalker(wordSegmenter, s);
+
       @Override
       protected int anyBeforeOrAt(int offset) {
         return inner.anyBeforeOrAt(offset);
@@ -201,13 +204,6 @@ public class JSEnvironment implements Environment {
     private final TSList<Integer> segments = new TSList<>();
     private int index;
 
-    public boolean isWhitespace(int offset) {
-      return isWhitespace.test(text.substring(offset, 1));
-    }
-    public int length() {
-      return text.length();
-    }
-
     private BaseI18nWalker(Segmenter segmenter, String text) {
       this.text = text;
       JsObject segments0 = segmenter.segment(this.text);
@@ -220,6 +216,14 @@ public class JSEnvironment implements Environment {
         at = iter.next();
       }
       segments.add(text.length());
+    }
+
+    public boolean isWhitespace(int offset) {
+      return isWhitespace.test(text.substring(offset, 1));
+    }
+
+    public int length() {
+      return text.length();
     }
 
     public int anyBeforeOrAt(int offset) {

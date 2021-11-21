@@ -11,5 +11,5 @@ public interface ROOrderedMap<K, V> extends Iterable<ROPair<K, V>> {
 
   Iterator<V> iterValues();
 
-    int size();
+  int size();
 }

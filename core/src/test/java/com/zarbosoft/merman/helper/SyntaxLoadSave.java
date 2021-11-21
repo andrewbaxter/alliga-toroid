@@ -109,57 +109,66 @@ public class SyntaxLoadSave {
                     .build())
             .build();
 
-
     {
-      final FreeAtomType primitive = new TypeBuilder("primitive").back(Helper.buildBackPrimitive("x")).frontMark("x").build();
-      final FreeAtomType typedPrimitive = new TypeBuilder("typedPrimitive")
+      final FreeAtomType primitive =
+          new TypeBuilder("primitive").back(Helper.buildBackPrimitive("x")).frontMark("x").build();
+      final FreeAtomType typedPrimitive =
+          new TypeBuilder("typedPrimitive")
               .back(Helper.buildBackType("z", Helper.buildBackPrimitive("x")))
               .frontMark("x")
               .build();
-      final FreeAtomType doublePrimitive = new TypeBuilder("doublePrimitive")
+      final FreeAtomType doublePrimitive =
+          new TypeBuilder("doublePrimitive")
               .back(Helper.buildBackPrimitive("x"))
               .back(Helper.buildBackPrimitive("y"))
               .frontMark("x")
               .build();
-      final FreeAtomType array = new TypeBuilder("array")
+      final FreeAtomType array =
+          new TypeBuilder("array")
               .back(
-                      Helper.buildBackType(
-                              "typedArray",
-                              new BackArrayBuilder()
-                                      .add(Helper.buildBackPrimitive("x"))
-                                      .add(Helper.buildBackPrimitive("y"))
-                                      .build()))
+                  Helper.buildBackType(
+                      "typedArray",
+                      new BackArrayBuilder()
+                          .add(Helper.buildBackPrimitive("x"))
+                          .add(Helper.buildBackPrimitive("y"))
+                          .build()))
               .frontMark("x")
               .build();
-      final FreeAtomType record = new TypeBuilder("record")
+      final FreeAtomType record =
+          new TypeBuilder("record")
               .back(
-                      Helper.buildBackType(
-                              "typedRecord",
-                              new BackRecordBuilder()
-                                      .add("a", Helper.buildBackPrimitive("x"))
-                                      .add("b", Helper.buildBackPrimitive("y"))
-                                      .build()))
+                  Helper.buildBackType(
+                      "typedRecord",
+                      new BackRecordBuilder()
+                          .add("a", Helper.buildBackPrimitive("x"))
+                          .add("b", Helper.buildBackPrimitive("y"))
+                          .build()))
               .frontMark("x")
               .build();
-      final FreeAtomType dataPrimitive = new TypeBuilder("dataPrimitive")
+      final FreeAtomType dataPrimitive =
+          new TypeBuilder("dataPrimitive")
               .back(Helper.buildBackDataPrimitive("value"))
               .frontDataPrimitive("value")
               .build();
-      final FreeAtomType dataArray = new TypeBuilder("dataArray")
+      final FreeAtomType dataArray =
+          new TypeBuilder("dataArray")
               .back(Helper.buildBackDataArray("value", "array_value"))
               .frontDataArray("value")
               .build();
-      final FreeAtomType dataRecord = new TypeBuilder("dataRecord")
+      final FreeAtomType dataRecord =
+          new TypeBuilder("dataRecord")
               .back(Helper.buildBackDataRecord("value", "dataRecordElement"))
               .frontDataArray("value")
               .build();
-      final FreeAtomType dataRecordElement = new TypeBuilder("dataRecordElement")
+      final FreeAtomType dataRecordElement =
+          new TypeBuilder("dataRecordElement")
               .back(Helper.buildBackDataPrimitive("key"))
               .back(Helper.buildBackDataAtom("value", "value"))
               .frontDataPrimitive("key")
               .frontDataNode("value")
               .build();
-      final Syntax syntax = new SyntaxBuilder("array_value")
+      final Syntax syntax =
+          new SyntaxBuilder("array_value")
               .type(primitive)
               .type(typedPrimitive)
               .type(doublePrimitive)
@@ -170,28 +179,28 @@ public class SyntaxLoadSave {
               .type(dataRecord)
               .type(dataRecordElement)
               .group(
-                      "array_value",
-                      new GroupBuilder()
-                              .type(primitive)
-                              .type(typedPrimitive)
-                              .type(doublePrimitive)
-                              .type(array)
-                              .type(record)
-                              .type(dataPrimitive)
-                              .type(dataArray)
-                              .type(dataRecord)
-                              .build())
+                  "array_value",
+                  new GroupBuilder()
+                      .type(primitive)
+                      .type(typedPrimitive)
+                      .type(doublePrimitive)
+                      .type(array)
+                      .type(record)
+                      .type(dataPrimitive)
+                      .type(dataArray)
+                      .type(dataRecord)
+                      .build())
               .group(
-                      "value",
-                      new GroupBuilder()
-                              .type(primitive)
-                              .type(typedPrimitive)
-                              .type(array)
-                              .type(record)
-                              .type(dataPrimitive)
-                              .type(dataArray)
-                              .type(dataRecord)
-                              .build())
+                  "value",
+                  new GroupBuilder()
+                      .type(primitive)
+                      .type(typedPrimitive)
+                      .type(array)
+                      .type(record)
+                      .type(dataPrimitive)
+                      .type(dataArray)
+                      .type(dataRecord)
+                      .build())
               .build();
     }
   }

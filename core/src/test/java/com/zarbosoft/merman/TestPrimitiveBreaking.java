@@ -111,7 +111,7 @@ public class TestPrimitiveBreaking {
   public void testMultipleAtoms() {
     new GeneralTestWizard(
             PrimitiveSyntax.syntax,
-             new TreeBuilder(PrimitiveSyntax.primitive).add("value", "oret").build(),
+            new TreeBuilder(PrimitiveSyntax.primitive).add("value", "oret").build(),
             new TreeBuilder(PrimitiveSyntax.primitive).add("value", "nyibhye").build())
         .checkTextBrick(0, 1, "oret")
         .checkTextBrick(0, 3, "nyibhye")
@@ -125,7 +125,7 @@ public class TestPrimitiveBreaking {
   public void testMultipleAtomsPriorities() {
     new GeneralTestWizard(
             PrimitiveSyntax.syntax,
-             new TreeBuilder(PrimitiveSyntax.array)
+            new TreeBuilder(PrimitiveSyntax.array)
                 .addArray(
                     "value",
                     new TreeBuilder(PrimitiveSyntax.low).add("value", "oret").build(),
@@ -143,7 +143,7 @@ public class TestPrimitiveBreaking {
   public void testFiniteBreaking() {
     new GeneralTestWizard(
             PrimitiveSyntax.syntax,
-             new TreeBuilder(PrimitiveSyntax.quoted).add("value", "123456").build())
+            new TreeBuilder(PrimitiveSyntax.quoted).add("value", "123456").build())
         .displayWidth(50)
         .checkCourseCount(2);
   }
@@ -152,7 +152,7 @@ public class TestPrimitiveBreaking {
   public void testFiniteBreakLimit() {
     new GeneralTestWizard(
             PrimitiveSyntax.syntax,
-             new TreeBuilder(PrimitiveSyntax.primitive).add("value", "1234").build())
+            new TreeBuilder(PrimitiveSyntax.primitive).add("value", "1234").build())
         .displayWidth(30)
         .checkCourseCount(1);
   }

@@ -1,7 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.language;
 
 import com.zarbosoft.alligatoroid.compiler.Binding;
-import com.zarbosoft.alligatoroid.compiler.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
@@ -40,6 +39,7 @@ public class Bind extends LanguageValue {
     ectx.recordPre(bound.first);
     return ectx.build(NullValue.value);
   }
+
   public Object graphDeserialize(Record data) {
     return graphDeserialize(this.getClass(), data);
   }

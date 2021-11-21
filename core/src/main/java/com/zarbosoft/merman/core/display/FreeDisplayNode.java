@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.core.display;
 
-import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.visual.Vector;
 
 public interface FreeDisplayNode extends DisplayNode {

@@ -114,7 +114,8 @@ public class CursorAtom extends BaseEditCursorAtom {
           {
             ROPair<String, Visual> selectable = visual.selectable.get(index);
             if (selectable.second instanceof VisualFieldAtomBase) {
-              refactorer.refactor(editor, new TSList<>(((VisualFieldAtomBase) selectable.second).atomGet()));
+              refactorer.refactor(
+                  editor, new TSList<>(((VisualFieldAtomBase) selectable.second).atomGet()));
             }
             return true;
           }

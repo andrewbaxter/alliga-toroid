@@ -26,11 +26,6 @@ public class CursorFieldPrimitive extends BaseEditCursorFieldPrimitive2 {
   }
 
   public boolean handleKey(Context context, ButtonEvent hidEvent) {
-    return NotMain.handlePrimitiveNavigation(
-        context,
-        main,
-        this,
-        hidEvent
-    );
+    return NotMain.handlePrimitiveNavigation(context, main, this, hidEvent);
   }
 }

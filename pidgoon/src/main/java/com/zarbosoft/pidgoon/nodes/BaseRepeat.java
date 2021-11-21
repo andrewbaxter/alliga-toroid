@@ -49,7 +49,7 @@ public abstract class BaseRepeat<T, K> extends Node<ROList<K>> {
           grammar,
           step,
           new RepParent<T, K>(this, parent, ROList.empty, color),
-              leaf,
+          leaf,
           seen,
           cause,
           color);
@@ -71,7 +71,7 @@ public abstract class BaseRepeat<T, K> extends Node<ROList<K>> {
 
     @Override
     public void advance(
-            Grammar grammar, final Step step, Leaf leaf, T value, final MismatchCause cause) {
+        Grammar grammar, final Step step, Leaf leaf, T value, final MismatchCause cause) {
       TSList<K> nextCollected = collected.mut();
       self.combine(nextCollected, value);
       if (nextCollected.size() >= self.min)
@@ -81,15 +81,14 @@ public abstract class BaseRepeat<T, K> extends Node<ROList<K>> {
             grammar,
             step,
             new RepParent(self, parent, nextCollected, color),
-                leaf,
+            leaf,
             ROMap.empty,
             cause,
             color);
     }
 
     @Override
-    public void error(
-            Grammar grammar, final Step step, Leaf leaf, final MismatchCause cause) {
+    public void error(Grammar grammar, final Step step, Leaf leaf, final MismatchCause cause) {
       parent.error(grammar, step, leaf, cause);
     }
   }

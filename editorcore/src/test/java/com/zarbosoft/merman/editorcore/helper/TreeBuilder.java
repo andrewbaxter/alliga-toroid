@@ -8,8 +8,8 @@ import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.TSList;
@@ -38,7 +38,7 @@ public class TreeBuilder {
 
   public Atom build() {
     Atom atom = new Atom(type);
-    atom.initialSet(new TSList<>(),data);
+    atom.initialSet(new TSList<>(), data);
     return atom;
   }
 
@@ -60,6 +60,7 @@ public class TreeBuilder {
     data.putNew(key, v);
     return this;
   }
+
   public TreeBuilder addArray(final String key, final TSList<Atom> values) {
     FieldArray v = new FieldArray((BaseBackArraySpec) type.namedFields.get(key));
     v.initialSet(values);
@@ -77,7 +78,7 @@ public class TreeBuilder {
   public Field buildArray() {
     FieldArray fieldArray = new FieldArray(null);
     Atom atom = new Atom(type);
-    atom.initialSet(new TSList<>(),data);
+    atom.initialSet(new TSList<>(), data);
     fieldArray.initialSet(TSList.of(atom));
     return fieldArray;
   }

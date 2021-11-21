@@ -21,7 +21,6 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Map;
 
 public class BackFixedTypeSpec extends BackSpec {
@@ -34,7 +33,8 @@ public class BackFixedTypeSpec extends BackSpec {
   }
 
   @Override
-  public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
+  public ROPair<Atom, Integer> backLocate(
+      Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
     return value.backLocate(at, offset, segments);
   }
 
@@ -46,19 +46,12 @@ public class BackFixedTypeSpec extends BackSpec {
   }
 
   @Override
-  public void finish(
-          MultiError errors,
-          final Syntax syntax,
-          final SyntaxPath typePath) {
+  public void finish(MultiError errors, final Syntax syntax, final SyntaxPath typePath) {
     super.finish(errors, syntax, typePath);
     if (syntax.backType != BackType.LUXEM) {
       errors.add(new BackElementUnsupportedInBackFormat("type", syntax.backType, typePath));
     }
-    value.finish(
-        errors,
-        syntax,
-        typePath.add("value")
-    );
+    value.finish(errors, syntax, typePath.add("value"));
     value.parent =
         new PartParent() {
           @Override
@@ -71,7 +64,7 @@ public class BackFixedTypeSpec extends BackSpec {
             return null;
           }
         };
-    BackSpec.checkSingularNotTypeKey(errors, syntax,typePath.add("value"), value);
+    BackSpec.checkSingularNotTypeKey(errors, syntax, typePath.add("value"), value);
   }
 
   @Override

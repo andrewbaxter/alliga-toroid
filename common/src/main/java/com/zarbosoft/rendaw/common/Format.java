@@ -1,7 +1,5 @@
 package com.zarbosoft.rendaw.common;
 
-import java.util.Objects;
-
 public class Format {
   public static String format(String pattern, Object... args) {
     StringBuilder out = new StringBuilder();

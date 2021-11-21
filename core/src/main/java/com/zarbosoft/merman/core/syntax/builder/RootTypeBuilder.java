@@ -9,9 +9,9 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 public class RootTypeBuilder {
-  private BackSpec back;
   private final TSList<FrontSpec> front = new TSList<>();
   private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
+  private BackSpec back;
 
   public RootTypeBuilder() {}
 
@@ -32,7 +32,6 @@ public class RootTypeBuilder {
   }
 
   public RootAtomType build() {
-    return new RootAtomType(
-        new RootAtomType.Config(back, front.mut(), alignments.mut()));
+    return new RootAtomType(new RootAtomType.Config(back, front.mut(), alignments.mut()));
   }
 }

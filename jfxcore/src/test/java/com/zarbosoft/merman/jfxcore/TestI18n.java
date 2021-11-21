@@ -28,15 +28,17 @@ public class TestI18n {
     }
     Assert.assertThat(
         precedingStart,
-        equalTo(new int[] {I18N_DONE, 0, 0, 0, 0, 0, 0, 0,7, 7, 7, 7, 11, 11, 11, 11, 11, 11}));
+        equalTo(new int[] {I18N_DONE, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 11, 11, 11, 11, 11, 11}));
     Assert.assertThat(
         precedingEnd,
         equalTo(new int[] {I18N_DONE, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 10, 10, 10, 10, 10, 10, 16}));
     Assert.assertThat(
         followingStart,
-        equalTo(new int[] {7, 7, 7, 7, 7, 7, 7, 11, 11, 11, 11, 17, 17, 17, 17, 17, 17, I18N_DONE}));
+        equalTo(
+            new int[] {7, 7, 7, 7, 7, 7, 7, 11, 11, 11, 11, 17, 17, 17, 17, 17, 17, I18N_DONE}));
     Assert.assertThat(
         followingEnd,
-        equalTo(new int[] {5, 5, 5, 5, 5, 10, 10, 10, 10, 10, 16, 16, 16, 16, 16, 16, 17, I18N_DONE}));
+        equalTo(
+            new int[] {5, 5, 5, 5, 5, 10, 10, 10, 10, 10, 16, 16, 16, 16, 16, 16, 17, I18N_DONE}));
   }
 }

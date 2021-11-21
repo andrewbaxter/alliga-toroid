@@ -2,7 +2,6 @@ package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.luxem.write.Writer;
-import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.TSMap;
 
 public final class RemoteModuleId implements ModuleId {

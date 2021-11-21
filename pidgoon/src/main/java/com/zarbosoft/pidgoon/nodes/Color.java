@@ -23,11 +23,13 @@ public class Color<T> extends Node<T> {
 
   @Override
   public void context(
-          Grammar grammar, final Step step,
-          final Parent<T> parent,
-          Leaf leaf, ROMap<Object, Reference.RefParent> seen,
-          final MismatchCause cause,
-          Object color) {
+      Grammar grammar,
+      final Step step,
+      final Parent<T> parent,
+      Leaf leaf,
+      ROMap<Object, Reference.RefParent> seen,
+      final MismatchCause cause,
+      Object color) {
     child.context(grammar, step, new ColorParent<T>(parent), leaf, seen, cause, this.color);
   }
 
@@ -41,7 +43,7 @@ public class Color<T> extends Node<T> {
 
     @Override
     public void advance(
-            Grammar grammar, final Step step, Leaf leaf, T result, final MismatchCause cause) {
+        Grammar grammar, final Step step, Leaf leaf, T result, final MismatchCause cause) {
       parent.advance(grammar, step, leaf, result, cause);
     }
 

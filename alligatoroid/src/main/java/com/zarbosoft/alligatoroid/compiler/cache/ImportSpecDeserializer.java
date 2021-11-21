@@ -46,11 +46,12 @@ public class ImportSpecDeserializer {
 
               @Override
               protected BaseStateSingle innerEatType(
-                      TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
+                  TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
                 ObjectInfo info = typeInfos.getOpt(name);
                 if (info == null) {
                   errors.add(
-                          new Error.DeserializeUnknownType(luxemPath.render(), name, typeInfos.keys().toList()));
+                      new Error.DeserializeUnknownType(
+                          luxemPath.render(), name, typeInfos.keys().toList()));
                   return StateErrorSingle.state;
                 }
                 return new DefaultStateSingle() {

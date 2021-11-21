@@ -11,7 +11,9 @@ public interface ModuleId extends TreeSerializable, GraphSerializable {
 
   interface Dispatcher<T> {
     T handle(LocalModuleId id);
+
     T handle(RemoteModuleId id);
+
     T handle(BundleModuleSubId id);
   }
 }

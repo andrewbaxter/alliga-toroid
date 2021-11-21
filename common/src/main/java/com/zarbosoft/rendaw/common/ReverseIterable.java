@@ -9,6 +9,7 @@ public class ReverseIterable<T> implements Iterable<T> {
   public ReverseIterable(ROList<T> data) {
     this.data = data.inner_();
   }
+
   public ReverseIterable(List<T> data) {
     this.data = data;
   }

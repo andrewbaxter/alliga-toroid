@@ -27,7 +27,8 @@ public class ValueState extends DefaultStateSingle {
   }
 
   @Override
-  protected BaseStateSingle innerEatType(TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
+  protected BaseStateSingle innerEatType(
+      TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
     switch (name) {
       case CACHE_SUBVALUE_TYPE_NULL:
         return inner =

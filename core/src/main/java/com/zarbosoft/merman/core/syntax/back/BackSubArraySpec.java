@@ -2,7 +2,6 @@ package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
-import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
@@ -11,7 +10,6 @@ import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateDeepDataArray;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.error.PluralInvalidAtLocation;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -52,7 +50,8 @@ public class BackSubArraySpec extends BaseBackArraySpec {
   }
 
   @Override
-  public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
+  public ROPair<Atom, Integer> backLocate(
+      Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
     final FieldArray data = (FieldArray) at.namedFields.get(id);
     for (Atom e : data.data) {
       final ROPair<Atom, Integer> res = e.backLocate(offset, segments);

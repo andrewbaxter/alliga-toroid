@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.core.AtomKey;
-import com.zarbosoft.merman.core.SerializerBackPath;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.SerializerBackPath;
 import com.zarbosoft.merman.core.backevents.BackEvent;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
@@ -105,7 +105,8 @@ public class JSSerializer implements Serializer {
         });
   }
 
-  private void walkJSJson(TSList<ROPair<BackEvent, SerializerBackPath>> events, Object o, SerializerBackPath path) {
+  private void walkJSJson(
+      TSList<ROPair<BackEvent, SerializerBackPath>> events, Object o, SerializerBackPath path) {
     if (o == null) {
       events.add(new ROPair<>(new JSpecialPrimitiveEvent("null"), path));
     } else if (o instanceof Double) {

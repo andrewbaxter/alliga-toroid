@@ -14,7 +14,6 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.Iterator;
 import java.util.Map;
 
 public class BackIdSpec extends BackSpecData {
@@ -53,10 +52,7 @@ public class BackIdSpec extends BackSpecData {
 
   @Override
   public void write(
-          Environment env,
-          TSList<WriteState> stack,
-          Map<Object, Object> data,
-          EventConsumer writer) {
+      Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.primitive(Integer.toString((int) data.get(this)));
   }
 }

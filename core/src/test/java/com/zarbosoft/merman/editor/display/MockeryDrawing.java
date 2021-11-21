@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.editor.display;
 
+import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.Drawing;
 import com.zarbosoft.merman.core.display.DrawingContext;
-import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
+import com.zarbosoft.merman.core.visual.Vector;
 
 public class MockeryDrawing extends MockFreeDisplayNode implements Drawing {
   private Vector size = new Vector(0, 0);
@@ -66,7 +66,8 @@ public class MockeryDrawing extends MockFreeDisplayNode implements Drawing {
       public void closePath() {}
 
       @Override
-      public void arcTo(final double c, final double t, final double c2, final double t2, final double radius) {}
+      public void arcTo(
+          final double c, final double t, final double c2, final double t2, final double radius) {}
 
       @Override
       public void translate(final double c, final double t) {}

@@ -8,9 +8,9 @@ public class InvalidPath extends RuntimeException {
   private final ROList<String> full;
 
   public InvalidPath(ROList<String> valid, ROList<String> full) {
-	  this.valid = valid;
-	  this.full = full;
-	}
+    this.valid = valid;
+    this.full = full;
+  }
 
   @Override
   public String toString() {

@@ -88,8 +88,8 @@ public class BeddingContainerRoot {
   public void relayout(Context context) {
     double transverseSpan = current.transverseSpan();
     if (bedding == null
-            || (above && bedding.before != transverseSpan)
-            || (!above && bedding.after != transverseSpan)) {
+        || (above && bedding.before != transverseSpan)
+        || (!above && bedding.after != transverseSpan)) {
       if (bedding != null) {
         context.wall.removeBedding(context, bedding);
       }
@@ -117,17 +117,18 @@ public class BeddingContainerRoot {
     }
     current = inner;
     if (current != null) {
-      inner.setParent(new Container.Parent() {
-        @Override
-        public void relayout(Context context) {
-          BeddingContainerRoot.this.relayout(context);
-        }
+      inner.setParent(
+          new Container.Parent() {
+            @Override
+            public void relayout(Context context) {
+              BeddingContainerRoot.this.relayout(context);
+            }
 
-        @Override
-        public void remove(Context context) {
-          removeInner(editor, inner);
-        }
-      });
+            @Override
+            public void remove(Context context) {
+              removeInner(editor, inner);
+            }
+          });
       place(false);
       updateEdge(context);
       context.midground.add(current);

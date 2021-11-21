@@ -66,7 +66,7 @@ public class LanguageDeserializer {
         Lower.class,
         Import.class,
         ModLocal.class,
-              ModRemote.class
+        ModRemote.class
       };
   private final StatePrototype valuePrototype;
   private final TSMap<String, ObjectInfo> languageNodeInfos = new TSMap<>();
@@ -87,11 +87,12 @@ public class LanguageDeserializer {
 
               @Override
               protected BaseStateSingle innerEatType(
-                      TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
+                  TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
                 ObjectInfo info = languageNodeInfos.getOpt(name);
                 if (info == null) {
                   errors.add(
-                          new Error.DeserializeUnknownType(luxemPath.render(), name, languageNodeInfos.keys().toList()));
+                      new Error.DeserializeUnknownType(
+                          luxemPath.render(), name, languageNodeInfos.keys().toList()));
                   return StateErrorSingle.state;
                 }
                 return new DefaultStateSingle() {
@@ -168,7 +169,7 @@ public class LanguageDeserializer {
         new DefaultStateSingle() {
           @Override
           protected BaseStateSingle innerEatType(
-                  TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
+              TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
             String expected = "alligatoroid:0.0.1";
             if (!expected.equals(name)) {
               errors.add(new Error.DeserializeUnknownLanguageVersion(luxemPath.render(), expected));

@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.core.syntax.error;
 
-public class DuplicateAtomTypeIds extends BaseKVError{
+public class DuplicateAtomTypeIds extends BaseKVError {
 
   public DuplicateAtomTypeIds(String id) {
-        put("id", id);
+    put("id", id);
   }
 
   @Override

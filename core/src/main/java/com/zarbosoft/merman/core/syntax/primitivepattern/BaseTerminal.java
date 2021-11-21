@@ -20,7 +20,8 @@ public abstract class BaseTerminal extends Terminal<Object, EscapableResult<ROLi
       return new ROPair<>(false, new EscapableResult<>(false, true, ROList.empty));
     ROPair<Boolean, ROList<String>> subMatch = matches1((CharacterEvent) event);
     return new ROPair<>(
-        subMatch.first, new EscapableResult<>(true, true, capture ? subMatch.second : ROList.empty));
+        subMatch.first,
+        new EscapableResult<>(true, true, capture ? subMatch.second : ROList.empty));
   }
 
   protected abstract ROPair<Boolean, ROList<String>> matches1(CharacterEvent event);

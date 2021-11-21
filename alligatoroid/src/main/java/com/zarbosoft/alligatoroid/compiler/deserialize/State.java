@@ -20,7 +20,8 @@ public interface State {
 
   void eatType(TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath, String name);
 
-  void eatPrimitive(TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath, String value);
+  void eatPrimitive(
+      TSList<Error> errors, TSList<State> stack, LuxemPathBuilder luxemPath, String value);
 
   public Object build(TSList<Error> errors);
 }

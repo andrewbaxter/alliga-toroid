@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.language;
 
+import com.zarbosoft.alligatoroid.compiler.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
@@ -9,7 +10,6 @@ import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.ModuleIdValue;
 import com.zarbosoft.alligatoroid.compiler.RemoteModuleId;
-import com.zarbosoft.alligatoroid.compiler.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
@@ -49,8 +49,8 @@ public class ModLocal extends LanguageValue {
               public ModuleId handle(RemoteModuleId id) {
                 Path subpath = Paths.get(path).normalize();
                 if (subpath.startsWith("..")) {
-                    context.module.log.errors.add(
-                            new Error.ImportOutsideOwningBundleModule(location, subpath.toString(), id));
+                  context.module.log.errors.add(
+                      new Error.ImportOutsideOwningBundleModule(location, subpath.toString(), id));
                   return null;
                 }
                 return new BundleModuleSubId(id, subpath.toString());
@@ -60,8 +60,9 @@ public class ModLocal extends LanguageValue {
               public ModuleId handle(BundleModuleSubId id) {
                 Path subpath = Paths.get(id.path).resolveSibling(path).normalize();
                 if (subpath.startsWith("..")) {
-                    context.module.log.errors.add(
-                            new Error.ImportOutsideOwningBundleModule(location, subpath.toString(), id.module));
+                  context.module.log.errors.add(
+                      new Error.ImportOutsideOwningBundleModule(
+                          location, subpath.toString(), id.module));
                   return null;
                 }
                 return new BundleModuleSubId(id.module, subpath.toString());

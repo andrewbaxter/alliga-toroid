@@ -11,7 +11,6 @@ import com.zarbosoft.rendaw.common.TSMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public abstract class BaseKVError extends TSMap<String, Object> {
   protected abstract String description();

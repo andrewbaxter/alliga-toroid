@@ -11,8 +11,6 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.List;
-
 public abstract class BaseParseBuilder<O, P extends BaseParseBuilder<O, P>> {
   protected final Reference.Key<O> root;
   protected Grammar grammar;
@@ -72,7 +70,6 @@ public abstract class BaseParseBuilder<O, P extends BaseParseBuilder<O, P>> {
   }
 
   /**
-   *
    * @param data first is event, second is position
    * @return
    */
@@ -81,7 +78,7 @@ public abstract class BaseParseBuilder<O, P extends BaseParseBuilder<O, P>> {
     Object longestPosition = null;
     SerialStep<O> longestStep = null;
     TSList<ROPair<Integer, SerialStep<O>>> stack =
-            new TSList<>(new ROPair<>(0, Pidgoon.prepare(grammar, root, new SerialStep<>())));
+        new TSList<>(new ROPair<>(0, Pidgoon.prepare(grammar, root, new SerialStep<>())));
     while (stack.some()) {
       ROPair<Integer, SerialStep<O>> source = stack.last();
       SerialStep<O> sourceStep = source.second;
@@ -118,5 +115,4 @@ public abstract class BaseParseBuilder<O, P extends BaseParseBuilder<O, P>> {
     }
     throw new InvalidStreamAt(longestPosition, new InvalidStream(longestStep));
   }
-
 }

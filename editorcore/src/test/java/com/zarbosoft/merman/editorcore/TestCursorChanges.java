@@ -118,9 +118,7 @@ public class TestCursorChanges {
 
     // Transform
     transform.accept(
-        editor,
-        found,
-        c -> editor.history.record(editor, null, r -> r.apply(editor, c)));
+        editor, found, c -> editor.history.record(editor, null, r -> r.apply(editor, c)));
     MatcherAssert.assertThat(Helper.rootArray(editor.context.document).data.size(), equalTo(1));
     Helper.assertTreeEqual(Helper.rootArray(editor.context.document).data.get(0), end);
     assertThat(editor.context.cursor.getSyntaxPath(), equalTo(selectEnd));
@@ -373,7 +371,8 @@ public class TestCursorChanges {
               editor,
               ((Field)
                       editor.context.syntaxLocate(
-                          new SyntaxPath("named", "value", "0", "named", "value", "1", "named", "value")))
+                          new SyntaxPath(
+                              "named", "value", "0", "named", "value", "1", "named", "value")))
                   .atomParentRef.atom().fieldParentRef);
         },
         new TreeBuilder(array)
@@ -570,17 +569,15 @@ public class TestCursorChanges {
                 .build());
 
     final FieldArray value =
-        (FieldArray) Helper.rootArray(editor.context.document).data.get(0).namedFields.getOpt("value");
+        (FieldArray)
+            Helper.rootArray(editor.context.document).data.get(0).namedFields.getOpt("value");
     final VisualFieldArray visual = (VisualFieldArray) value.visual;
     visual.select(editor.context, true, beginSelectBegin, beginSelectEnd);
     final CursorFieldArray selection = visual.cursor;
 
     // Transform
     transform.accept(
-        editor,
-        value,
-        syntax,
-        c -> editor.history.record(editor, null, r -> r.apply(editor, c)));
+        editor, value, syntax, c -> editor.history.record(editor, null, r -> r.apply(editor, c)));
     assertThat(selection.beginIndex, equalTo(endSelectBegin));
     assertThat(selection.endIndex, equalTo(endSelectEnd));
 
@@ -853,7 +850,9 @@ public class TestCursorChanges {
           parentDelete(
               editor,
               ((FieldArray)
-                      editor.context.syntaxLocate(new SyntaxPath("named", "value", "0", "named", "value", "named", "value")))
+                      editor.context.syntaxLocate(
+                          new SyntaxPath(
+                              "named", "value", "0", "named", "value", "named", "value")))
                   .atomParentRef.atom().fieldParentRef);
         },
         new TreeBuilder(snooze)

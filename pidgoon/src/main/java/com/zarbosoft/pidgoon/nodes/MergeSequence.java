@@ -1,7 +1,6 @@
 package com.zarbosoft.pidgoon.nodes;
 
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.TSList;
 
 public class MergeSequence<T> extends BaseSequence<ROList<T>, T> {
   @Override

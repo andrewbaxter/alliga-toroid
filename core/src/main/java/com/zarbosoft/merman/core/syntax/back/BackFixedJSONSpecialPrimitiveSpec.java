@@ -17,7 +17,6 @@ import com.zarbosoft.pidgoon.nodes.Discard;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.Iterator;
 import java.util.Map;
 
 public class BackFixedJSONSpecialPrimitiveSpec extends BackSpec {
@@ -30,7 +29,9 @@ public class BackFixedJSONSpecialPrimitiveSpec extends BackSpec {
   @Override
   public void finish(MultiError errors, Syntax syntax, SyntaxPath typePath) {
     if (syntax.backType != BackType.JSON) {
-      errors.add(new BackElementUnsupportedInBackFormat("json special primitive", syntax.backType, typePath));
+      errors.add(
+          new BackElementUnsupportedInBackFormat(
+              "json special primitive", syntax.backType, typePath));
     }
     super.finish(errors, syntax, typePath);
   }
@@ -42,7 +43,8 @@ public class BackFixedJSONSpecialPrimitiveSpec extends BackSpec {
   }
 
   @Override
-  public void write(Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
+  public void write(
+      Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.jsonSpecialPrimitive(value);
   }
 

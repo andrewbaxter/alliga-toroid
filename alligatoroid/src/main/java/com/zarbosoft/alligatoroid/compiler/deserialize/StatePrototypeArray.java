@@ -31,10 +31,12 @@ public class StatePrototypeArray implements StatePrototype {
       }
 
       @Override
-      protected DefaultStateArray innerArrayBegin(TSList<Error> errors, LuxemPathBuilder luxemPath) {
+      protected DefaultStateArray innerArrayBegin(
+          TSList<Error> errors, LuxemPathBuilder luxemPath) {
         return new DefaultStateArray() {
           @Override
-          public BaseStateSingle createElementState(TSList<Error> errors, LuxemPathBuilder luxemPath) {
+          public BaseStateSingle createElementState(
+              TSList<Error> errors, LuxemPathBuilder luxemPath) {
             BaseStateSingle state = inner.create(errors, luxemPath);
             elements.add(state);
             return state;

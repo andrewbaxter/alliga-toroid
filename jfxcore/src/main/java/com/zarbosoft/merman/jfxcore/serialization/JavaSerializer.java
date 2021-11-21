@@ -91,14 +91,10 @@ public class JavaSerializer implements Serializer {
     };
   }
 
-  private static enum JsonState {
-    RECORD_KEY,
-    RECORD_VALUE,
-    ARRAY,
-  }
   private static EventConsumer jsonEventConsumer(final JsonWriter generator) {
     return new EventConsumer() {
       TSList<JsonState> state = new TSList<>(JsonState.RECORD_KEY);
+
       @Override
       public void primitive(final String value) {
         if (state.last() == JsonState.RECORD_KEY) {
@@ -455,5 +451,11 @@ public class JavaSerializer implements Serializer {
               "Code don't conform to syntax tree\nat %s %s\nmismatches at final stream element:\n%s",
               ((Position) e.at).at, ((Position) e.at).event, message.toString()));
     }
+  }
+
+  private static enum JsonState {
+    RECORD_KEY,
+    RECORD_VALUE,
+    ARRAY,
   }
 }

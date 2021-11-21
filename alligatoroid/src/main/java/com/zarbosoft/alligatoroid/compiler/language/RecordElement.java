@@ -11,14 +11,15 @@ import com.zarbosoft.rendaw.common.Assertion;
 public class RecordElement extends LanguageValue {
   public final Value key;
   public final Value value;
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
 
   public RecordElement(Location id, Value key, Value value) {
     super(id, hasLowerInSubtree(key, value));
     this.key = key;
     this.value = value;
+  }
+
+  public Object graphDeserialize(Record data) {
+    return graphDeserialize(this.getClass(), data);
   }
 
   @Override

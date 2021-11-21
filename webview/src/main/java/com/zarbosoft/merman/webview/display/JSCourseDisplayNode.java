@@ -34,9 +34,7 @@ public abstract class JSCourseDisplayNode extends JSDisplayNode implements Cours
     this.transverseBaseline = baseline;
     setJSPositionInternal(
         display.convert.unconvertTransverse(
-            transverseCorner(),
-            inner_().clientWidth,
-            inner_().clientHeight),
+            transverseCorner(), inner_().clientWidth, inner_().clientHeight),
         animate);
   }
 
@@ -62,9 +60,7 @@ public abstract class JSCourseDisplayNode extends JSDisplayNode implements Cours
     this.converse = converse;
     setJSPositionInternal(
         display.convert.unconvertConverse(
-            converseCorner(),
-            inner_().clientWidth,
-            inner_().clientHeight),
+            converseCorner(), inner_().clientWidth, inner_().clientHeight),
         animate);
   }
 }

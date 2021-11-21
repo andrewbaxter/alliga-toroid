@@ -25,11 +25,12 @@ public class StateErrorSingle extends BaseStateSingle {
   }
 
   @Override
-  protected BaseStateSingle innerEatType(TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
+  protected BaseStateSingle innerEatType(
+      TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
     return this;
   }
 
   @Override
   protected void innerEatPrimitiveUntyped(
-          TSList<Error> errors, LuxemPathBuilder luxemPath, String value) {}
+      TSList<Error> errors, LuxemPathBuilder luxemPath, String value) {}
 }

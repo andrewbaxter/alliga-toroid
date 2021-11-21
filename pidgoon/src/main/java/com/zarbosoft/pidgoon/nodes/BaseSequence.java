@@ -33,12 +33,13 @@ public abstract class BaseSequence<K, T> extends Node<ROList<T>> {
 
   @Override
   public void context(
-          Grammar grammar, final Step step,
-          final Parent<ROList<T>> parent,
-          Leaf leaf,
-          final ROMap<Object, Reference.RefParent> seen,
-          final MismatchCause cause,
-          Object color) {
+      Grammar grammar,
+      final Step step,
+      final Parent<ROList<T>> parent,
+      Leaf leaf,
+      final ROMap<Object, Reference.RefParent> seen,
+      final MismatchCause cause,
+      Object color) {
     if (children.isEmpty()) {
       parent.advance(grammar, step, leaf, ROList.empty, cause);
     } else {
@@ -46,9 +47,10 @@ public abstract class BaseSequence<K, T> extends Node<ROList<T>> {
           .get(0)
           .first
           .context(
-                  grammar, step,
+              grammar,
+              step,
               new SeqParent<K, T>(this, parent, 0, ROList.empty, color),
-                  leaf,
+              leaf,
               seen,
               cause,
               color);
@@ -58,6 +60,8 @@ public abstract class BaseSequence<K, T> extends Node<ROList<T>> {
   public boolean isEmpty() {
     return children.isEmpty();
   }
+
+  protected abstract ROList<T> collect(ROList<T> collection, K result);
 
   private static class SeqParent<K, T> implements Parent<K> {
     final int step;
@@ -80,10 +84,11 @@ public abstract class BaseSequence<K, T> extends Node<ROList<T>> {
     }
 
     @Override
-    public void advance(Grammar grammar, Step step, Leaf leaf, K result, MismatchCause mismatchCause) {
+    public void advance(
+        Grammar grammar, Step step, Leaf leaf, K result, MismatchCause mismatchCause) {
       final int nextStep = this.step + 1;
       ROList<T> newCollected;
-      if (self.children.get(this.step).second) newCollected = self.collect(collected,result);
+      if (self.children.get(this.step).second) newCollected = self.collect(collected, result);
       else newCollected = collected;
       if (nextStep >= self.children.size()) {
         parent.advance(grammar, step, leaf, newCollected, mismatchCause);
@@ -92,10 +97,10 @@ public abstract class BaseSequence<K, T> extends Node<ROList<T>> {
             .get(nextStep)
             .first
             .context(
-                    grammar,
+                grammar,
                 step,
                 new SeqParent<K, T>(self, parent, nextStep, newCollected, color),
-                    leaf,
+                leaf,
                 ROMap.empty,
                 mismatchCause,
                 color);
@@ -107,6 +112,4 @@ public abstract class BaseSequence<K, T> extends Node<ROList<T>> {
       parent.error(grammar, step, leaf, mismatchCause);
     }
   }
-
-  protected abstract ROList<T> collect(ROList<T> collection, K result);
 }

@@ -37,10 +37,7 @@ public class MortarHalfBoolType implements MortarHalfDataType {
   @Override
   public MortarTargetModuleContext.LowerResult box(JVMSharedCode valueCode) {
     return new MortarTargetModuleContext.LowerResult(
-        MortarHalfBoxedBoolType.type,
-        new MortarCode()
-            .add(valueCode)
-            .add(JVMDescriptor.boxBool));
+        MortarHalfBoxedBoolType.type, new MortarCode().add(valueCode).add(JVMDescriptor.boxBool));
   }
 
   @Override

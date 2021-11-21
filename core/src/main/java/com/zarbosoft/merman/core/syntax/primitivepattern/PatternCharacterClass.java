@@ -17,7 +17,7 @@ public class PatternCharacterClass extends Pattern {
   public Node<EscapableResult<ROList<String>>> build(boolean capture) {
     Union<EscapableResult<ROList<String>>> union = new Union<>();
     for (ROPair<String, String> range : ranges) {
-        union.add(new CharacterRangeTerminal(capture, range.first, range.second));
+      union.add(new CharacterRangeTerminal(capture, range.first, range.second));
     }
     return union;
   }

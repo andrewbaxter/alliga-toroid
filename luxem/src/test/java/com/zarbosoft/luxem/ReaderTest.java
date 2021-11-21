@@ -5,7 +5,6 @@ import com.zarbosoft.luxem.read.InvalidStream;
 import com.zarbosoft.luxem.read.Reader;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.MatchingEvent;
-import com.zarbosoft.pidgoon.events.Position;
 import com.zarbosoft.rendaw.common.ROPair;
 import org.junit.Test;
 

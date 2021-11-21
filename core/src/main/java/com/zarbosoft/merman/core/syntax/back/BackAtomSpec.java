@@ -5,7 +5,6 @@ import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.Field;
-import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
@@ -37,7 +36,8 @@ public class BackAtomSpec extends BackSpecData {
   }
 
   @Override
-  public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
+  public ROPair<Atom, Integer> backLocate(
+      Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
     FieldAtom data = (FieldAtom) at.namedFields.get(id);
     return data.data.backLocate(offset, segments);
   }
@@ -75,10 +75,7 @@ public class BackAtomSpec extends BackSpecData {
   }
 
   @Override
-  public void finish(
-          MultiError errors,
-          Syntax syntax,
-          SyntaxPath typePath) {
+  public void finish(MultiError errors, Syntax syntax, SyntaxPath typePath) {
     super.finish(errors, syntax, typePath);
     if (type == null) return; // Gaps have null type, take anything
     ROOrderedSetRef<AtomType> childTypes = syntax.splayedTypes.getOpt(type);
@@ -86,7 +83,7 @@ public class BackAtomSpec extends BackSpecData {
       errors.add(new AtomTypeDoesntExist(typePath, type));
     } else {
       for (AtomType childType : childTypes) {
-        BackSpec.checkSingularNotKey(errors, syntax,typePath,childType.back());
+        BackSpec.checkSingularNotKey(errors, syntax, typePath, childType.back());
       }
     }
   }

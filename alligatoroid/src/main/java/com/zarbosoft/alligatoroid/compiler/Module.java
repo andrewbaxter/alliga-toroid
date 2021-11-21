@@ -1,6 +1,5 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 

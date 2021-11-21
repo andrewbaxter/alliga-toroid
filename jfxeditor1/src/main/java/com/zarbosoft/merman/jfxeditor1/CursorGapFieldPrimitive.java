@@ -24,11 +24,6 @@ public class CursorGapFieldPrimitive extends BaseEditCursorGapFieldPrimitive {
   }
 
   public boolean handleKey(Context context, ButtonEvent hidEvent) {
-    return NotMain.handlePrimitiveNavigation(
-        context,
-        main,
-        this,
-        hidEvent
-    );
+    return NotMain.handlePrimitiveNavigation(context, main, this, hidEvent);
   }
 }

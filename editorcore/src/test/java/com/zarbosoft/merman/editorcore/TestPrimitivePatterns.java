@@ -14,11 +14,13 @@ import org.junit.Test;
 public class TestPrimitivePatterns {
   @Test
   public void testPatternAllowed() {
-    final FreeAtomType quoted = new TypeBuilder("quoted")
+    final FreeAtomType quoted =
+        new TypeBuilder("quoted")
             .back(Helper.buildBackDataPrimitiveLetters("value"))
             .frontDataPrimitive("value")
             .build();
-    final Syntax syntax = new SyntaxBuilder("any")
+    final Syntax syntax =
+        new SyntaxBuilder("any")
             .type(quoted)
             .group("any", new GroupBuilder().type(quoted).build())
             .build();
@@ -31,11 +33,13 @@ public class TestPrimitivePatterns {
 
   @Test
   public void testPatternDisallowed() {
-    final FreeAtomType quoted = new TypeBuilder("quoted")
+    final FreeAtomType quoted =
+        new TypeBuilder("quoted")
             .back(Helper.buildBackDataPrimitiveLetters("value"))
             .frontDataPrimitive("value")
             .build();
-    final Syntax syntax = new SyntaxBuilder("any")
+    final Syntax syntax =
+        new SyntaxBuilder("any")
             .type(quoted)
             .group("any", new GroupBuilder().type(quoted).build())
             .build();

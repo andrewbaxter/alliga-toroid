@@ -7,6 +7,7 @@ public interface GraphSerializable {
 
   /**
    * Presents the object structure as a record so it can be walked by the graph serializer.
+   *
    * @return
    */
   Record graphSerialize();
