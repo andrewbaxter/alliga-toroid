@@ -7,9 +7,7 @@ import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.jvm.JVMBuiltin;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.CreatedFile;
 import com.zarbosoft.alligatoroid.compiler.mortar.Function;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarClass;
@@ -21,9 +19,6 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfStringType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
-import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
-import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -37,6 +32,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 
+import static com.zarbosoft.rendaw.common.Common.uncheck;
 import static org.objectweb.asm.Opcodes.GETFIELD;
 
 public class Builtin extends LanguageValue {
@@ -44,18 +40,36 @@ public class Builtin extends LanguageValue {
   public static TSMap<Class, MortarClass> wrappedClasses = new TSMap<>();
 
   public static LooseRecord builtin =
-      new LooseRecord(
-          new TSOrderedMap()
-              .put("log", EvaluateResult.pure(wrapFunction(Builtin.class, "builtinLog")))
-              .put("jvm", EvaluateResult.pure(JVMBuiltin.builtin))
-              .put("null", EvaluateResult.pure(NullValue.value))
-              .put("nullType", EvaluateResult.pure(NullType.type))
-              .put(
-                  "createFile",
-                  EvaluateResult.pure(wrapFunction(Builtin.class, "builtinCreateFile"))));
+      aggregateBuiltin(com.zarbosoft.alligatoroid.compiler.mortar.Builtin.class);
 
   public Builtin(Location id) {
     super(id, false);
+  }
+
+  private static LooseRecord aggregateBuiltin(Class klass) {
+    TSOrderedMap<Object, EvaluateResult> values = new TSOrderedMap<>();
+    for (Field f : klass.getDeclaredFields()) {
+      if (!Modifier.isStatic(f.getModifiers())) continue;
+      String name = f.getName();
+      if (name.startsWith("_")) {
+        name = name.substring(1);
+      }
+      Object data = uncheck(() -> f.get(null));
+      if (data instanceof Value) {
+        values.put(name, EvaluateResult.pure((Value) data));
+      } else {
+        values.put(name, EvaluateResult.pure(aggregateBuiltin(data.getClass())));
+      }
+    }
+    for (Method m : klass.getDeclaredMethods()) {
+      if (!Modifier.isStatic(m.getModifiers())) continue;
+      String name = m.getName();
+      if (name.startsWith("_")) {
+        name = name.substring(1);
+      }
+      values.put(name, EvaluateResult.pure(wrapFunction(klass, m.getName())));
+    }
+    return new LooseRecord(values);
   }
 
   /*
@@ -95,10 +109,6 @@ public class Builtin extends LanguageValue {
     return out;
   }
    */
-
-  public static void builtinLog(Module module, String message) {
-    module.log.log.add(message);
-  }
 
   public static FuncInfo funcDescriptor(Method method) {
     boolean needsModule = false;
@@ -201,10 +211,6 @@ public class Builtin extends LanguageValue {
     FuncInfo info = funcDescriptor(method);
     return new Function(
         JVMDescriptor.jvmName(klass.getCanonicalName()), name, info.descriptor, info.returnType);
-  }
-
-  public static CreatedFile builtinCreateFile(String path) {
-    return new CreatedFile(path);
   }
 
   @Override

@@ -1,52 +1,34 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.LooseRecord;
-import com.zarbosoft.rendaw.common.TSOrderedMap;
 
-import static com.zarbosoft.alligatoroid.compiler.language.Builtin.wrapFunction;
-
+/** Fields in builtin.jvm -- reflected into a value */
 public class JVMBuiltin {
-  public static final LooseRecord builtin =
-      new LooseRecord(
-          new TSOrderedMap()
-              .put(
-                  "newClass",
-                  EvaluateResult.pure(wrapFunction(JVMBuiltin.class, "builtinNewClass")))
-              .put(
-                  "externClass",
-                  EvaluateResult.pure(wrapFunction(JVMBuiltin.class, "builtinExternClass")))
-              .put(
-                  "externStaticField",
-                  EvaluateResult.pure(wrapFunction(JVMBuiltin.class, "builtinExternStaticField")))
-              .put("string", EvaluateResult.pure(JVMStringType.value))
-              .put("int", EvaluateResult.pure(JVMIntType.value))
-              .put("byte", EvaluateResult.pure(JVMByteType.value))
-              .put("char", EvaluateResult.pure(JVMCharType.value))
-              .put("double", EvaluateResult.pure(JVMDoubleType.value))
-              .put("float", EvaluateResult.pure(JVMFloatType.value))
-              .put("long", EvaluateResult.pure(JVMLongType.value))
-              .put("bool", EvaluateResult.pure(JVMBoolType.value))
-              .put("array", EvaluateResult.pure(wrapFunction(JVMBuiltin.class, "builtinArray"))));
+  public static final Value string = JVMStringType.value;
+  public static final Value _int = JVMIntType.value;
+  public static final Value _byte = JVMByteType.value;
+  public static final Value _char = JVMCharType.value;
+  public static final Value _double = JVMDoubleType.value;
+  public static final Value _float = JVMFloatType.value;
+  public static final Value _long = JVMLongType.value;
+  public static final Value bool = JVMBoolType.value;
 
-  public static JVMArrayType builtinArray(Value elementType) {
+  public static JVMArrayType array(Value elementType) {
     return new JVMArrayType((JVMDataType) elementType);
   }
 
-  public static RetClass builtinNewClass(String qualifiedName) {
+  public static RetClass newClass(String qualifiedName) {
     JVMClassType type = new JVMClassType(qualifiedName);
     return new RetClass(type, new JVMClassBuilder(type));
   }
 
-  public static RetExternClass builtinExternClass(String qualifiedName, Value setup) {
+  public static RetExternClass externClass(String qualifiedName, Value setup) {
     JVMExternClassType type = new JVMExternClassType(qualifiedName, setup);
     JVMExternConstructor constructor = new JVMExternConstructor(type);
     return new RetExternClass(type, constructor);
   }
 
-  public static Value builtinExternStaticField(
-      String qualifiedClassName, String fieldName, Value spec) {
+  public static Value externStaticField(String qualifiedClassName, String fieldName, Value spec) {
     JVMDataType spec1 = (JVMDataType) spec;
     return new JVMExternStaticField(qualifiedClassName, fieldName, spec1);
   }
