@@ -22,8 +22,4 @@ public class Access extends LanguageValue {
     return ectx.build(
         ectx.record(ectx.evaluate(this.base).access(context, location, ectx.evaluate(this.key))));
   }
-
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
 }

@@ -16,10 +16,6 @@ public final class Lower extends LanguageValue {
     this.child = child;
   }
 
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Override
   public EvaluateResult evaluate(Context context) {
     context.module.log.errors.add(new Error.LowerTooDeep(location));

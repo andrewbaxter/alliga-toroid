@@ -212,10 +212,6 @@ public class Builtin extends LanguageValue {
     return EvaluateResult.pure(builtin);
   }
 
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Retention(RetentionPolicy.RUNTIME)
   public @interface WrapExpose {}
 

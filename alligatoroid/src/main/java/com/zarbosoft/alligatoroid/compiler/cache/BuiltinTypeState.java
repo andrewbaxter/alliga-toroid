@@ -42,6 +42,6 @@ public class BuiltinTypeState extends DefaultStateArrayPair {
   @Override
   public Object build(TSList<Error> errors) {
     Record record = (Record) inner.build(errors);
-    return uncheck(() -> Cache.builtinTypeMap.get(type).invoke(null, record));
+    return uncheck(() -> Cache.builtinTypeMap.get(type).graphDeserialize(record));
   }
 }

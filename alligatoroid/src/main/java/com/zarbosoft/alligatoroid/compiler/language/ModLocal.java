@@ -25,10 +25,6 @@ public class ModLocal extends LanguageValue {
     this.path = path;
   }
 
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Override
   public EvaluateResult evaluate(Context context) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);

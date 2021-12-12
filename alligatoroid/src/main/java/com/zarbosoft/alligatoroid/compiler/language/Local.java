@@ -18,10 +18,6 @@ public class Local extends LanguageValue {
     this.key = key;
   }
 
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Override
   public EvaluateResult evaluate(Context context) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);

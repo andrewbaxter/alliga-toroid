@@ -20,10 +20,6 @@ public class Record extends LanguageValue {
     this.elements = elements;
   }
 
-  public Object graphDeserialize(com.zarbosoft.alligatoroid.compiler.mortar.Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Override
   public EvaluateResult evaluate(Context context) {
     TSOrderedMap<Object, EvaluateResult> data = new TSOrderedMap<>();

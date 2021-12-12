@@ -15,10 +15,6 @@ public class LiteralBool extends LanguageValue {
     this.value = value;
   }
 
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Override
   public EvaluateResult evaluate(Context context) {
     return EvaluateResult.pure(new WholeBool(value));

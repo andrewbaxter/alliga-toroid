@@ -46,10 +46,6 @@ public class Block extends LanguageValue {
     return new EvaluateResult(context.target.merge(context, location, pre), post, last);
   }
 
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Override
   public EvaluateResult evaluate(Context context) {
     return evaluate(context, location, statements);

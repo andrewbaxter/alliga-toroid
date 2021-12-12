@@ -1,5 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.cache;
 
+import com.zarbosoft.alligatoroid.compiler.AutoBuiltinMeta;
+import com.zarbosoft.alligatoroid.compiler.BuiltinMeta;
 import com.zarbosoft.alligatoroid.compiler.BundleValue;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.ErrorValue;
@@ -33,7 +35,6 @@ import com.zarbosoft.rendaw.common.TSSet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -53,7 +54,7 @@ public class Cache {
    *
    * <p>Maps mortar-defined classes to cache paths
    */
-  public static final ROMap<String, Method> builtinTypeMap;
+  public static final ROMap<String, GraphSerializableMeta> builtinTypeMap;
 
   public static final String CACHE_OBJECT_TYPE_IMPORT_SPEC = "importSpec";
   public static final String CACHE_OBJECT_TYPE_BUILTIN = "builtin";
@@ -70,25 +71,23 @@ public class Cache {
   public static final String CACHE_SUBVALUE_TYPE_NULL = "null";
 
   static {
-    TSMap<String, Method> builtinTypeMap1 = new TSMap<>();
-    Class[] builtinTypes = {
-      Location.class,
-      LocalModuleId.class,
-      RemoteModuleId.class,
-      BundleValue.class,
-      JVMExternClassType.class,
-      JVMExternStaticField.class,
-      JVMShallowMethodFieldType.class,
-      JVMArrayType.class,
-      JVMExternConstructor.class
+    TSMap<String, GraphSerializableMeta> builtinTypeMap1 = new TSMap<>();
+    BuiltinMeta[] builtinTypes = {
+      new AutoBuiltinMeta(Location.class),
+      new AutoBuiltinMeta(LocalModuleId.class),
+      new AutoBuiltinMeta(RemoteModuleId.class),
+      new AutoBuiltinMeta(BundleValue.class),
+      new AutoBuiltinMeta(JVMExternClassType.class),
+      new AutoBuiltinMeta(JVMExternStaticField.class),
+      new AutoBuiltinMeta(JVMShallowMethodFieldType.class),
+      new AutoBuiltinMeta(JVMArrayType.class),
+      new AutoBuiltinMeta(JVMExternConstructor.class)
     };
-    for (Class klass : builtinTypes) {
-      builtinTypeMap1.put(
-          builtinTypeKey(klass), uncheck(() -> klass.getMethod("graphDeserialize", Record.class)));
+    for (BuiltinMeta klass : builtinTypes) {
+      builtinTypeMap1.put(builtinTypeKey(klass.getKlass()), klass);
     }
-    for (Class klass : LanguageDeserializer.LANGUAGE) {
-      builtinTypeMap1.put(
-          builtinTypeKey(klass), uncheck(() -> klass.getMethod("graphDeserialize", Record.class)));
+    for (BuiltinMeta klass : LanguageDeserializer.LANGUAGE) {
+      builtinTypeMap1.put(builtinTypeKey(klass.getKlass()), klass);
     }
     builtinTypeMap = builtinTypeMap1;
 

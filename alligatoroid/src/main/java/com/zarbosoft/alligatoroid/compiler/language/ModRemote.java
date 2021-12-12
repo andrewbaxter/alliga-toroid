@@ -20,10 +20,6 @@ public class ModRemote extends LanguageValue {
     this.hash = hash;
   }
 
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Override
   public EvaluateResult evaluate(Context context) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);

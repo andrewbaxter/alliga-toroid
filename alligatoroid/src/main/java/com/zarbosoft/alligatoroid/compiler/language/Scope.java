@@ -19,10 +19,6 @@ public class Scope extends LanguageValue {
     this.inner = inner;
   }
 
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Override
   public EvaluateResult evaluate(Context context) {
     Context subcontext = context.pushScope();

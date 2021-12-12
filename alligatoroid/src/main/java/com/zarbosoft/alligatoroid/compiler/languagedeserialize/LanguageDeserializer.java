@@ -1,5 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.languagedeserialize;
 
+import com.zarbosoft.alligatoroid.compiler.AutoBuiltinMeta;
+import com.zarbosoft.alligatoroid.compiler.BuiltinMeta;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.ModuleId;
@@ -49,24 +51,24 @@ import java.lang.reflect.Type;
 import static com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer.errorRet;
 
 public class LanguageDeserializer {
-  public static final Class[] LANGUAGE =
-      new Class[] {
-        Access.class,
-        Bind.class,
-        Block.class,
-        Builtin.class,
-        Call.class,
-        LiteralString.class,
-        LiteralBool.class,
-        Local.class,
-        Record.class,
-        RecordElement.class,
-        Tuple.class,
-        Stage.class,
-        Lower.class,
-        Import.class,
-        ModLocal.class,
-        ModRemote.class
+  public static final BuiltinMeta[] LANGUAGE =
+      new BuiltinMeta[] {
+        new AutoBuiltinMeta(Access.class),
+        new AutoBuiltinMeta(Bind.class),
+        new AutoBuiltinMeta(Block.class),
+        new AutoBuiltinMeta(Builtin.class),
+        new AutoBuiltinMeta(Call.class),
+        new AutoBuiltinMeta(LiteralString.class),
+        new AutoBuiltinMeta(LiteralBool.class),
+        new AutoBuiltinMeta(Local.class),
+        new AutoBuiltinMeta(Record.class),
+        new AutoBuiltinMeta(RecordElement.class),
+        new AutoBuiltinMeta(Tuple.class),
+        new AutoBuiltinMeta(Stage.class),
+        new AutoBuiltinMeta(Lower.class),
+        new AutoBuiltinMeta(Import.class),
+        new AutoBuiltinMeta(ModLocal.class),
+        new AutoBuiltinMeta(ModRemote.class)
       };
   private final StatePrototype valuePrototype;
   private final TSMap<String, ObjectInfo> languageNodeInfos = new TSMap<>();
@@ -108,12 +110,13 @@ public class LanguageDeserializer {
           }
         };
 
-    for (Class klass : LANGUAGE) {
-      String type = toUnderscore(klass.getSimpleName());
+    for (BuiltinMeta klass : LANGUAGE) {
+      // String type = toUnderscore(klass.getSimpleName());
+      String type = toUnderscore(klass.getKlass().getSimpleName());
       languageNodeInfos.put(type, new ObjectInfo(type));
     }
-    for (Class klass : LANGUAGE) {
-      Constructor constructor = klass.getConstructors()[0];
+    for (BuiltinMeta klass : LANGUAGE) {
+      Constructor constructor = klass.getKlass().getConstructors()[0];
       TSMap<String, StatePrototype> fields = new TSMap<>();
       TSMap<String, Integer> argOrder = new TSMap<>();
       for (int i = 0; i < constructor.getParameters().length; i++) {
@@ -139,7 +142,7 @@ public class LanguageDeserializer {
         } else throw new Assertion();
         fields.put(parameter.getName(), prototype);
       }
-      String type = toUnderscore(klass.getSimpleName());
+      String type = toUnderscore(klass.getKlass().getSimpleName());
       ObjectInfo prototype = languageNodeInfos.get(type);
       prototype.constructor = constructor;
       prototype.argOrder = argOrder;

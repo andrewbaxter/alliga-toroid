@@ -18,10 +18,6 @@ public class RecordElement extends LanguageValue {
     this.value = value;
   }
 
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Override
   public EvaluateResult evaluate(Context context) {
     // Evaluated by record literal directly

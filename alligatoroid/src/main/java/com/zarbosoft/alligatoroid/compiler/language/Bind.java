@@ -39,8 +39,4 @@ public class Bind extends LanguageValue {
     ectx.recordPre(bound.first);
     return ectx.build(NullValue.value);
   }
-
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
 }

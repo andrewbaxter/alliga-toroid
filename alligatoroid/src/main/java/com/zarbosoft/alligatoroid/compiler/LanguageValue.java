@@ -37,19 +37,6 @@ public abstract class LanguageValue implements SimpleValue, GraphSerializable {
     return out;
   }
 
-  public static Object graphDeserialize(Class klass, Record data) {
-    Constructor constructor = klass.getConstructors()[0];
-    Object[] args = new Object[constructor.getParameterCount()];
-    for (int i = 0; i < constructor.getParameters().length; i++) {
-      Parameter param = constructor.getParameters()[i];
-      args[i] = data.data.get(param.getName());
-      if (args[i] instanceof Tuple) {
-        args[i] = ((Tuple) args[i]).data;
-      }
-    }
-    return uncheck(() -> constructor.newInstance(args));
-  }
-
   @Override
   public abstract EvaluateResult evaluate(Context context);
 

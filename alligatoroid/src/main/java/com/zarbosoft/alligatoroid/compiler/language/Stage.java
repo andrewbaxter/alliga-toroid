@@ -98,10 +98,6 @@ public class Stage extends LanguageValue {
         pre, context.target.merge(context, location, new ReverseIterable<>(post)));
   }
 
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Override
   public EvaluateResult evaluate(Context context) {
     StageLowerResult stageRes = stageLower(context, location, child);

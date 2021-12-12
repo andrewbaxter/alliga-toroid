@@ -22,10 +22,6 @@ public class Import extends LanguageValue {
     this.spec = spec;
   }
 
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Override
   public EvaluateResult evaluate(Context context) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);

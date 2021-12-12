@@ -17,10 +17,6 @@ public class Call extends LanguageValue {
     this.argument = argument;
   }
 
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Override
   public EvaluateResult evaluate(Context context) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);

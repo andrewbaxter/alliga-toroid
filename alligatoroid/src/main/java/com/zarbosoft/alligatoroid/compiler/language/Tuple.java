@@ -18,10 +18,6 @@ public class Tuple extends LanguageValue {
     this.elements = elements;
   }
 
-  public Object graphDeserialize(Record data) {
-    return graphDeserialize(this.getClass(), data);
-  }
-
   @Override
   public EvaluateResult evaluate(Context context) {
     TSList<EvaluateResult> data = new TSList<>();
