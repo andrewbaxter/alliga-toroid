@@ -1,8 +1,8 @@
 package com.zarbosoft.atstdlib;
 
-import com.zarbosoft.alligatoroid.compiler.Error;
-import com.zarbosoft.alligatoroid.compiler.ImportSpec;
-import com.zarbosoft.alligatoroid.compiler.Module;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.modules.Module;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -45,13 +45,13 @@ public class Main {
     boolean hadErrors = false;
     Writer outWriter = new Writer(System.out, (byte) ' ', 4);
     for (Path p : generated) {
-      TSMap<ImportSpec, Module> results = compile(p.toString());
+      TSMap<ImportId, Module> results = compile(p.toString());
       outWriter.arrayBegin();
       for (Module value : results.values()) {
         outWriter.recordBegin();
 
-        if (value.sourcePath != null) {
-          outWriter.primitive("source").primitive(value.sourcePath);
+        if (value.localSourcePath() != null) {
+          outWriter.primitive("source").primitive(value.localSourcePath());
         }
 
         if (value.log.errors.some()) {
@@ -59,7 +59,7 @@ public class Main {
         }
 
         outWriter.primitive("id");
-        value.spec.treeSerialize(outWriter);
+        value.spec().treeSerialize(outWriter);
 
         outWriter.primitive("log");
         outWriter.arrayBegin();

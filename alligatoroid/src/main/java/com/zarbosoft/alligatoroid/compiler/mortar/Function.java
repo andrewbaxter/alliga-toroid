@@ -1,9 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.Location;
-import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext.convertFunctionArgument;
@@ -24,10 +24,10 @@ public class Function implements SimpleValue {
   }
 
   @Override
-  public EvaluateResult call(Context context, Location location, Value argument) {
+  public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
     MortarCode code = new MortarCode();
     convertFunctionArgument(context, code, argument);
-    code.line(context.module.sourceLocation(location))
+    code.line(context.moduleContext.sourceLocation(location))
         .add(new MethodInsnNode(INVOKESTATIC, jbcInternalClass, name, jbcDesc, false));
     if (returnType == null) return new EvaluateResult(code, null, NullValue.value);
     else return EvaluateResult.pure(returnType.stackAsValue(code));

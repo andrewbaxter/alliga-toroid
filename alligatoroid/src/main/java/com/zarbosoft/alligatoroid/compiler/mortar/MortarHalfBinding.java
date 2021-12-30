@@ -1,9 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
-import com.zarbosoft.alligatoroid.compiler.Binding;
-import com.zarbosoft.alligatoroid.compiler.Context;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 
 public class MortarHalfBinding implements Binding {
@@ -16,7 +16,7 @@ public class MortarHalfBinding implements Binding {
   }
 
   @Override
-  public EvaluateResult fork(Context context, Location location) {
+  public EvaluateResult fork(EvaluationContext context, Location location) {
     return EvaluateResult.pure(
         type.asValue(
             new MortarProtocode() {
@@ -26,14 +26,14 @@ public class MortarHalfBinding implements Binding {
               }
 
               @Override
-              public TargetCode drop(Context context, Location location) {
+              public TargetCode drop(EvaluationContext context, Location location) {
                 return null;
               }
             }));
   }
 
   @Override
-  public TargetCode drop(Context context, Location location) {
+  public TargetCode drop(EvaluationContext context, Location location) {
     return null;
   }
 }

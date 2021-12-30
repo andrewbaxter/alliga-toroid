@@ -41,7 +41,7 @@ public class Common {
     return new UncheckedException(e);
   }
 
-  public static <T> T uncheck(final Thrower1<T> code) {
+  public static <T> T uncheck(final UncheckedSupplier<T> code) {
     try {
       return code.get();
     } catch (InvocationTargetException e) {
@@ -61,7 +61,7 @@ public class Common {
     }
   }
 
-  public static void uncheck(final Thrower2 code) {
+  public static void uncheck(final UncheckedRunnable code) {
     try {
       code.get();
     } catch (InvocationTargetException e) {
@@ -81,6 +81,13 @@ public class Common {
     }
   }
 
+  /**
+   *
+   * @param text
+   * @param delim
+   * @param n max returned elements
+   * @return
+   */
   public static ROList<String> splitN(String text, String delim, int n) {
     TSList<String> out = new TSList<>();
     int at = 0;
@@ -111,12 +118,12 @@ public class Common {
   }
 
   @FunctionalInterface
-  public interface Thrower1<T> {
+  public interface UncheckedSupplier<T> {
     T get() throws Exception, Error;
   }
 
   @FunctionalInterface
-  public interface Thrower2 {
+  public interface UncheckedRunnable {
     void get() throws Exception, Error;
   }
 

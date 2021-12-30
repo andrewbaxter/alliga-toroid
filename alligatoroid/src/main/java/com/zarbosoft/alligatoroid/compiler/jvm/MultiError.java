@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Error;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class MultiError extends RuntimeException {

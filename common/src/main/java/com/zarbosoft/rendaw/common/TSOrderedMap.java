@@ -17,6 +17,11 @@ public class TSOrderedMap<K, V> implements ROOrderedMap<K, V> {
     unordered = new HashMap<>();
   }
 
+  private TSOrderedMap(List<ROPair<K, V>> ordered, Map<K, V> unordered) {
+    this.ordered = ordered;
+    this.unordered = unordered;
+  }
+
   public TSOrderedMap(Consumer<TSOrderedMap<K, V>> c) {
     this();
     c.accept(this);
@@ -70,6 +75,11 @@ public class TSOrderedMap<K, V> implements ROOrderedMap<K, V> {
   @Override
   public int size() {
     return ordered.size();
+  }
+
+  @Override
+  public TSOrderedMap<K, V> mut() {
+    return new TSOrderedMap<>(new ArrayList(ordered), new HashMap<>(unordered));
   }
 
   @Override

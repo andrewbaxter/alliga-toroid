@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
-import com.zarbosoft.alligatoroid.compiler.language.Builtin;
+import com.zarbosoft.alligatoroid.compiler.Meta;
 
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -10,14 +10,13 @@ import static com.zarbosoft.rendaw.common.Common.uncheck;
 import static java.nio.file.StandardOpenOption.CREATE;
 
 public class CreatedFile {
-
   private final OutputStream outputStream;
 
   public CreatedFile(String path) {
     outputStream = uncheck(() -> Files.newOutputStream(Paths.get(path), CREATE));
   }
 
-  @Builtin.WrapExpose
+  @Meta.WrapExpose
   public void write(byte[] data) {
     uncheck(() -> outputStream.write(data));
   }

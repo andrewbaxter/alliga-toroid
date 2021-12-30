@@ -1,10 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
-import com.zarbosoft.alligatoroid.compiler.Binding;
-import com.zarbosoft.alligatoroid.compiler.Context;
-import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.rendaw.common.ROPair;
 
@@ -25,7 +25,7 @@ public interface MortarHalfDataType extends MortarHalfType, MortarUnlowerer {
           }
 
           @Override
-          public TargetCode drop(Context context, Location location) {
+          public TargetCode drop(EvaluationContext context, Location location) {
             return new MortarCode().add(POP);
           }
         });

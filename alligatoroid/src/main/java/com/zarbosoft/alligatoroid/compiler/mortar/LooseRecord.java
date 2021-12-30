@@ -1,12 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
-import com.zarbosoft.alligatoroid.compiler.Error;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.Location;
-import com.zarbosoft.alligatoroid.compiler.OkValue;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.model.OkValue;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -19,7 +19,7 @@ public class LooseRecord implements OkValue {
   }
 
   @Override
-  public TargetCode drop(Context context, Location location) {
+  public TargetCode drop(EvaluationContext context, Location location) {
     TSList<TargetCode> out = new TSList<>();
     for (ROPair<Object, EvaluateResult> e : data) {
       out.add(e.second.preEffect);
@@ -30,7 +30,7 @@ public class LooseRecord implements OkValue {
   }
 
   @Override
-  public EvaluateResult access(Context context, Location location, Value key0) {
+  public EvaluateResult access(EvaluationContext context, Location location, Value key0) {
     WholeValue key = WholeValue.getWhole(context, location, key0);
     if (key == null) return EvaluateResult.error;
     TSList<TargetCode> pre = new TSList<>();
@@ -53,7 +53,7 @@ public class LooseRecord implements OkValue {
       }
     }
     if (out == null) {
-      context.module.log.errors.add(new Error.NoField(location, key));
+      context.moduleContext.log.errors.add(new NoField(location, key));
       return EvaluateResult.error;
     }
     return new EvaluateResult(

@@ -209,6 +209,11 @@ public class TSList<T> implements ROList<T> {
     return last();
   }
 
+  @Override
+  public boolean contains(T value) {
+    return values.contains(value);
+  }
+
   public void set(int index, T value) {
     values.set(index, value);
   }

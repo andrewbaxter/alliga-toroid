@@ -1,14 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
-import com.zarbosoft.alligatoroid.compiler.Error;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.TargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
+import com.zarbosoft.alligatoroid.compiler.model.error.IncompatibleTargetValues;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseTuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfValue;
@@ -53,13 +53,13 @@ public class JVMTargetModuleContext implements TargetModuleContext {
   }
 
   @Override
-  public TargetCode merge(Context context, Location location, Iterable<TargetCode> chunks) {
+  public TargetCode merge(EvaluationContext context, Location location, Iterable<TargetCode> chunks) {
     JVMRWSharedCode code = new JVMCode();
     for (TargetCode chunk : chunks) {
       if (chunk == null) continue;
       if (!(chunk instanceof JVMCode)) {
-        context.module.log.errors.add(
-            new Error.IncompatibleTargetValues(location, MORTAR_TARGET_NAME, chunk.targetName()));
+        context.moduleContext.log.errors.add(
+            new IncompatibleTargetValues(location, MORTAR_TARGET_NAME, chunk.targetName()));
         return null;
       }
       code.add((JVMCode) chunk);

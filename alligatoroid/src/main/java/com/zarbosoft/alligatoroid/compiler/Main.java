@@ -1,17 +1,21 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.appdirsj.AppDirs;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.luxem.write.Writer;
-import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.ROList;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+
+import static com.zarbosoft.alligatoroid.compiler.Alligatorus.appDirs;
 
 public class Main {
-  public static final AppDirs appDirs =
-      new AppDirs().set_appname("alligatoroid").set_appauthor("zarbosoft");
-
-  public static TSMap<ImportSpec, Module> compile(ImportSpec spec) {
+  public static void main(String[] args) {
+    if (args.length != 1) {
+      throw new RuntimeException("Need one argument, path to root module");
+    }
     Path cachePath;
     String cachePath0 = System.getenv("ALLIGATOROID_CACHE");
     if (cachePath0 == null || cachePath0.isEmpty()) {
@@ -19,52 +23,25 @@ public class Main {
     } else {
       cachePath = Paths.get(cachePath0);
     }
-    CompilationContext compilationContext = new CompilationContext(cachePath);
-    TSMap<ImportSpec, Module> modules;
-    try {
-      compilationContext.loadRootModule(spec);
-    } finally {
-      modules = compilationContext.join();
-    }
-    return modules;
-  }
-
-  public static void main(String[] args) {
-    if (args.length != 1) {
-      throw new RuntimeException("Need one argument, path to root module");
-    }
-    TSMap<ImportSpec, Module> modules =
-        compile(CompilationContext.rootModuleSpec(Paths.get(args[0])));
+    Alligatorus.Result result =
+        Alligatorus.compile(cachePath, Alligatorus.rootModuleSpec(Paths.get(args[0])));
 
     Writer outWriter = new Writer(System.out, (byte) ' ', 4);
     outWriter.recordBegin();
 
     outWriter.primitive("modules").arrayBegin();
-    for (Module value : modules.values()) {
-      if (value.sourcePath != null) {
-        outWriter.primitive("source").primitive(value.sourcePath);
+    for (Map.Entry<ImportId, ROList<Error>> value : result.errors.entrySet()) {
+      Path localSource = result.localSources.get(value.getKey());
+      if (localSource != null) {
+        outWriter.primitive("source").primitive(value.toString());
       }
 
       outWriter.recordBegin().primitive("id");
-      value.spec.treeSerialize(outWriter);
-
-      outWriter.primitive("log");
-      outWriter.arrayBegin();
-      for (String message : value.log.log) {
-        outWriter.primitive(message);
-      }
-      outWriter.arrayEnd();
+      value.getKey().treeSerialize(outWriter);
 
       outWriter.primitive("errors");
       outWriter.arrayBegin();
-      for (Error error : value.log.errors) {
-        error.treeSerialize(outWriter);
-      }
-      outWriter.arrayEnd();
-
-      outWriter.primitive("warnings");
-      outWriter.arrayBegin();
-      for (Error error : value.log.warnings) {
+      for (Error error : value.getValue()) {
         error.treeSerialize(outWriter);
       }
       outWriter.arrayEnd();

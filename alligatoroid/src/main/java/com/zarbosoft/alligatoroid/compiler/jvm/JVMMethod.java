@@ -1,11 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
+import com.zarbosoft.alligatoroid.compiler.Builtin;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.Module;
 import com.zarbosoft.alligatoroid.compiler.Scope;
-import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.language.Builtin;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.SimpleValue;
 import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSList;
@@ -28,7 +27,7 @@ public class JVMMethod implements SimpleValue {
   }
 
   @Builtin.WrapExpose
-  public void implement(Module module, Value body) {
+  public void implement(DirectModule module, Value body) {
     String name = (String) key.get(0);
     JVMShallowMethodFieldType field =
         new JVMShallowMethodFieldType(specDetails.returnType, name, specDetails.jvmSigDesc);
@@ -36,7 +35,7 @@ public class JVMMethod implements SimpleValue {
     base.methodFields.put(key, field);
     base.fields.add(name);
     JVMTargetModuleContext targetContext = new JVMTargetModuleContext();
-    Context context = new Context(module, targetContext, new Scope(null));
+    EvaluationContext context = new EvaluationContext(module, targetContext, new Scope(null));
 
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
     ectx.record(body.evaluate(context));

@@ -1,11 +1,11 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
-import com.zarbosoft.alligatoroid.compiler.Error;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.Location;
-import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
+import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.rendaw.common.ROMap;
 
 public class MortarClass extends MortarHalfObjectType implements SimpleValue {
@@ -18,11 +18,11 @@ public class MortarClass extends MortarHalfObjectType implements SimpleValue {
 
   @Override
   public EvaluateResult valueAccess(
-      Context context, Location location, Value field0, MortarProtocode lower) {
+          EvaluationContext context, Location location, Value field0, MortarProtocode lower) {
     WholeValue key = WholeValue.getWhole(context, location, field0);
     MortarHalfType field = fields.getOpt(key.concreteValue());
     if (field == null) {
-      context.module.log.errors.add(new Error.NoField(location, key));
+      context.moduleContext.log.errors.add(new NoField(location, key));
       return EvaluateResult.error;
     }
     return EvaluateResult.pure(field.asValue(lower));

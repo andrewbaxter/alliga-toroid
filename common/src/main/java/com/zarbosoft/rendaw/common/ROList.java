@@ -46,4 +46,6 @@ public interface ROList<T> extends Iterable<T> {
   ROList<T> subUntil(int end);
 
   T lastOpt();
+
+  boolean contains(T value);
 }

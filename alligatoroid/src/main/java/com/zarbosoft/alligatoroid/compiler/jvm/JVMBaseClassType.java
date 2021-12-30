@@ -1,12 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
-import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.Location;
-import com.zarbosoft.alligatoroid.compiler.Module;
-import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
+import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.mortar.LooseTuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeBool;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeString;
@@ -84,13 +84,13 @@ public class JVMBaseClassType extends JVMObjectType {
     } else return ROTuple.create(getArgTupleInner(value));
   }
 
-  public void resolveMethods(Module module) {}
+  public void resolveMethods(ModuleCompileContext module) {}
 
   @Override
-  public EvaluateResult access(Context context, Location location, Value field0) {
+  public EvaluateResult access(EvaluationContext context, Location location, Value field0) {
     WholeValue key = WholeValue.getWhole(context, location, field0);
     if (!staticFields.contains((String) key.concreteValue())) {
-      context.module.log.errors.add(new Error.NoField(location, key));
+      context.moduleContext.errors.add(new NoField(location, key));
       return EvaluateResult.error;
     }
     return EvaluateResult.pure(new JVMPseudoStaticField(this, (String) key.concreteValue()));
@@ -98,10 +98,10 @@ public class JVMBaseClassType extends JVMObjectType {
 
   @Override
   public EvaluateResult valueAccess(
-      Context context, Location location, Value field0, JVMProtocode lower) {
+          EvaluationContext context, Location location, Value field0, JVMProtocode lower) {
     WholeValue key = WholeValue.getWhole(context, location, field0);
     if (!fields.contains((String) key.concreteValue())) {
-      context.module.log.errors.add(new Error.NoField(location, key));
+      context.moduleContext.errors.add(new NoField(location, key));
       return EvaluateResult.error;
     }
     return EvaluateResult.pure(new JVMPseudoField(lower, this, (String) key.concreteValue()));

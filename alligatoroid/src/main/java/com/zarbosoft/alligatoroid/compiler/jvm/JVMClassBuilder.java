@@ -1,7 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Error;
-import com.zarbosoft.alligatoroid.compiler.language.Builtin;
+import com.zarbosoft.alligatoroid.compiler.Builtin;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSList;
@@ -13,7 +13,7 @@ public class JVMClassBuilder {
     this.base = base;
   }
 
-  @Builtin.WrapExpose
+  @com.zarbosoft.alligatoroid.compiler.Builtin.WrapExpose
   public JVMMethod declareMethod(String name, Record spec) {
     JVMShallowMethodFieldType.MethodSpecDetails specDetails =
         JVMShallowMethodFieldType.methodSpecDetails(spec);

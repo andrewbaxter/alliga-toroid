@@ -1,5 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.alligatoroid.compiler.model.ErrorValue;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -25,10 +28,10 @@ public class EvaluateResult {
   public static class Context {
     public final TSList<TargetCode> preEffect = new TSList<>();
     public final TSList<TargetCode> postEffect = new TSList<>();
-    public final com.zarbosoft.alligatoroid.compiler.Context context;
+    public final EvaluationContext context;
     private final Location location;
 
-    public Context(com.zarbosoft.alligatoroid.compiler.Context context, Location location) {
+    public Context(EvaluationContext context, Location location) {
       this.context = context;
       this.location = location;
     }

@@ -1,11 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
-import com.zarbosoft.alligatoroid.compiler.Location;
-import com.zarbosoft.alligatoroid.compiler.Module;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.SimpleValue;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
@@ -28,12 +27,12 @@ public class JVMObjectType implements JVMDataType, SimpleValue {
         this,
         new JVMProtocode() {
           @Override
-          public JVMCode lower(Module module) {
+          public JVMCode lower(EvaluationContext context) {
             return code;
           }
 
           @Override
-          public TargetCode drop(Context context, Location location) {
+          public TargetCode drop(EvaluationContext context, Location location) {
             return new JVMCode().add(POP);
           }
         });

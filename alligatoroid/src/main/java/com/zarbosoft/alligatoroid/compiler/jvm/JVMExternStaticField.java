@@ -1,14 +1,13 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.Location;
-import com.zarbosoft.alligatoroid.compiler.Module;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.cache.GraphSerializable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.modules.Module;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.SimpleValue;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -16,7 +15,7 @@ import org.objectweb.asm.tree.FieldInsnNode;
 
 import static org.objectweb.asm.Opcodes.GETSTATIC;
 
-public class JVMExternStaticField implements SimpleValue, GraphSerializable {
+public class JVMExternStaticField implements SimpleValue {
   public static final String SERIAL_FIELD_PARENT = "parent";
   public static final String SERIAL_FIELD_NAME = "name";
   public static final String SERIAL_FIELD_TYPE = "type";
@@ -38,14 +37,14 @@ public class JVMExternStaticField implements SimpleValue, GraphSerializable {
   }
 
   @Override
-  public EvaluateResult access(Context context, Location location, Value field0) {
+  public EvaluateResult access(EvaluationContext context, Location location, Value field0) {
     return type.valueAccess(
         context,
         location,
         field0,
         new JVMProtocode() {
           @Override
-          public TargetCode drop(Context context, Location location) {
+          public TargetCode drop(EvaluationContext context, Location location) {
             return null;
           }
 

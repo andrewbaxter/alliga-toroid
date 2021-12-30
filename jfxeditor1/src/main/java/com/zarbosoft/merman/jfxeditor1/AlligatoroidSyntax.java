@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.jfxeditor1;
 
-import com.zarbosoft.alligatoroid.compiler.Error;
+import com.zarbosoft.alligatoroid.compiler.model.error.RemoteModuleHashMismatch;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.document.Atom;
@@ -1274,8 +1274,8 @@ public class AlligatoroidSyntax {
       }
       String foundHash = null;
       for (Object error : errors) {
-        if (error instanceof Error.RemoteModuleHashMismatch) {
-          foundHash = ((Error.RemoteModuleHashMismatch) error).foundHash;
+        if (error instanceof RemoteModuleHashMismatch) {
+          foundHash = ((RemoteModuleHashMismatch) error).foundHash;
           break;
         }
       }

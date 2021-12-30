@@ -1,9 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Module;
-import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.cache.GraphSerializable;
-import com.zarbosoft.alligatoroid.compiler.language.Builtin;
+import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.model.language.Builtin;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarClass;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.Tuple;
@@ -14,7 +13,7 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
-public class JVMExternClassType extends JVMBaseClassType implements GraphSerializable {
+public class JVMExternClassType extends JVMBaseClassType {
   public static final String SERIAL_NAME = "jvmName";
   public static final String SERIAL_FIELDS_METHODS = "methods";
   public static final String SERIAL_FIELDS_DATA = "data";
@@ -68,10 +67,10 @@ public class JVMExternClassType extends JVMBaseClassType implements GraphSeriali
   }
 
   @Override
-  public void resolveMethods(Module module) {
+  public void resolveMethods(ModuleCompileContext module) {
     if (setupDone) return;
     MortarClass classValueType = Builtin.wrappedClasses.get(JVMExternClassBuilder.class);
-    module.compilationContext.evaluate(
+    module.compileContext.evaluate(
         module,
         new TSList<>(setup),
         new TSOrderedMap<WholeValue, Value>()

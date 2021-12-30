@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
-import com.zarbosoft.alligatoroid.compiler.OkValue;
+import com.zarbosoft.alligatoroid.compiler.model.OkValue;
 import com.zarbosoft.luxem.write.Writer;
 
 public class WholeString implements WholeValue, OkValue {

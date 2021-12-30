@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
 
 /** Fields in builtin.jvm -- reflected into a value */
 public class JVMBuiltin {

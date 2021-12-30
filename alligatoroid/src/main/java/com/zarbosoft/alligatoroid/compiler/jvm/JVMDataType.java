@@ -1,25 +1,37 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Binding;
-import com.zarbosoft.alligatoroid.compiler.Context;
-import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.Location;
-import com.zarbosoft.alligatoroid.compiler.Module;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoGraphBuiltinValue;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.model.error.AccessNotSupported;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import static org.objectweb.asm.Opcodes.POP;
 
-public interface JVMDataType extends JVMType {
+public interface JVMDataType extends JVMType, AutoGraphBuiltinValue {
   default EvaluateResult valueAccess(
-      Context context, Location location, Value field, JVMProtocode lower) {
-    context.module.log.errors.add(new Error.AccessNotSupported(location));
+      EvaluationContext context, Location location, Value field, JVMProtocode lower) {
+    context.moduleContext.errors.add(new AccessNotSupported(location));
     return EvaluateResult.error;
   }
 
-  default ROPair<TargetCode, Binding> valueBind(Module module, JVMProtocode lower) {
+  @Override
+  default Value graphDeserializeValue(
+      ModuleCompileContext context,
+      Desemiserializer typeDesemiserializer,
+      SemiserialSubvalue data) {
+    throw new Assertion();
+  }
+
+  default ROPair<TargetCode, Binding> valueBind(EvaluationContext module, JVMProtocode lower) {
     Object key = new Object();
     return new ROPair<>(
         new JVMCode().add(lower.lower(module)).addVarInsn(storeOpcode(), key),
@@ -35,12 +47,12 @@ public interface JVMDataType extends JVMType {
         this,
         new JVMProtocode() {
           @Override
-          public JVMCode lower(Module module) {
+          public JVMCode lower(EvaluationContext context) {
             return code;
           }
 
           @Override
-          public TargetCode drop(Context context, Location location) {
+          public TargetCode drop(EvaluationContext context, Location location) {
             return new JVMCode().add(POP);
           }
         });

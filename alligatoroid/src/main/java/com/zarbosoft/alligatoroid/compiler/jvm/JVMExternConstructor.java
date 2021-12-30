@@ -1,12 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.Location;
-import com.zarbosoft.alligatoroid.compiler.Module;
-import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.cache.GraphSerializable;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.SimpleValue;
@@ -20,7 +18,7 @@ import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.NEW;
 
-public class JVMExternConstructor implements SimpleValue, GraphSerializable {
+public class JVMExternConstructor implements SimpleValue {
   public final JVMExternClassType base;
 
   public JVMExternConstructor(JVMExternClassType base) {
@@ -34,17 +32,17 @@ public class JVMExternConstructor implements SimpleValue, GraphSerializable {
   }
 
   @Override
-  public EvaluateResult call(Context context, Location location, Value argument) {
-    resolveSigs(context.module);
+  public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
+    resolveSigs(context.moduleContext);
     ROTuple argTuple = getArgTuple(argument);
     JVMShallowMethodFieldType.MethodSpecDetails real = base.constructorSigs.getOpt(argTuple);
     if (real == null) {
-      context.module.log.errors.add(JVMError.noMethodField(location, "<init>"));
+      context.moduleContext.log.errors.add(JVMError.noMethodField(location, "<init>"));
       return EvaluateResult.error;
     }
     JVMRWSharedCode code =
         new JVMCode()
-            .line(context.module.sourceLocation(location))
+            .line(context.moduleContext.sourceLocation(location))
             .add(new TypeInsnNode(NEW, base.jvmName))
             .add(DUP);
     JVMTargetModuleContext.convertFunctionArgument(code, argument);
@@ -52,7 +50,7 @@ public class JVMExternConstructor implements SimpleValue, GraphSerializable {
     return new EvaluateResult(code, null, NullValue.value);
   }
 
-  public void resolveSigs(Module module) {
+  public void resolveSigs(DirectModule module) {
     base.resolveMethods(module);
   }
 

@@ -1,9 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.cache.GraphSerializable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
+import com.zarbosoft.alligatoroid.compiler.mortar.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.Tuple;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROTuple;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class JVMShallowMethodFieldType implements GraphSerializable {
+public class JVMShallowMethodFieldType implements SimpleValue {
   public final JVMDataType returnType;
   public final String name;
   public final String jvmDesc;

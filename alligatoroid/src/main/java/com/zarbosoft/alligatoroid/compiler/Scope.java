@@ -1,5 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
+import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
 import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.ROList;
@@ -8,7 +10,7 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 public class Scope {
-  private final Scope parent;
+  public final Scope parent;
   private final TSOrderedMap<Object, Binding> data = new TSOrderedMap<>();
   public boolean error = false;
 

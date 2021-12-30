@@ -1,0 +1,35 @@
+package com.zarbosoft.alligatoroid.compiler;
+
+import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.modules.LocalLogger;
+import com.zarbosoft.alligatoroid.compiler.modules.Logger;
+import com.zarbosoft.alligatoroid.compiler.modules.Modules;
+import com.zarbosoft.alligatoroid.compiler.modules.Sources;
+import com.zarbosoft.alligatoroid.compiler.modules.modulecompiler.ModuleCompiler;
+import com.zarbosoft.alligatoroid.compiler.modules.modulediskcache.ModuleDiskCache;
+import com.zarbosoft.alligatoroid.compiler.modules.sourcediskcache.SourceDiskCache;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSMap;
+
+import java.nio.file.Path;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class CompileContext {
+  public static final ConcurrentHashMap<ImportId, ROList<Error>> moduleErrors =
+      new ConcurrentHashMap<>();
+  public static final Evaluator evaluator = new Evaluator();
+  public final Logger logger = new LocalLogger();
+  public final Threads threads = new Threads();
+  public final Modules modules;
+  public final Sources sources;
+
+  public ConcurrentHashMap<ImportId, Path> localSources;
+
+  public CompileContext(Path cacheRoot) {
+    modules = new Modules(new ModuleDiskCache(cacheRoot.resolve("modules"), new ModuleCompiler()));
+    sources = new Sources(new SourceDiskCache(cacheRoot.resolve("sources")));
+  }
+}

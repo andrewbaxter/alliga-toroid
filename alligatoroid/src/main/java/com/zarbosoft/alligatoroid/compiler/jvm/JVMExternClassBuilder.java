@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.language.Builtin;
+import com.zarbosoft.alligatoroid.compiler.Builtin;
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 import com.zarbosoft.rendaw.common.ROTuple;
 
@@ -11,19 +11,19 @@ public class JVMExternClassBuilder {
     this.base = base;
   }
 
-  @Builtin.WrapExpose
+  @com.zarbosoft.alligatoroid.compiler.Builtin.WrapExpose
   public void inherit(JVMDataType type) {
     base.inherits.add((JVMBaseClassType) type);
   }
 
-  @Builtin.WrapExpose
+  @com.zarbosoft.alligatoroid.compiler.Builtin.WrapExpose
   public void constructor(Record spec) {
     JVMShallowMethodFieldType.MethodSpecDetails specDetails =
         JVMShallowMethodFieldType.methodSpecDetails(spec);
     base.constructorSigs.put(specDetails.keyTuple, specDetails);
   }
 
-  @Builtin.WrapExpose
+  @com.zarbosoft.alligatoroid.compiler.Builtin.WrapExpose
   public void method(String name, Record spec) {
     JVMShallowMethodFieldType.MethodSpecDetails specDetails =
         JVMShallowMethodFieldType.methodSpecDetails(spec);

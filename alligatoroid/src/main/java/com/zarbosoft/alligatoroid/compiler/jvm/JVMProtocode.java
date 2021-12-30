@@ -1,13 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
-import com.zarbosoft.alligatoroid.compiler.Location;
-import com.zarbosoft.alligatoroid.compiler.Module;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 
 public interface JVMProtocode {
-  TargetCode drop(Context context, Location location);
+  TargetCode drop(EvaluationContext context, Location location);
 
-  JVMSharedCode lower(Module module);
+  JVMSharedCode lower(EvaluationContext context);
 }

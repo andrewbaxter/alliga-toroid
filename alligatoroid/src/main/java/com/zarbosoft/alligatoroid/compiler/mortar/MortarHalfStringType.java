@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
-import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 
 import static org.objectweb.asm.Opcodes.ILOAD;

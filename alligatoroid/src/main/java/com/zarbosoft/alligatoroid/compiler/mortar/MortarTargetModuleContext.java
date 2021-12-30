@@ -1,16 +1,16 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
-import com.zarbosoft.alligatoroid.compiler.Error;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.Location;
-import com.zarbosoft.alligatoroid.compiler.ModuleId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.TargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.model.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
+import com.zarbosoft.alligatoroid.compiler.model.error.IncompatibleTargetValues;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -91,7 +91,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                 false));
   }
 
-  public static LowerResult lower(Context context, Value value) {
+  public static LowerResult lower(EvaluationContext context, Value value) {
     if (value.getClass() == FutureValue.class) {
       return lower(context, ((FutureValue) value).get());
     }
@@ -158,7 +158,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     }
   }
 
-  public static JVMSharedCode lowerRaw(Context context, Object value, boolean boxed) {
+  public static JVMSharedCode lowerRaw(EvaluationContext context, Object value, boolean boxed) {
     if (value.getClass() == String.class) {
       return new MortarCode().addString((String) value);
     } else if (value.getClass() == Integer.class && !boxed) {
@@ -175,7 +175,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
   }
 
   public static void convertFunctionArgument(
-      Context context, JVMRWSharedCode code, Value argument) {
+          EvaluationContext context, JVMRWSharedCode code, Value argument) {
     if (argument instanceof LooseTuple) {
       for (EvaluateResult e : ((LooseTuple) argument).data) {
         if (e.preEffect != null) code.add((JVMSharedCode) e.preEffect);
@@ -203,13 +203,13 @@ public class MortarTargetModuleContext implements TargetModuleContext {
   }
 
   @Override
-  public MortarCode merge(Context context, Location location, Iterable<TargetCode> chunks) {
+  public MortarCode merge(EvaluationContext context, Location location, Iterable<TargetCode> chunks) {
     MortarCode code = new MortarCode();
     for (TargetCode chunk : chunks) {
       if (chunk == null) continue;
       if (!(chunk instanceof MortarCode)) {
-        context.module.log.errors.add(
-            new Error.IncompatibleTargetValues(location, MORTAR_TARGET_NAME, chunk.targetName()));
+        context.moduleContext.log.errors.add(
+            new IncompatibleTargetValues(location, MORTAR_TARGET_NAME, chunk.targetName()));
         return null;
       }
       code.add((MortarCode) chunk);

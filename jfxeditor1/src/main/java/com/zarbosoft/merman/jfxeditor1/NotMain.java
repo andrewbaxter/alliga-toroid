@@ -1,11 +1,11 @@
 package com.zarbosoft.merman.jfxeditor1;
 
-import com.zarbosoft.alligatoroid.compiler.CompilationContext;
-import com.zarbosoft.alligatoroid.compiler.Error;
-import com.zarbosoft.alligatoroid.compiler.ImportSpec;
-import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.CompileContext;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.Main;
-import com.zarbosoft.alligatoroid.compiler.Module;
+import com.zarbosoft.alligatoroid.compiler.modules.Module;
 import com.zarbosoft.merman.core.BackPath;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
@@ -340,7 +340,7 @@ public class NotMain extends Application {
       final HBox layout = new HBox();
       final Label messages = new Label();
 
-      ImportSpec rootModuleSpec = CompilationContext.rootModuleSpec(path);
+      ImportId rootModuleSpec = CompileContext.rootModuleSpec(path);
       TSList<Atom> errorAtoms = new TSList<>();
       if ("at".equals(extension)) {
         flushCallback =
@@ -353,14 +353,14 @@ public class NotMain extends Application {
                   new Thread(
                       () -> {
                         Exception e0mut = null;
-                        TSMap<ImportSpec, Module> modules0 = null;
+                        TSMap<ImportId, Module> modules0 = null;
                         try {
                           modules0 = Main.compile(rootModuleSpec);
                         } catch (Exception e1) {
                           e0mut = e1;
                         }
                         Exception e0 = e0mut;
-                        TSMap<ImportSpec, Module> modules = modules0;
+                        TSMap<ImportId, Module> modules = modules0;
                         Platform.runLater(
                             () -> {
                               try {
@@ -382,12 +382,12 @@ public class NotMain extends Application {
                                   messages.setText(messages.getText() + "\n" + e0.toString());
                                 } else {
                                   TSMap<Atom, TSList<Object>> errorMessages = new TSMap<>();
-                                  for (Map.Entry<ImportSpec, Module> module : modules) {
+                                  for (Map.Entry<ImportId, Module> module : modules) {
                                     for (Error error : module.getValue().log.errors) {
                                       error.dispatch(
                                           new Error.Dispatcher<Object>() {
                                             @Override
-                                            public Object handle(Error.PreDeserializeError e) {
+                                            public Object handle(Error.LocationlessError e) {
                                               if (!rootModuleSpec.moduleId.equals(
                                                   module.getKey().moduleId)) return null;
                                               if (!layout.getChildren().contains(messages))
