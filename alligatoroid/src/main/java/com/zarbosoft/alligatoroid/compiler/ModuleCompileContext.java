@@ -1,13 +1,15 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
-import com.zarbosoft.alligatoroid.compiler.model.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 public class ModuleCompileContext {
+  public final ImportId importId;
   public final CompileContext compileContext;
   /**
    * TODO if module generates method that does evaluation then calls it in parallel, this will have
@@ -25,7 +27,9 @@ public class ModuleCompileContext {
    */
   public TSMap<Value, ArtifactId> backArtifactLookup;
 
-  public ModuleCompileContext(CompileContext compileContext, ImportPath importPath) {
+  public ModuleCompileContext(
+      ImportId importId, CompileContext compileContext, ImportPath importPath) {
+    this.importId = importId;
     this.compileContext = compileContext;
     this.importPath = importPath;
   }

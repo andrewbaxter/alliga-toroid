@@ -5,6 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfDataType;
 
 public class MortarHalfBinding implements Binding {
   public final Object key;

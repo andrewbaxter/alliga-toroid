@@ -8,5 +8,5 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 public interface JVMProtocode {
   TargetCode drop(EvaluationContext context, Location location);
 
-  JVMSharedCode lower(EvaluationContext context);
+  JVMSharedCode<JVMSharedCode> lower(EvaluationContext context);
 }

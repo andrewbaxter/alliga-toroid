@@ -3,11 +3,11 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.model.LanguageValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
-import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
 
 public class Local extends LanguageValue {
   public final Value key;

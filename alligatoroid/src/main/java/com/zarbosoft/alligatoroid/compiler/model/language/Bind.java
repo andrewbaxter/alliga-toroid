@@ -2,13 +2,13 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.model.LanguageValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.NullValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
 import com.zarbosoft.rendaw.common.ROPair;
 
 public class Bind extends LanguageValue {

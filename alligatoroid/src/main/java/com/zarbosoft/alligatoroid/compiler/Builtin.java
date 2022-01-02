@@ -1,10 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoGraphBuiltinValue;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoGraphBuiltinValueType;
-import com.zarbosoft.alligatoroid.compiler.model.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.LooseRecord;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarBuiltin;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.AutoGraphMixin;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.AutoGraphBuiltinValueType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.LooseRecord;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.MortarBuiltin;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -31,12 +31,12 @@ public class Builtin {
     TSMap<String, Value> semiKeyToBuiltin = new TSMap<>();
     TSMap<Class, Value> builtinToBuiltinType = new TSMap<>();
     builtin = aggregateBuiltinForGraph(builtinToSemiKey, semiKeyToBuiltin, MortarBuiltin.class, "");
-    for (Class<AutoGraphBuiltinValue> languageElement : LANGUAGE) {
-      AutoGraphBuiltinValue.assertFieldsOk(languageElement);
+    for (Class<AutoGraphMixin> languageElement : LANGUAGE) {
+      AutoGraphMixin.assertFieldsOk(languageElement);
       builtinToBuiltinType.put(languageElement, new AutoGraphBuiltinValueType(languageElement));
     }
-    for (Class<AutoGraphBuiltinValue> klass : OTHER_AUTO_GRAPH) {
-      AutoGraphBuiltinValue.assertFieldsOk(klass);
+    for (Class<AutoGraphMixin> klass : OTHER_AUTO_GRAPH) {
+      AutoGraphMixin.assertFieldsOk(klass);
       builtinToBuiltinType.put(klass, new AutoGraphBuiltinValueType(klass));
     }
     Builtin.builtinToSemiKey = builtinToSemiKey;

@@ -2,14 +2,14 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.model.LanguageValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.half.MortarHalfValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -40,7 +40,7 @@ public class Stage extends LanguageValue {
     MortarCode pre;
     if (value instanceof Lower) {
       EvaluateResult evalRes = ((Lower) value).child.evaluate(context);
-      JVMSharedCode lowerRes = MortarTargetModuleContext.lower(context, evalRes.value).valueCode;
+      JVMSharedCode<JVMSharedCode> lowerRes = MortarTargetModuleContext.lower(context, evalRes.value).valueCode;
       pre =
           (MortarCode)
               context.target.merge(context, location, new TSList<>(evalRes.preEffect, lowerRes));
@@ -67,7 +67,7 @@ public class Stage extends LanguageValue {
           Object parameterValue = uncheck(() -> klass.getField(parameter.getName()).get(value));
           for (Object o : ((TSList) parameterValue)) {
             StageLowerResult stageRes = stageLower(context, location, (Value) o);
-            pre.add((JVMSharedCode) stageRes.pre);
+            pre.add((JVMSharedCode<JVMSharedCode>) stageRes.pre);
             pre.add(MortarTargetModuleContext.tsListAddCode);
             post.add(stageRes.post);
           }
@@ -78,7 +78,7 @@ public class Stage extends LanguageValue {
                   context,
                   location,
                   (Value) uncheck(() -> klass.getField(parameter.getName()).get(value)));
-          pre.add((JVMSharedCode) stageRes.pre);
+          pre.add((JVMSharedCode<JVMSharedCode>) stageRes.pre);
           post.add(stageRes.post);
         } else throw new Assertion();
       }

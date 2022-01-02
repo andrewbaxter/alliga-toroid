@@ -1,8 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-import com.zarbosoft.alligatoroid.compiler.CompileContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
-import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.rendaw.common.ROList;
 

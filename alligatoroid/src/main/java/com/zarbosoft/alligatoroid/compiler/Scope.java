@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
-import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;

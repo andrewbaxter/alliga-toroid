@@ -13,8 +13,8 @@ import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeInt
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeString;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.State;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateErrorSingle;
-import com.zarbosoft.alligatoroid.compiler.model.LanguageValue;
-import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.DeserializeUnknownLanguageVersion;
 import com.zarbosoft.alligatoroid.compiler.model.error.DeserializeUnknownType;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
@@ -32,8 +32,8 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import static com.zarbosoft.alligatoroid.compiler.Builtin.LANGUAGE;
-import static com.zarbosoft.alligatoroid.compiler.Builtin.toUnderscore;
+import static com.zarbosoft.alligatoroid.compiler.Meta.LANGUAGE;
+import static com.zarbosoft.alligatoroid.compiler.Meta.toUnderscore;
 import static com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.Deserializer.errorRet;
 
 public class LanguageDeserializer {

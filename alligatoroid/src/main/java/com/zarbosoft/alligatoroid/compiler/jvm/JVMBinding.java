@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
+import com.zarbosoft.alligatoroid.compiler.jvm.value.base.JVMDataType;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
@@ -22,7 +23,7 @@ public class JVMBinding implements Binding {
         type.asValue(
             new JVMProtocode() {
               @Override
-              public JVMCode lower(Module module) {
+              public JVMCode lower(EvaluationContext context) {
                 return (JVMCode) new JVMCode().addVarInsn(type.loadOpcode(), key);
               }
 

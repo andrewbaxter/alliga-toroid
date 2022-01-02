@@ -1,21 +1,20 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.alligatoroid.compiler.jvm.MultiError;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.languageinout.LanguageDeserializer;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.DynamicClassLoader;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedClass;
-import com.zarbosoft.alligatoroid.compiler.model.ErrorValue;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.LocationlessUnexpected;
 import com.zarbosoft.alligatoroid.compiler.model.error.Unexpected;
-import com.zarbosoft.alligatoroid.compiler.model.language.Block;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.languageinout.LanguageDeserializer;
-import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.model.language.Block;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.ErrorValue;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
@@ -36,6 +35,7 @@ public class Evaluator {
   public static final String ENTRY_METHOD_NAME = "enter";
   public static final String METHOD_DESCRIPTOR = JVMDescriptor.func(JVMDescriptor.VOID_DESCRIPTOR);
   public static final String GENERATED_CLASS_PREFIX = "com.zarbosoft.alligatoroidmortar.Generated";
+  private static final Evaluator instance = new Evaluator();
   public final AtomicInteger uniqueClass = new AtomicInteger();
 
   public static void processError(EvaluationContext context, Throwable e) {
@@ -43,8 +43,6 @@ public class Evaluator {
       processError(context, e.getCause());
     } else if (e instanceof ExecutionException) {
       processError(context, e.getCause());
-    } else if (e instanceof MultiError) {
-      context.moduleContext.errors.addAll(((MultiError) e).errors);
     } else {
       Location location = null; // TODO convert whole stack?
       for (StackTraceElement t : new ReverseIterable<>(Arrays.asList(e.getStackTrace()))) {
@@ -65,9 +63,16 @@ public class Evaluator {
     }
   }
 
-  public <T> Value evaluate(
+  public static <T> Value evaluate(
       ModuleCompileContext moduleContext,
-      ImportId spec,
+      ROList<Value> rootStatements,
+      /** Only whole-ish values */
+      ROOrderedMap<WholeValue, Value> initialScope) {
+    return instance.evaluateInner(moduleContext, rootStatements, initialScope);
+  }
+
+  private <T> Value evaluateInner(
+      ModuleCompileContext moduleContext,
       ROList<Value> rootStatements,
       /** Only whole-ish values */
       ROOrderedMap<WholeValue, Value> initialScope) {
@@ -77,7 +82,7 @@ public class Evaluator {
     MortarTargetModuleContext targetContext =
         new MortarTargetModuleContext(JVMDescriptor.jvmName(className));
     EvaluationContext context =
-        new EvaluationContext(moduleContext, spec, targetContext, new Scope(null));
+        new EvaluationContext(moduleContext, targetContext, new Scope(null));
     for (ROPair<WholeValue, Value> local : initialScope) {
       context.scope.put(local.first, local.second.bind(context, null).second);
     }
@@ -136,12 +141,12 @@ public class Evaluator {
   }
 
   public <T> Value evaluate(
-          ModuleCompileContext moduleContext, ImportId spec, String path, InputStream source) {
+      ModuleCompileContext moduleContext, ImportId spec, String path, InputStream source) {
     final ROList<Value> res =
-        new LanguageDeserializer(spec.moduleId).deserialize(moduleContext.errors, path, source);
+        LanguageDeserializer.deserialize(spec.moduleId, moduleContext.errors, path, source);
     if (res == null) {
       return ErrorValue.error;
     }
-    return evaluate(moduleContext, spec, res, ROOrderedMap.empty);
+    return evaluate(moduleContext, res, ROOrderedMap.empty);
   }
 }

@@ -1,8 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
-import com.zarbosoft.alligatoroid.compiler.model.BundleValue;
-import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.BundleValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.language.Access;
 import com.zarbosoft.alligatoroid.compiler.model.language.Bind;
@@ -19,15 +19,15 @@ import com.zarbosoft.alligatoroid.compiler.model.language.Record;
 import com.zarbosoft.alligatoroid.compiler.model.language.RecordElement;
 import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.Function;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarClass;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.AutoBuiltinFunctionType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.AutoBuiltinClassType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfArrayType;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfByteType;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfStringType;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfType;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.MortarHalfArrayType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.MortarHalfByteType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.MortarHalfStringType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.AutoBuiltinMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -66,7 +66,7 @@ public class Meta {
     BundleValue.class,
   };
   /** Initialized statically, never modified after (thread safe for reads). */
-  public static TSMap<Class, MortarClass> wrappedClasses = new TSMap<>();
+  public static TSMap<Class, AutoBuiltinClassType> wrappedClasses = new TSMap<>();
 
   public static String toUnderscore(Class klass) {
     return toUnderscore(klass.getSimpleName());
@@ -164,10 +164,10 @@ public class Meta {
       throw new Assertion();
     }
      */
-    MortarClass out = wrappedClasses.getOpt(klass);
+    AutoBuiltinClassType out = wrappedClasses.getOpt(klass);
     String jvmName = JVMDescriptor.jvmName(klass);
     if (out == null) {
-      out = new MortarClass(jvmName);
+      out = new AutoBuiltinClassType(jvmName);
       wrappedClasses.put(klass, out);
       TSMap<Object, MortarHalfType> fields = new TSMap<>();
       if (klass != Value.class)
@@ -177,7 +177,7 @@ public class Meta {
           FuncInfo info = funcDescriptor(method);
           fields.putNew(
               method.getName(),
-              new MortarMethodFieldType(
+              new AutoBuiltinMethodFieldType(
                   out, method.getName(), info.descriptor, info.returnType, info.needsModule));
         }
       for (Field field : klass.getDeclaredFields()) {
@@ -214,7 +214,7 @@ public class Meta {
     return out;
   }
 
-  public static Function wrapFunction(Class klass, String name) {
+  public static AutoBuiltinFunctionType wrapFunction(Class klass, String name) {
     Method method = null;
     for (Method checkMethod : klass.getMethods()) {
       if (!checkMethod.getName().equals(name)) continue;
@@ -224,7 +224,7 @@ public class Meta {
     if (method == null)
       throw Assertion.format("builtin wrap [%s] function [%s] missing", klass.getName(), name);
     FuncInfo info = funcDescriptor(method);
-    return new Function(
+    return new AutoBuiltinFunctionType(
         JVMDescriptor.jvmName(klass.getCanonicalName()), name, info.descriptor, info.returnType);
   }
 

@@ -2,15 +2,30 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.TargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.model.error.IncompatibleTargetValues;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.half.MortarHalfValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.Record;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.Tuple;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.MortarHalfBoolType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.MortarHalfStringType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.NullType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.FutureValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.LooseRecord;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.LooseTuple;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.NullValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.WholeBool;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.WholeString;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -31,12 +46,12 @@ import static org.objectweb.asm.Opcodes.NEW;
 
 public class MortarTargetModuleContext implements TargetModuleContext {
   public static final String TRANSFER_PREFIX = "transfer";
-  public static JVMRWSharedCode newTSListCode =
+  public static MortarCode newTSListCode =
       new MortarCode()
           .add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(TSList.class)))
-          .add(DUP)
+          .addI(DUP)
           .add(callConstructorCode(TSList.class));
-  public static JVMRWSharedCode tsListAddCode =
+  public static MortarCode tsListAddCode =
       new MortarCode()
           .add(
               new MethodInsnNode(
@@ -47,20 +62,20 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                       JVMDescriptor.objDescriptorFromReal(TSList.class),
                       JVMDescriptor.objDescriptorFromReal(Object.class)),
                   false));
-  public static JVMRWSharedCode newTSMapCode =
+  public static MortarCode newTSMapCode =
       new MortarCode()
           .add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(TSMap.class)))
-          .add(DUP)
+          .addI(DUP)
           .add(callConstructorCode(TSMap.class));
-  public static JVMRWSharedCode newTupleCode1 =
-      new MortarCode().add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(Tuple.class))).add(DUP);
-  public static JVMRWSharedCode newTupleCode2 = callConstructorCode(Tuple.class, ROList.class);
-  public static JVMRWSharedCode newRecordCode1 =
-      new MortarCode().add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(Record.class))).add(DUP);
-  public static JVMRWSharedCode newRecordCode2 = callConstructorCode(Record.class, ROMap.class);
-  public static JVMRWSharedCode newLocationCode1 =
-      new MortarCode().add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(Location.class))).add(DUP);
-  public static JVMRWSharedCode newLocationCode2 =
+  public static MortarCode newTupleCode1 =
+      new MortarCode().add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(Tuple.class))).addI(DUP);
+  public static MortarCode newTupleCode2 = callConstructorCode(Tuple.class, ROList.class);
+  public static MortarCode newRecordCode1 =
+      new MortarCode().add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(Record.class))).addI(DUP);
+  public static MortarCode newRecordCode2 = callConstructorCode(Record.class, ROMap.class);
+  public static MortarCode newLocationCode1 =
+      new MortarCode().add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(Location.class))).addI(DUP);
+  public static MortarCode newLocationCode2 =
       callConstructorCode(Location.class, ModuleId.class, int.class);
   public final TSOrderedMap<Object, String> transfers = new TSOrderedMap<>();
   public final String moduleInternalName;
@@ -69,7 +84,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     this.moduleInternalName = moduleInternalName;
   }
 
-  public static JVMRWSharedCode callConstructorCode(Class klass, Class... args) {
+  public static MortarCode callConstructorCode(Class klass, Class... args) {
     String[] argDesc = new String[args.length];
     for (int i = 0; i < args.length; i++) {
       Class arg = args[i];
@@ -104,7 +119,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       out.add(newTupleCode1);
       out.add(newTSListCode);
       for (EvaluateResult e : ((LooseTuple) value).data) {
-        if (e.preEffect != null) out.add((JVMSharedCode) e.preEffect);
+        if (e.preEffect != null) out.add((JVMSharedCode<JVMSharedCode>) e.preEffect);
         LowerResult lowerRes = lower(context, e.value);
         if (lowerRes.dataType != null) lowerRes = lowerRes.dataType.box(lowerRes.valueCode);
         types.add(lowerRes.dataType);
@@ -120,7 +135,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       out.add(newRecordCode1);
       out.add(newTSMapCode);
       for (ROPair<Object, EvaluateResult> e : ((LooseRecord) value).data) {
-        if (e.second.preEffect != null) out.add((JVMSharedCode) e.second.preEffect);
+        if (e.second.preEffect != null) out.add((JVMSharedCode<JVMSharedCode>) e.second.preEffect);
         out.add(lowerRaw(context, e.first, true));
         LowerResult lowerRes = lower(context, e.second.value);
         if (lowerRes.dataType != null) lowerRes = lowerRes.dataType.box(lowerRes.valueCode);
@@ -158,7 +173,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     }
   }
 
-  public static JVMSharedCode lowerRaw(EvaluationContext context, Object value, boolean boxed) {
+  public static JVMSharedCodeElement lowerRaw(EvaluationContext context, Object value, boolean boxed) {
     if (value.getClass() == String.class) {
       return new MortarCode().addString((String) value);
     } else if (value.getClass() == Integer.class && !boxed) {
@@ -178,7 +193,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
           EvaluationContext context, JVMRWSharedCode code, Value argument) {
     if (argument instanceof LooseTuple) {
       for (EvaluateResult e : ((LooseTuple) argument).data) {
-        if (e.preEffect != null) code.add((JVMSharedCode) e.preEffect);
+        if (e.preEffect != null) code.add((JVMSharedCode<JVMSharedCode>) e.preEffect);
         code.add(lower(context, e.value).valueCode);
       }
     } else {
@@ -208,7 +223,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     for (TargetCode chunk : chunks) {
       if (chunk == null) continue;
       if (!(chunk instanceof MortarCode)) {
-        context.moduleContext.log.errors.add(
+        context.moduleContext.errors.add(
             new IncompatibleTargetValues(location, MORTAR_TARGET_NAME, chunk.targetName()));
         return null;
       }
@@ -219,9 +234,9 @@ public class MortarTargetModuleContext implements TargetModuleContext {
 
   public static class LowerResult {
     public final MortarHalfDataType dataType;
-    public final JVMSharedCode valueCode;
+    public final JVMSharedCodeElement valueCode;
 
-    public LowerResult(MortarHalfDataType dataType, JVMSharedCode valueCode) {
+    public LowerResult(MortarHalfDataType dataType, JVMSharedCodeElement valueCode) {
       this.dataType = dataType;
       this.valueCode = valueCode;
     }

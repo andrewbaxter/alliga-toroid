@@ -10,7 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRefArtifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRefBuiltin;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialValue;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
-import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.rendaw.common.Assertion;

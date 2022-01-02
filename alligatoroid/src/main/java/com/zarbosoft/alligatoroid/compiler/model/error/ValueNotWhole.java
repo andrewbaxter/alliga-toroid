@@ -1,7 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.model.error;
 
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 
 public class ValueNotWhole extends Error.LocationError {
     public final Value value;

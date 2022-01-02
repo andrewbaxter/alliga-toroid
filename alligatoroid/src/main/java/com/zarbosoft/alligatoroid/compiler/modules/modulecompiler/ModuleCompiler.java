@@ -5,10 +5,10 @@ import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRef;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
-import com.zarbosoft.alligatoroid.compiler.model.BundleValue;
-import com.zarbosoft.alligatoroid.compiler.model.ErrorValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.BundleValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
-import com.zarbosoft.alligatoroid.compiler.model.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.ImportLoopPre;
 import com.zarbosoft.alligatoroid.compiler.model.error.ImportNotFoundPre;
@@ -45,7 +45,7 @@ public class ModuleCompiler implements ModuleResolver {
     ImportPath importPath = new ImportPath(importId);
     if (fromImportPath != null) importPath.add(fromImportPath);
 
-    ModuleCompileContext moduleContext = new ModuleCompileContext(context, importPath);
+    ModuleCompileContext moduleContext = new ModuleCompileContext(importId, context, importPath);
 
     Value res =
         importId.moduleId.dispatch(
