@@ -32,8 +32,7 @@ public class JVMExternClassBuilder {
     JVMUtils.MethodSpecDetails specDetails =
         JVMUtils.methodSpecDetails(spec);
     JVMMethodFieldType field =
-        new JVMMethodFieldType(specDetails.returnType, name, specDetails.jvmSigDesc);
-    field.base = base;
+        new JVMMethodFieldType(base,name, spec);
     if (specDetails.isStatic) {
       base.staticMethodFields.put(ROTuple.create(name).append(specDetails.keyTuple), field);
     } else {

@@ -6,6 +6,7 @@ import com.zarbosoft.alligatoroid.compiler.model.error.ValueNotWhole;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.WholeBool;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.WholeInt;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.WholeString;
 
 public interface WholeValue extends SimpleValue, TreeSerializable {
@@ -26,6 +27,8 @@ public interface WholeValue extends SimpleValue, TreeSerializable {
     T handleString(WholeString value);
 
     T handleBool(WholeBool value);
+
+    T handleInt(WholeInt value);
   }
 
   public class DefaultDispatcher<T> implements Dispatcher<T> {
@@ -42,6 +45,11 @@ public interface WholeValue extends SimpleValue, TreeSerializable {
 
     @Override
     public T handleBool(WholeBool value) {
+      return defaultRet;
+    }
+
+    @Override
+    public T handleInt(WholeInt value) {
       return defaultRet;
     }
   }

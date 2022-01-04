@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value.base;
 
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
@@ -26,7 +26,7 @@ public abstract class MortarHalfObjectType implements MortarHalfDataType {
   }
 
   @Override
-  public MortarTargetModuleContext.LowerResult box(JVMSharedCode<JVMSharedCode> valueCode) {
+  public MortarTargetModuleContext.LowerResult box(JVMSharedCodeElement valueCode) {
     return new MortarTargetModuleContext.LowerResult(this, valueCode);
   }
 }

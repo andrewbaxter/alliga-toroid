@@ -1,18 +1,27 @@
 package com.zarbosoft.alligatoroid.compiler.jvm.value.direct;
 
-import com.zarbosoft.alligatoroid.compiler.jvm.value.base.JVMDataType;
+import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.whole.JVMClassType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.Record;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.AutoGraphMixin;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LeafValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.SimpleValue;
 
 /** Represents the metadata for interacting with (calling) a method. */
-public class JVMMethodFieldType {
-  public final JVMDataType returnType;
+public class JVMMethodFieldType implements SimpleValue, AutoGraphMixin, LeafValue {
   public final String name;
-  public final String jvmDesc;
+  public final Record spec;
   public JVMClassType base;
+  public JVMUtils.MethodSpecDetails specDetails;
 
-  public JVMMethodFieldType(JVMDataType returnType, String name, String jvmDesc) {
-    this.returnType = returnType;
+  public JVMMethodFieldType(JVMClassType base, String name, Record spec) {
+    this.base = base;
     this.name = name;
-    this.jvmDesc = jvmDesc;
+    this.spec = spec;
+  }
+
+  @Override
+  public void postDesemiserialize() {
+    specDetails = JVMUtils.methodSpecDetails(spec);
   }
 }

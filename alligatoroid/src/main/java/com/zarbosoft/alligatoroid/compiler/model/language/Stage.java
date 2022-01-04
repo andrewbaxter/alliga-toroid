@@ -1,17 +1,18 @@
 package com.zarbosoft.alligatoroid.compiler.model.language;
 
-import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
-import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.half.MortarHalfValue;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.half.MortarHalfValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ReverseIterable;
@@ -35,21 +36,23 @@ public class Stage extends LanguageValue {
     this.child = child;
   }
 
-  public static StageLowerResult stageLower(EvaluationContext context, Location location, Value value) {
+  public static StageLowerResult stageLower(
+      EvaluationContext context, Location location, Value value) {
     TSList<TargetCode> post = new TSList<>();
-    MortarCode pre;
+    JVMSharedCode pre;
     if (value instanceof Lower) {
       EvaluateResult evalRes = ((Lower) value).child.evaluate(context);
-      JVMSharedCode<JVMSharedCode> lowerRes = MortarTargetModuleContext.lower(context, evalRes.value).valueCode;
+      JVMSharedCodeElement lowerRes =
+          MortarTargetModuleContext.lower(context, evalRes.value).valueCode;
       pre =
-          (MortarCode)
+          (JVMSharedCode)
               context.target.merge(context, location, new TSList<>(evalRes.preEffect, lowerRes));
       post.add(evalRes.postEffect);
     } else if (value instanceof LanguageValue && ((LanguageValue) value).hasLowerInSubtree) {
       Class<? extends Value> klass = value.getClass();
 
-      pre = new MortarCode();
-      pre.add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(klass))).add(DUP);
+      pre = new JVMSharedCode();
+      pre.add(new TypeInsnNode(NEW, JVMDescriptorUtils.jvmName(klass))).addI(DUP);
 
       Constructor<?> constructor = klass.getConstructors()[0];
       Parameter[] parameters = constructor.getParameters();
@@ -57,28 +60,28 @@ public class Stage extends LanguageValue {
       for (int i = 0; i < parameters.length; i++) {
         Parameter parameter = parameters[i];
         if (parameter.getType() == Location.class) {
-          argDesc[i] = JVMDescriptor.objDescriptorFromReal(Location.class);
+          argDesc[i] = JVMDescriptorUtils.objDescriptorFromReal(Location.class);
           pre.add(
               MortarTargetModuleContext.lowerRaw(
                   context, uncheck(() -> klass.getField("location").get(value)), false));
         } else if (parameter.getType() == ROList.class) {
-          argDesc[i] = JVMDescriptor.objDescriptorFromReal(ROList.class);
+          argDesc[i] = JVMDescriptorUtils.objDescriptorFromReal(ROList.class);
           pre.add(MortarTargetModuleContext.newTSListCode);
           Object parameterValue = uncheck(() -> klass.getField(parameter.getName()).get(value));
           for (Object o : ((TSList) parameterValue)) {
             StageLowerResult stageRes = stageLower(context, location, (Value) o);
-            pre.add((JVMSharedCode<JVMSharedCode>) stageRes.pre);
+            pre.add((JVMSharedCode) stageRes.pre);
             pre.add(MortarTargetModuleContext.tsListAddCode);
             post.add(stageRes.post);
           }
         } else if (parameter.getType() == Value.class) {
-          argDesc[i] = JVMDescriptor.objDescriptorFromReal(Value.class);
+          argDesc[i] = JVMDescriptorUtils.objDescriptorFromReal(Value.class);
           StageLowerResult stageRes =
               stageLower(
                   context,
                   location,
                   (Value) uncheck(() -> klass.getField(parameter.getName()).get(value)));
-          pre.add((JVMSharedCode<JVMSharedCode>) stageRes.pre);
+          pre.add((JVMSharedCode) stageRes.pre);
           post.add(stageRes.post);
         } else throw new Assertion();
       }
@@ -86,9 +89,9 @@ public class Stage extends LanguageValue {
       pre.add(
           new MethodInsnNode(
               INVOKESPECIAL,
-              JVMDescriptor.jvmName(klass),
+              JVMDescriptorUtils.jvmName(klass),
               "<init>",
-              JVMDescriptor.func("V", argDesc),
+              JVMDescriptorUtils.func("V", argDesc),
               false));
     } else {
       pre = ((MortarTargetModuleContext) context.target).transfer(value);
@@ -104,15 +107,15 @@ public class Stage extends LanguageValue {
         null,
         stageRes.post,
         new MortarHalfValue(
-            Builtin.wrapClass(Value.class),
+            Meta.wrapClass(Value.class),
             new MortarProtocode() {
               @Override
-              public MortarCode lower() {
-                return (MortarCode) stageRes.pre;
+              public JVMSharedCodeElement lower(EvaluationContext context) {
+                return (JVMSharedCode) stageRes.pre;
               }
 
               @Override
-              public TargetCode drop(EvaluationContext context, Location location) {
+              public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
                 return null;
               }
             }));

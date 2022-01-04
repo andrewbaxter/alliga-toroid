@@ -12,10 +12,12 @@ public interface ModuleId extends TreeSerializable {
   String toString();
 
   interface Dispatcher<T> {
-    T handle(LocalModuleId id);
+    T handleLocal(LocalModuleId id);
 
-    T handle(RemoteModuleId id);
+    T handleRemote(RemoteModuleId id);
 
-    T handle(BundleModuleSubId id);
+    T handleBundle(BundleModuleSubId id);
+
+    T handleRoot(RootModuleId id);
   }
 }

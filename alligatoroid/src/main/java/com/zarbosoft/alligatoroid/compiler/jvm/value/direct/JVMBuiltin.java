@@ -12,29 +12,30 @@ import com.zarbosoft.alligatoroid.compiler.jvm.value.halftype.JVMLongType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.halftype.JVMStringType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.whole.JVMClassType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.whole.JVMExternClassType;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 
 public class JVMBuiltin {
-  public static final Value string = JVMStringType.value;
-  public static final Value _int = JVMIntType.value;
-  public static final Value _byte = JVMByteType.value;
-  public static final Value _char = JVMCharType.value;
-  public static final Value _double = JVMDoubleType.value;
-  public static final Value _float = JVMFloatType.value;
-  public static final Value _long = JVMLongType.value;
-  public static final Value bool = JVMBoolType.value;
+  public static final JVMStringType string = JVMStringType.value;
+  public static final JVMIntType _int = JVMIntType.value;
+  public static final JVMByteType _byte = JVMByteType.value;
+  public static final JVMCharType _char = JVMCharType.value;
+  public static final JVMDoubleType _double = JVMDoubleType.value;
+  public static final JVMFloatType _float = JVMFloatType.value;
+  public static final JVMLongType _long = JVMLongType.value;
+  public static final JVMBoolType bool = JVMBoolType.value;
 
   public static JVMArrayType array(Value elementType) {
     return new JVMArrayType((JVMDataType) elementType);
   }
 
   public static RetClass newClass(String qualifiedName) {
-    JVMClassType type = JVMClassType.blank(qualifiedName);
+    JVMClassType type = JVMClassType.blank(JVMSharedNormalName.fromString(qualifiedName));
     return new RetClass(type, new JVMConcreteClassBuilder(type));
   }
 
   public static JVMExternClassType externClass(String qualifiedName, Value setup) {
-    return new JVMExternClassType(qualifiedName, setup);
+    return new JVMExternClassType(JVMSharedNormalName.fromString(qualifiedName), setup);
   }
 
   public static class RetClass {

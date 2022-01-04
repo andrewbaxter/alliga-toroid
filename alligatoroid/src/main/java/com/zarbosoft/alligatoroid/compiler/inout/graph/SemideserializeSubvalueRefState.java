@@ -1,10 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-import com.zarbosoft.alligatoroid.compiler.model.error.DeserializeUnknownType;
-import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.DefaultStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateErrorSingle;
+import com.zarbosoft.alligatoroid.compiler.model.error.DeserializeUnknownType;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
@@ -12,14 +12,14 @@ import com.zarbosoft.rendaw.common.TSList;
 import static com.zarbosoft.alligatoroid.compiler.inout.graph.SemideserializeSubvalueState.protoRefArtifact;
 import static com.zarbosoft.alligatoroid.compiler.inout.graph.SemideserializeSubvalueState.protoRefBuiltin;
 
-public class SemideserializeSubvalueRefState extends DefaultStateSingle<SemiserialRef> {
-  private BaseStateSingle<? extends SemiserialRef> inner = null;
+public class SemideserializeSubvalueRefState extends DefaultStateSingle<Void, SemiserialRef> {
+  private BaseStateSingle<Void, ? extends SemiserialRef> inner = null;
 
   public SemideserializeSubvalueRefState() {}
 
   @Override
   protected BaseStateSingle innerEatType(
-      TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
+      Void context, TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
     switch (name) {
       case SemiserialRefArtifact.SERIAL_TYPE:
         return inner = protoRefArtifact.create(errors, luxemPath);
@@ -34,7 +34,7 @@ public class SemideserializeSubvalueRefState extends DefaultStateSingle<Semiseri
   }
 
   @Override
-  public SemiserialRef build(TSList<Error> errors) {
-    return inner.build(errors);
+  public SemiserialRef build(Void context, TSList<Error> errors) {
+    return inner.build(context, errors);
   }
 }

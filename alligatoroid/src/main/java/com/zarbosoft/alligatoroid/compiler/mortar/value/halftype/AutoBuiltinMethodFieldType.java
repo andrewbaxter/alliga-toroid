@@ -1,7 +1,11 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value.halftype;
 
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.AutoBuiltinClassType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.AutoGraphMixin;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LeafValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.SimpleValue;
@@ -9,9 +13,9 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.half.MortarMethodField;
 
 public class AutoBuiltinMethodFieldType
-    implements SimpleValue, MortarHalfType, AutoGraphMixin {
+    implements SimpleValue, MortarHalfType, AutoGraphMixin, LeafValue {
   public final String name;
-  public final String jbcDesc;
+  public final JVMSharedFuncDescriptor jbcDesc;
   /** Null if null */
   public final MortarHalfDataType returnType;
 
@@ -22,7 +26,7 @@ public class AutoBuiltinMethodFieldType
   public AutoBuiltinMethodFieldType(
       AutoBuiltinClassType base,
       String name,
-      String jbcDesc,
+      JVMSharedFuncDescriptor jbcDesc,
       MortarHalfDataType returnType,
       boolean needsModule) {
     this.base = base;
@@ -33,7 +37,7 @@ public class AutoBuiltinMethodFieldType
   }
 
   @Override
-  public Value asValue(MortarProtocode lower) {
+  public Value asValue(Location location, MortarProtocode lower) {
     return new MortarMethodField(lower, this);
   }
 }

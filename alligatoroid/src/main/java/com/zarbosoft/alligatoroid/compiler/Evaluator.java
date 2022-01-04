@@ -2,15 +2,18 @@ package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.inout.utils.languageinout.LanguageDeserializer;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.DynamicClassLoader;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedClass;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.LocationlessUnexpected;
 import com.zarbosoft.alligatoroid.compiler.model.error.Unexpected;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.language.Block;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
@@ -33,7 +36,8 @@ import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Evaluator {
   public static final String ENTRY_METHOD_NAME = "enter";
-  public static final String METHOD_DESCRIPTOR = JVMDescriptor.func(JVMDescriptor.VOID_DESCRIPTOR);
+  public static final String METHOD_DESCRIPTOR =
+      JVMDescriptorUtils.func(JVMDescriptorUtils.VOID_DESCRIPTOR);
   public static final String GENERATED_CLASS_PREFIX = "com.zarbosoft.alligatoroidmortar.Generated";
   private static final Evaluator instance = new Evaluator();
   public final AtomicInteger uniqueClass = new AtomicInteger();
@@ -71,16 +75,28 @@ public class Evaluator {
     return instance.evaluateInner(moduleContext, rootStatements, initialScope);
   }
 
+  public static <T> Value evaluate(
+      ModuleCompileContext moduleContext, ImportId spec, String path, InputStream source) {
+    final ROList<Value> res =
+        LanguageDeserializer.deserialize(spec.moduleId, moduleContext.errors, path, source);
+    if (res == null) {
+      return ErrorValue.error;
+    }
+    return evaluate(moduleContext, res, ROOrderedMap.empty);
+  }
+
   private <T> Value evaluateInner(
       ModuleCompileContext moduleContext,
       ROList<Value> rootStatements,
       /** Only whole-ish values */
       ROOrderedMap<WholeValue, Value> initialScope) {
     String className = GENERATED_CLASS_PREFIX + uniqueClass.getAndIncrement();
+    JVMSharedJVMName jvmClassName =
+        JVMSharedJVMName.fromNormalName(JVMSharedNormalName.fromString(className));
 
     // Do first pass flat evaluation
     MortarTargetModuleContext targetContext =
-        new MortarTargetModuleContext(JVMDescriptor.jvmName(className));
+        new MortarTargetModuleContext(JVMDescriptorUtils.jvmName(className));
     EvaluationContext context =
         new EvaluationContext(moduleContext, targetContext, new Scope(null));
     for (ROPair<WholeValue, Value> local : initialScope) {
@@ -104,7 +120,7 @@ public class Evaluator {
         moduleContext.errors.add(new Unexpected(d.first, e));
       }
     }
-    MortarCode code = new MortarCode();
+    JVMSharedCode code = new JVMSharedCode();
     code.add(
         targetContext.merge(
             context,
@@ -115,14 +131,14 @@ public class Evaluator {
     }
 
     // Do 2nd pass jvm evaluation
-    JVMSharedClass preClass = new JVMSharedClass(className);
+    JVMSharedClass preClass = new JVMSharedClass(jvmClassName);
     for (ROPair<Object, String> e : Common.iterable(targetContext.transfers.iterator())) {
       preClass.defineStaticField(e.second, e.first.getClass());
     }
     preClass.defineFunction(
         ENTRY_METHOD_NAME,
-        JVMDescriptor.func(lowered.dataType.jvmDesc()),
-        new MortarCode().add(code).add(lowered.dataType.returnOpcode()),
+        JVMSharedFuncDescriptor.fromParts(lowered.dataType.jvmDesc()),
+        new JVMSharedCode().add(code).addI(lowered.dataType.returnOpcode()),
         new TSList<>());
     Class klass =
         DynamicClassLoader.loadTree(
@@ -138,15 +154,5 @@ public class Evaluator {
       return ErrorValue.error;
     }
     return lowered.dataType.unlower(pass2);
-  }
-
-  public <T> Value evaluate(
-      ModuleCompileContext moduleContext, ImportId spec, String path, InputStream source) {
-    final ROList<Value> res =
-        LanguageDeserializer.deserialize(spec.moduleId, moduleContext.errors, path, source);
-    if (res == null) {
-      return ErrorValue.error;
-    }
-    return evaluate(moduleContext, res, ROOrderedMap.empty);
   }
 }

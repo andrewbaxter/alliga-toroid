@@ -13,9 +13,9 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialTuple;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -111,7 +111,7 @@ public class AutoGraphBuiltinValueType implements Value {
     TSList<ROPair<Field, SemiserialRefArtifact>> valueFields = new TSList<>();
     TSList<ROPair<ROPair<TSList, Integer>, SemiserialRefArtifact>> valueListFields = new TSList<>();
     final int paramCount = constructor.getParameterCount();
-    Object args[] = new Object[paramCount];
+    Object[] args = new Object[paramCount];
     data.dispatch(
         new SemiserialSubvalue.DefaultDispatcher<>() {
           @Override
@@ -198,6 +198,11 @@ public class AutoGraphBuiltinValueType implements Value {
           }
         });
     return out;
+  }
+
+  @Override
+  public void postDesemiserialize() {
+    throw new Assertion();
   }
 
   public interface GraphAuxConverter {

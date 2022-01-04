@@ -4,6 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.appdirsj.AppDirs;
 import com.zarbosoft.rendaw.common.ROList;
 
@@ -22,9 +23,14 @@ public class Alligatorus {
   }
 
   public static Result compile(Path cachePath, ImportId spec) {
+    RootModuleId rootModuleId = new RootModuleId();
+    final ImportId rootImportId = new ImportId(rootModuleId);
     CompileContext context = new CompileContext(cachePath);
+    ModuleCompileContext moduleContext =
+        new ModuleCompileContext(rootImportId, context, new ImportPath(null));
+    context.moduleErrors.put(rootImportId, moduleContext.errors);
     try {
-      uncheck(() -> context.modules.get(context, new ImportPath(null), spec).get());
+      uncheck(() -> context.modules.get(moduleContext, new ImportPath(null), spec).get());
     } finally {
       context.threads.join();
     }

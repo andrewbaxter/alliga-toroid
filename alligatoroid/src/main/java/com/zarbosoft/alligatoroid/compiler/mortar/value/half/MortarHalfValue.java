@@ -6,7 +6,6 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LeafValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfDataType;
@@ -36,10 +35,10 @@ public class MortarHalfValue implements OkValue, LeafValue, NoExportValue {
 
   @Override
   public ROPair<TargetCode, Binding> bind(EvaluationContext context, Location location) {
-    return type.valueBind(lower);
+    return type.valueBind(context, lower);
   }
 
-  public JVMSharedCodeElement lower() {
-    return lower.lower();
+  public JVMSharedCodeElement lower(EvaluationContext context) {
+    return lower.lower(context);
   }
 }

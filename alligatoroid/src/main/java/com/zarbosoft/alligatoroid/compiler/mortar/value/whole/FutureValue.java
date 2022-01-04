@@ -7,10 +7,11 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.SimpleValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 
 import java.util.concurrent.Future;
@@ -60,5 +61,10 @@ public class FutureValue implements SimpleValue {
       Desemiserializer typeDesemiserializer,
       SemiserialSubvalue data) {
     return get().graphDeserializeValue(context, typeDesemiserializer, data);
+  }
+
+  @Override
+  public void postDesemiserialize() {
+    throw new Assertion();
   }
 }

@@ -1,25 +1,27 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value.whole;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.AutoGraphMixin;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LeafValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.SimpleValue;
 import com.zarbosoft.rendaw.common.Assertion;
 
-public class NullValue implements MortarProtocode, SimpleValue {
+public class NullValue implements MortarProtocode, SimpleValue, LeafValue, AutoGraphMixin {
   public static final NullValue value = new NullValue();
 
   private NullValue() {}
 
   @Override
-  public MortarCode lower() {
+  public JVMSharedCode lower(EvaluationContext context) {
     throw new Assertion();
   }
 
   @Override
-  public TargetCode drop(EvaluationContext context, Location location) {
+  public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
     return null;
   }
 }

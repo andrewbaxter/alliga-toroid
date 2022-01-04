@@ -1,8 +1,8 @@
-package com.zarbosoft.alligatoroid.compiler.mortar.value.halftype;
+package com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf;
 
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfObjectType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.rendaw.common.Assertion;
 
 public class MortarHalfBoxedByteType extends MortarHalfObjectType {
@@ -11,8 +11,8 @@ public class MortarHalfBoxedByteType extends MortarHalfObjectType {
   private MortarHalfBoxedByteType() {}
 
   @Override
-  public String jvmDesc() {
-    return JVMDescriptor.objDescriptorFromReal(Byte.class);
+  public JVMSharedDataDescriptor jvmDesc() {
+    return JVMSharedDataDescriptor.BOXED_BYTE;
   }
 
   @Override

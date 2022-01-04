@@ -13,7 +13,7 @@ import static org.objectweb.asm.Opcodes.INVOKESTATIC;
  *
  * <p>3. Descriptors (La/b/c/MyClass; - all types)
  */
-public class JVMDescriptor {
+public class JVMDescriptorUtils {
   public static final String objectJvmName = jvmName(Object.class);
   public static final String objectDescriptor = objDescriptorFromJvmName(objectJvmName);
   public static final String stringJvmName = jvmName(String.class);
@@ -27,19 +27,6 @@ public class JVMDescriptor {
   public static final String CHAR_DESCRIPTOR = "C";
   public static final String SHORT_DESCRIPTOR = "S";
   public static final String VOID_DESCRIPTOR = "V";
-  public static final MethodInsnNode boxBool = box(JVMDescriptor.BOOL_DESCRIPTOR, Boolean.class);
-  public static final MethodInsnNode boxByte = box(JVMDescriptor.BYTE_DESCRIPTOR, Byte.class);
-  public static final MethodInsnNode boxInt = box(JVMDescriptor.INT_DESCRIPTOR, Integer.class);
-
-  public static MethodInsnNode box(String primDescriptor, Class box) {
-    String jvmName = jvmName(box);
-    return new MethodInsnNode(
-        INVOKESTATIC,
-        jvmName,
-        "valueOf",
-        "(" + primDescriptor + ")" + objDescriptorFromJvmName(jvmName),
-        false);
-  }
 
   public static String func(String returnDescriptor, String... argDescriptors) {
     StringBuilder builder = new StringBuilder();

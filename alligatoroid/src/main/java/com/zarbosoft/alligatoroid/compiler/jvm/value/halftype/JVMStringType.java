@@ -1,15 +1,15 @@
 package com.zarbosoft.alligatoroid.compiler.jvm.value.halftype;
 
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.SimpleValue;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 
-public class JVMStringType extends JVMObjectType implements SimpleValue {
+public class JVMStringType extends JVMObjectType {
   public static final JVMStringType value = new JVMStringType();
 
   private JVMStringType() {}
 
   @Override
-  public String jvmDesc() {
-    return JVMDescriptor.stringDescriptor;
+  public JVMSharedDataDescriptor jvmDesc() {
+    return JVMSharedDataDescriptor.STRING;
   }
 }

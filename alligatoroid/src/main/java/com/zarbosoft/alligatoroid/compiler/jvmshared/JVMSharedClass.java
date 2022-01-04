@@ -23,10 +23,9 @@ public class JVMSharedClass {
   public final ClassWriter cw;
   public final TSSet<String> seenFunctions = new TSSet<>();
 
-  public JVMSharedClass(String classId) {
+  public JVMSharedClass(JVMSharedJVMName jvmName) {
     this.cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-    cw.visit(
-        52, ACC_PUBLIC + ACC_SUPER, JVMDescriptor.jvmName(classId), null, "java/lang/Object", null);
+    cw.visit(52, ACC_PUBLIC + ACC_SUPER, jvmName.value, null, "java/lang/Object", null);
   }
 
   public JVMSharedClass setMetaSource(String address) {
@@ -34,13 +33,26 @@ public class JVMSharedClass {
     return this;
   }
 
-  public JVMSharedClass defineFunction(
-          String methodId, String desc, JVMSharedCode<JVMSharedCode> code, TSList<Object> initialIndexes) {
-    MethodVisitor mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, methodId, desc, null, null);
+  public JVMSharedClass defineConstructor(
+      JVMSharedFuncDescriptor desc, JVMSharedCode code, TSList<Object> initialIndexes) {
+    MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", desc.value, null, null);
     mv.visitCode();
     MethodNode temp = new MethodNode();
     code.render(temp, initialIndexes);
-    JVMRWSharedCode.print(temp);
+    JVMSharedCode.print(temp);
+    code.render(mv, initialIndexes);
+    mv.visitMaxs(-1, -1);
+    mv.visitEnd();
+    return this;
+  }
+
+  public JVMSharedClass defineFunction(
+      String methodId, JVMSharedFuncDescriptor desc, JVMSharedCode code, TSList<Object> initialIndexes) {
+    MethodVisitor mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, methodId, desc.value, null, null);
+    mv.visitCode();
+    MethodNode temp = new MethodNode();
+    code.render(temp, initialIndexes);
+    JVMSharedCode.print(temp);
     code.render(mv, initialIndexes);
     mv.visitMaxs(-1, -1);
     mv.visitEnd();

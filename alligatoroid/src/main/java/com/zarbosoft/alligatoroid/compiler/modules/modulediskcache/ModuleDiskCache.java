@@ -1,15 +1,15 @@
 package com.zarbosoft.alligatoroid.compiler.modules.modulediskcache;
 
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
-import com.zarbosoft.alligatoroid.compiler.model.error.Error;
-import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
-import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemideserializeSemiserial;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.Deserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateRecord;
+import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.LocationlessUnexpected;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.modules.Module;
 import com.zarbosoft.alligatoroid.compiler.modules.ModuleResolver;
 import com.zarbosoft.alligatoroid.compiler.modules.Source;
@@ -51,7 +51,7 @@ public class ModuleDiskCache implements ModuleResolver {
 
   @Override
   public Module get(
-          CompileContext context, ImportPath fromImportPath, ImportId importId, Source source) {
+      CompileContext context, ImportPath fromImportPath, ImportId importId, Source source) {
     // Find the location the result would be written
     String hash = importId.hash();
     Path cachePath = null;
@@ -111,8 +111,8 @@ public class ModuleDiskCache implements ModuleResolver {
           final SemideserializeSemiserial rootState =
               new SemideserializeSemiserial(new LuxemArrayPathBuilder(null));
           Deserializer.deserialize(
-              deserializeErrors, cachePath, new TSList<>(new StateRecord(rootState)));
-          SemiserialModule res = rootState.build(deserializeErrors);
+              null, deserializeErrors, cachePath, new TSList<>(new StateRecord(rootState)));
+          SemiserialModule res = rootState.build(null, deserializeErrors);
           if (deserializeErrors.some()) {
             for (Error e : deserializeErrors) {
               context.logger.warn(e);

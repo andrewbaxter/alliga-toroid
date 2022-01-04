@@ -1,10 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value.whole;
 
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.AutoGraphMixin;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LeafValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.OkValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
 import com.zarbosoft.luxem.write.Writer;
 
-public class WholeString implements WholeValue, OkValue {
+public class WholeString implements WholeValue, OkValue, LeafValue, AutoGraphMixin {
   public final String value;
 
   public WholeString(String value) {

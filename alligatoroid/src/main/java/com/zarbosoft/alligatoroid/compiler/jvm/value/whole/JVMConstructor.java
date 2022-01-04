@@ -2,52 +2,46 @@ package com.zarbosoft.alligatoroid.compiler.jvm.value.whole;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.jvm.JVMError;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.AutoGraphMixin;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LeafValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.NullValue;
-import com.zarbosoft.rendaw.common.ROTuple;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-
-import static com.zarbosoft.alligatoroid.compiler.jvm.value.whole.JVMClassType.getArgTuple;
-import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
-import static org.objectweb.asm.Opcodes.NEW;
 
 public class JVMConstructor implements SimpleValue, AutoGraphMixin, LeafValue {
+  private final Record spec;
   public JVMClassType base;
+  public JVMUtils.MethodSpecDetails specDetails;
 
-  public JVMConstructor(JVMClassType base) {
+  public JVMConstructor(JVMClassType base, Record spec) {
     this.base = base;
+    this.spec = spec;
+  }
+
+  public static JVMConstructor create(JVMClassType base, Record spec) {
+    final JVMConstructor out = new JVMConstructor(base, spec);
+    out.postDesemiserialize();
+    return out;
+  }
+
+  @Override
+  public void postDesemiserialize() {
+    specDetails = JVMUtils.methodSpecDetails(spec);
   }
 
   @Override
   public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
-    resolveSigs(context);
-    ROTuple argTuple = getArgTuple(argument);
-    JVMUtils.MethodSpecDetails real = base.constructors.getOpt(argTuple);
-    if (real == null) {
-      context.moduleContext.errors.add(JVMError.noMethodField(location, "<init>"));
-      return EvaluateResult.error;
-    }
-    JVMRWSharedCode code =
-        new JVMCode()
-            .line(context.sourceLocation(location))
-            .add(new TypeInsnNode(NEW, base.jvmName))
-            .add(DUP);
-    JVMTargetModuleContext.convertFunctionArgument(code, argument);
-    code.add(new MethodInsnNode(INVOKESPECIAL, base.jvmName, "<init>", real.jvmSigDesc, false));
-    return new EvaluateResult(code, null, NullValue.value);
-  }
-
-  public void resolveSigs(EvaluationContext context) {
     base.resolveMethods(context);
+    JVMSharedCode code = new JVMSharedCode();
+    JVMTargetModuleContext.convertFunctionArgument(context, code, argument);
+    code.add(
+        JVMSharedCode.instantiate(
+            context.sourceLocation(location), base.name, specDetails.jvmSigDesc, code));
+    return new EvaluateResult(code, null, NullValue.value);
   }
 }

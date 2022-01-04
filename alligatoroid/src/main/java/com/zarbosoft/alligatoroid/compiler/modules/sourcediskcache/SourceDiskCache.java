@@ -1,19 +1,20 @@
 package com.zarbosoft.alligatoroid.compiler.modules.sourcediskcache;
 
-import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
+import com.zarbosoft.alligatoroid.compiler.Utils;
+import com.zarbosoft.alligatoroid.compiler.model.error.CacheUnexpectedPre;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
+import com.zarbosoft.alligatoroid.compiler.model.error.ImportNotFoundPre;
+import com.zarbosoft.alligatoroid.compiler.model.error.RemoteModuleHashMismatch;
+import com.zarbosoft.alligatoroid.compiler.model.error.RemoteModuleHashMismatchPre;
+import com.zarbosoft.alligatoroid.compiler.model.error.RemoteModuleProtocolUnsupported;
+import com.zarbosoft.alligatoroid.compiler.model.error.WarnUnexpected;
+import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
-import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.model.error.CacheUnexpectedPre;
-import com.zarbosoft.alligatoroid.compiler.model.error.ImportNotFoundPre;
-import com.zarbosoft.alligatoroid.compiler.model.error.RemoteModuleHashMismatchPre;
-import com.zarbosoft.alligatoroid.compiler.model.error.RemoteModuleHashMismatch;
-import com.zarbosoft.alligatoroid.compiler.model.error.RemoteModuleProtocolUnsupported;
-import com.zarbosoft.alligatoroid.compiler.model.error.WarnUnexpected;
+import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.alligatoroid.compiler.modules.Source;
 import com.zarbosoft.alligatoroid.compiler.modules.SourceResolver;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -64,14 +65,14 @@ public class SourceDiskCache implements SourceResolver {
     return id.dispatch(
         new ModuleId.Dispatcher<Source>() {
           @Override
-          public Source handle(LocalModuleId id) {
+          public Source handleLocal(LocalModuleId id) {
             final Path path = Paths.get(id.path).toAbsolutePath().normalize();
             final Utils.SHA256 hash = new Utils.SHA256().add(path);
             return new Source(hash.buildHex(), path);
           }
 
           @Override
-          public Source handle(RemoteModuleId id) {
+          public Source handleRemote(RemoteModuleId id) {
             final ROList<String> splits = Common.splitN(id.url, "://", 2);
             String proto = splits.get(0);
             switch (proto) {
@@ -176,8 +177,13 @@ public class SourceDiskCache implements SourceResolver {
           }
 
           @Override
-          public Source handle(BundleModuleSubId id) {
+          public Source handleBundle(BundleModuleSubId id) {
             return get(context, id.module);
+          }
+
+          @Override
+          public Source handleRoot(RootModuleId id) {
+            throw new Assertion();
           }
         });
   }

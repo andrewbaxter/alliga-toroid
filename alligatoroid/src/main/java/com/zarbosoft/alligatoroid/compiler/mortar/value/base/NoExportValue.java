@@ -13,6 +13,11 @@ public interface NoExportValue extends Value {
   }
 
   @Override
+  default void postDesemiserialize() {
+    throw new Assertion();
+  }
+
+  @Override
   default Value type() {
     throw new Assertion();
   }

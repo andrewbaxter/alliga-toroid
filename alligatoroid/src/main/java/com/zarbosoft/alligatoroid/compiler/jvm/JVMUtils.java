@@ -1,10 +1,11 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
 import com.zarbosoft.alligatoroid.compiler.jvm.value.base.JVMDataType;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.NullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.Tuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.NullType;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROTuple;
 
@@ -24,20 +25,20 @@ public class JVMUtils {
   public static MethodSpecDetails methodSpecDetails(Record spec) {
     Object outRaw = spec.data.getOpt("out");
     JVMDataType returnType = null;
-    String returnDescriptor;
+    JVMSharedDataDescriptor returnDescriptor;
     if (outRaw == null || outRaw == NullType.type) {
-      returnDescriptor = JVMDescriptor.VOID_DESCRIPTOR;
+      returnDescriptor = JVMSharedDataDescriptor.VOID;
     } else {
       JVMDataType inJvmType = (JVMDataType) outRaw;
       returnDescriptor = inJvmType.jvmDesc();
       returnType = inJvmType;
     }
     Object inRaw = spec.data.get("in");
-    String[] argDescriptor;
+    JVMSharedDataDescriptor[] argDescriptor;
     List argTupleData = new ArrayList();
     if (inRaw instanceof Tuple) {
       ROList<Object> inTuple = ((Tuple) inRaw).data;
-      argDescriptor = new String[inTuple.size()];
+      argDescriptor = new JVMSharedDataDescriptor[inTuple.size()];
       for (int i = 0; i < inTuple.size(); i++) {
         JVMDataType jvmDataType = (JVMDataType) inTuple.get(i);
         argDescriptor[i] = jvmDataType.jvmDesc();
@@ -45,12 +46,12 @@ public class JVMUtils {
       }
     } else {
       JVMDataType jvmDataType = (JVMDataType) inRaw;
-      argDescriptor = new String[] {jvmDataType.jvmDesc()};
+      argDescriptor = new JVMSharedDataDescriptor[] {jvmDataType.jvmDesc()};
       argTupleData.add(jvmDataType);
     }
     return new MethodSpecDetails(
         returnType,
-        JVMDescriptor.func(returnDescriptor, argDescriptor),
+        JVMSharedFuncDescriptor.fromParts(returnDescriptor, argDescriptor),
         new ROTuple(argTupleData),
         Objects.equals(spec.data.getOpt("protected"), true),
         Objects.equals(spec.data.getOpt("final"), true),
@@ -74,7 +75,7 @@ public class JVMUtils {
 
   public static class MethodSpecDetails {
     public final JVMDataType returnType;
-    public final String jvmSigDesc;
+    public final JVMSharedFuncDescriptor jvmSigDesc;
     public final ROTuple keyTuple;
     public final boolean isProtected;
     public final boolean isFinal;
@@ -82,7 +83,7 @@ public class JVMUtils {
 
     public MethodSpecDetails(
         JVMDataType returnType,
-        String jvmSigDesc,
+        JVMSharedFuncDescriptor jvmSigDesc,
         ROTuple keyTuple,
         boolean isProtected,
         boolean isFinal,

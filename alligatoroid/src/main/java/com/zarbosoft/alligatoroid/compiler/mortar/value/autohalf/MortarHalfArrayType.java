@@ -1,7 +1,8 @@
-package com.zarbosoft.alligatoroid.compiler.mortar.value.halftype;
+package com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf;
 
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfObjectType;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -19,7 +20,7 @@ public class MortarHalfArrayType extends MortarHalfObjectType {
   }
 
   @Override
-  public String jvmDesc() {
-    return JVMDescriptor.arrayDescriptor(elementType.jvmDesc());
+  public JVMSharedDataDescriptor jvmDesc() {
+  return elementType.jvmDesc().array();
   }
 }

@@ -2,10 +2,11 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value.base;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfBinding;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
@@ -16,22 +17,22 @@ import com.zarbosoft.rendaw.common.ROPair;
 import static org.objectweb.asm.Opcodes.POP;
 
 public interface MortarHalfDataType extends MortarHalfType, MortarUnlowerer {
-  default Value asValue(MortarProtocode lower) {
+  default Value asValue(Location location, MortarProtocode lower) {
     return new MortarHalfValue(this, lower);
   }
 
-  default Value stackAsValue(MortarCode code) {
+  default Value stackAsValue(JVMSharedCode code) {
     return new MortarHalfValue(
         this,
         new MortarProtocode() {
           @Override
-          public MortarCode lower() {
+          public JVMSharedCodeElement lower(EvaluationContext context) {
             return code;
           }
 
           @Override
-          public TargetCode drop(EvaluationContext context, Location location) {
-            return new MortarCode().addI(POP);
+          public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
+            return JVMSharedCode.inst(POP);
           }
         });
   }
@@ -40,16 +41,16 @@ public interface MortarHalfDataType extends MortarHalfType, MortarUnlowerer {
 
   int loadOpcode();
 
-  default ROPair<TargetCode, Binding> valueBind(MortarProtocode lower) {
+  default ROPair<TargetCode, Binding> valueBind(EvaluationContext context, MortarProtocode lower) {
     Object key = new Object();
     return new ROPair<>(
-        new MortarCode().add(lower.lower()).addVarInsn(storeOpcode(), key),
+        new JVMSharedCode().add(lower.lower(context)).addVarInsn(storeOpcode(), key),
         new MortarHalfBinding(key, this));
   }
 
   int returnOpcode();
 
-  String jvmDesc();
+  JVMSharedDataDescriptor jvmDesc();
 
   MortarTargetModuleContext.LowerResult box(JVMSharedCodeElement valueCode);
 }

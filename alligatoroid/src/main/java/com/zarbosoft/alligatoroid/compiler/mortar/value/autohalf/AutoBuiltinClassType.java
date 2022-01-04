@@ -1,23 +1,24 @@
-package com.zarbosoft.alligatoroid.compiler.mortar.value.halftype;
+package com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfObjectType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
 import com.zarbosoft.rendaw.common.ROMap;
 
 public class AutoBuiltinClassType extends MortarHalfObjectType {
-  public final String jvmName;
+  public final JVMSharedJVMName jvmName;
   public ROMap<Object, MortarHalfType> fields;
 
-  public AutoBuiltinClassType(String jvmName) {
+  public AutoBuiltinClassType(JVMSharedJVMName jvmName) {
     this.jvmName = jvmName;
   }
 
@@ -30,7 +31,7 @@ public class AutoBuiltinClassType extends MortarHalfObjectType {
       context.moduleContext.errors.add(new NoField(location, key));
       return EvaluateResult.error;
     }
-    return EvaluateResult.pure(field.asValue(lower));
+    return EvaluateResult.pure(field.asValue(location, lower));
   }
 
   @Override
@@ -39,7 +40,7 @@ public class AutoBuiltinClassType extends MortarHalfObjectType {
   }
 
   @Override
-  public String jvmDesc() {
-    return JVMDescriptor.objDescriptorFromJvmName(jvmName);
+  public JVMSharedDataDescriptor jvmDesc() {
+    return JVMSharedDataDescriptor.fromJVMName(jvmName);
   }
 }

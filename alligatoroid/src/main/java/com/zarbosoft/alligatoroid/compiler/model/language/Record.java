@@ -25,7 +25,7 @@ public class Record extends LanguageValue {
     TSOrderedMap<Object, EvaluateResult> data = new TSOrderedMap<>();
     for (Value element : elements) {
       if (!(element instanceof RecordElement)) {
-        context.moduleContext.log.errors.add(
+        context.moduleContext.errors.add(
             new NotRecordPair(
                 ((LanguageValue) element).location, element.getClass().getSimpleName()));
         continue;

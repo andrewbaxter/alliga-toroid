@@ -1,13 +1,13 @@
 package com.zarbosoft.alligatoroid.compiler.jvm.value.halftype;
 
 import com.zarbosoft.alligatoroid.compiler.jvm.value.base.JVMDataType;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.SimpleValue;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.ISTORE;
 
-public class JVMCharType implements JVMDataType, SimpleValue {
+public class JVMCharType implements JVMDataType {
   public static final JVMCharType value = new JVMCharType();
 
   private JVMCharType() {}
@@ -23,7 +23,7 @@ public class JVMCharType implements JVMDataType, SimpleValue {
   }
 
   @Override
-  public String jvmDesc() {
-    return JVMDescriptor.CHAR_DESCRIPTOR;
+  public JVMSharedDataDescriptor jvmDesc() {
+    return JVMSharedDataDescriptor.CHAR;
   }
 }

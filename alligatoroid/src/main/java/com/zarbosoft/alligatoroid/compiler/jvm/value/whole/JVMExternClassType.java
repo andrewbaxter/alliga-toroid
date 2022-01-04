@@ -3,13 +3,12 @@ package com.zarbosoft.alligatoroid.compiler.jvm.value.whole;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Evaluator;
 import com.zarbosoft.alligatoroid.compiler.Meta;
-import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.direct.JVMExternClassBuilder;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.AutoBuiltinClassType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.AutoBuiltinClassType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.WholeString;
-import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -19,9 +18,9 @@ public class JVMExternClassType extends JVMClassType {
   boolean finished;
   private boolean setupDone = false;
 
-  public JVMExternClassType(String jvmExternalClass, Value setup) {
+  public JVMExternClassType(JVMSharedNormalName name, Value setup) {
     super(
-        jvmExternalClass,
+        name,
         new TSMap<>(),
         new TSMap<>(),
         new TSMap<>(),

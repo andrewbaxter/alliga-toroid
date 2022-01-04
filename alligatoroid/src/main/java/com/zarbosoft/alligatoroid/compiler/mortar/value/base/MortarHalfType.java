@@ -6,8 +6,8 @@ import com.zarbosoft.alligatoroid.compiler.model.error.AccessNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 
-public interface MortarHalfType extends SimpleValue, LeafValue, AutoGraphMixin {
-  Value asValue(MortarProtocode lower);
+public interface MortarHalfType {
+  Value asValue(Location location, MortarProtocode lower);
 
   default EvaluateResult valueAccess(
       EvaluationContext context, Location location, Value field, MortarProtocode lower) {

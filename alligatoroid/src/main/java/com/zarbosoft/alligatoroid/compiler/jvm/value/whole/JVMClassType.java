@@ -7,15 +7,22 @@ import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.base.JVMDataType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.direct.JVMMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.halftype.JVMBoolType;
+import com.zarbosoft.alligatoroid.compiler.jvm.value.halftype.JVMIntType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.halftype.JVMObjectType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.halftype.JVMStringType;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.AutoGraphMixin;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LeafValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.LooseTuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.WholeBool;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.WholeInt;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.WholeString;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROTuple;
@@ -28,9 +35,9 @@ import java.util.List;
 import java.util.Map;
 
 /** Represents the metadata for interacting with a class - inheritance, fields */
-public class JVMClassType extends JVMObjectType {
+public class JVMClassType extends JVMObjectType implements AutoGraphMixin, LeafValue, SimpleValue {
   public static final String ACCESS_NEW = "new";
-  public final String jvmExternalClass;
+  public final JVMSharedNormalName jvmExternalClass;
   public final TSMap<ROTuple, JVMUtils.MethodSpecDetails> constructors;
   public final TSMap<String, JVMDataType> dataFields;
   public final TSMap<ROTuple, JVMMethodFieldType> methodFields;
@@ -38,12 +45,12 @@ public class JVMClassType extends JVMObjectType {
   public final TSMap<ROTuple, JVMMethodFieldType> staticMethodFields;
   public final TSList<JVMClassType> inherits;
 
-  public final String jvmName;
+  public final JVMSharedJVMName name;
   public final TSSet<String> fields;
   public final TSSet<String> staticFields;
 
   public JVMClassType(
-      String jvmExternalClass,
+      JVMSharedNormalName jvmExternalClass,
       TSMap<ROTuple, JVMUtils.MethodSpecDetails> constructors,
       TSMap<String, JVMDataType> dataFields,
       TSMap<ROTuple, JVMMethodFieldType> methodFields,
@@ -51,7 +58,7 @@ public class JVMClassType extends JVMObjectType {
       TSMap<ROTuple, JVMMethodFieldType> staticMethodFields,
       TSList<JVMClassType> inherits) {
     this.jvmExternalClass = jvmExternalClass;
-    this.jvmName = JVMDescriptor.jvmName(jvmExternalClass);
+    this.name = JVMSharedJVMName.fromNormalName(jvmExternalClass);
     this.constructors = constructors;
     this.dataFields = dataFields;
     this.methodFields = methodFields;
@@ -68,7 +75,7 @@ public class JVMClassType extends JVMObjectType {
     }
   }
 
-  public static JVMClassType blank(String jvmExternalClass) {
+  public static JVMClassType blank(JVMSharedNormalName jvmExternalClass) {
     return new JVMClassType(
         jvmExternalClass,
         new TSMap<>(),
@@ -92,6 +99,11 @@ public class JVMClassType extends JVMObjectType {
                 @Override
                 public JVMDataType handleBool(WholeBool value) {
                   return JVMBoolType.value;
+                }
+
+                @Override
+                public JVMDataType handleInt(WholeInt value) {
+                  return JVMIntType.value;
                 }
               });
     } else if (value instanceof JVMDataType) {
@@ -121,7 +133,7 @@ public class JVMClassType extends JVMObjectType {
             return ACCESS_NEW.equals(value.value);
           }
         })) {
-
+        return EvaluateResult.pure(new JVMPseudoConstructor(this));
     }
       if (!staticFields.contains((String) key.concreteValue())) {
         context.moduleContext.errors.add(new NoField(location, key));
@@ -142,7 +154,7 @@ public class JVMClassType extends JVMObjectType {
   }
 
   @Override
-  public String jvmDesc() {
-    return JVMDescriptor.objDescriptorFromJvmName(jvmName);
+  public JVMSharedDataDescriptor jvmDesc() {
+    return JVMSharedDataDescriptor.fromJVMName(name);
   }
 }

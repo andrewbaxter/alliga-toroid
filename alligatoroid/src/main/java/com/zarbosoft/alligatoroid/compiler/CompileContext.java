@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CompileContext {
-  public static final ConcurrentHashMap<ImportId, ROList<Error>> moduleErrors =
+  public final ConcurrentHashMap<ImportId, ROList<Error>> moduleErrors =
       new ConcurrentHashMap<>();
   public final Logger logger = new LocalLogger();
   public final Threads threads = new Threads();

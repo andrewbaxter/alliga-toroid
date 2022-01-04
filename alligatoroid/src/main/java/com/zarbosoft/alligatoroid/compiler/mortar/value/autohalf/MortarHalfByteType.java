@@ -1,9 +1,10 @@
-package com.zarbosoft.alligatoroid.compiler.mortar.value.halftype;
+package com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf;
 
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -12,10 +13,10 @@ import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.IRETURN;
 import static org.objectweb.asm.Opcodes.ISTORE;
 
-public class MortarHalfBoolType implements MortarHalfDataType {
-  public static final MortarHalfBoolType type = new MortarHalfBoolType();
+public class MortarHalfByteType implements MortarHalfDataType {
+  public static final MortarHalfByteType type = new MortarHalfByteType();
 
-  private MortarHalfBoolType() {}
+  private MortarHalfByteType() {}
 
   @Override
   public int storeOpcode() {
@@ -33,14 +34,14 @@ public class MortarHalfBoolType implements MortarHalfDataType {
   }
 
   @Override
-  public String jvmDesc() {
-    return JVMDescriptor.BOOL_DESCRIPTOR;
+  public JVMSharedDataDescriptor jvmDesc() {
+    return JVMSharedDataDescriptor.BYTE;
   }
 
   @Override
-  public MortarTargetModuleContext.LowerResult box(JVMSharedCode<JVMSharedCode> valueCode) {
+  public MortarTargetModuleContext.LowerResult box(JVMSharedCodeElement valueCode) {
     return new MortarTargetModuleContext.LowerResult(
-        MortarHalfBoxedBoolType.type, new MortarCode().add(valueCode).add(JVMDescriptor.boxBool));
+        MortarHalfBoxedByteType.type, new JVMSharedCode().add(valueCode).add(JVMSharedCode.boxByte));
   }
 
   @Override

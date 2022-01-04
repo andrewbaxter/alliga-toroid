@@ -6,25 +6,25 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.base.OkValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
 import com.zarbosoft.luxem.write.Writer;
 
-public class WholeBool implements WholeValue, OkValue, LeafValue, AutoGraphMixin {
-  public final boolean value;
+public class WholeInt implements WholeValue, OkValue, LeafValue, AutoGraphMixin {
+  public final int value;
 
-  public WholeBool(boolean value) {
+  public WholeInt(int value) {
     this.value = value;
   }
 
   @Override
-  public Object concreteValue() {
+  public Integer concreteValue() {
     return value;
   }
 
   @Override
   public <T> T dispatch(Dispatcher<T> dispatcher) {
-    return dispatcher.handleBool(this);
+    return dispatcher.handleInt(this);
   }
 
   @Override
   public void treeSerialize(Writer writer) {
-    writer.type("bool").primitive(value ? "true" : "false");
+    writer.type("int").primitive(Integer.toString(value));
   }
 }

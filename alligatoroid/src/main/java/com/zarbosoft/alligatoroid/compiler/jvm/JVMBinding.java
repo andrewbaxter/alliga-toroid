@@ -1,12 +1,13 @@
 package com.zarbosoft.alligatoroid.compiler.jvm;
 
-import com.zarbosoft.alligatoroid.compiler.jvm.value.base.JVMDataType;
-import com.zarbosoft.alligatoroid.compiler.model.Binding;
-import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.modules.Module;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
+import com.zarbosoft.alligatoroid.compiler.jvm.value.base.JVMDataType;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 
 public class JVMBinding implements Binding {
   public final Object key;
@@ -23,12 +24,12 @@ public class JVMBinding implements Binding {
         type.asValue(
             new JVMProtocode() {
               @Override
-              public JVMCode lower(EvaluationContext context) {
-                return (JVMCode) new JVMCode().addVarInsn(type.loadOpcode(), key);
+              public JVMSharedCodeElement lower(EvaluationContext context) {
+                return new JVMSharedCode().addVarInsn(type.loadOpcode(), key);
               }
 
               @Override
-              public TargetCode drop(EvaluationContext context, Location location) {
+              public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
                 return null;
               }
             }));

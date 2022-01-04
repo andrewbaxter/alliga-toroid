@@ -65,4 +65,9 @@ public final class ErrorValue implements Value {
   public Value graphDeserializeValue(ModuleCompileContext context, Desemiserializer typeDesemiserializer, SemiserialSubvalue data) {
     throw new Assertion();
   }
+
+  @Override
+  public void postDesemiserialize() {
+    throw new Assertion();
+  }
 }

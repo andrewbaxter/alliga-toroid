@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
 import com.zarbosoft.rendaw.common.Assertion;
 
-class JVMSharedCodeStoreLoad implements JVMSharedCodeElement {
+public class JVMSharedCodeStoreLoad implements JVMSharedCodeElement {
   final int code;
   final Object key;
 

@@ -38,6 +38,9 @@ public interface AutoGraphMixin extends BuiltinTypeValue {
   }
 
   @Override
+  default void postDesemiserialize() {}
+
+  @Override
   default boolean canExport() {
     return true;
   }

@@ -16,4 +16,9 @@ public class JVMError {
     return new Unexpected(
         location, new RuntimeException(Format.format("No data field named %s", name)));
   }
+
+  public static Error noConstructorMatchingParameters(Location location) {
+    return new Unexpected(
+            location, new RuntimeException("No constructor matching arguments"));
+  }
 }

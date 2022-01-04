@@ -1,14 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.modules.modulecompiler;
 
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
+import com.zarbosoft.alligatoroid.compiler.Evaluator;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRef;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.BundleValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.ImportLoopPre;
 import com.zarbosoft.alligatoroid.compiler.model.error.ImportNotFoundPre;
@@ -18,9 +16,14 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.alligatoroid.compiler.modules.Module;
 import com.zarbosoft.alligatoroid.compiler.modules.ModuleResolver;
 import com.zarbosoft.alligatoroid.compiler.modules.Source;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.BundleValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.ErrorValue;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
@@ -46,6 +49,7 @@ public class ModuleCompiler implements ModuleResolver {
     if (fromImportPath != null) importPath.add(fromImportPath);
 
     ModuleCompileContext moduleContext = new ModuleCompileContext(importId, context, importPath);
+    context.moduleErrors.put(importId, moduleContext.errors);
 
     Value res =
         importId.moduleId.dispatch(
@@ -57,8 +61,7 @@ public class ModuleCompiler implements ModuleResolver {
                   return uncheck(
                       () -> {
                         try (InputStream stream = Files.newInputStream(source.path)) {
-                          return CompileContext.evaluator.evaluate(
-                              moduleContext, importId, stringPath, stream);
+                          return Evaluator.evaluate(moduleContext, importId, stringPath, stream);
                         }
                       });
                 } else if (stringPath.endsWith(".zip")) {
@@ -69,17 +72,17 @@ public class ModuleCompiler implements ModuleResolver {
               }
 
               @Override
-              public Value handle(LocalModuleId id) {
+              public Value handleLocal(LocalModuleId id) {
                 return handleTopLevel();
               }
 
               @Override
-              public Value handle(RemoteModuleId id) {
+              public Value handleRemote(RemoteModuleId id) {
                 return handleTopLevel();
               }
 
               @Override
-              public Value handle(BundleModuleSubId id) {
+              public Value handleBundle(BundleModuleSubId id) {
                 return uncheck(
                     () -> {
                       try (ZipFile bundle = new ZipFile(source.path.toFile())) {
@@ -97,7 +100,7 @@ public class ModuleCompiler implements ModuleResolver {
                         }
                         if (path.endsWith(".at")) {
                           try (InputStream stream = bundle.getInputStream(e)) {
-                            return CompileContext.evaluator.evaluate(
+                            return Evaluator.evaluate(
                                 moduleContext, importId, id.toString(), stream);
                           }
                         } else {
@@ -105,6 +108,11 @@ public class ModuleCompiler implements ModuleResolver {
                         }
                       }
                     });
+              }
+
+              @Override
+              public Value handleRoot(RootModuleId id) {
+                throw new Assertion();
               }
             });
     if (res == ErrorValue.error) throw Error.moduleError;

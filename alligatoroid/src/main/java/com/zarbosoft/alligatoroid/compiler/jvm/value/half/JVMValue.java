@@ -50,7 +50,7 @@ public class JVMValue implements OkValue, NoExportValue {
 
   @Override
   public ROPair<TargetCode, Binding> bind(EvaluationContext context, Location location) {
-    return type.valueBind(context, lower);
+    return type.valueBind(lower.lower(context));
   }
 
   @Override

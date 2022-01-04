@@ -6,39 +6,35 @@ import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Scope;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMTargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
+import com.zarbosoft.alligatoroid.compiler.jvm.value.whole.JVMConstructor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSList;
 
 import static org.objectweb.asm.Opcodes.RETURN;
 
-public class JVMConcreteMethodBuilder {
+public class JVMConcreteConstructorBuilder {
   private final JVMConcreteClassBuilder classBuilder;
-  private final ROTuple key;
-  private final JVMUtils.MethodSpecDetails specDetails;
+  private final JVMConstructor constructor;
   private JVMSharedCode built;
 
-  public JVMConcreteMethodBuilder(
-      JVMConcreteClassBuilder classBuilder,
-      ROTuple keyTuple,
-      JVMUtils.MethodSpecDetails specDetails) {
+  public JVMConcreteConstructorBuilder(
+      JVMConcreteClassBuilder classBuilder, JVMConstructor constructor) {
     this.classBuilder = classBuilder;
-    this.key = keyTuple;
-    this.specDetails = specDetails;
+    this.constructor = constructor;
   }
 
   @Meta.WrapExpose
   public void implement(ModuleCompileContext module, Value body) {
-    String name = (String) key.get(0);
     JVMTargetModuleContext targetContext = new JVMTargetModuleContext();
     EvaluationContext context = new EvaluationContext(module, targetContext, new Scope(null));
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
     ectx.record(body.evaluate(context));
     built = (JVMSharedCode) ectx.build(null).preEffect;
-    classBuilder.jvmClass.defineFunction(
-        name, specDetails.jvmSigDesc, new JVMSharedCode().add(built).addI(RETURN), new TSList<>());
-    classBuilder.incompleteMethods.remove(key);
+    classBuilder.jvmClass.defineConstructor(
+        constructor.specDetails.jvmSigDesc,
+        new JVMSharedCode().add(built).addI(RETURN),
+        new TSList<>());
+    classBuilder.incompleteMethods.remove(constructor.specDetails.keyTuple);
   }
 }

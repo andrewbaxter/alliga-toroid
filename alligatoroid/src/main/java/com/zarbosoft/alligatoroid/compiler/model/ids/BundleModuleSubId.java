@@ -41,7 +41,7 @@ public final class BundleModuleSubId implements ModuleId {
 
   @Override
   public <T> T dispatch(Dispatcher<T> dispatcher) {
-    return dispatcher.handle(this);
+    return dispatcher.handleBundle(this);
   }
 
   @Override

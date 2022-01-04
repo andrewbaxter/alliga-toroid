@@ -8,4 +8,8 @@ public class Tuple {
   public Tuple(ROList<Object> data) {
     this.data = data;
   }
+
+  public Object get(int index) {
+    return data.get(index);
+  }
 }

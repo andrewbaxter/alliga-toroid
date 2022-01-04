@@ -1,8 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.BundleValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.language.Access;
 import com.zarbosoft.alligatoroid.compiler.model.language.Bind;
@@ -19,20 +21,20 @@ import com.zarbosoft.alligatoroid.compiler.model.language.Record;
 import com.zarbosoft.alligatoroid.compiler.model.language.RecordElement;
 import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.AutoBuiltinFunctionType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.AutoBuiltinClassType;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.MortarHalfArrayType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.MortarHalfByteType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.MortarHalfStringType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.AutoBuiltinMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.AutoBuiltinClassType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.MortarHalfArrayType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.MortarHalfByteType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.MortarHalfStringType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.AutoBuiltinFunctionType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.AutoBuiltinMethodFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.BundleValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSMap;
-import org.objectweb.asm.tree.FieldInsnNode;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -40,8 +42,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-
-import static org.objectweb.asm.Opcodes.GETFIELD;
 
 public class Meta {
   public static final Class[] LANGUAGE = {
@@ -127,34 +127,37 @@ public class Meta {
 
   public static FuncInfo funcDescriptor(Method method) {
     boolean needsModule = false;
-    String[] argDescriptor = new String[method.getParameters().length];
+    JVMSharedDataDescriptor[] argDescriptor =
+        new JVMSharedDataDescriptor[method.getParameters().length];
     for (int i = 0; i < method.getParameters().length; ++i) {
       Parameter parameter = method.getParameters()[i];
       if (i == 0 && parameter.getType() == ModuleCompileContext.class) {
         needsModule = true;
       }
-      ROPair<String, MortarHalfDataType> paramDesc = dataDescriptor(parameter.getType());
+      ROPair<JVMSharedDataDescriptor, MortarHalfDataType> paramDesc =
+          dataDescriptor(parameter.getType());
       argDescriptor[i] = paramDesc.first;
     }
 
-    ROPair<String, MortarHalfDataType> retDesc = dataDescriptor(method.getReturnType());
+    ROPair<JVMSharedDataDescriptor, MortarHalfDataType> retDesc =
+        dataDescriptor(method.getReturnType());
 
     return new FuncInfo(
-        JVMDescriptor.func(retDesc.first, argDescriptor), retDesc.second, needsModule);
+        JVMSharedFuncDescriptor.fromParts(retDesc.first, argDescriptor),
+        retDesc.second,
+        needsModule);
   }
 
-  public static ROPair<String, MortarHalfDataType> dataDescriptor(Class klass) {
+  public static ROPair<JVMSharedDataDescriptor, MortarHalfDataType> dataDescriptor(Class klass) {
     if (klass == void.class) {
-      return new ROPair<>(JVMDescriptor.VOID_DESCRIPTOR, null);
+      return new ROPair<>(JVMSharedDataDescriptor.VOID, null);
     } else if (klass == String.class) {
-      return new ROPair<>(
-          JVMDescriptor.objDescriptorFromReal(String.class), MortarHalfStringType.type);
+      return new ROPair<>(JVMSharedDataDescriptor.STRING, MortarHalfStringType.type);
     } else if (klass == byte[].class) {
       return new ROPair<>(
-          JVMDescriptor.arrayDescriptor(JVMDescriptor.BYTE_DESCRIPTOR),
-          new MortarHalfArrayType(MortarHalfByteType.type));
+          JVMSharedDataDescriptor.BYTE_ARRAY, new MortarHalfArrayType(MortarHalfByteType.type));
     } else {
-      return new ROPair<>(JVMDescriptor.objDescriptorFromReal(klass), wrapClass(klass));
+      return new ROPair<>(JVMSharedDataDescriptor.fromClass(klass), wrapClass(klass));
     }
   }
 
@@ -165,7 +168,7 @@ public class Meta {
     }
      */
     AutoBuiltinClassType out = wrappedClasses.getOpt(klass);
-    String jvmName = JVMDescriptor.jvmName(klass);
+    JVMSharedJVMName jvmName = JVMSharedJVMName.fromClass(klass);
     if (out == null) {
       out = new AutoBuiltinClassType(jvmName);
       wrappedClasses.put(klass, out);
@@ -181,28 +184,29 @@ public class Meta {
                   out, method.getName(), info.descriptor, info.returnType, info.needsModule));
         }
       for (Field field : klass.getDeclaredFields()) {
-        ROPair<String, MortarHalfDataType> desc = dataDescriptor(field.getType());
+        ROPair<JVMSharedDataDescriptor, MortarHalfDataType> desc = dataDescriptor(field.getType());
         MortarHalfDataType dataType = desc.second;
         String fieldName = field.getName();
         fields.putNew(
             fieldName,
             new MortarHalfType() {
               @Override
-              public Value asValue(MortarProtocode lower) {
+              public Value asValue(Location location, MortarProtocode lower) {
                 return dataType.asValue(
+                    location,
                     new MortarProtocode() {
                       @Override
-                      public MortarCode lower() {
-                        return (MortarCode)
-                            new MortarCode()
-                                .add(lower.lower())
-                                .add(
-                                    new FieldInsnNode(
-                                        GETFIELD, jvmName, fieldName, dataType.jvmDesc()));
+                      public JVMSharedCodeElement lower(EvaluationContext context) {
+                        return JVMSharedCode.accessField(
+                            context.sourceLocation(location),
+                            jvmName,
+                            fieldName,
+                            dataType.jvmDesc());
                       }
 
                       @Override
-                      public TargetCode drop(EvaluationContext context, Location location) {
+                      public JVMSharedCodeElement drop(
+                          EvaluationContext context, Location location) {
                         return null;
                       }
                     });
@@ -225,18 +229,19 @@ public class Meta {
       throw Assertion.format("builtin wrap [%s] function [%s] missing", klass.getName(), name);
     FuncInfo info = funcDescriptor(method);
     return new AutoBuiltinFunctionType(
-        JVMDescriptor.jvmName(klass.getCanonicalName()), name, info.descriptor, info.returnType);
+        JVMSharedJVMName.fromClass(klass), name, info.descriptor, info.returnType);
   }
 
   @Retention(RetentionPolicy.RUNTIME)
   public @interface WrapExpose {}
 
   public static class FuncInfo {
-    public final String descriptor;
+    public final JVMSharedFuncDescriptor descriptor;
     public final MortarHalfDataType returnType;
     public final boolean needsModule;
 
-    public FuncInfo(String descriptor, MortarHalfDataType returnType, boolean needsModule) {
+    public FuncInfo(
+        JVMSharedFuncDescriptor descriptor, MortarHalfDataType returnType, boolean needsModule) {
       this.descriptor = descriptor;
       this.returnType = returnType;
       this.needsModule = needsModule;

@@ -19,67 +19,66 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
-public class SemideserializeSubvalueState extends DefaultStateSingle<SemiserialSubvalue> {
+public class SemideserializeSubvalueState extends DefaultStateSingle<Void, SemiserialSubvalue> {
   public static final PrototypeAuto protoRefArtifact =
       new PrototypeAuto(SemiserialRefArtifact.class);
-  public static final PrototypeAuto protoRefBuiltin =
-      new PrototypeAuto(SemiserialRefBuiltin.class);
-  private BaseStateSingle<? extends SemiserialSubvalue> inner = null;
+  public static final PrototypeAuto protoRefBuiltin = new PrototypeAuto(SemiserialRefBuiltin.class);
+  private BaseStateSingle<Void, ? extends SemiserialSubvalue> inner = null;
 
   public SemideserializeSubvalueState() {}
 
   @Override
   protected BaseStateSingle innerEatType(
-      TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
+      Void context, TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
     switch (name) {
       case SemiserialInt.SERIAL_TYPE:
         return inner =
-            new DefaultStateInt<SemiserialSubvalue>() {
+            new DefaultStateInt<Void, SemiserialSubvalue>() {
               @Override
-              public SemiserialSubvalue build(TSList<Error> errors) {
+              public SemiserialSubvalue build(Void context, TSList<Error> errors) {
                 return new SemiserialInt(value);
               }
             };
       case SemiserialString.SERIAL_TYPE:
         return inner =
-            new DefaultStatePrimitive<SemiserialSubvalue>() {
+            new DefaultStatePrimitive<Void, SemiserialSubvalue>() {
               @Override
-              public SemiserialSubvalue build(TSList<Error> errors) {
+              public SemiserialSubvalue build(Void context, TSList<Error> errors) {
                 return new SemiserialString(out);
               }
             };
       case SemiserialBool.SERIAL_TYPE:
         return inner =
-            new DefaultStateBool<SemiserialSubvalue>() {
+            new DefaultStateBool<Void, SemiserialSubvalue>() {
               @Override
-              public SemiserialSubvalue build(TSList<Error> errors) {
+              public SemiserialSubvalue build(Void context, TSList<Error> errors) {
                 return new SemiserialBool(value);
               }
             };
       case SemiserialRecord.SERIAL_TYPE:
         return inner =
-            new StateRecord<SemiserialRecord>(
-                new BaseStateRecordBody<SemiserialRecord>() {
+            new StateRecord<Void, SemiserialRecord>(
+                new BaseStateRecordBody<Void, SemiserialRecord>() {
                   private final TSList<
                           ROPair<SemideserializeSubvalueState, SemideserializeSubvalueState>>
                       data = new TSList<>();
                   private SemideserializeSubvalueState key;
 
                   @Override
-                  public SemiserialRecord build(TSList<Error> errors) {
-                    boolean ok[] = new boolean[] {true};
+                  public SemiserialRecord build(Void context, TSList<Error> errors) {
+                    boolean[] ok = new boolean[] {true};
                     return new SemiserialRecord(
                         new TSOrderedMap<SemiserialSubvalue, SemiserialSubvalue>(
                             m -> {
                               for (ROPair<
                                       SemideserializeSubvalueState, SemideserializeSubvalueState>
                                   kv : data) {
-                                final SemiserialSubvalue key = kv.first.build(errors);
+                                final SemiserialSubvalue key = kv.first.build(context, errors);
                                 if (key == null) {
                                   ok[0] = false;
                                   return;
                                 }
-                                final SemiserialSubvalue value = kv.second.build(errors);
+                                final SemiserialSubvalue value = kv.second.build(context, errors);
                                 if (value == null) {
                                   ok[0] = false;
                                   return;
@@ -91,13 +90,13 @@ public class SemideserializeSubvalueState extends DefaultStateSingle<SemiserialS
 
                   @Override
                   public BaseStateSingle createKeyState(
-                      TSList<Error> errors, LuxemPathBuilder luxemPath) {
+                      Void context, TSList<Error> errors, LuxemPathBuilder luxemPath) {
                     return key = new SemideserializeSubvalueState();
                   }
 
                   @Override
                   public BaseStateSingle createValueState(
-                      TSList<Error> errors, LuxemPathBuilder luxemPath, Object key) {
+                      Void context, TSList<Error> errors, LuxemPathBuilder luxemPath, Object key) {
                     final SemideserializeSubvalueState value = new SemideserializeSubvalueState();
                     data.add(new ROPair<>(this.key, value));
                     return value;
@@ -105,14 +104,14 @@ public class SemideserializeSubvalueState extends DefaultStateSingle<SemiserialS
                 });
       case SemiserialTuple.SERIAL_TYPE:
         return new StateArray<>(
-            new DefaultStateArrayBody<SemiserialTuple>() {
+            new DefaultStateArrayBody<Void, SemiserialTuple>() {
               private final TSList<SemideserializeSubvalueState> elements = new TSList<>();
 
               @Override
-              public SemiserialTuple build(TSList<Error> errors) {
+              public SemiserialTuple build(Void context, TSList<Error> errors) {
                 final TSList<SemiserialSubvalue> data = new TSList<>();
                 for (SemideserializeSubvalueState element : elements) {
-                  final SemiserialSubvalue built = element.build(errors);
+                  final SemiserialSubvalue built = element.build(context, errors);
                   if (built == null) return null;
                   data.add(built);
                 }
@@ -121,7 +120,7 @@ public class SemideserializeSubvalueState extends DefaultStateSingle<SemiserialS
 
               @Override
               public BaseStateSingle createElementState(
-                  TSList<Error> errors, LuxemPathBuilder luxemPath) {
+                  Void context, TSList<Error> errors, LuxemPathBuilder luxemPath) {
                 final SemideserializeSubvalueState element = new SemideserializeSubvalueState();
                 elements.add(element);
                 return element;
@@ -140,7 +139,7 @@ public class SemideserializeSubvalueState extends DefaultStateSingle<SemiserialS
   }
 
   @Override
-  public SemiserialSubvalue build(TSList<Error> errors) {
-    return inner.build(errors);
+  public SemiserialSubvalue build(Void context, TSList<Error> errors) {
+    return inner.build(context, errors);
   }
 }

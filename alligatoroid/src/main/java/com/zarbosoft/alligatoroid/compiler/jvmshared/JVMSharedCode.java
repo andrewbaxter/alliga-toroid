@@ -6,11 +6,14 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LineNumberNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 
@@ -20,8 +23,12 @@ import java.util.Iterator;
 
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.BASTORE;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.DSTORE;
+import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.FSTORE;
+import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.ICONST_1;
 import static org.objectweb.asm.Opcodes.ICONST_2;
@@ -29,11 +36,20 @@ import static org.objectweb.asm.Opcodes.ICONST_3;
 import static org.objectweb.asm.Opcodes.ICONST_4;
 import static org.objectweb.asm.Opcodes.ICONST_5;
 import static org.objectweb.asm.Opcodes.ICONST_M1;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.ISTORE;
 import static org.objectweb.asm.Opcodes.LSTORE;
+import static org.objectweb.asm.Opcodes.NEW;
 
-public abstract class JVMSharedCode<M extends JVMSharedCode<M>>
-    implements TargetCode, JVMSharedCodeElement {
+public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
+  public static final JVMSharedCodeElement boxBool =
+      box(JVMSharedDataDescriptor.BOOL, JVMSharedJVMName.BOOL);
+  public static final JVMSharedCodeElement boxByte =
+      box(JVMSharedDataDescriptor.BYTE, JVMSharedJVMName.BYTE);
+  public static final JVMSharedCodeElement boxInt =
+      box(JVMSharedDataDescriptor.INT, JVMSharedJVMName.INT);
   private final TSList<JVMSharedCodeElement> children = new TSList<>();
 
   public static void print(MethodNode m) {
@@ -45,6 +61,51 @@ public abstract class JVMSharedCode<M extends JVMSharedCode<M>>
     printer.print(printWriter);
     printWriter.flush();
     // FIXME! DEBUG
+  }
+
+  public static JVMSharedCodeElement instantiate(
+      int location,
+      JVMSharedJVMName klass,
+      JVMSharedFuncDescriptor desc,
+      JVMSharedCodeElement arguments) {
+    JVMSharedCode code = new JVMSharedCode();
+    if (location > 0) code.line(location);
+    code.add(new TypeInsnNode(NEW, klass.value)).addI(DUP);
+    code.add(arguments);
+    code.add(new MethodInsnNode(INVOKESPECIAL, klass.value, "<init>", desc.value, false));
+    return code;
+  }
+
+  public static JVMSharedCodeElement accessField(
+      int location, JVMSharedJVMName klass, String field, JVMSharedDataDescriptor fieldDesc) {
+    final JVMSharedCode code = new JVMSharedCode();
+    if (location > 0) code.line(location);
+    code.add(new FieldInsnNode(GETFIELD, klass.value, field, fieldDesc.value));
+    return code;
+  }
+
+  public static JVMSharedCodeElement accessStaticField(
+      int location, JVMSharedJVMName klass, String field, JVMSharedDataDescriptor fieldDesc) {
+    final JVMSharedCode code = new JVMSharedCode();
+    if (location > 0) code.line(location);
+    code.add(new FieldInsnNode(GETSTATIC, klass.value, field, fieldDesc.value));
+    return code;
+  }
+
+  public static JVMSharedCodeElement callMethod(
+      int location, JVMSharedJVMName klass, String method, JVMSharedFuncDescriptor methodDesc) {
+    final JVMSharedCode code = new JVMSharedCode();
+    if (location > 0) code.line(location);
+    code.add(new MethodInsnNode(INVOKEVIRTUAL, klass.value, method, methodDesc.value, false));
+    return code;
+  }
+
+  public static JVMSharedCodeElement callStaticMethod(
+      int location, JVMSharedJVMName klass, String method, JVMSharedFuncDescriptor methodDesc) {
+    final JVMSharedCode code = new JVMSharedCode();
+    if (location > 0) code.line(location);
+    code.add(new MethodInsnNode(INVOKESTATIC, klass.value, method, methodDesc.value, false));
+    return code;
   }
 
   public static JVMSharedCodeElement string(String value) {
@@ -75,14 +136,29 @@ public abstract class JVMSharedCode<M extends JVMSharedCode<M>>
     return new JVMSharedCodeInstruction(new LdcInsnNode(value));
   }
 
-  public M addString(String value) {
-    add(string(value));
-    return (M) this;
+  public static JVMSharedCodeElement box(
+      JVMSharedDataDescriptor primDescriptor, JVMSharedJVMName box) {
+    return new JVMSharedCodeInstruction(
+        new MethodInsnNode(
+            INVOKESTATIC,
+            box.value,
+            "valueOf",
+            "(" + primDescriptor + ")" + JVMSharedDataDescriptor.fromJVMName(box).value,
+            false));
   }
 
-  public M addInt(int value) {
+  public static JVMSharedCodeElement cast(JVMSharedDataDescriptor toClass) {
+    return new JVMSharedCodeInstruction(new TypeInsnNode(CHECKCAST, toClass.value));
+  }
+
+  public JVMSharedCode addString(String value) {
+    add(string(value));
+    return this;
+  }
+
+  public JVMSharedCode addInt(int value) {
     add(int_(value));
-    return (M) this;
+    return this;
   }
 
   @Override
@@ -90,12 +166,13 @@ public abstract class JVMSharedCode<M extends JVMSharedCode<M>>
     dispatcher.handleNested(this);
   }
 
-  public void line(Integer line) {
+  public JVMSharedCode line(Integer line) {
     if (line != null) {
       LabelNode label = new LabelNode();
       add(label);
       add(new LineNumberNode(line, label));
     }
+    return this;
   }
 
   public void render(MethodVisitor out, TSList<Object> initialIndexes) {
@@ -119,7 +196,7 @@ public abstract class JVMSharedCode<M extends JVMSharedCode<M>>
       next.dispatch(
           new Dispatcher() {
             @Override
-            public void handleNested(JVMSharedCode<?> code) {
+            public void handleNested(JVMSharedCode code) {
               Iterator<JVMSharedCodeElement> iter = code.children.iterator();
               if (iter.hasNext()) stack.addLast(iter);
             }
@@ -145,7 +222,7 @@ public abstract class JVMSharedCode<M extends JVMSharedCode<M>>
       child.dispatch(
           new Dispatcher() {
             @Override
-            public void handleNested(JVMSharedCode<?> code) {
+            public void handleNested(JVMSharedCode code) {
               throw new Assertion();
             }
 
@@ -198,35 +275,35 @@ public abstract class JVMSharedCode<M extends JVMSharedCode<M>>
     }
   }
 
-  public M add(JVMSharedCodeElement element) {
+  public JVMSharedCode add(JVMSharedCodeElement element) {
     children.add(element);
-    return (M) this;
+    return this;
   }
 
-  public M add(AbstractInsnNode node) {
+  public JVMSharedCode add(AbstractInsnNode node) {
     children.add(new JVMSharedCodeInstruction(node));
-    return (M) this;
+    return this;
   }
 
-  public M addI(int opcode) {
+  public JVMSharedCode addI(int opcode) {
     children.add(new JVMSharedCodeInstruction(new InsnNode(opcode)));
-    return (M) this;
+    return this;
   }
 
-  public M add(JVMSharedCode<M> child) {
+  public JVMSharedCode add(JVMSharedCode child) {
     if (child != null) children.add(child);
-    return (M) this;
+    return this;
   }
 
   public JVMSharedCodeElement bool_(boolean value) {
     return inst(value ? ICONST_1 : ICONST_0);
   }
 
-  public M addVarInsn(int opcode, Object key) {
+  public JVMSharedCode addVarInsn(int opcode, Object key) {
     return add(new JVMSharedCodeStoreLoad(opcode, key));
   }
 
-  public M addBool(boolean value) {
+  public JVMSharedCode addBool(boolean value) {
     return add(bool_(value));
   }
 }

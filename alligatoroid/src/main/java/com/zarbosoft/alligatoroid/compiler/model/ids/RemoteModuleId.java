@@ -3,7 +3,6 @@ package com.zarbosoft.alligatoroid.compiler.model.ids;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.Record;
 import com.zarbosoft.luxem.write.Writer;
-import com.zarbosoft.rendaw.common.TSMap;
 
 public final class RemoteModuleId implements ModuleId {
   public static final String GRAPH_KEY_URL = "url";
@@ -52,7 +51,7 @@ public final class RemoteModuleId implements ModuleId {
 
   @Override
   public <T> T dispatch(Dispatcher<T> dispatcher) {
-    return dispatcher.handle(this);
+    return dispatcher.handleRemote(this);
   }
 
   @Override
@@ -63,10 +62,5 @@ public final class RemoteModuleId implements ModuleId {
   @Override
   public int hashCode() {
     return Utils.reflectHashCode(this);
-  }
-
-  @Override
-  public Record graphSerialize() {
-    return new Record(new TSMap<>().put(GRAPH_KEY_URL, url).put(GRAPH_KEY_HASH, hash));
   }
 }
