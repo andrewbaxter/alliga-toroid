@@ -5,12 +5,12 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.AutoGraphMixin;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LeafValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.Record;
 
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +39,6 @@ public class BundleValue implements SimpleValue, AutoGraphMixin, LeafValue {
     CompletableFuture<Value> importResult =
         context.moduleContext.compileContext.modules.get(
             context.moduleContext,
-            context.moduleContext.importPath,
             new ImportId(
                 new BundleModuleSubId(
                     id.moduleId,

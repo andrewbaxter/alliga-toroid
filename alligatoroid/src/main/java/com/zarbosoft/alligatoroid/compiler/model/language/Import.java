@@ -33,7 +33,6 @@ public class Import extends LanguageValue {
     CompletableFuture<Value> importResult =
         context.moduleContext.compileContext.modules.get(
             context.moduleContext,
-            context.moduleContext.importPath,
             new ImportId(((ModuleIdValue) value).id));
     context.deferredErrors.add(new ROPair<>(location, importResult));
     return ectx.build(new FutureValue(importResult.exceptionally(e -> ErrorValue.error)));

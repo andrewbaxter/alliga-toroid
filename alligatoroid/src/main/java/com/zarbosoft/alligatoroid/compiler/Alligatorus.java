@@ -1,12 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.appdirsj.AppDirs;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSList;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -26,11 +26,12 @@ public class Alligatorus {
     RootModuleId rootModuleId = new RootModuleId();
     final ImportId rootImportId = new ImportId(rootModuleId);
     CompileContext context = new CompileContext(cachePath);
-    ModuleCompileContext moduleContext =
-        new ModuleCompileContext(rootImportId, context, new ImportPath(null));
+    ModuleCompileContext moduleContext = new ModuleCompileContext(rootImportId, context, null);
     context.moduleErrors.put(rootImportId, moduleContext.errors);
     try {
-      uncheck(() -> context.modules.get(moduleContext, new ImportPath(null), spec).get());
+      uncheck(() -> context.modules.get(moduleContext, spec).get());
+    } catch (Error.PreLocationlessError e) {
+      context.moduleErrors.put(rootImportId, new TSList<>(e.toError()));
     } finally {
       context.threads.join();
     }

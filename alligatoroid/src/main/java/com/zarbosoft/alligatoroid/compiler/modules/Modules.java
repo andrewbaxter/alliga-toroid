@@ -10,9 +10,9 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRefArtifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRefBuiltin;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialValue;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -55,9 +55,8 @@ public class Modules {
         });
   }
 
-  public CompletableFuture<Value> get(
-      ModuleCompileContext context, ImportPath fromImportPath, ImportId importId) {
-    return getModule(context.compileContext, fromImportPath, importId)
+  public CompletableFuture<Value> get(ModuleCompileContext context, ImportId importId) {
+    return getModule(context.compileContext, context.importPath, importId)
         .thenApply(
             semi -> {
               TSList<ROPair<ArtifactId, SemiserialValue>> remaining =

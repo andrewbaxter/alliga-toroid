@@ -8,6 +8,7 @@ import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
@@ -37,6 +38,7 @@ public abstract class Error implements TreeSerializable {
   public void treeSerialize(Writer writer) {
     writer.type(this.getClass().getName()).recordBegin();
     for (Field field : this.getClass().getFields()) {
+      if (Modifier.isStatic(field.getModifiers())) continue;
       writer.primitive(field.getName());
       TreeSerializable.treeSerialize(writer, uncheck(() -> field.get(this)));
     }

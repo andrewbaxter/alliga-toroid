@@ -15,14 +15,13 @@ import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CompileContext {
-  public final ConcurrentHashMap<ImportId, ROList<Error>> moduleErrors =
-      new ConcurrentHashMap<>();
+  public final ConcurrentHashMap<ImportId, ROList<Error>> moduleErrors = new ConcurrentHashMap<>();
   public final Logger logger = new LocalLogger();
   public final Threads threads = new Threads();
   public final Modules modules;
   public final Sources sources;
 
-  public ConcurrentHashMap<ImportId, Path> localSources;
+  public final ConcurrentHashMap<ImportId, Path> localSources = new ConcurrentHashMap<>();
 
   public CompileContext(Path cacheRoot) {
     modules = new Modules(new ModuleDiskCache(cacheRoot.resolve("modules"), new ModuleCompiler()));

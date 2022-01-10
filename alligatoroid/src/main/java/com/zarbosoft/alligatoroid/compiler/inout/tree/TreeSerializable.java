@@ -28,7 +28,9 @@ public interface TreeSerializable {
       writer.primitive((String) object);
     } else if (object.getClass() == Integer.class) {
       writer.primitive(Integer.toString((Integer) object));
-    } else throw new Assertion();
+    } else if (Throwable.class.isAssignableFrom(object.getClass())) {
+      writer.primitive(object.toString());
+    } else throw new Assertion(object.getClass().getCanonicalName());
   }
 
   public void treeSerialize(Writer writer);
