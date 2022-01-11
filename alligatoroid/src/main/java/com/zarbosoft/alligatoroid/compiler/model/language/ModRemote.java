@@ -2,18 +2,17 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.ModuleIdValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ModuleIdValue;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 
-public class ModRemote extends LanguageValue {
-  public final Value url;
-  public final Value hash;
+public class ModRemote extends LanguageElement {
+  public final LanguageElement url;
+  public final LanguageElement hash;
 
-  public ModRemote(Location id, Value url, Value hash) {
+  public ModRemote(Location id, LanguageElement url, LanguageElement hash) {
     super(id, hasLowerInSubtree(url, hash));
     this.url = url;
     this.hash = hash;

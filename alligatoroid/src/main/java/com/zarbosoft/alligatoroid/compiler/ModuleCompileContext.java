@@ -4,7 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 

@@ -22,16 +22,16 @@ import com.zarbosoft.alligatoroid.compiler.model.language.RecordElement;
 import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.AutoBuiltinClassType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.MortarHalfArrayType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.MortarHalfByteType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.MortarHalfStringType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.AutoBuiltinFunctionType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.halftype.AutoBuiltinMethodFieldType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.BundleValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfAutoType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfArrayType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfByteType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfStringType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.AutoBuiltinMethodFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoBuiltinStaticMethod;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -66,7 +66,7 @@ public class Meta {
     BundleValue.class,
   };
   /** Initialized statically, never modified after (thread safe for reads). */
-  public static TSMap<Class, AutoBuiltinClassType> wrappedClasses = new TSMap<>();
+  public static TSMap<Class, MortarHalfAutoType> autoMortarHalfDataTypes = new TSMap<>();
 
   public static String toUnderscore(Class klass) {
     return toUnderscore(klass.getSimpleName());
@@ -157,21 +157,21 @@ public class Meta {
       return new ROPair<>(
           JVMSharedDataDescriptor.BYTE_ARRAY, new MortarHalfArrayType(MortarHalfByteType.type));
     } else {
-      return new ROPair<>(JVMSharedDataDescriptor.fromClass(klass), wrapClass(klass));
+      return new ROPair<>(JVMSharedDataDescriptor.fromClass(klass), autoMortarHalfDataType(klass));
     }
   }
 
-  public static MortarHalfDataType wrapClass(Class klass) {
+  public static MortarHalfDataType autoMortarHalfDataType(Class klass) {
     /*
     if (klass == Value.class) {
       throw new Assertion();
     }
      */
-    AutoBuiltinClassType out = wrappedClasses.getOpt(klass);
+    MortarHalfAutoType out = autoMortarHalfDataTypes.getOpt(klass);
     JVMSharedJVMName jvmName = JVMSharedJVMName.fromClass(klass);
     if (out == null) {
-      out = new AutoBuiltinClassType(jvmName);
-      wrappedClasses.put(klass, out);
+      out = new MortarHalfAutoType(jvmName);
+      autoMortarHalfDataTypes.put(klass, out);
       TSMap<Object, MortarHalfType> fields = new TSMap<>();
       if (klass != Value.class)
         for (Method method : klass.getDeclaredMethods()) {
@@ -218,7 +218,8 @@ public class Meta {
     return out;
   }
 
-  public static AutoBuiltinFunctionType wrapFunction(Class klass, String name) {
+  public static AutoBuiltinStaticMethod autoMortarHalfStaticMethodType(
+      Class klass, String name) {
     Method method = null;
     for (Method checkMethod : klass.getMethods()) {
       if (!checkMethod.getName().equals(name)) continue;
@@ -228,7 +229,7 @@ public class Meta {
     if (method == null)
       throw Assertion.format("builtin wrap [%s] function [%s] missing", klass.getName(), name);
     FuncInfo info = funcDescriptor(method);
-    return new AutoBuiltinFunctionType(
+    return new AutoBuiltinStaticMethod(
         JVMSharedJVMName.fromClass(klass), name, info.descriptor, info.returnType);
   }
 

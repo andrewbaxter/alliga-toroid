@@ -15,9 +15,10 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.language.Block;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.ErrorValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
@@ -69,7 +70,7 @@ public class Evaluator {
 
   public static <T> Value evaluate(
       ModuleCompileContext moduleContext,
-      ROList<Value> rootStatements,
+      ROList<LanguageElement> rootStatements,
       /** Only whole-ish values */
       ROOrderedMap<WholeValue, Value> initialScope) {
     return instance.evaluateInner(moduleContext, rootStatements, initialScope);
@@ -77,7 +78,7 @@ public class Evaluator {
 
   public static <T> Value evaluate(
       ModuleCompileContext moduleContext, ImportId spec, String path, InputStream source) {
-    final ROList<Value> res =
+    final ROList<LanguageElement> res =
         LanguageDeserializer.deserialize(spec.moduleId, moduleContext.errors, path, source);
     if (res == null) {
       return ErrorValue.error;
@@ -87,7 +88,7 @@ public class Evaluator {
 
   private <T> Value evaluateInner(
       ModuleCompileContext moduleContext,
-      ROList<Value> rootStatements,
+      ROList<LanguageElement> rootStatements,
       /** Only whole-ish values */
       ROOrderedMap<WholeValue, Value> initialScope) {
     String className = GENERATED_CLASS_PREFIX + uniqueClass.getAndIncrement();
@@ -103,8 +104,8 @@ public class Evaluator {
       context.scope.put(local.first, local.second.bind(context, null).second);
     }
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
-    MortarTargetModuleContext.LowerResult lowered =
-        MortarTargetModuleContext.lower(
+    MortarTargetModuleContext.HalfLowerResult lowered =
+        MortarTargetModuleContext.halfLower(
             context,
             ectx.record(
                 new com.zarbosoft.alligatoroid.compiler.model.language.Scope(

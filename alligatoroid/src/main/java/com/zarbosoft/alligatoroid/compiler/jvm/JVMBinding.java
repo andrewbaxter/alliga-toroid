@@ -3,7 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.jvm;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.jvm.value.base.JVMDataType;
+import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfDataType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
@@ -11,9 +11,9 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 
 public class JVMBinding implements Binding {
   public final Object key;
-  public final JVMDataType type;
+  public final JVMHalfDataType type;
 
-  public JVMBinding(Object key, JVMDataType type) {
+  public JVMBinding(Object key, JVMHalfDataType type) {
     this.key = key;
     this.type = type;
   }

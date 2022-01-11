@@ -9,19 +9,18 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.ModuleIdValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ModuleIdValue;
 import com.zarbosoft.rendaw.common.Assertion;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class ModLocal extends LanguageValue {
-  public final Value path;
+public class ModLocal extends LanguageElement {
+  public final LanguageElement path;
 
-  public ModLocal(Location id, Value path) {
+  public ModLocal(Location id, LanguageElement path) {
     super(id, hasLowerInSubtree(path));
     this.path = path;
   }

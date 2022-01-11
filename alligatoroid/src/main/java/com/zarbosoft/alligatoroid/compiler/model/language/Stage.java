@@ -2,99 +2,110 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.half.MortarHalfValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarHalfValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.TypeInsnNode;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 
+import static com.zarbosoft.alligatoroid.compiler.Meta.autoMortarHalfDataType;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
-import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
-import static org.objectweb.asm.Opcodes.NEW;
 
-public class Stage extends LanguageValue {
-  public final Value child;
+public class Stage extends LanguageElement {
+  public final LanguageElement child;
 
-  public Stage(Location id, Value child) {
+  public Stage(Location id, LanguageElement child) {
     super(id, hasLowerInSubtree(child));
     this.child = child;
   }
 
   public static StageLowerResult stageLower(
-      EvaluationContext context, Location location, Value value) {
+      EvaluationContext context, Location location, LanguageElement element) {
     TSList<TargetCode> post = new TSList<>();
-    JVMSharedCode pre;
-    if (value instanceof Lower) {
-      EvaluateResult evalRes = ((Lower) value).child.evaluate(context);
-      JVMSharedCodeElement lowerRes =
-          MortarTargetModuleContext.lower(context, evalRes.value).valueCode;
+    JVMSharedCodeElement pre;
+    if (element instanceof Lower) {
+      EvaluateResult evalRes = ((Lower) element).child.evaluate(context);
+      MortarTargetModuleContext.HalfLowerResult lowerRes =
+          MortarTargetModuleContext.halfLower(context, evalRes.value);
+      JVMSharedCodeElement pre0;
+      if (lowerRes.dataType == autoMortarHalfDataType(LanguageElement.class)) {
+        pre0 = lowerRes.valueCode;
+      } else {
+        pre0 =
+            JVMSharedCode.instantiate(
+                -1,
+                JVMSharedJVMName.fromClass(Wrap.class),
+                JVMSharedFuncDescriptor.fromConstructorParts(
+                    JVMSharedDataDescriptor.fromClass(Location.class),
+                    JVMSharedDataDescriptor.OBJECT),
+                new JVMSharedCode()
+                    .add(((MortarTargetModuleContext) context.target).transfer(location))
+                    .add(lowerRes.valueCode));
+      }
       pre =
           (JVMSharedCode)
-              context.target.merge(context, location, new TSList<>(evalRes.preEffect, lowerRes));
+              context.target.merge(context, location, new TSList<>(evalRes.preEffect, pre0));
       post.add(evalRes.postEffect);
-    } else if (value instanceof LanguageValue && ((LanguageValue) value).hasLowerInSubtree) {
-      Class<? extends Value> klass = value.getClass();
+    } else if (element.hasLowerInSubtree) {
+      Class klass = element.getClass();
 
-      pre = new JVMSharedCode();
-      pre.add(new TypeInsnNode(NEW, JVMDescriptorUtils.jvmName(klass))).addI(DUP);
+      JVMSharedCode args = new JVMSharedCode();
 
       Constructor<?> constructor = klass.getConstructors()[0];
       Parameter[] parameters = constructor.getParameters();
-      String[] argDesc = new String[parameters.length];
+      JVMSharedDataDescriptor[] argDesc = new JVMSharedDataDescriptor[parameters.length];
       for (int i = 0; i < parameters.length; i++) {
         Parameter parameter = parameters[i];
         if (parameter.getType() == Location.class) {
-          argDesc[i] = JVMDescriptorUtils.objDescriptorFromReal(Location.class);
-          pre.add(
+          argDesc[i] = JVMSharedDataDescriptor.fromClass(Location.class);
+          args.add(
               MortarTargetModuleContext.lowerRaw(
-                  context, uncheck(() -> klass.getField("location").get(value)), false));
+                  context, uncheck(() -> klass.getField("location").get(element)), false));
         } else if (parameter.getType() == ROList.class) {
-          argDesc[i] = JVMDescriptorUtils.objDescriptorFromReal(ROList.class);
-          pre.add(MortarTargetModuleContext.newTSListCode);
-          Object parameterValue = uncheck(() -> klass.getField(parameter.getName()).get(value));
+          argDesc[i] = JVMSharedDataDescriptor.fromClass(ROList.class);
+          args.add(MortarTargetModuleContext.newTSListCode);
+          Object parameterValue = uncheck(() -> klass.getField(parameter.getName()).get(element));
           for (Object o : ((TSList) parameterValue)) {
-            StageLowerResult stageRes = stageLower(context, location, (Value) o);
-            pre.add((JVMSharedCode) stageRes.pre);
-            pre.add(MortarTargetModuleContext.tsListAddCode);
+            StageLowerResult stageRes = stageLower(context, location, (LanguageElement) o);
+            args.add((JVMSharedCode) stageRes.pre);
+            args.add(MortarTargetModuleContext.tsListAddCode);
             post.add(stageRes.post);
           }
-        } else if (parameter.getType() == Value.class) {
-          argDesc[i] = JVMDescriptorUtils.objDescriptorFromReal(Value.class);
+        } else if (parameter.getType() == LanguageElement.class) {
+          argDesc[i] = JVMSharedDataDescriptor.fromClass(LanguageElement.class);
           StageLowerResult stageRes =
               stageLower(
                   context,
                   location,
-                  (Value) uncheck(() -> klass.getField(parameter.getName()).get(value)));
-          pre.add((JVMSharedCode) stageRes.pre);
+                  (LanguageElement)
+                      uncheck(() -> klass.getField(parameter.getName()).get(element)));
+          args.add((JVMSharedCode) stageRes.pre);
           post.add(stageRes.post);
-        } else throw new Assertion();
+        }
+        throw new Assertion();
       }
-
-      pre.add(
-          new MethodInsnNode(
-              INVOKESPECIAL,
-              JVMDescriptorUtils.jvmName(klass),
-              "<init>",
-              JVMDescriptorUtils.func("V", argDesc),
-              false));
+      pre =
+          JVMSharedCode.instantiate(
+              -1,
+              JVMSharedJVMName.fromClass(klass),
+              JVMSharedFuncDescriptor.fromConstructorParts(argDesc),
+              args);
     } else {
-      pre = ((MortarTargetModuleContext) context.target).transfer(value);
+      pre = ((MortarTargetModuleContext) context.target).transfer(element);
     }
     return new StageLowerResult(
         pre, context.target.merge(context, location, new ReverseIterable<>(post)));
@@ -107,7 +118,7 @@ public class Stage extends LanguageValue {
         null,
         stageRes.post,
         new MortarHalfValue(
-            Meta.wrapClass(Value.class),
+            autoMortarHalfDataType(Value.class),
             new MortarProtocode() {
               @Override
               public JVMSharedCodeElement lower(EvaluationContext context) {

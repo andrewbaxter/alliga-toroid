@@ -1,16 +1,15 @@
 package com.zarbosoft.alligatoroid.compiler.model.language;
 
-import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 
-public class Call extends LanguageValue {
-  public final Value target;
-  public final Value argument;
+public class Call extends LanguageElement {
+  public final LanguageElement target;
+  public final LanguageElement argument;
 
-  public Call(Location id, Value target, Value argument) {
+  public Call(Location id, LanguageElement target, LanguageElement argument) {
     super(id, hasLowerInSubtree(target, argument));
     this.target = target;
     this.argument = argument;

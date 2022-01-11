@@ -1,18 +1,17 @@
 package com.zarbosoft.alligatoroid.compiler.model.language;
 
-import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.LooseTuple;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class Tuple extends LanguageValue {
-  public final ROList<Value> elements;
+public class Tuple extends LanguageElement {
+  public final ROList<LanguageElement> elements;
 
-  public Tuple(Location id, ROList<Value> elements) {
+  public Tuple(Location id, ROList<LanguageElement> elements) {
     super(id, hasLowerInSubtree(elements));
     this.elements = elements;
   }
@@ -20,7 +19,7 @@ public class Tuple extends LanguageValue {
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
     TSList<EvaluateResult> data = new TSList<>();
-    for (Value element : elements) {
+    for (LanguageElement element : elements) {
       data.add(element.evaluate(context));
     }
     return EvaluateResult.pure(new LooseTuple(data));

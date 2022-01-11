@@ -8,10 +8,10 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.error.IncompatibleTargetValues;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.half.MortarHalfValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.LooseTuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.WholeString;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarHalfValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeString;
 import com.zarbosoft.rendaw.common.Assertion;
 
 import static com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement.JVM_TARGET_NAME;

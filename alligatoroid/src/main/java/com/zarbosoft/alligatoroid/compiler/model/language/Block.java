@@ -2,28 +2,28 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.NullValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class Block extends LanguageValue {
-  public final ROList<Value> statements;
+public class Block extends LanguageElement {
+  public final ROList<LanguageElement> statements;
 
-  public Block(Location id, ROList<Value> statements) {
+  public Block(Location id, ROList<LanguageElement> statements) {
     super(id, hasLowerInSubtree(statements));
     this.statements = statements;
   }
 
   public static EvaluateResult evaluate(
-          EvaluationContext context, Location location, ROList<Value> children) {
+          EvaluationContext context, Location location, ROList<LanguageElement> children) {
     TSList<TargetCode> pre = new TSList<>();
     EvaluateResult lastRes = null;
     Location lastLocation = null;
-    for (Value child : children) {
+    for (LanguageElement child : children) {
       if (lastRes != null) {
         pre.add(lastRes.preEffect);
         pre.add(lastRes.value.drop(context, lastLocation));

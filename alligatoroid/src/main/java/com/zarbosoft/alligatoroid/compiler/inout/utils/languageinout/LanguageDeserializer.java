@@ -13,13 +13,13 @@ import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeInt
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeString;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.State;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateErrorSingle;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.DeserializeUnknownLanguageVersion;
 import com.zarbosoft.alligatoroid.compiler.model.error.DeserializeUnknownType;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
@@ -45,17 +45,17 @@ public class LanguageDeserializer {
         new Prototype() {
           @Override
           public BaseStateSingle create(TSList<Error> errors, LuxemPathBuilder luxemPath) {
-            return new DefaultStateSingle<ModuleId, LanguageValue>() {
-              private StateClassBody<ModuleId, LanguageValue> child;
+            return new DefaultStateSingle<ModuleId, LanguageElement>() {
+              private StateClassBody<ModuleId, LanguageElement> child;
 
               @Override
-              public LanguageValue build(ModuleId moduleId, TSList<Error> errors) {
+              public LanguageElement build(ModuleId moduleId, TSList<Error> errors) {
                 if (child == null) return null;
                 return child.build(moduleId, errors);
               }
 
               @Override
-              protected BaseStateSingle<ModuleId, LanguageValue> innerEatType(
+              protected BaseStateSingle<ModuleId, LanguageElement> innerEatType(
                   ModuleId moduleId,
                   TSList<Error> errors,
                   LuxemPathBuilder luxemPath,
@@ -68,16 +68,16 @@ public class LanguageDeserializer {
                   return StateErrorSingle.state;
                 }
 
-                return new DefaultStateSingle<ModuleId, LanguageValue>() {
+                return new DefaultStateSingle<ModuleId, LanguageElement>() {
                   @Override
-                  public LanguageValue build(ModuleId moduleId, TSList<Error> errors) {
+                  public LanguageElement build(ModuleId moduleId, TSList<Error> errors) {
                     return null;
                   }
 
                   @Override
-                  protected BaseStateRecordBody<ModuleId, LanguageValue> innerEatRecordBegin(
+                  protected BaseStateRecordBody<ModuleId, LanguageElement> innerEatRecordBegin(
                       ModuleId moduleId, TSList<Error> errors, LuxemPathBuilder luxemPath) {
-                    child = new StateClassBody<ModuleId, LanguageValue>(luxemPath, info);
+                    child = new StateClassBody<ModuleId, LanguageElement>(luxemPath, info);
                     return child;
                   }
                 };
@@ -127,7 +127,7 @@ public class LanguageDeserializer {
     }
   }
 
-  public static ROList<Value> deserialize(
+  public static ROList<LanguageElement> deserialize(
       ModuleId moduleId, TSList<Error> errors, String path, InputStream source) {
     TSList<State> stack = new TSList<>();
     State[] rootNodes = new State[1];
@@ -156,6 +156,6 @@ public class LanguageDeserializer {
     if (out == errorRet) {
       return null;
     }
-    return (ROList<Value>) out;
+    return (ROList<LanguageElement>) out;
   }
 }

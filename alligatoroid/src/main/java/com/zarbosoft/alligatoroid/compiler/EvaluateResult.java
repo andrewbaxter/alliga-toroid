@@ -1,8 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -36,8 +37,8 @@ public class EvaluateResult {
       this.location = location;
     }
 
-    public Value evaluate(Value value) {
-      return record(value.evaluate(context));
+    public Value evaluate(LanguageElement element) {
+      return record(element.evaluate(context));
     }
 
     public void recordPre(TargetCode sideEffect) {

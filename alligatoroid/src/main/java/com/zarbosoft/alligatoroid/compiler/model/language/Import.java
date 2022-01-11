@@ -2,22 +2,22 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.ErrorValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.ModuleIdValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ModuleIdValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.FutureValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.FutureValue;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import java.util.concurrent.CompletableFuture;
 
-public class Import extends LanguageValue {
-  public final Value spec;
+public class Import extends LanguageElement {
+  public final LanguageElement spec;
 
-  public Import(Location id, Value spec) {
+  public Import(Location id, LanguageElement spec) {
     super(id, hasLowerInSubtree(spec));
     this.spec = spec;
   }

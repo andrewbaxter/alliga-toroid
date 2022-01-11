@@ -1,7 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.Record;
+import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.luxem.write.Writer;
 
 public final class RemoteModuleId implements ModuleId {

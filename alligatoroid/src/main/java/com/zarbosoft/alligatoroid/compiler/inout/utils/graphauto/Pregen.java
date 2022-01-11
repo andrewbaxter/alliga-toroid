@@ -11,7 +11,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.AutoGraphBuiltinValueType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoGraphValueType;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -26,17 +26,17 @@ import static com.zarbosoft.alligatoroid.compiler.Meta.toUnderscore;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Pregen {
-  public static final ROMap<Class, AutoGraphBuiltinValueType.GraphAuxConverter> graphAuxConverters;
+  public static final ROMap<Class, AutoGraphValueType.GraphAuxConverter> graphAuxConverters;
 
   static {
     //// Graph id/primitive type conversions
     // =============================
     /// Prepare type converters for non-value, non-collection types
-    TSMap<Class, AutoGraphBuiltinValueType.GraphAuxConverter> graphAuxConverters0 = new TSMap<>();
+    TSMap<Class, AutoGraphValueType.GraphAuxConverter> graphAuxConverters0 = new TSMap<>();
 
     /// Simple types
-    AutoGraphBuiltinValueType.GraphAuxConverter intConverter =
-        new AutoGraphBuiltinValueType.GraphAuxConverter() {
+    AutoGraphValueType.GraphAuxConverter intConverter =
+        new AutoGraphValueType.GraphAuxConverter() {
           @Override
           public Object desemiserialize(SemiserialSubvalue data) {
             return data.dispatch(
@@ -55,8 +55,8 @@ public class Pregen {
         };
     graphAuxConverters0.put(Integer.class, intConverter);
     graphAuxConverters0.put(int.class, intConverter);
-    AutoGraphBuiltinValueType.GraphAuxConverter boolConverter =
-        new AutoGraphBuiltinValueType.GraphAuxConverter() {
+    AutoGraphValueType.GraphAuxConverter boolConverter =
+        new AutoGraphValueType.GraphAuxConverter() {
           @Override
           public Object desemiserialize(SemiserialSubvalue data) {
             return data.dispatch(
@@ -75,8 +75,8 @@ public class Pregen {
         };
     graphAuxConverters0.put(Boolean.class, boolConverter);
     graphAuxConverters0.put(boolean.class, boolConverter);
-    AutoGraphBuiltinValueType.GraphAuxConverter stringConverter =
-        new AutoGraphBuiltinValueType.GraphAuxConverter() {
+    AutoGraphValueType.GraphAuxConverter stringConverter =
+        new AutoGraphValueType.GraphAuxConverter() {
           @Override
           public Object desemiserialize(SemiserialSubvalue data) {
             return data.dispatch(
@@ -95,7 +95,7 @@ public class Pregen {
         };
     graphAuxConverters0.put(String.class, stringConverter);
 
-    /// Complexer types
+    /// Complexer types (but still simple, just ids and the like)
     // Walk type tree to find children of polymorphic types.
     TSMap<Class, TSSet<Class>> children = new TSMap<>();
     class WalkParents {
@@ -136,7 +136,7 @@ public class Pregen {
         }
         graphAuxConverters0.put(
             e.getKey(),
-            new AutoGraphBuiltinValueType.GraphAuxConverter() {
+            new AutoGraphValueType.GraphAuxConverter() {
               @Override
               public Object desemiserialize(SemiserialSubvalue data) {
                 return data.dispatch(
@@ -160,7 +160,7 @@ public class Pregen {
         Constructor constructor = klass.getConstructors()[0];
         graphAuxConverters0.put(
             klass,
-            new AutoGraphBuiltinValueType.GraphAuxConverter() {
+            new AutoGraphValueType.GraphAuxConverter() {
               @Override
               public Object desemiserialize(SemiserialSubvalue data) {
                 return data.dispatch(

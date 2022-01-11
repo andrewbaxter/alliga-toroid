@@ -1,16 +1,15 @@
 package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 
-public class Access extends LanguageValue {
-  public final Value base;
-  public final Value key;
+public class Access extends LanguageElement {
+  public final LanguageElement base;
+  public final LanguageElement key;
 
-  public Access(Location id, Value base, Value key) {
+  public Access(Location id, LanguageElement base, LanguageElement key) {
     super(id, hasLowerInSubtree(base, key));
     this.base = base;
     this.key = key;

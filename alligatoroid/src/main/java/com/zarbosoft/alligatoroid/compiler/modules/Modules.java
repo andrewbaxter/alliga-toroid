@@ -12,7 +12,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialValue;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;

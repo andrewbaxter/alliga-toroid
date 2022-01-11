@@ -69,7 +69,7 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
       JVMSharedFuncDescriptor desc,
       JVMSharedCodeElement arguments) {
     JVMSharedCode code = new JVMSharedCode();
-    if (location > 0) code.line(location);
+    if (location >= 0) code.line(location);
     code.add(new TypeInsnNode(NEW, klass.value)).addI(DUP);
     code.add(arguments);
     code.add(new MethodInsnNode(INVOKESPECIAL, klass.value, "<init>", desc.value, false));
@@ -79,7 +79,7 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
   public static JVMSharedCodeElement accessField(
       int location, JVMSharedJVMName klass, String field, JVMSharedDataDescriptor fieldDesc) {
     final JVMSharedCode code = new JVMSharedCode();
-    if (location > 0) code.line(location);
+    if (location >= 0) code.line(location);
     code.add(new FieldInsnNode(GETFIELD, klass.value, field, fieldDesc.value));
     return code;
   }
@@ -87,7 +87,7 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
   public static JVMSharedCodeElement accessStaticField(
       int location, JVMSharedJVMName klass, String field, JVMSharedDataDescriptor fieldDesc) {
     final JVMSharedCode code = new JVMSharedCode();
-    if (location > 0) code.line(location);
+    if (location >= 0) code.line(location);
     code.add(new FieldInsnNode(GETSTATIC, klass.value, field, fieldDesc.value));
     return code;
   }
@@ -95,7 +95,7 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
   public static JVMSharedCodeElement callMethod(
       int location, JVMSharedJVMName klass, String method, JVMSharedFuncDescriptor methodDesc) {
     final JVMSharedCode code = new JVMSharedCode();
-    if (location > 0) code.line(location);
+    if (location >= 0) code.line(location);
     code.add(new MethodInsnNode(INVOKEVIRTUAL, klass.value, method, methodDesc.value, false));
     return code;
   }
@@ -103,7 +103,7 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
   public static JVMSharedCodeElement callStaticMethod(
       int location, JVMSharedJVMName klass, String method, JVMSharedFuncDescriptor methodDesc) {
     final JVMSharedCode code = new JVMSharedCode();
-    if (location > 0) code.line(location);
+    if (location >= 0) code.line(location);
     code.add(new MethodInsnNode(INVOKESTATIC, klass.value, method, methodDesc.value, false));
     return code;
   }
@@ -138,13 +138,12 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
 
   public static JVMSharedCodeElement box(
       JVMSharedDataDescriptor primDescriptor, JVMSharedJVMName box) {
-    return new JVMSharedCodeInstruction(
-        new MethodInsnNode(
-            INVOKESTATIC,
-            box.value,
-            "valueOf",
-            "(" + primDescriptor + ")" + JVMSharedDataDescriptor.fromJVMName(box).value,
-            false));
+    return callStaticMethod(
+        -1,
+        box,
+        "valueOf",
+        JVMSharedFuncDescriptor.fromParts(
+            JVMSharedDataDescriptor.fromJVMName(box), primDescriptor));
   }
 
   public static JVMSharedCodeElement cast(JVMSharedDataDescriptor toClass) {

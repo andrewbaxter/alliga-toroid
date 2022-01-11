@@ -7,6 +7,11 @@ public class JVMSharedFuncDescriptor {
     this.value = value;
   }
 
+  public static JVMSharedFuncDescriptor fromConstructorParts(
+      JVMSharedDataDescriptor... argDescriptors) {
+    return fromParts(JVMSharedDataDescriptor.VOID, argDescriptors);
+  }
+
   public static JVMSharedFuncDescriptor fromParts(
       JVMSharedDataDescriptor returnDescriptor, JVMSharedDataDescriptor... argDescriptors) {
     StringBuilder builder = new StringBuilder();

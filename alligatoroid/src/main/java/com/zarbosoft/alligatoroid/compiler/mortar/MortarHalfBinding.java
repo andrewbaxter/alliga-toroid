@@ -7,7 +7,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeStoreLoad;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfDataType;
 
 public class MortarHalfBinding implements Binding {
   public final Object key;

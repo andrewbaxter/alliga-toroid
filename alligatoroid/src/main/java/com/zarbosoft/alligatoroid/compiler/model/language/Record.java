@@ -2,20 +2,19 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.LanguageValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.NotRecordPair;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.LooseRecord;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
-public class Record extends LanguageValue {
-  public final ROList<Value> elements;
+public class Record extends LanguageElement {
+  public final ROList<LanguageElement> elements;
 
-  public Record(Location id, ROList<Value> elements) {
+  public Record(Location id, ROList<LanguageElement> elements) {
     super(id, hasLowerInSubtree(elements));
     this.elements = elements;
   }
@@ -23,11 +22,11 @@ public class Record extends LanguageValue {
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
     TSOrderedMap<Object, EvaluateResult> data = new TSOrderedMap<>();
-    for (Value element : elements) {
+    for (LanguageElement element : elements) {
       if (!(element instanceof RecordElement)) {
         context.moduleContext.errors.add(
             new NotRecordPair(
-                ((LanguageValue) element).location, element.getClass().getSimpleName()));
+                ((LanguageElement) element).location, element.getClass().getSimpleName()));
         continue;
       }
       EvaluateResult keyRes = ((RecordElement) element).key.evaluate(context);

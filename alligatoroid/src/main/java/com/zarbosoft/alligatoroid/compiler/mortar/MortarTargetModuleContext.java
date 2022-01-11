@@ -10,23 +10,23 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.error.IncompatibleTargetValues;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.MortarHalfBoolType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.MortarHalfRecordType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.MortarHalfStringType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.MortarHalfTupleType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.NullType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.Record;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.autohalf.Tuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.MortarHalfDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.WholeValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.half.MortarHalfValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.FutureValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.LooseRecord;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.LooseTuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.NullValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.WholeBool;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.WholeString;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfBoolType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfRecordType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfStringType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfTupleType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfNullType;
+import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
+import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Tuple;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarHalfValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.FutureValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeBool;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeString;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -113,12 +113,12 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                 false));
   }
 
-  public static LowerResult lower(EvaluationContext context, Value value) {
+  public static HalfLowerResult halfLower(EvaluationContext context, Value value) {
     if (value.getClass() == FutureValue.class) {
-      return lower(context, ((FutureValue) value).get());
+      return halfLower(context, ((FutureValue) value).get());
     }
     if (value == NullValue.value) {
-      return new LowerResult(NullType.type, new JVMSharedCode());
+      return new HalfLowerResult(MortarHalfNullType.type, new JVMSharedCode());
 
     } else if (value instanceof LooseTuple) {
       JVMSharedCode out = new JVMSharedCode();
@@ -127,14 +127,14 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       out.add(newTSListCode);
       for (EvaluateResult e : ((LooseTuple) value).data) {
         if (e.preEffect != null) out.add((JVMSharedCode) e.preEffect);
-        LowerResult lowerRes = lower(context, e.value);
+        HalfLowerResult lowerRes = halfLower(context, e.value);
         if (lowerRes.dataType != null) lowerRes = lowerRes.dataType.box(lowerRes.valueCode);
         types.add(lowerRes.dataType);
         out.add(lowerRes.valueCode);
         out.add(tsListAddCode);
       }
       out.add(newTupleCode2);
-      return new LowerResult(new MortarHalfTupleType(types), out);
+      return new HalfLowerResult(new MortarHalfTupleType(types), out);
 
     } else if (value instanceof LooseRecord) {
       JVMSharedCode out = new JVMSharedCode();
@@ -144,7 +144,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       for (ROPair<Object, EvaluateResult> e : ((LooseRecord) value).data) {
         if (e.second.preEffect != null) out.add((JVMSharedCode) e.second.preEffect);
         out.add(lowerRaw(context, e.first, true));
-        LowerResult lowerRes = lower(context, e.second.value);
+        HalfLowerResult lowerRes = halfLower(context, e.second.value);
         if (lowerRes.dataType != null) lowerRes = lowerRes.dataType.box(lowerRes.valueCode);
         types.put(e.first, lowerRes.dataType);
         out.add(lowerRes.valueCode);
@@ -160,22 +160,22 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                 false));
       }
       out.add(newRecordCode2);
-      return new LowerResult(new MortarHalfRecordType(types), out);
+      return new HalfLowerResult(new MortarHalfRecordType(types), out);
 
     } else if (value instanceof WholeString) {
-      return new LowerResult(
+      return new HalfLowerResult(
           MortarHalfStringType.type, new JVMSharedCode().addString(((WholeString) value).value));
 
     } else if (value instanceof WholeBool) {
-      return new LowerResult(
+      return new HalfLowerResult(
           MortarHalfBoolType.type, new JVMSharedCode().addBool(((WholeBool) value).value));
 
     } else if (value instanceof MortarHalfValue) {
-      return new LowerResult(((MortarHalfValue) value).type, ((MortarHalfValue) value).lower(context));
+      return new HalfLowerResult(((MortarHalfValue) value).type, ((MortarHalfValue) value).lower(context));
 
     } else {
       if (value instanceof WholeValue) throw new Assertion();
-      return new LowerResult(
+      return new HalfLowerResult(
           null /* TODO */, ((MortarTargetModuleContext) context.target).transfer(value));
     }
   }
@@ -202,10 +202,10 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     if (argument instanceof LooseTuple) {
       for (EvaluateResult e : ((LooseTuple) argument).data) {
         if (e.preEffect != null) code.add((JVMSharedCode) e.preEffect);
-        code.add(lower(context, e.value).valueCode);
+        code.add(halfLower(context, e.value).valueCode);
       }
     } else {
-      code.add(lower(context, argument).valueCode);
+      code.add(halfLower(context, argument).valueCode);
     }
   }
 
@@ -241,11 +241,11 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     return code;
   }
 
-  public static class LowerResult {
+  public static class HalfLowerResult {
     public final MortarHalfDataType dataType;
     public final JVMSharedCodeElement valueCode;
 
-    public LowerResult(MortarHalfDataType dataType, JVMSharedCodeElement valueCode) {
+    public HalfLowerResult(MortarHalfDataType dataType, JVMSharedCodeElement valueCode) {
       this.dataType = dataType;
       this.valueCode = valueCode;
     }

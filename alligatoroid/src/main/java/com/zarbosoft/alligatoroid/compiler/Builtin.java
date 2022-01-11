@@ -1,10 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.AutoGraphMixin;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.AutoGraphBuiltinValueType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.base.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.LooseRecord;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.whole.MortarBuiltin;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoGraphMixin;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoGraphValueType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarBuiltin;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -15,7 +15,7 @@ import java.lang.reflect.Modifier;
 
 import static com.zarbosoft.alligatoroid.compiler.Meta.LANGUAGE;
 import static com.zarbosoft.alligatoroid.compiler.Meta.OTHER_AUTO_GRAPH;
-import static com.zarbosoft.alligatoroid.compiler.Meta.wrapFunction;
+import static com.zarbosoft.alligatoroid.compiler.Meta.autoMortarHalfStaticMethodType;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Builtin {
@@ -33,11 +33,11 @@ public class Builtin {
     builtin = aggregateBuiltinForGraph(builtinToSemiKey, semiKeyToBuiltin, MortarBuiltin.class, "");
     for (Class<AutoGraphMixin> languageElement : LANGUAGE) {
       AutoGraphMixin.assertFieldsOk(languageElement);
-      builtinToBuiltinType.put(languageElement, new AutoGraphBuiltinValueType(languageElement));
+      builtinToBuiltinType.put(languageElement, new AutoGraphValueType(languageElement));
     }
     for (Class<AutoGraphMixin> klass : OTHER_AUTO_GRAPH) {
       AutoGraphMixin.assertFieldsOk(klass);
-      builtinToBuiltinType.put(klass, new AutoGraphBuiltinValueType(klass));
+      builtinToBuiltinType.put(klass, new AutoGraphValueType(klass));
     }
     Builtin.builtinToSemiKey = builtinToSemiKey;
     Builtin.semiKeyToBuiltin = semiKeyToBuiltin;
@@ -74,7 +74,7 @@ public class Builtin {
       if (name.startsWith("_")) {
         name = name.substring(1);
       }
-      values.put(name, EvaluateResult.pure(wrapFunction(klass, m.getName())));
+      values.put(name, EvaluateResult.pure(autoMortarHalfStaticMethodType(klass, m.getName())));
     }
     return new LooseRecord(values);
   }
