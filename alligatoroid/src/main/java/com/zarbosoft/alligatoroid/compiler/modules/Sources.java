@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.modules;
 
 import com.zarbosoft.alligatoroid.compiler.Asyncer;
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
-import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 
 public class Sources {
   private final SourceResolver inner;
@@ -13,13 +13,13 @@ public class Sources {
     downloads = new Asyncer<>();
   }
 
-  public Source get(CompileContext context, ImportId importId) {
+  public Source get(CompileContext context, ModuleId moduleId) {
     return downloads.getSync(
         context.threads,
-        importId.moduleId,
+        moduleId,
         () -> {
-          final Source out = inner.get(context, importId.moduleId);
-          context.localSources.put(importId, out.path);
+          final Source out = inner.get(context, moduleId);
+          context.localSources.put(moduleId, out.path);
           return out;
         });
   }

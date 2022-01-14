@@ -2,20 +2,13 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
-import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public final class ErrorValue implements Value {
+public final class ErrorValue implements Value, NoExportValue, LeafValue {
   public static final ErrorValue error = new ErrorValue();
 
   private ErrorValue() {}
@@ -43,30 +36,5 @@ public final class ErrorValue implements Value {
   @Override
   public Location location() {
     return null;
-  }
-
-  @Override
-  public Value type() {
-    throw new Assertion();
-  }
-
-  @Override
-  public boolean canExport() {
-    return false;
-  }
-
-  @Override
-  public SemiserialSubvalue graphSerialize(ImportId spec, Semiserializer semiserializer, ROList<Value> path, ROList<String> accessPath) {
-    throw new Assertion();
-  }
-
-  @Override
-  public Value graphDeserializeValue(ModuleCompileContext context, Desemiserializer typeDesemiserializer, SemiserialSubvalue data) {
-    throw new Assertion();
-  }
-
-  @Override
-  public void postDesemiserialize() {
-    throw new Assertion();
   }
 }

@@ -29,7 +29,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfStringType
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.AutoBuiltinMethodFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfMethodType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoBuiltinStaticMethod;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -180,7 +180,7 @@ public class Meta {
           FuncInfo info = funcDescriptor(method);
           fields.putNew(
               method.getName(),
-              new AutoBuiltinMethodFieldType(
+              new MortarHalfMethodType(
                   out, method.getName(), info.descriptor, info.returnType, info.needsModule));
         }
       for (Field field : klass.getDeclaredFields()) {

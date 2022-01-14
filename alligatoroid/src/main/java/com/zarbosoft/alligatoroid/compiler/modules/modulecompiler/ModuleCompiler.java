@@ -4,7 +4,6 @@ import com.zarbosoft.alligatoroid.compiler.CompileContext;
 import com.zarbosoft.alligatoroid.compiler.Evaluator;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRef;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
@@ -20,9 +19,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.alligatoroid.compiler.modules.Module;
 import com.zarbosoft.alligatoroid.compiler.modules.ModuleResolver;
 import com.zarbosoft.alligatoroid.compiler.modules.Source;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -51,11 +48,11 @@ public class ModuleCompiler implements ModuleResolver {
     ModuleCompileContext moduleContext = new ModuleCompileContext(importId, context, importPath);
     context.moduleErrors.put(importId, moduleContext.errors);
 
-    Value res =
+    SemiserialModule res =
         importId.moduleId.dispatch(
-            new ModuleId.Dispatcher<Value>() {
+            new ModuleId.Dispatcher<SemiserialModule>() {
 
-              public Value handleTopLevel() {
+              public SemiserialModule handleTopLevel() {
                 final String stringPath = source.path.toString();
                 if (stringPath.endsWith(".at")) {
                   return uncheck(
@@ -65,24 +62,25 @@ public class ModuleCompiler implements ModuleResolver {
                         }
                       });
                 } else if (stringPath.endsWith(".zip")) {
-                  return new BundleValue(importId, "");
+                  return Semiserializer.semiserialize(
+                      moduleContext, new BundleValue(importId, ""), null);
                 } else {
                   throw new UnknownImportFileTypePre(importId.moduleId);
                 }
               }
 
               @Override
-              public Value handleLocal(LocalModuleId id) {
+              public SemiserialModule handleLocal(LocalModuleId id) {
                 return handleTopLevel();
               }
 
               @Override
-              public Value handleRemote(RemoteModuleId id) {
+              public SemiserialModule handleRemote(RemoteModuleId id) {
                 return handleTopLevel();
               }
 
               @Override
-              public Value handleBundle(BundleModuleSubId id) {
+              public SemiserialModule handleBundle(BundleModuleSubId id) {
                 return uncheck(
                     () -> {
                       try (ZipFile bundle = new ZipFile(source.path.toFile())) {
@@ -96,7 +94,8 @@ public class ModuleCompiler implements ModuleResolver {
                           throw new ImportNotFoundPre(id.toString());
                         }
                         if (e.isDirectory()) {
-                          return new BundleValue(new ImportId(id.module), path);
+                          return Semiserializer.semiserialize(
+                              moduleContext, new BundleValue(new ImportId(id.module), path), null);
                         }
                         if (path.endsWith(".at")) {
                           try (InputStream stream = bundle.getInputStream(e)) {
@@ -111,14 +110,11 @@ public class ModuleCompiler implements ModuleResolver {
               }
 
               @Override
-              public Value handleRoot(RootModuleId id) {
+              public SemiserialModule handleRoot(RootModuleId id) {
                 throw new Assertion();
               }
             });
-    if (res == ErrorValue.error) throw Error.moduleError;
-    Semiserializer s = new Semiserializer(moduleContext.backArtifactLookup);
-    SemiserialRef root = s.process(importId, res, new TSList<>(), new TSList<>());
-    SemiserialModule semiserialModule = new SemiserialModule(root, s.artifacts);
+    if (res == null) throw Error.moduleError;
     return new Module() {
       @Override
       public ImportId spec() {
@@ -127,7 +123,7 @@ public class ModuleCompiler implements ModuleResolver {
 
       @Override
       public SemiserialModule result() {
-        return semiserialModule;
+        return res;
       }
     };
   }

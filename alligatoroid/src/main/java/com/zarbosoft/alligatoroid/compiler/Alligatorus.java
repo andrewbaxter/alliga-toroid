@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.appdirsj.AppDirs;
 import com.zarbosoft.rendaw.common.ROList;
@@ -25,7 +26,7 @@ public class Alligatorus {
   public static Result compile(Path cachePath, ImportId spec) {
     RootModuleId rootModuleId = new RootModuleId();
     final ImportId rootImportId = new ImportId(rootModuleId);
-    CompileContext context = new CompileContext(cachePath);
+    CompileContext context = new CompileContext(cachePath, spec);
     ModuleCompileContext moduleContext = new ModuleCompileContext(rootImportId, context, null);
     context.moduleErrors.put(rootImportId, moduleContext.errors);
     try {
@@ -40,9 +41,9 @@ public class Alligatorus {
 
   public static class Result {
     public final Map<ImportId, ROList<Error>> errors;
-    public final Map<ImportId, Path> localSources;
+    public final Map<ModuleId, Path> localSources;
 
-    public Result(Map<ImportId, ROList<Error>> errors, Map<ImportId, Path> localSources) {
+    public Result(Map<ImportId, ROList<Error>> errors, Map<ModuleId, Path> localSources) {
       this.errors = errors;
       this.localSources = localSources;
     }

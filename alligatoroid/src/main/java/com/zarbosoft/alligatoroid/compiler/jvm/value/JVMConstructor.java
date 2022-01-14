@@ -7,13 +7,13 @@ import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoGraphMixin;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LeafValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
 
-public class JVMConstructor implements SimpleValue, AutoGraphMixin, LeafValue {
+public class JVMConstructor implements SimpleValue, AutoExportable, LeafValue {
   private final Record spec;
   public JVMHalfClassType base;
   public JVMUtils.MethodSpecDetails specDetails;

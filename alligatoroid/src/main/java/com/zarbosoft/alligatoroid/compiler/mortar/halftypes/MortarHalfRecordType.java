@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
@@ -11,13 +12,15 @@ import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LeafValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
-public class MortarHalfRecordType extends MortarHalfObjectType {
+public class MortarHalfRecordType extends MortarHalfObjectType
+    implements AutoExportable, LeafValue {
   public static final JVMSharedJVMName JVMNAME = JVMSharedJVMName.fromClass(Record.class);
   public static final JVMSharedDataDescriptor DESC = JVMSharedDataDescriptor.fromJVMName(JVMNAME);
   public final TSOrderedMap<Object, MortarHalfDataType> fields;
@@ -53,7 +56,8 @@ public class MortarHalfRecordType extends MortarHalfObjectType {
     }
     return EvaluateResult.pure(
         field.asValue(
-                location, new MortarProtocode() {
+            location,
+            new MortarProtocode() {
               @Override
               public JVMSharedCodeElement lower(EvaluationContext context) {
                 JVMSharedCode out = new JVMSharedCode();

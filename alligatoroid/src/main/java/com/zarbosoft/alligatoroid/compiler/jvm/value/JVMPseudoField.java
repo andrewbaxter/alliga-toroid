@@ -2,11 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.jvm.value;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMError;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMProtocode;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMTargetModuleContext;
@@ -15,20 +11,19 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
-import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LeafValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NoExportValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROTuple;
 
 import static com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType.getArgTuple;
 
-public class JVMPseudoField implements SimpleValue, NoExportValue {
+public class JVMPseudoField implements SimpleValue, NoExportValue, LeafValue {
   public final JVMHalfClassType base;
   public final String name;
   private final JVMProtocode lower;
@@ -47,11 +42,6 @@ public class JVMPseudoField implements SimpleValue, NoExportValue {
   @Override
   public Value type() {
     throw new Assertion();
-  }
-
-  @Override
-  public boolean canExport() {
-    return false;
   }
 
   @Override
@@ -110,19 +100,5 @@ public class JVMPseudoField implements SimpleValue, NoExportValue {
             .add(
                 JVMSharedCode.accessField(
                     context.sourceLocation(location), base.name, name, real.jvmDesc())));
-  }
-
-  @Override
-  public SemiserialSubvalue graphSerialize(
-      ImportId spec, Semiserializer semiserializer, ROList<Value> path, ROList<String> accessPath) {
-    throw new Assertion();
-  }
-
-  @Override
-  public Value graphDeserializeValue(
-      ModuleCompileContext context,
-      Desemiserializer typeDesemiserializer,
-      SemiserialSubvalue data) {
-    throw new Assertion();
   }
 }

@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.jvm.halftypes;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMProtocode;
+import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfValue;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;

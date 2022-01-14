@@ -15,7 +15,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoGraphMixin;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
@@ -25,7 +25,7 @@ import com.zarbosoft.rendaw.common.ROTuple;
 
 import static com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType.getArgTuple;
 
-public class JVMPseudoStaticField implements SimpleValue, AutoGraphMixin {
+public class JVMPseudoStaticField implements SimpleValue, AutoExportable {
   public final String name;
   public JVMHalfClassType base;
 

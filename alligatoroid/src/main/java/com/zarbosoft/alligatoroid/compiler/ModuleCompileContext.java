@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
@@ -20,12 +21,12 @@ public class ModuleCompileContext {
 
   public final ImportPath importPath;
   /** Already desemiserialized artifacts generated via imports. */
-  public TSMap<ArtifactId, Value> artifactLookup;
+  public TSMap<ArtifactId, Exportable> artifactLookup;
   /**
    * A mapping of artifacts imported, used while semiserializing output after compilation to prevent
    * re-semiserializing artifacts from other modules.
    */
-  public TSMap<Value, ArtifactId> backArtifactLookup;
+  public TSMap<Exportable, ArtifactId> backArtifactLookup;
 
   public ModuleCompileContext(
       ImportId importId, CompileContext compileContext, ImportPath importPath) {

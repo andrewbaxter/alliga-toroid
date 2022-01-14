@@ -20,4 +20,32 @@ public interface ModuleId extends TreeSerializable {
 
     T handleRoot(RootModuleId id);
   }
+
+  public abstract class DefaultDispatcher<T> implements Dispatcher<T> {
+    private final T default_;
+
+    protected DefaultDispatcher(T default_) {
+      this.default_ = default_;
+    }
+
+    @Override
+    public T handleBundle(BundleModuleSubId id) {
+      return default_;
+    }
+
+    @Override
+    public T handleLocal(LocalModuleId id) {
+      return default_;
+    }
+
+    @Override
+    public T handleRemote(RemoteModuleId id) {
+      return default_;
+    }
+
+    @Override
+    public T handleRoot(RootModuleId id) {
+      return default_;
+    }
+  }
 }

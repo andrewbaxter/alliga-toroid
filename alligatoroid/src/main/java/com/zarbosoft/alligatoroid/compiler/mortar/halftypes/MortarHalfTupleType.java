@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
@@ -12,30 +13,30 @@ import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Tuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LeafValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeInt;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class MortarHalfTupleType extends MortarHalfObjectType {
+public class MortarHalfTupleType extends MortarHalfObjectType implements AutoExportable, LeafValue {
   public static final JVMSharedJVMName JVMNAME = JVMSharedJVMName.fromClass(Tuple.class);
   public static final JVMSharedDataDescriptor DESC = JVMSharedDataDescriptor.fromJVMName(JVMNAME);
   public final TSList<MortarHalfDataType> fields;
 
-  public MortarHalfTupleType(TSList< MortarHalfDataType> fields) {
+  public MortarHalfTupleType(TSList<MortarHalfDataType> fields) {
     this.fields = fields;
   }
 
   @Override
   public Value unlower(Object object) {
     Tuple source = (Tuple) object;
-    final TSList< EvaluateResult> data = new TSList<>();
+    final TSList<EvaluateResult> data = new TSList<>();
     for (int i = 0; i < source.data.size(); i++) {
       final MortarHalfDataType field = fields.get(i);
       final Object element = source.data.get(i);
-      data.add(
-              EvaluateResult.pure(field.unlower(element)));
+      data.add(EvaluateResult.pure(field.unlower(element)));
     }
     return new LooseTuple(data);
   }
@@ -48,19 +49,20 @@ public class MortarHalfTupleType extends MortarHalfObjectType {
   @Override
   public EvaluateResult valueAccess(
       EvaluationContext context, Location location, Value field0, MortarProtocode lower) {
-      if (field0 == ErrorValue.error) return EvaluateResult.error;
-      if (!(field0 instanceof WholeInt)) {
-          context.moduleContext.errors.add(new WrongType(location, field0, "int"));
-      }
-      WholeInt key = (WholeInt) field0;
-      if (key.value < 0 || key.value >= fields.size()) {
-          context.moduleContext.errors.add(new NoField(location, key));
-          return EvaluateResult.error;
-      }
+    if (field0 == ErrorValue.error) return EvaluateResult.error;
+    if (!(field0 instanceof WholeInt)) {
+      context.moduleContext.errors.add(new WrongType(location, field0, "int"));
+    }
+    WholeInt key = (WholeInt) field0;
+    if (key.value < 0 || key.value >= fields.size()) {
+      context.moduleContext.errors.add(new NoField(location, key));
+      return EvaluateResult.error;
+    }
     MortarHalfDataType field = fields.get(key.concreteValue());
     return EvaluateResult.pure(
         field.asValue(
-                location, new MortarProtocode() {
+            location,
+            new MortarProtocode() {
               @Override
               public JVMSharedCodeElement lower(EvaluationContext context) {
                 JVMSharedCode out = new JVMSharedCode();

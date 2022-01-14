@@ -1,5 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRef;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.languageinout.LanguageDeserializer;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.DynamicClassLoader;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
@@ -13,14 +16,11 @@ import com.zarbosoft.alligatoroid.compiler.model.error.LocationlessUnexpected;
 import com.zarbosoft.alligatoroid.compiler.model.error.Unexpected;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.model.language.Block;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.Common;
-import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ReverseIterable;
@@ -68,27 +68,27 @@ public class Evaluator {
     }
   }
 
-  public static <T> Value evaluate(
+  public static <T> SemiserialModule evaluate(
       ModuleCompileContext moduleContext,
-      ROList<LanguageElement> rootStatements,
+      LanguageElement rootStatement,
       /** Only whole-ish values */
       ROOrderedMap<WholeValue, Value> initialScope) {
-    return instance.evaluateInner(moduleContext, rootStatements, initialScope);
+    return instance.evaluateInner(moduleContext, rootStatement, initialScope);
   }
 
-  public static <T> Value evaluate(
+  public static <T> SemiserialModule evaluate(
       ModuleCompileContext moduleContext, ImportId spec, String path, InputStream source) {
-    final ROList<LanguageElement> res =
+    final LanguageElement res =
         LanguageDeserializer.deserialize(spec.moduleId, moduleContext.errors, path, source);
     if (res == null) {
-      return ErrorValue.error;
+      return null;
     }
     return evaluate(moduleContext, res, ROOrderedMap.empty);
   }
 
-  private <T> Value evaluateInner(
+  private <T> SemiserialModule evaluateInner(
       ModuleCompileContext moduleContext,
-      ROList<LanguageElement> rootStatements,
+      LanguageElement rootStatement,
       /** Only whole-ish values */
       ROOrderedMap<WholeValue, Value> initialScope) {
     String className = GENERATED_CLASS_PREFIX + uniqueClass.getAndIncrement();
@@ -108,8 +108,7 @@ public class Evaluator {
         MortarTargetModuleContext.halfLower(
             context,
             ectx.record(
-                new com.zarbosoft.alligatoroid.compiler.model.language.Scope(
-                        null, new Block(null, rootStatements))
+                new com.zarbosoft.alligatoroid.compiler.model.language.Scope(null, rootStatement)
                     .evaluate(context)));
     EvaluateResult evaluateResult = ectx.build(null);
     for (ROPair<Location, CompletableFuture> d : context.deferredErrors) {
@@ -128,7 +127,7 @@ public class Evaluator {
             null,
             new TSList<>(evaluateResult.preEffect, lowered.valueCode, evaluateResult.postEffect)));
     if (moduleContext.errors.some()) {
-      return ErrorValue.error;
+      return null;
     }
 
     // Do 2nd pass jvm evaluation
@@ -152,8 +151,8 @@ public class Evaluator {
       pass2 = uncheck(() -> klass.getMethod(ENTRY_METHOD_NAME).invoke(null));
     } catch (Exception e) {
       processError(context, e);
-      return ErrorValue.error;
+      return null;
     }
-    return lowered.dataType.unlower(pass2);
+    return Semiserializer.semiserialize(moduleContext, lowered.dataType.unlower(pass2), rootStatement.location);
   }
 }

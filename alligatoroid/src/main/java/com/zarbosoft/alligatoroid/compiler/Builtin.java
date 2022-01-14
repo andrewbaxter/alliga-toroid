@@ -1,10 +1,11 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoGraphMixin;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoGraphValueType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportableType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarBuiltin;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -20,24 +21,24 @@ import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Builtin {
   public static LooseRecord builtin;
-  public static ROMap<Value, String> builtinToSemiKey;
-  public static ROMap<String, Value> semiKeyToBuiltin;
-  public static ROMap<Class, Value> builtinToBuiltinType;
+  public static ROMap<Exportable, String> builtinToSemiKey;
+  public static ROMap<String, Exportable> semiKeyToBuiltin;
+  public static ROMap<Class, Exportable> builtinToBuiltinType;
 
   static {
     //// Builtin value lookups for graph work
     // =============================
-    TSMap<Value, String> builtinToSemiKey = new TSMap<>();
-    TSMap<String, Value> semiKeyToBuiltin = new TSMap<>();
-    TSMap<Class, Value> builtinToBuiltinType = new TSMap<>();
+    TSMap<Exportable, String> builtinToSemiKey = new TSMap<>();
+    TSMap<String, Exportable> semiKeyToBuiltin = new TSMap<>();
+    TSMap<Class, Exportable> builtinToBuiltinType = new TSMap<>();
     builtin = aggregateBuiltinForGraph(builtinToSemiKey, semiKeyToBuiltin, MortarBuiltin.class, "");
-    for (Class<AutoGraphMixin> languageElement : LANGUAGE) {
-      AutoGraphMixin.assertFieldsOk(languageElement);
-      builtinToBuiltinType.put(languageElement, new AutoGraphValueType(languageElement));
+    for (Class<AutoExportable> languageElement : LANGUAGE) {
+      AutoExportable.assertFieldsOk(languageElement);
+      builtinToBuiltinType.put(languageElement, new AutoExportableType(languageElement));
     }
-    for (Class<AutoGraphMixin> klass : OTHER_AUTO_GRAPH) {
-      AutoGraphMixin.assertFieldsOk(klass);
-      builtinToBuiltinType.put(klass, new AutoGraphValueType(klass));
+    for (Class<AutoExportable> klass : OTHER_AUTO_GRAPH) {
+      AutoExportable.assertFieldsOk(klass);
+      builtinToBuiltinType.put(klass, new AutoExportableType(klass));
     }
     Builtin.builtinToSemiKey = builtinToSemiKey;
     Builtin.semiKeyToBuiltin = semiKeyToBuiltin;
@@ -45,8 +46,8 @@ public class Builtin {
   }
 
   private static LooseRecord aggregateBuiltinForGraph(
-      TSMap<Value, String> semiBuiltinLookup,
-      TSMap<String, Value> desemiBuiltinLookup,
+      TSMap<Exportable, String> semiBuiltinLookup,
+      TSMap<String, Exportable> desemiBuiltinLookup,
       Class klass,
       String path) {
     TSOrderedMap<Object, EvaluateResult> values = new TSOrderedMap<>();

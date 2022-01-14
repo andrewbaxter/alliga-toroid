@@ -39,7 +39,7 @@ public class JVMHalfExternClassType extends JVMHalfClassType {
         Meta.autoMortarHalfDataTypes.get(JVMExternClassBuilder.class);
     Evaluator.evaluate(
         context.moduleContext,
-        new TSList<>(setup),
+        setup,
         new TSOrderedMap<WholeValue, Value>()
             .put(
                 new WholeString("class"), classValueType.unlower(new JVMExternClassBuilder(this))));

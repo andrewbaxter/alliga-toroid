@@ -5,6 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.Builtin;
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRef;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRefArtifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRefBuiltin;
@@ -12,6 +13,8 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialValue;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -35,21 +38,36 @@ public class Modules {
         context.threads,
         importId,
         () -> {
-          final Source source = context.sources.get(context, importId);
+          final Source source = context.sources.get(context, importId.moduleId);
+          importId.moduleId.dispatch(
+              new ModuleId.DefaultDispatcher<Object>(null) {
+                @Override
+                public Object handleLocal(LocalModuleId id) {
+                  return fromImportPath.spec.moduleId.dispatch(
+                      new ModuleId.DefaultDispatcher<Object>(null) {
+                        @Override
+                        public Object handleLocal(LocalModuleId fromId) {
+                          context.dependents.addDependency(fromId.path, id.path);
+                          context.dependents.addHash(id.path, source.hash);
+                          return null;
+                        }
+                      });
+                }
+              });
           return inner.get(context, fromImportPath, importId, source);
         });
   }
 
-  private Value lookupRef(ModuleCompileContext context, SemiserialRef ref) {
+  private Exportable lookupRef(ModuleCompileContext context, SemiserialRef ref) {
     return ref.dispatchRef(
-        new SemiserialRef.Dispatcher<Value>() {
+        new SemiserialRef.Dispatcher<Exportable>() {
           @Override
-          public Value handleArtifact(SemiserialRefArtifact s) {
+          public Exportable handleArtifact(SemiserialRefArtifact s) {
             return context.artifactLookup.getOpt(s.id);
           }
 
           @Override
-          public Value handleBuiltin(SemiserialRefBuiltin s) {
+          public Exportable handleBuiltin(SemiserialRefBuiltin s) {
             return Builtin.semiKeyToBuiltin.get(s.key);
           }
         });
@@ -66,7 +84,8 @@ public class Modules {
                 remaining.add(new ROPair<>(new ArtifactId(importId, i), semiValue));
               }
               // type, (id, semivalue)
-              TSList<ROPair<Value, ROPair<ArtifactId, SemiserialValue>>> stratum = new TSList<>();
+              TSList<ROPair<Exportable, ROPair<ArtifactId, SemiserialValue>>> stratum =
+                  new TSList<>();
               do {
                 stratum.clear();
                 final Iterator<ROPair<ArtifactId, SemiserialValue>> iter = remaining.iterator();
@@ -75,7 +94,7 @@ public class Modules {
                 while (iter.hasNext()) {
                   final ROPair<ArtifactId, SemiserialValue> pair = iter.next();
                   final SemiserialValue semiValue = pair.second;
-                  Value type = lookupRef(context, semiValue.type);
+                  Exportable type = lookupRef(context, semiValue.type);
                   if (type != null) {
                     stratum.add(new ROPair<>(type, pair));
                     iter.remove();
@@ -84,7 +103,7 @@ public class Modules {
 
                 // Desemiserialize this stratum
                 Desemiserializer typeDesemiserializer = new Desemiserializer();
-                for (ROPair<Value, ROPair<ArtifactId, SemiserialValue>> candidate : stratum) {
+                for (ROPair<Exportable, ROPair<ArtifactId, SemiserialValue>> candidate : stratum) {
                   final Value value =
                       candidate.first.graphDeserializeValue(
                           context, typeDesemiserializer, candidate.second.second.data);
@@ -100,7 +119,7 @@ public class Modules {
                  */
                 throw new Assertion();
               }
-              final Value out = lookupRef(context, semi.result().root);
+              final Value out = (Value) lookupRef(context, semi.result().root);
               if (out == null) {
                 /** Shouldn't happen unless someone messes with the cache data directly. */
                 throw new Assertion();

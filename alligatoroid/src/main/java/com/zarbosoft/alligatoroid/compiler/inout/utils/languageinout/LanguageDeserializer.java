@@ -37,11 +37,11 @@ import static com.zarbosoft.alligatoroid.compiler.Meta.toUnderscore;
 import static com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.Deserializer.errorRet;
 
 public class LanguageDeserializer {
-  private static final Prototype valuePrototype;
+  private static final Prototype languagePrototype;
 
   static {
     TSMap<String, ClassInfo> languageNodeInfos = new TSMap<>();
-    valuePrototype =
+    languagePrototype =
         new Prototype() {
           @Override
           public BaseStateSingle create(TSList<Error> errors, LuxemPathBuilder luxemPath) {
@@ -102,8 +102,8 @@ public class LanguageDeserializer {
         Prototype prototype;
         if (parameter.getType() == Location.class) {
           prototype = locationPrototype;
-        } else if (parameter.getType() == Value.class) {
-          prototype = valuePrototype;
+        } else if (parameter.getType() == LanguageElement.class) {
+          prototype = languagePrototype;
         } else if (parameter.getType() == int.class) {
           prototype = PrototypeInt.instance;
         } else if (parameter.getType() == String.class) {
@@ -114,7 +114,7 @@ public class LanguageDeserializer {
           Type paramType =
               ((ParameterizedType) parameter.getParameterizedType()).getActualTypeArguments()[0];
           if (paramType == Value.class) {
-            prototype = new PrototypeArray(valuePrototype);
+            prototype = new PrototypeArray(languagePrototype);
           } else throw new Assertion();
         } else throw new Assertion();
         fields.put(parameter.getName(), prototype);
@@ -127,7 +127,7 @@ public class LanguageDeserializer {
     }
   }
 
-  public static ROList<LanguageElement> deserialize(
+  public static LanguageElement deserialize(
       ModuleId moduleId, TSList<Error> errors, String path, InputStream source) {
     TSList<State> stack = new TSList<>();
     State[] rootNodes = new State[1];
@@ -146,7 +146,7 @@ public class LanguageDeserializer {
               errors.add(new DeserializeUnknownLanguageVersion(luxemPath.render(), expected));
               return StateErrorSingle.state;
             }
-            BaseStateSingle out = new PrototypeArray(valuePrototype).create(errors, luxemPath);
+            BaseStateSingle out = languagePrototype.create(errors, luxemPath);
             rootNodes[0] = out;
             return out;
           }
@@ -156,6 +156,6 @@ public class LanguageDeserializer {
     if (out == errorRet) {
       return null;
     }
-    return (ROList<LanguageElement>) out;
+    return (LanguageElement) out;
   }
 }

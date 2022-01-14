@@ -2,14 +2,14 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
+import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.FutureValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ModuleIdValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
-import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.FutureValue;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import java.util.concurrent.CompletableFuture;
@@ -32,8 +32,7 @@ public class Import extends LanguageElement {
     }
     CompletableFuture<Value> importResult =
         context.moduleContext.compileContext.modules.get(
-            context.moduleContext,
-            new ImportId(((ModuleIdValue) value).id));
+            context.moduleContext, new ImportId(((ModuleIdValue) value).id));
     context.deferredErrors.add(new ROPair<>(location, importResult));
     return ectx.build(new FutureValue(importResult.exceptionally(e -> ErrorValue.error)));
   }

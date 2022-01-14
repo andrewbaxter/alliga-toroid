@@ -16,15 +16,12 @@ import com.zarbosoft.alligatoroid.compiler.modules.Source;
 import com.zarbosoft.luxem.read.path.LuxemArrayPathBuilder;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
@@ -53,10 +50,12 @@ public class ModuleDiskCache implements ModuleResolver {
   public Module get(
       CompileContext context, ImportPath fromImportPath, ImportId importId, Source source) {
     // Find the location the result would be written
-    String hash = importId.hash();
     Path cachePath = null;
     Path hashPath = null;
     do {
+      if (context.localDirty.contains(importId.moduleId)) {
+        break;
+      }
       try {
         cachePath =
             uncheck(
@@ -70,38 +69,7 @@ public class ModuleDiskCache implements ModuleResolver {
                       wantIdBytes = wantIdBytes1.toByteArray();
                     }
 
-                    Path tryRelPath = rootCachePath.resolve(SUBDIR_RESULT);
-                    int cuts = 3;
-                    for (int i = 0; i < cuts; ++i) {
-                      String seg = hash.substring(i * 2, (i + 1) * 2);
-                      tryRelPath = tryRelPath.resolve(seg);
-                    }
-                    Path useRelPath = null;
-                    for (int i = 0; i < 1000; ++i) {
-                      Path tryRelPath1 =
-                          tryRelPath.resolve(Format.format("%s-%s", hash.substring(cuts * 2), i));
-                      Path importSpecPath = tryRelPath1.resolve(CACHE_FILENAME_ID);
-                      byte[] foundIdBytes;
-                      try {
-                        foundIdBytes = Files.readAllBytes(importSpecPath);
-                      } catch (NoSuchFileException e) {
-                        useRelPath = tryRelPath1;
-                        break;
-                      }
-                      if (Arrays.equals(foundIdBytes, wantIdBytes)) {
-                        useRelPath = tryRelPath1;
-                        break;
-                      }
-                    }
-                    if (useRelPath == null)
-                      throw new Assertion(); // Something's probably wrong with the hashing code if
-                    // this
-                    // is
-                    // reached
-
-                    Files.createDirectories(useRelPath);
-                    Files.write(useRelPath.resolve(CACHE_FILENAME_ID), wantIdBytes);
-                    return useRelPath;
+                    return Utils.uniqueDir(rootCachePath.resolve(SUBDIR_RESULT), wantIdBytes);
                   }
                 });
         hashPath = cachePath.resolve("hash");

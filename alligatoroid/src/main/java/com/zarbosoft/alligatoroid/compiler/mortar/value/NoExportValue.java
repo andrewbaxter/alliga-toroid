@@ -1,17 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
+import com.zarbosoft.alligatoroid.compiler.model.error.UnexportablePre;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 
-public interface NoExportValue extends Value {
-  @Override
-  default boolean canExport() {
-    return false;
-  }
-
+public interface NoExportValue extends Exportable {
   @Override
   default void postDesemiserialize() {
     throw new Assertion();
@@ -23,8 +20,12 @@ public interface NoExportValue extends Value {
   }
 
   @Override
-  default SemiserialSubvalue graphSerialize(
-      ImportId spec, Semiserializer semiserializer, ROList<Value> path, ROList<String> accessPath) {
-    throw new Assertion();
+  default SemiserialSubvalue graphSemiserialize(
+      ImportId spec,
+      Semiserializer semiserializer,
+      ROList<Exportable> path,
+      ROList<String> accessPath) {
+    semiserializer.errors.add(new UnexportablePre(accessPath));
+    return null;
   }
 }

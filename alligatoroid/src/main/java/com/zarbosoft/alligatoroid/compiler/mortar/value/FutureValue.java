@@ -5,6 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
@@ -29,16 +30,6 @@ public class FutureValue implements SimpleValue {
   }
 
   @Override
-  public Value type() {
-    return get().type();
-  }
-
-  @Override
-  public boolean canExport() {
-    return get().canExport();
-  }
-
-  @Override
   public EvaluateResult access(EvaluationContext context, Location location, Value field) {
     return get().access(context, location, field);
   }
@@ -48,9 +39,12 @@ public class FutureValue implements SimpleValue {
   }
 
   @Override
-  public SemiserialSubvalue graphSerialize(
-      ImportId spec, Semiserializer semiserializer, ROList<Value> path, ROList<String> accessPath) {
-    return get().graphSerialize(spec, semiserializer, path, accessPath);
+  public SemiserialSubvalue graphSemiserialize(
+      ImportId spec,
+      Semiserializer semiserializer,
+      ROList<Exportable> path,
+      ROList<String> accessPath) {
+    return get().graphSemiserialize(spec, semiserializer, path, accessPath);
   }
 
   @Override
@@ -64,5 +58,10 @@ public class FutureValue implements SimpleValue {
   @Override
   public void postDesemiserialize() {
     throw new Assertion();
+  }
+
+  @Override
+  public Exportable type() {
+    return get().type();
   }
 }

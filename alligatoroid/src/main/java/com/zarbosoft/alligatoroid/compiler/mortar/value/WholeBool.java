@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
 import com.zarbosoft.luxem.write.Writer;
 
-public class WholeBool implements WholeValue, OkValue, LeafValue, AutoGraphMixin {
+public class WholeBool implements WholeValue {
   public final boolean value;
 
   public WholeBool(boolean value) {

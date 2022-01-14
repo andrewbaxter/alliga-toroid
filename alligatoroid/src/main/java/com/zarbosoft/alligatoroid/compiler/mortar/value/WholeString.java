@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
 import com.zarbosoft.luxem.write.Writer;
 
-public class WholeString implements WholeValue, OkValue, LeafValue, AutoGraphMixin {
+public class WholeString implements WholeValue {
   public final String value;
 
   public WholeString(String value) {

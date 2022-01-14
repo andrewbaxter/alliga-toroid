@@ -1,5 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.Format;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -21,6 +23,45 @@ import java.util.stream.Stream;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Utils {
+  public static final String UNIQUE_PATH_FILENAME = "path";
+
+  public static Path uniqueDir(Path rootCachePath, byte[] id) {
+    return uncheck(
+        () -> {
+          String hash = new SHA256().add(id).buildHex();
+          Path tryRelPath = rootCachePath;
+          int cuts = 3;
+          for (int i = 0; i < cuts; ++i) {
+            String seg = hash.substring(i * 2, (i + 1) * 2);
+            tryRelPath = tryRelPath.resolve(seg);
+          }
+          Path useRelPath = null;
+          for (int i = 0; i < 1000; ++i) {
+            Path tryRelPath1 =
+                tryRelPath.resolve(Format.format("%s-%s", hash.substring(cuts * 2), i));
+            Path importSpecPath = tryRelPath1.resolve(UNIQUE_PATH_FILENAME);
+            byte[] foundIdBytes;
+            try {
+              foundIdBytes = Files.readAllBytes(importSpecPath);
+            } catch (NoSuchFileException e) {
+              useRelPath = tryRelPath1;
+              break;
+            }
+            if (Arrays.equals(foundIdBytes, id)) {
+              useRelPath = tryRelPath1;
+              break;
+            }
+          }
+          if (useRelPath == null)
+            // Something's probably wrong with the hashing code if this is reached
+            throw new Assertion();
+
+          Files.createDirectories(useRelPath);
+          Files.write(useRelPath.resolve(UNIQUE_PATH_FILENAME), id);
+          return useRelPath;
+        });
+  }
+
   public static void recursiveDelete(Path path) {
     uncheck(
         () -> {

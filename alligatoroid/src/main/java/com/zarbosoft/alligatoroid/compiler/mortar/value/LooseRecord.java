@@ -9,7 +9,7 @@ import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class LooseRecord implements OkValue, LeafValue, AutoGraphMixin {
+public class LooseRecord implements OkValue, LeafValue, NoExportValue {
   public final ROOrderedMap<Object, EvaluateResult> data;
 
   public LooseRecord(ROOrderedMap<Object, EvaluateResult> data) {

@@ -3,21 +3,12 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.GraphValue;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public interface Value extends GraphValue {
-  Value type();
-
-  /**
-   * Semiserializable - provides implementation of graph + co methods (GraphValue)
-   *
-   * @return
-   */
-  boolean canExport();
-
+public interface Value extends Exportable {
   EvaluateResult call(EvaluationContext context, Location location, Value argument);
 
   EvaluateResult access(EvaluationContext context, Location location, Value field);

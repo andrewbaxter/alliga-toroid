@@ -1,4 +1,4 @@
-package com.zarbosoft.alligatoroid.compiler.mortar.value;
+package com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto;
 
 import com.zarbosoft.alligatoroid.compiler.Builtin;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
@@ -6,6 +6,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRef;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRefArtifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRefBuiltin;
@@ -15,6 +16,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -27,52 +29,22 @@ import java.lang.reflect.Parameter;
 import static com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.Pregen.graphAuxConverters;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class AutoGraphValueType implements Value {
+public class AutoExportableType implements Exportable {
   private final Constructor constructor;
 
-  public AutoGraphValueType(Class klass) {
+  public AutoExportableType(Class klass) {
     constructor = uncheck(() -> klass.getConstructors()[0]);
   }
 
   @Override
-  public SemiserialSubvalue graphSerialize(
-      ImportId spec, Semiserializer semiserializer, ROList<Value> path, ROList<String> accessPath) {
-    throw new Assertion();
-  }
-
-  @Override
-  public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
-    throw new Assertion();
-  }
-
-  @Override
-  public EvaluateResult access(EvaluationContext context, Location location, Value field) {
-    throw new Assertion();
-  }
-
-  @Override
-  public TargetCode drop(EvaluationContext context, Location location) {
-    throw new Assertion();
-  }
-
-  @Override
-  public ROPair<TargetCode, Binding> bind(EvaluationContext context, Location location) {
-    throw new Assertion();
-  }
-
-  @Override
-  public Location location() {
+  public SemiserialSubvalue graphSemiserialize(
+      ImportId spec, Semiserializer semiserializer, ROList<Exportable> path, ROList<String> accessPath) {
     throw new Assertion();
   }
 
   @Override
   public Value type() {
     throw new Assertion();
-  }
-
-  @Override
-  public boolean canExport() {
-    return false;
   }
 
   public Object prepNonCollectionArg(
@@ -134,7 +106,7 @@ public class AutoGraphValueType implements Value {
                             new SemiserialRef.Dispatcher<Object>() {
                               @Override
                               public Object handleArtifact(SemiserialRefArtifact s) {
-                                Value found = context.artifactLookup.getOpt(s.id);
+                                Exportable found = context.artifactLookup.getOpt(s.id);
                                 if (found != null) return found;
                                 valueFields.add(
                                     new ROPair<>(

@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
@@ -10,7 +11,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfDataType;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext.convertFunctionArgument;
 
-public class AutoBuiltinStaticMethod implements SimpleValue, AutoGraphMixin, LeafValue {
+public class AutoBuiltinStaticMethod implements SimpleValue, AutoExportable, LeafValue {
   private final String name;
   private final JVMSharedFuncDescriptor desc;
   private final JVMSharedJVMName base;

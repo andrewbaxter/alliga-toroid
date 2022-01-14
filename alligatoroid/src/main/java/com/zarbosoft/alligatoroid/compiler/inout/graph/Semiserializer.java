@@ -1,30 +1,49 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
 import com.zarbosoft.alligatoroid.compiler.Builtin;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.TypeDependencyLoopPre;
 import com.zarbosoft.alligatoroid.compiler.model.error.UnexportablePre;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 public class Semiserializer {
+  public final TSList<Error.PreError> errors;
   public final TSList<SemiserialValue> artifacts = new TSList<>();
-  public final TSMap<Value, ArtifactId> artifactLookup;
+  public final TSMap<Exportable, ArtifactId> artifactLookup;
 
-  public Semiserializer(TSMap<Value, ArtifactId> artifactLookup) {
+  public Semiserializer(
+      TSList<Error.PreError> errors, TSMap<Exportable, ArtifactId> artifactLookup) {
+    this.errors = errors;
     this.artifactLookup = artifactLookup;
   }
 
-  public SemiserialRef process(
-      ImportId spec, Value value, ROList<Value> path, ROList<String> accessPath) {
-    if (!value.canExport()) {
-      throw new UnexportablePre(accessPath);
+  public static SemiserialModule semiserialize(
+      ModuleCompileContext moduleContext, Value value, Location location) {
+    TSList<Error.PreError> errors = new TSList<>();
+    Semiserializer s = new Semiserializer(errors, moduleContext.backArtifactLookup);
+    final SemiserialRef out =
+        s.process(moduleContext.importId, value, new TSList<>(), new TSList<>());
+    if (errors.some()) {
+      for (Error.PreError error : errors) {
+        moduleContext.errors.add(error.toError(location));
+      }
+      return null;
     }
+    return new SemiserialModule(out, s.artifacts);
+  }
+
+  public SemiserialRef process(
+      ImportId spec, Exportable value, ROList<Exportable> path, ROList<String> accessPath) {
     if (path.contains(value)) {
-      throw new TypeDependencyLoopPre();
+      errors.add(new TypeDependencyLoopPre(accessPath));
+      return null;
     }
     {
       String found = Builtin.builtinToSemiKey.getOpt(value);
@@ -42,8 +61,8 @@ public class Semiserializer {
     artifacts.add(null);
     final ArtifactId id = new ArtifactId(spec, index);
     artifactLookup.put(value, id);
-    final TSList<Value> newPath = path.mut().add(value);
-    SemiserialSubvalue data = value.graphSerialize(spec, this, newPath, accessPath);
+    final TSList<Exportable> newPath = path.mut().add(value);
+    SemiserialSubvalue data = value.graphSemiserialize(spec, this, newPath, accessPath);
     artifacts.set(
         index,
         new SemiserialValue(

@@ -14,7 +14,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoGraphMixin;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LeafValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
@@ -36,7 +36,7 @@ import java.util.Map;
 
 /** Represents the metadata for interacting with a class - inheritance, fields */
 public class JVMHalfClassType extends JVMHalfObjectType
-    implements AutoGraphMixin, LeafValue, SimpleValue {
+    implements AutoExportable, LeafValue, SimpleValue {
   public static final String ACCESS_NEW = "new";
   public final JVMSharedNormalName jvmExternalClass;
   public final TSMap<ROTuple, JVMUtils.MethodSpecDetails> constructors;

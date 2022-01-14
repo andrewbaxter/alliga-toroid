@@ -2,12 +2,12 @@ package com.zarbosoft.alligatoroid.compiler.jvm.value;
 
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoGraphMixin;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LeafValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 
 /** Represents the metadata for interacting with (calling) a method. */
-public class JVMMethodFieldType implements SimpleValue, AutoGraphMixin, LeafValue {
+public class JVMMethodFieldType implements SimpleValue, AutoExportable, LeafValue {
   public final String name;
   public final Record spec;
   public JVMHalfClassType base;

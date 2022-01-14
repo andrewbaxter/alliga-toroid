@@ -7,13 +7,13 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.AutoBuiltinMethodFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfMethodType;
 
 public class MortarMethodField implements SimpleValue, LeafValue, NoExportValue {
   private final MortarProtocode lower;
-  private final AutoBuiltinMethodFieldType type;
+  private final MortarHalfMethodType type;
 
-  public MortarMethodField(MortarProtocode lower, AutoBuiltinMethodFieldType type) {
+  public MortarMethodField(MortarProtocode lower, MortarHalfMethodType type) {
     this.lower = lower;
     this.type = type;
   }
