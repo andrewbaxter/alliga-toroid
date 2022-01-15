@@ -12,7 +12,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LeafValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NoExportValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
@@ -23,7 +23,7 @@ import com.zarbosoft.rendaw.common.ROTuple;
 
 import static com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType.getArgTuple;
 
-public class JVMPseudoField implements SimpleValue, NoExportValue, LeafValue {
+public class JVMPseudoField implements SimpleValue, NoExportValue, LeafExportable {
   public final JVMHalfClassType base;
   public final String name;
   private final JVMProtocode lower;
@@ -57,7 +57,7 @@ public class JVMPseudoField implements SimpleValue, NoExportValue, LeafValue {
     JVMTargetModuleContext.convertFunctionArgument(context, code, argument);
     code.add(
         JVMSharedCode.callMethod(
-            context.sourceLocation(location), base.name, name, real.specDetails.jvmSigDesc));
+            context.sourceLocation(location), base.jvmName, name, real.specDetails.jvmSigDesc));
     if (real.specDetails.returnType == null) return new EvaluateResult(code, null, NullValue.value);
     else return EvaluateResult.pure(real.specDetails.returnType.stackAsValue(code));
   }
@@ -82,7 +82,7 @@ public class JVMPseudoField implements SimpleValue, NoExportValue, LeafValue {
           @Override
           public JVMSharedCodeElement lower(EvaluationContext context) {
             return JVMSharedCode.accessField(
-                context.sourceLocation(location), base.name, name, real.jvmDesc());
+                context.sourceLocation(location), base.jvmName, name, real.jvmDesc());
           }
         });
   }
@@ -99,6 +99,6 @@ public class JVMPseudoField implements SimpleValue, NoExportValue, LeafValue {
             .add(lower.lower(context))
             .add(
                 JVMSharedCode.accessField(
-                    context.sourceLocation(location), base.name, name, real.jvmDesc())));
+                    context.sourceLocation(location), base.jvmName, name, real.jvmDesc())));
   }
 }

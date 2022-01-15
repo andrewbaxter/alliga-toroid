@@ -9,7 +9,7 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class Tuple extends LanguageElement {
-  public final ROList<LanguageElement> elements;
+  public ROList<LanguageElement> elements;
 
   public Tuple(Location id, ROList<LanguageElement> elements) {
     super(id, hasLowerInSubtree(elements));

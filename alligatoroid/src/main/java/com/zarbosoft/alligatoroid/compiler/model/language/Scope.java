@@ -10,7 +10,7 @@ import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class Scope extends LanguageElement {
-  public final LanguageElement inner;
+  public  LanguageElement inner;
 
   public Scope(Location id, LanguageElement inner) {
     super(id, hasLowerInSubtree(inner));

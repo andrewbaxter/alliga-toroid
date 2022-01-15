@@ -15,7 +15,7 @@ import com.zarbosoft.rendaw.common.ROPair;
 import java.util.concurrent.CompletableFuture;
 
 public class Import extends LanguageElement {
-  public final LanguageElement spec;
+  public LanguageElement spec;
 
   public Import(Location id, LanguageElement spec) {
     super(id, hasLowerInSubtree(spec));

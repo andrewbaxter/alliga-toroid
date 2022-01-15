@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
+import com.zarbosoft.alligatoroid.compiler.Builtin;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeSerializable;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMBuiltin;
@@ -8,6 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfNullType;
 import com.zarbosoft.luxem.write.Writer;
 
 /** Fields in top level builtin -- reflected into builtin value */
+@Builtin.Aggregate
 public class MortarBuiltin {
   public static final JVMBuiltin jvm = new JVMBuiltin();
   public static final Value _null = NullValue.value;

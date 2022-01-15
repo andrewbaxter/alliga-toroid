@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfExternClassType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
@@ -22,16 +23,16 @@ import com.zarbosoft.alligatoroid.compiler.model.language.RecordElement;
 import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfAutoType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfArrayType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfAutoType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfByteType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfStringType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfMethodType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfStringType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoBuiltinStaticMethod;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -63,7 +64,7 @@ public class Meta {
     ModRemote.class
   };
   public static final Class[] OTHER_AUTO_GRAPH = {
-    BundleValue.class,
+    BundleValue.class, JVMHalfExternClassType.class,
   };
   /** Initialized statically, never modified after (thread safe for reads). */
   public static TSMap<Class, MortarHalfAutoType> autoMortarHalfDataTypes = new TSMap<>();
@@ -218,8 +219,7 @@ public class Meta {
     return out;
   }
 
-  public static AutoBuiltinStaticMethod autoMortarHalfStaticMethodType(
-      Class klass, String name) {
+  public static AutoBuiltinStaticMethod autoMortarHalfStaticMethodType(Class klass, String name) {
     Method method = null;
     for (Method checkMethod : klass.getMethods()) {
       if (!checkMethod.getName().equals(name)) continue;

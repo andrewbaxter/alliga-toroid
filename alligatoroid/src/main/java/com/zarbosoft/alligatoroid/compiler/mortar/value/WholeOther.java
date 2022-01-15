@@ -1,9 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.luxem.write.Writer;
 
-public class WholeOther implements WholeValue, AutoExportable, LeafValue {
+public class WholeOther implements WholeValue, AutoBuiltinExportable, LeafExportable {
   public final Object object;
 
   public WholeOther(Object object) {

@@ -5,6 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMError;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMProtocode;
@@ -15,7 +16,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
@@ -25,7 +26,7 @@ import com.zarbosoft.rendaw.common.ROTuple;
 
 import static com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType.getArgTuple;
 
-public class JVMPseudoStaticField implements SimpleValue, AutoExportable {
+public class JVMPseudoStaticField implements SimpleValue, AutoBuiltinExportable {
   public final String name;
   public JVMHalfClassType base;
 
@@ -46,7 +47,7 @@ public class JVMPseudoStaticField implements SimpleValue, AutoExportable {
     JVMTargetModuleContext.convertFunctionArgument(context, code, argument);
     code.add(
         JVMSharedCode.callStaticMethod(
-            context.sourceLocation(location), base.name, name, real.specDetails.jvmSigDesc));
+            context.sourceLocation(location), base.jvmName, name, real.specDetails.jvmSigDesc));
     if (real.specDetails.returnType == null) return new EvaluateResult(code, null, NullValue.value);
     else return EvaluateResult.pure(real.specDetails.returnType.stackAsValue((JVMSharedCode) code));
   }
@@ -71,7 +72,7 @@ public class JVMPseudoStaticField implements SimpleValue, AutoExportable {
           @Override
           public JVMSharedCodeElement lower(EvaluationContext context) {
             return JVMSharedCode.accessStaticField(
-                context.sourceLocation(location), base.name, name, real.jvmDesc());
+                context.sourceLocation(location), base.jvmName, name, real.jvmDesc());
           }
         });
   }
@@ -85,11 +86,11 @@ public class JVMPseudoStaticField implements SimpleValue, AutoExportable {
     }
     return real.valueBind(
         JVMSharedCode.accessStaticField(
-            context.sourceLocation(location), base.name, name, real.jvmDesc()));
+            context.sourceLocation(location), base.jvmName, name, real.jvmDesc()));
   }
 
   @Override
-  public Value graphDeserializeValue(
+  public Exportable graphDesemiserializeChild(
       ModuleCompileContext context,
       Desemiserializer typeDesemiserializer,
       SemiserialSubvalue data) {

@@ -10,6 +10,8 @@ import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.LocationlessUnexpected;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.modules.Module;
 import com.zarbosoft.alligatoroid.compiler.modules.ModuleResolver;
 import com.zarbosoft.alligatoroid.compiler.modules.Source;
@@ -53,9 +55,13 @@ public class ModuleDiskCache implements ModuleResolver {
     Path cachePath = null;
     Path hashPath = null;
     do {
-      if (context.localDirty.contains(importId.moduleId)) {
-        break;
-      }
+      if (importId.moduleId.dispatch(
+          new ModuleId.DefaultDispatcher<Boolean>(false) {
+            @Override
+            public Boolean handleLocal(LocalModuleId id) {
+              return context.dependents.isDirty(id.path);
+            }
+          })) break;
       try {
         cachePath =
             uncheck(

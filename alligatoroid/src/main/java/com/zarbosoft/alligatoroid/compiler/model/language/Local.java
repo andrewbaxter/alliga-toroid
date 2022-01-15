@@ -9,7 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 
 public class Local extends LanguageElement {
-  public final LanguageElement key;
+  public  LanguageElement key;
 
   public Local(Location id, LanguageElement key) {
     super(id, hasLowerInSubtree(key));

@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.jvm.value;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMProtocode;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfBoolType;
@@ -14,8 +15,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LeafValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
@@ -36,30 +36,29 @@ import java.util.Map;
 
 /** Represents the metadata for interacting with a class - inheritance, fields */
 public class JVMHalfClassType extends JVMHalfObjectType
-    implements AutoExportable, LeafValue, SimpleValue {
+    implements AutoBuiltinExportable, LeafExportable, SimpleValue {
   public static final String ACCESS_NEW = "new";
-  public final JVMSharedNormalName jvmExternalClass;
   public final TSMap<ROTuple, JVMUtils.MethodSpecDetails> constructors;
   public final TSMap<String, JVMHalfDataType> dataFields;
   public final TSMap<ROTuple, JVMMethodFieldType> methodFields;
   public final TSMap<String, JVMHalfDataType> staticDataFields;
   public final TSMap<ROTuple, JVMMethodFieldType> staticMethodFields;
   public final TSList<JVMHalfClassType> inherits;
-
-  public final JVMSharedJVMName name;
+  public final JVMSharedJVMName jvmName;
   public final TSSet<String> fields;
   public final TSSet<String> staticFields;
+  public JVMSharedNormalName name;
 
   public JVMHalfClassType(
-      JVMSharedNormalName jvmExternalClass,
+      JVMSharedNormalName name,
       TSMap<ROTuple, JVMUtils.MethodSpecDetails> constructors,
       TSMap<String, JVMHalfDataType> dataFields,
       TSMap<ROTuple, JVMMethodFieldType> methodFields,
       TSMap<String, JVMHalfDataType> staticDataFields,
       TSMap<ROTuple, JVMMethodFieldType> staticMethodFields,
       TSList<JVMHalfClassType> inherits) {
-    this.jvmExternalClass = jvmExternalClass;
-    this.name = JVMSharedJVMName.fromNormalName(jvmExternalClass);
+    this.name = name;
+    this.jvmName = JVMSharedJVMName.fromNormalName(name);
     this.constructors = constructors;
     this.dataFields = dataFields;
     this.methodFields = methodFields;
@@ -162,6 +161,6 @@ public class JVMHalfClassType extends JVMHalfObjectType
 
   @Override
   public JVMSharedDataDescriptor jvmDesc() {
-    return JVMSharedDataDescriptor.fromJVMName(name);
+    return JVMSharedDataDescriptor.fromJVMName(jvmName);
   }
 }

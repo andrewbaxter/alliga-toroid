@@ -6,8 +6,8 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 
 public class Call extends LanguageElement {
-  public final LanguageElement target;
-  public final LanguageElement argument;
+  public  LanguageElement target;
+  public LanguageElement argument;
 
   public Call(Location id, LanguageElement target, LanguageElement argument) {
     super(id, hasLowerInSubtree(target, argument));

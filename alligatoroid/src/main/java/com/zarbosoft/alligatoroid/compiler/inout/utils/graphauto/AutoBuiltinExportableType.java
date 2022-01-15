@@ -1,10 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto;
 
 import com.zarbosoft.alligatoroid.compiler.Builtin;
-import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
-import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRef;
@@ -13,9 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRefBuiltin;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialTuple;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
-import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
-import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
@@ -29,16 +24,19 @@ import java.lang.reflect.Parameter;
 import static com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.Pregen.graphAuxConverters;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class AutoExportableType implements Exportable {
+public class AutoBuiltinExportableType implements Exportable {
   private final Constructor constructor;
 
-  public AutoExportableType(Class klass) {
+  public AutoBuiltinExportableType(Class klass) {
     constructor = uncheck(() -> klass.getConstructors()[0]);
   }
 
   @Override
   public SemiserialSubvalue graphSemiserialize(
-      ImportId spec, Semiserializer semiserializer, ROList<Exportable> path, ROList<String> accessPath) {
+      ImportId spec,
+      Semiserializer semiserializer,
+      ROList<Exportable> path,
+      ROList<String> accessPath) {
     throw new Assertion();
   }
 
@@ -75,7 +73,7 @@ public class AutoExportableType implements Exportable {
   }
 
   @Override
-  public Value graphDeserializeValue(
+  public Exportable graphDesemiserializeChild(
       ModuleCompileContext context,
       Desemiserializer typeDesemiserializer,
       SemiserialSubvalue data) {

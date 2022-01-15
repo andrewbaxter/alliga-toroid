@@ -9,8 +9,8 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 
 public class ModRemote extends LanguageElement {
-  public final LanguageElement url;
-  public final LanguageElement hash;
+  public  LanguageElement url;
+  public LanguageElement hash;
 
   public ModRemote(Location id, LanguageElement url, LanguageElement hash) {
     super(id, hasLowerInSubtree(url, hash));

@@ -1,6 +1,5 @@
 package com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer;
 
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.TSList;
@@ -19,12 +18,12 @@ public class PrototypeArray implements Prototype {
 
       @Override
       public Object build(Object context, TSList<Error> errors) {
-        TSList<Value> out = new TSList<>();
+        TSList out = new TSList<>();
         boolean bad = false;
         for (State e : elements) {
-          Value val = (Value) ((State) e).build(context, errors);
-          if (val == null) bad = true;
-          out.add(val);
+          Object obj = ((State) e).build(context, errors);
+          if (obj == null) bad = true;
+          out.add(obj);
         }
         if (bad) return null;
         return out;

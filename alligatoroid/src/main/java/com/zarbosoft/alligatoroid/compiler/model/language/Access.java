@@ -6,8 +6,8 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 
 public class Access extends LanguageElement {
-  public final LanguageElement base;
-  public final LanguageElement key;
+  public LanguageElement base;
+  public LanguageElement key;
 
   public Access(Location id, LanguageElement base, LanguageElement key) {
     super(id, hasLowerInSubtree(base, key));

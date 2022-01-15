@@ -7,15 +7,15 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
 
 public class Wrap extends LanguageElement {
-private final Object data;
+  private Object data;
 
-    public Wrap(Location id, Object data) {
-        super(id, false);
-        this.data = data;
-    }
+  public Wrap(Location id, Object data) {
+    super(id, false);
+    this.data = data;
+  }
 
-    @Override
-    public EvaluateResult evaluate(EvaluationContext context) {
-        return EvaluateResult.pure(new WholeOther(data));
-    }
+  @Override
+  public EvaluateResult evaluate(EvaluationContext context) {
+    return EvaluateResult.pure(new WholeOther(data));
+  }
 }

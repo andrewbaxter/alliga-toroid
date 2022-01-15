@@ -1,14 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LeafValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarMethodField;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 
-public class MortarHalfMethodType implements MortarHalfType, AutoExportable, LeafValue {
+public class MortarHalfMethodType implements MortarHalfType, AutoBuiltinExportable, LeafExportable {
   public final String name;
   public final JVMSharedFuncDescriptor jbcDesc;
   /** Null if null */

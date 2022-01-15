@@ -37,6 +37,7 @@ public abstract class Error implements TreeSerializable {
   @Override
   public void treeSerialize(Writer writer) {
     writer.type(this.getClass().getName()).recordBegin();
+    writer.primitive("message").primitive(this.toString());
     for (Field field : this.getClass().getFields()) {
       if (Modifier.isStatic(field.getModifiers())) continue;
       writer.primitive(field.getName());

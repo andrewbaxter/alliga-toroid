@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.inout.tree;
 
+import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
@@ -28,23 +29,12 @@ public interface TreeSerializable {
       writer.primitive((String) object);
     } else if (object.getClass() == Integer.class) {
       writer.primitive(Integer.toString((Integer) object));
+    } else if (object.getClass() == LuxemPath.class) {
+      writer.primitive(((LuxemPath) object).toString());
     } else if (Throwable.class.isAssignableFrom(object.getClass())) {
       writer.primitive(object.toString());
     } else throw new Assertion(object.getClass().getCanonicalName());
   }
 
   public void treeSerialize(Writer writer);
-
-  public static class Url implements TreeSerializable {
-    private final String url;
-
-    public Url(String url) {
-      this.url = url;
-    }
-
-    @Override
-    public void treeSerialize(Writer writer) {
-      writer.primitive(url);
-    }
-  }
 }

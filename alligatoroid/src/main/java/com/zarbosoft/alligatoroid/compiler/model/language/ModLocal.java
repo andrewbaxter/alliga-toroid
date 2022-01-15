@@ -18,7 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class ModLocal extends LanguageElement {
-  public final LanguageElement path;
+  public  LanguageElement path;
 
   public ModLocal(Location id, LanguageElement path) {
     super(id, hasLowerInSubtree(path));

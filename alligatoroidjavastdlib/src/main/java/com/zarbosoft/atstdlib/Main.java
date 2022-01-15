@@ -1,18 +1,19 @@
 package com.zarbosoft.atstdlib;
 
+import com.zarbosoft.alligatoroid.compiler.Alligatorus;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
-import com.zarbosoft.alligatoroid.compiler.modules.Module;
 import com.zarbosoft.luxem.write.Writer;
-import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.ROList;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import static com.zarbosoft.alligatoroid.compiler.Main.compile;
+import static com.zarbosoft.alligatoroid.compiler.Alligatorus.compile;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Main {
@@ -42,42 +43,28 @@ public class Main {
 
     sync.join();
     System.out.flush();
+    System.out.format("\n");
     boolean hadErrors = false;
     Writer outWriter = new Writer(System.out, (byte) ' ', 4);
+    outWriter.recordBegin();
     for (Path p : generated) {
-      TSMap<ImportId, Module> results = compile(p.toString());
+      outWriter.primitive(p.toString());
+      Alligatorus.Result results =
+          compile(Alligatorus.defaultCachePath(), Alligatorus.rootModuleSpec(p));
       outWriter.arrayBegin();
-      for (Module value : results.values()) {
+      for (Map.Entry<ImportId, ROList<Error>> value : results.errors.entrySet()) {
         outWriter.recordBegin();
 
-        if (value.localSourcePath() != null) {
-          outWriter.primitive("source").primitive(value.localSourcePath());
-        }
+        outWriter.primitive("id");
+        value.getKey().treeSerialize(outWriter);
 
-        if (value.log.errors.some()) {
+        if (value.getValue().some()) {
           hadErrors = true;
         }
 
-        outWriter.primitive("id");
-        value.spec().treeSerialize(outWriter);
-
-        outWriter.primitive("log");
-        outWriter.arrayBegin();
-        for (String message : value.log.log) {
-          outWriter.primitive(message);
-        }
-        outWriter.arrayEnd();
-
         outWriter.primitive("errors");
         outWriter.arrayBegin();
-        for (Error error : value.log.errors) {
-          error.treeSerialize(outWriter);
-        }
-        outWriter.arrayEnd();
-
-        outWriter.primitive("warnings");
-        outWriter.arrayBegin();
-        for (Error error : value.log.warnings) {
+        for (Error error : value.getValue()) {
           error.treeSerialize(outWriter);
         }
         outWriter.arrayEnd();
@@ -86,6 +73,7 @@ public class Main {
       }
       outWriter.arrayEnd();
     }
+    outWriter.recordEnd();
     System.out.flush();
     if (hadErrors) throw new RuntimeException("Compile errors");
 

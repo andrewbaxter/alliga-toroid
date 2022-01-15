@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.jvm.value;
 
+import com.zarbosoft.alligatoroid.compiler.Builtin;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfBoolType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfByteType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfCharType;
@@ -15,6 +16,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 
+@Builtin.Aggregate
 public class JVMBuiltin {
   public static final JVMHalfStringType string = JVMHalfStringType.value;
   public static final JVMHalfIntType _int = JVMHalfIntType.value;

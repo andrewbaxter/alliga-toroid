@@ -26,7 +26,7 @@ public interface Exportable {
    * @param data
    * @return
    */
-  Value graphDeserializeValue(
+  Exportable graphDesemiserializeChild(
       ModuleCompileContext context, Desemiserializer typeDesemiserializer, SemiserialSubvalue data);
 
   /** Called after deferred initialization in graph desemiserialization. */

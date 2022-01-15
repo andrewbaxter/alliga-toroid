@@ -9,22 +9,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import static com.zarbosoft.alligatoroid.compiler.Alligatorus.appDirs;
-
 public class Main {
   public static void main(String[] args) {
     if (args.length != 1) {
       throw new RuntimeException("Need one argument, path to root module");
     }
-    Path cachePath;
-    String cachePath0 = System.getenv("ALLIGATOROID_CACHE");
-    if (cachePath0 == null || cachePath0.isEmpty()) {
-      cachePath = appDirs.user_cache_dir(false);
-    } else {
-      cachePath = Paths.get(cachePath0);
-    }
     Alligatorus.Result result =
-        Alligatorus.compile(cachePath, Alligatorus.rootModuleSpec(Paths.get(args[0])));
+        Alligatorus.compile(
+            Alligatorus.defaultCachePath(), Alligatorus.rootModuleSpec(Paths.get(args[0])));
 
     Writer outWriter = new Writer(System.out, (byte) ' ', 4);
     outWriter.recordBegin();

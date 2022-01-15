@@ -5,7 +5,6 @@ import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -21,12 +20,12 @@ public class ModuleCompileContext {
 
   public final ImportPath importPath;
   /** Already desemiserialized artifacts generated via imports. */
-  public TSMap<ArtifactId, Exportable> artifactLookup;
+  public final TSMap<ArtifactId, Exportable> artifactLookup = new TSMap<>();
   /**
    * A mapping of artifacts imported, used while semiserializing output after compilation to prevent
    * re-semiserializing artifacts from other modules.
    */
-  public TSMap<Exportable, ArtifactId> backArtifactLookup;
+  public final TSMap<Exportable, ArtifactId> backArtifactLookup = new TSMap<>();
 
   public ModuleCompileContext(
       ImportId importId, CompileContext compileContext, ImportPath importPath) {

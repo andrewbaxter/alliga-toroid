@@ -43,15 +43,17 @@ public class Modules {
               new ModuleId.DefaultDispatcher<Object>(null) {
                 @Override
                 public Object handleLocal(LocalModuleId id) {
-                  return fromImportPath.spec.moduleId.dispatch(
-                      new ModuleId.DefaultDispatcher<Object>(null) {
-                        @Override
-                        public Object handleLocal(LocalModuleId fromId) {
-                          context.dependents.addDependency(fromId.path, id.path);
-                          context.dependents.addHash(id.path, source.hash);
-                          return null;
-                        }
-                      });
+                  context.dependents.addHash(id.path, source.hash);
+                  if (fromImportPath != null)
+                    fromImportPath.spec.moduleId.dispatch(
+                        new ModuleId.DefaultDispatcher<Object>(null) {
+                          @Override
+                          public Object handleLocal(LocalModuleId fromId) {
+                            context.dependents.addDependency(fromId.path, id.path);
+                            return null;
+                          }
+                        });
+                  return null;
                 }
               });
           return inner.get(context, fromImportPath, importId, source);
@@ -104,8 +106,8 @@ public class Modules {
                 // Desemiserialize this stratum
                 Desemiserializer typeDesemiserializer = new Desemiserializer();
                 for (ROPair<Exportable, ROPair<ArtifactId, SemiserialValue>> candidate : stratum) {
-                  final Value value =
-                      candidate.first.graphDeserializeValue(
+                  final Exportable value =
+                      candidate.first.graphDesemiserializeChild(
                           context, typeDesemiserializer, candidate.second.second.data);
                   context.artifactLookup.put(candidate.second.first, value);
                   context.backArtifactLookup.put(value, candidate.second.first);

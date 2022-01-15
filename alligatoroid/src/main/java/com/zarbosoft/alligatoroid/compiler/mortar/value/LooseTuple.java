@@ -6,6 +6,7 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.model.error.IndexNotInteger;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
@@ -14,7 +15,7 @@ import com.zarbosoft.rendaw.common.TSList;
  * Represents consecutive stack elements - needs to be converted to an actual tuple to bind/access
  * (TODO conversion)
  */
-public class LooseTuple implements OkValue, LeafValue, NoExportValue {
+public class LooseTuple implements OkValue, LeafExportable, NoExportValue {
   public final ROList<EvaluateResult> data;
 
   public LooseTuple(ROList<EvaluateResult> data) {

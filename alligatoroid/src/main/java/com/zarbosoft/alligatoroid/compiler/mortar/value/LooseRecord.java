@@ -5,11 +5,12 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class LooseRecord implements OkValue, LeafValue, NoExportValue {
+public class LooseRecord implements OkValue, LeafExportable, NoExportValue {
   public final ROOrderedMap<Object, EvaluateResult> data;
 
   public LooseRecord(ROOrderedMap<Object, EvaluateResult> data) {

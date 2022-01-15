@@ -8,8 +8,8 @@ import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LeafValue;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
@@ -17,7 +17,7 @@ import com.zarbosoft.rendaw.common.ROTuple;
 
 import static com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType.getArgTuple;
 
-public class JVMPseudoConstructor implements SimpleValue, AutoExportable, LeafValue {
+public class JVMPseudoConstructor implements SimpleValue, AutoBuiltinExportable, LeafExportable {
   public final JVMHalfClassType base;
 
   public JVMPseudoConstructor(JVMHalfClassType base) {
@@ -37,7 +37,7 @@ public class JVMPseudoConstructor implements SimpleValue, AutoExportable, LeafVa
     JVMTargetModuleContext.convertFunctionArgument(context, argCode, argument);
     JVMSharedCodeElement code =
         JVMSharedCode.instantiate(
-            context.sourceLocation(location), base.name, real.jvmSigDesc, argCode);
+            context.sourceLocation(location), base.jvmName, real.jvmSigDesc, argCode);
     if (real.returnType == null) return new EvaluateResult(code, null, NullValue.value);
     else return EvaluateResult.pure(real.returnType.stackAsValue(code));
   }

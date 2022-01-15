@@ -1,9 +1,11 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeSerializable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.luxem.write.Writer;
 
-public final class Location implements TreeSerializable {
+public final class Location implements TreeSerializable, AutoBuiltinExportable, LeafExportable {
   public final ModuleId module;
   public final int id;
 

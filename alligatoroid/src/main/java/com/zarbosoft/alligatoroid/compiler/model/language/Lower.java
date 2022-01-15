@@ -7,7 +7,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.error.LowerTooDeep;
 
 public final class Lower extends LanguageElement {
-  public final LanguageElement child;
+  public LanguageElement child;
 
   public Lower(Location id, LanguageElement child) {
     super(id, true);

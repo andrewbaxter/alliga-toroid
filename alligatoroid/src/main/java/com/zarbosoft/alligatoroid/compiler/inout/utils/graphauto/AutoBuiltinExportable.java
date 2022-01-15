@@ -7,8 +7,8 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialTuple;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.model.error.UnexportablePre;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -21,27 +21,10 @@ import static com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.Pregen.g
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 /** Mixin to automatically semiserialize value based on (single) constructor arguments. */
-public interface AutoExportable extends Exportable {
-  public static void assertFieldsOk(Class klass) {
-    final Constructor constructor = klass.getConstructors()[0];
-    for (Parameter parameter : constructor.getParameters()) {
-      final Field field = uncheck(() -> klass.getField(parameter.getName()));
-      if (Modifier.isFinal(field.getModifiers()))
-        throw new RuntimeException(
-            Format.format(
-                "%s param %s -> field %s is final",
-                klass.getName(), parameter.getName(), field.getName()));
-      if (Modifier.isPrivate(field.getModifiers()))
-        throw new RuntimeException(
-            Format.format(
-                "%s param %s -> field %s is private",
-                klass.getName(), parameter.getName(), field.getName()));
-    }
-  }
-
+public interface AutoBuiltinExportable extends Exportable {
   @Override
   default Exportable type() {
-    return Builtin.builtinToBuiltinType.get(getClass());
+    return Builtin.autoBuiltinTypes.get(getClass());
   }
 
   @Override
@@ -54,7 +37,7 @@ public interface AutoExportable extends Exportable {
       ROList<Exportable> path,
       ROList<String> accessPath) {
     Class t = data.getClass();
-    AutoExportableType.GraphAuxConverter graphAuxConverter;
+    AutoBuiltinExportableType.GraphAuxConverter graphAuxConverter;
     if ((graphAuxConverter = graphAuxConverters.getOpt(t)) != null) {
       return graphAuxConverter.semiserialize(data);
     } else if (Exportable.class.isAssignableFrom(t)) {
@@ -77,15 +60,21 @@ public interface AutoExportable extends Exportable {
     TSList<SemiserialSubvalue> rootData = new TSList<>();
     for (int i = 0; i < paramCount; i++) {
       final Parameter parameter = constructor.getParameters()[i];
-      Field field = uncheck(() -> getClass().getField(parameter.getName()));
-      if (field == null) {
+      final String fieldName;
+      if (LanguageElement.class.isAssignableFrom(getClass()) && parameter.getName().equals("id"))
+        fieldName = "location";
+      else fieldName = parameter.getName();
+      Field field;
+      try {
+        field = getClass().getField(fieldName);
+      } catch (NoSuchFieldException e) {
         throw Assertion.format(
-            "No field matching parameter %s in %s",
-            parameter.getName(), getClass().getCanonicalName());
+            "%s param %s -> field %s doesn't exist",
+            getClass().getName(), parameter.getName(), fieldName);
       }
       final Class<?> t = parameter.getType();
       final Object data = uncheck(() -> field.get(this));
-      final TSList<String> paramAccessPath = accessPath.mut().add(parameter.getName());
+      final TSList<String> paramAccessPath = accessPath.mut().add(fieldName);
       if (ROList.class.isAssignableFrom(t)) {
         TSList<SemiserialSubvalue> elementData = new TSList<>();
         for (int collI = 0; collI < ((ROList) data).size(); collI++) {

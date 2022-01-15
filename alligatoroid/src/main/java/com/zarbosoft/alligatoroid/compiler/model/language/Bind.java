@@ -12,8 +12,8 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.ROPair;
 
 public class Bind extends LanguageElement {
-  public final LanguageElement key;
-  public final LanguageElement value;
+  public  LanguageElement key;
+  public LanguageElement value;
 
   public Bind(Location id, LanguageElement key, LanguageElement value) {
     super(id, hasLowerInSubtree(key, value));

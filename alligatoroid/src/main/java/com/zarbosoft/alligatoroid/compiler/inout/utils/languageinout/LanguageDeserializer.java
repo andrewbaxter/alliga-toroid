@@ -19,7 +19,6 @@ import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
@@ -113,7 +112,7 @@ public class LanguageDeserializer {
         } else if (parameter.getType() == ROList.class) {
           Type paramType =
               ((ParameterizedType) parameter.getParameterizedType()).getActualTypeArguments()[0];
-          if (paramType == Value.class) {
+          if (paramType == LanguageElement.class) {
             prototype = new PrototypeArray(languagePrototype);
           } else throw new Assertion();
         } else throw new Assertion();

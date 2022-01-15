@@ -1,4 +1,4 @@
-package com.zarbosoft.alligatoroid.compiler.mortar.value;
+package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
@@ -6,9 +6,9 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.rendaw.common.Assertion;
 
-public interface LeafValue extends Exportable {
+public interface LeafExportable extends Exportable {
   @Override
-  default Value graphDeserializeValue(
+  default Exportable graphDesemiserializeChild(
       ModuleCompileContext context,
       Desemiserializer typeDesemiserializer,
       SemiserialSubvalue data) {

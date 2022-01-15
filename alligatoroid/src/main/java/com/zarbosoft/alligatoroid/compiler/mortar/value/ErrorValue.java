@@ -6,9 +6,10 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public final class ErrorValue implements Value, NoExportValue, LeafValue {
+public final class ErrorValue implements Value, NoExportValue, LeafExportable {
   public static final ErrorValue error = new ErrorValue();
 
   private ErrorValue() {}

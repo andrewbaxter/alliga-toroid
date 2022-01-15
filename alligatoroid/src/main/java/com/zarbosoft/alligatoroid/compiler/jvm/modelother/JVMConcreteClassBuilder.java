@@ -21,7 +21,7 @@ public class JVMConcreteClassBuilder {
 
   public JVMConcreteClassBuilder(JVMHalfClassType base) {
     this.base = base;
-    this.jvmClass = new JVMSharedClass(JVMSharedJVMName.fromNormalName(base.jvmExternalClass));
+    this.jvmClass = new JVMSharedClass(JVMSharedJVMName.fromNormalName(base.name));
   }
 
   @Meta.WrapExpose

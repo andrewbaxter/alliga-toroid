@@ -162,18 +162,11 @@ public abstract class Reader {
       if (raw.eatInterstitial(next)) return true;
       if (next == (byte) '(') {
         finished(raw);
-        raw.stack.addLast(new UntypedValue());
+        raw.stack.addLast(new Value());
         raw.stack.addLast(new Type());
         return true;
       }
-      return UntypedValue.eatStatic(this, raw, next);
-    }
-  }
-
-  private static class UntypedValue extends State {
-
-    public static boolean eatStatic(final State state, final Reader raw, final byte next) {
-      state.finished(raw);
+      finished(raw);
       switch (next) {
         case (byte) '[':
           raw.eatArrayBegin();
@@ -189,12 +182,6 @@ public abstract class Reader {
       }
       raw.stack.addLast(new Primitive());
       return false;
-    }
-
-    @Override
-    public boolean eat(final Reader raw, final byte next) {
-      if (raw.eatInterstitial(next)) return true;
-      return eatStatic(this, raw, next);
     }
   }
 

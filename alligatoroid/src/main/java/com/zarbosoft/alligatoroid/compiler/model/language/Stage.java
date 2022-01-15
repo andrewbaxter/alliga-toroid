@@ -26,7 +26,7 @@ import static com.zarbosoft.alligatoroid.compiler.Meta.autoMortarHalfDataType;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Stage extends LanguageElement {
-  public final LanguageElement child;
+  public  LanguageElement child;
 
   public Stage(Location id, LanguageElement child) {
     super(id, hasLowerInSubtree(child));

@@ -5,11 +5,12 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfMethodType;
 
-public class MortarMethodField implements SimpleValue, LeafValue, NoExportValue {
+public class MortarMethodField implements SimpleValue, LeafExportable, NoExportValue {
   private final MortarProtocode lower;
   private final MortarHalfMethodType type;
 

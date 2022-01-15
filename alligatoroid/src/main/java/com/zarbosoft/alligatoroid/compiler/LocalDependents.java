@@ -49,7 +49,11 @@ public class LocalDependents {
             new ModuleId.Dispatcher<ROSetRef<String>>() {
               @Override
               public ROSetRef<String> handleLocal(LocalModuleId id) {
-                cachePath = localHashesPath(id, cacheRoot);
+                cachePath =
+                    Utils.uniqueDir(
+                            cacheRoot.resolve("local_hashes"),
+                            id.path.getBytes(StandardCharsets.UTF_8))
+                        .resolve("dependents");
                 TSList<Error> errors = new TSList<>();
                 final BaseStateRecordBody<Void, ROMap<String, DependentState>> rootState =
                     new BaseStateRecordBody<>() {
@@ -84,7 +88,11 @@ public class LocalDependents {
                         return out;
                       }
                     };
-                Deserializer.deserialize(null, errors, cachePath, new TSList<>(rootState));
+                try {
+                    Deserializer.deserialize(null, errors, cachePath, new TSList<>(rootState));
+                } catch (Common.UncheckedFileNotFoundException ignored) {
+                    return ROSet.empty;
+                }
                 ROMap<String, DependentState> dependents = rootState.build(null, errors);
                 if (errors.some()) {
                   for (Error error : errors) {
@@ -135,13 +143,8 @@ public class LocalDependents {
             });
   }
 
-  private Path localHashesPath(LocalModuleId id, Path cacheRoot) {
-    return Utils.uniqueDir(
-        cacheRoot.resolve("local_hashes"), id.path.getBytes(StandardCharsets.UTF_8));
-  }
-
-  public boolean isDirty(Path sourcePath) {
-    return localDirty.contains(sourcePath.toString());
+  public boolean isDirty(String sourcePath) {
+    return localDirty.contains(sourcePath);
   }
 
   public void addDependency(String source, String dependency) {
@@ -184,7 +187,7 @@ public class LocalDependents {
     private final String hash;
     private final ROSet<String> dependents;
 
-    private DependentState(String hash, ROSet<String> dependents) {
+    public DependentState(String hash, ROSet<String> dependents) {
       this.hash = hash;
       this.dependents = dependents;
     }

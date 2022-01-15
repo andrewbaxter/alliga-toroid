@@ -3,7 +3,7 @@ package com.zarbosoft.luxem.read.path;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public class LuxemPath {
+public final class LuxemPath {
   /** First is index, second is key=true/value=false (always false except in records) */
   public final ROList<ROPair<Integer, Boolean>> data;
 

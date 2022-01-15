@@ -33,7 +33,7 @@ public class Threads {
             () -> {
               try {
                 r.run();
-              } catch (Exception e) {
+              } catch (Throwable e) {
                 e.printStackTrace();
               }
             });

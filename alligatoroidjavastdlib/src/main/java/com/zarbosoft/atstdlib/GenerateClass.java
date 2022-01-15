@@ -227,7 +227,7 @@ public class GenerateClass {
           try (OutputStream os = Files.newOutputStream(path)) {
             Writer writer = new Writer(os, (byte) '\t', 1);
             IdManager ids = new IdManager();
-            writer.type("alligatoroid:0.0.1").arrayBegin();
+            writer.type("alligatoroid:0.0.1");
             lCall(
                     ids,
                     lAccess(ids, jvm(ids), lString(ids, "externClass")),
@@ -328,7 +328,6 @@ public class GenerateClass {
                               }
                             })))
                 .write(writer);
-            writer.arrayEnd();
           }
         });
   }

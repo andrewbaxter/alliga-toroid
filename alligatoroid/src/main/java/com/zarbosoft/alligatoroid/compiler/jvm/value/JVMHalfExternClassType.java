@@ -15,8 +15,7 @@ import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 public class JVMHalfExternClassType extends JVMHalfClassType {
-  boolean finished;
-  private LanguageElement setup;
+  public LanguageElement setup;
   private boolean setupDone = false;
 
   public JVMHalfExternClassType(JVMSharedNormalName name, LanguageElement setup) {
@@ -28,7 +27,6 @@ public class JVMHalfExternClassType extends JVMHalfClassType {
         new TSMap<>(),
         new TSMap<>(),
         new TSList<>());
-    finished = false;
     this.setup = setup;
   }
 

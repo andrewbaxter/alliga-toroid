@@ -7,8 +7,8 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.rendaw.common.Assertion;
 
 public class RecordElement extends LanguageElement {
-  public final LanguageElement key;
-  public final LanguageElement value;
+  public  LanguageElement key;
+  public LanguageElement value;
 
   public RecordElement(Location id, LanguageElement key, LanguageElement value) {
     super(id, hasLowerInSubtree(key, value));

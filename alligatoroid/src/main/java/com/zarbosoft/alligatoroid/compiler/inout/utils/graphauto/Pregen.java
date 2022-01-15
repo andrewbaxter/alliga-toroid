@@ -8,17 +8,17 @@ import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSMap;
 
 public class Pregen {
-  public static final ROMap<Class, AutoExportableType.GraphAuxConverter> graphAuxConverters;
+  public static final ROMap<Class, AutoBuiltinExportableType.GraphAuxConverter> graphAuxConverters;
 
   static {
     //// Graph id/primitive type conversions
     // =============================
     /// Prepare type converters for non-value, non-collection types
-    TSMap<Class, AutoExportableType.GraphAuxConverter> graphAuxConverters0 = new TSMap<>();
+    TSMap<Class, AutoBuiltinExportableType.GraphAuxConverter> graphAuxConverters0 = new TSMap<>();
 
     /// Simple types
-    AutoExportableType.GraphAuxConverter intConverter =
-        new AutoExportableType.GraphAuxConverter() {
+    AutoBuiltinExportableType.GraphAuxConverter intConverter =
+        new AutoBuiltinExportableType.GraphAuxConverter() {
           @Override
           public Object desemiserialize(SemiserialSubvalue data) {
             return data.dispatch(
@@ -37,8 +37,8 @@ public class Pregen {
         };
     graphAuxConverters0.put(Integer.class, intConverter);
     graphAuxConverters0.put(int.class, intConverter);
-    AutoExportableType.GraphAuxConverter boolConverter =
-        new AutoExportableType.GraphAuxConverter() {
+    AutoBuiltinExportableType.GraphAuxConverter boolConverter =
+        new AutoBuiltinExportableType.GraphAuxConverter() {
           @Override
           public Object desemiserialize(SemiserialSubvalue data) {
             return data.dispatch(
@@ -57,8 +57,8 @@ public class Pregen {
         };
     graphAuxConverters0.put(Boolean.class, boolConverter);
     graphAuxConverters0.put(boolean.class, boolConverter);
-    AutoExportableType.GraphAuxConverter stringConverter =
-        new AutoExportableType.GraphAuxConverter() {
+    AutoBuiltinExportableType.GraphAuxConverter stringConverter =
+        new AutoBuiltinExportableType.GraphAuxConverter() {
           @Override
           public Object desemiserialize(SemiserialSubvalue data) {
             return data.dispatch(

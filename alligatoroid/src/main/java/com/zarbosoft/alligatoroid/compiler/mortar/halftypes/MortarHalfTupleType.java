@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
@@ -14,13 +14,13 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Tuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LeafValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeInt;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class MortarHalfTupleType extends MortarHalfObjectType implements AutoExportable, LeafValue {
+public class MortarHalfTupleType extends MortarHalfObjectType implements AutoBuiltinExportable, LeafExportable {
   public static final JVMSharedJVMName JVMNAME = JVMSharedJVMName.fromClass(Tuple.class);
   public static final JVMSharedDataDescriptor DESC = JVMSharedDataDescriptor.fromJVMName(JVMNAME);
   public final TSList<MortarHalfDataType> fields;

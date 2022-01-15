@@ -5,7 +5,7 @@ import com.zarbosoft.luxem.write.Writer;
 
 public class LocalLogger implements Logger {
   private synchronized void log(TreeSerializable message) {
-    Writer outWriter = new Writer(System.out, (byte) ' ', 4);
+    Writer outWriter = new Writer(System.err, (byte) ' ', 4);
     message.treeSerialize(outWriter);
   }
 

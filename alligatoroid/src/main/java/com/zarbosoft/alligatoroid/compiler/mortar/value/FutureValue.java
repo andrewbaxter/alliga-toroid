@@ -48,11 +48,11 @@ public class FutureValue implements SimpleValue {
   }
 
   @Override
-  public Value graphDeserializeValue(
+  public Exportable graphDesemiserializeChild(
       ModuleCompileContext context,
       Desemiserializer typeDesemiserializer,
       SemiserialSubvalue data) {
-    return get().graphDeserializeValue(context, typeDesemiserializer, data);
+    return get().graphDesemiserializeChild(context, typeDesemiserializer, data);
   }
 
   @Override
