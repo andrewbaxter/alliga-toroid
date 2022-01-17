@@ -20,7 +20,7 @@ public class WholeString implements WholeValue {
   }
 
   @Override
-  public void treeSerialize(Writer writer) {
+  public void treeDump(Writer writer) {
     writer.type("string").primitive(value);
   }
 }

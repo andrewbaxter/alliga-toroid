@@ -1,8 +1,18 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeSerializable;
+public interface SemiserialSubvalue {
+  public static final Class<? extends SemiserialSubvalue>[] SERIAL_UNION =
+      new Class[] {
+        SemiserialInt.class,
+        SemiserialString.class,
+        SemiserialRefArtifact.class,
+        SemiserialRefBuiltin.class,
+        SemiserialRecord.class,
+        SemiserialTuple.class,
+        SemiserialBool.class,
+        SemiserialType.class,
+      };
 
-public interface SemiserialSubvalue extends TreeSerializable {
   public <T> T dispatch(Dispatcher<T> dispatcher);
 
   public interface Dispatcher<T> {

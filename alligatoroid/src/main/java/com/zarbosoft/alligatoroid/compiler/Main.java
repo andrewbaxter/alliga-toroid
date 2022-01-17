@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.modules.StderrLogger;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.ROList;
 
@@ -16,7 +17,9 @@ public class Main {
     }
     Alligatorus.Result result =
         Alligatorus.compile(
-            Alligatorus.defaultCachePath(), Alligatorus.rootModuleSpec(Paths.get(args[0])));
+            Alligatorus.defaultCachePath(),
+            new StderrLogger(),
+            Alligatorus.rootModuleSpec(Paths.get(args[0])));
 
     Writer outWriter = new Writer(System.out, (byte) ' ', 4);
     outWriter.recordBegin();
@@ -29,12 +32,12 @@ public class Main {
       }
 
       outWriter.recordBegin().primitive("id");
-      value.getKey().treeSerialize(outWriter);
+      value.getKey().treeDump(outWriter);
 
       outWriter.primitive("errors");
       outWriter.arrayBegin();
       for (Error error : value.getValue()) {
-        error.treeSerialize(outWriter);
+        error.treeDump(outWriter);
       }
       outWriter.arrayEnd();
 

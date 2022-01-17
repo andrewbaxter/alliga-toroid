@@ -37,7 +37,7 @@ public class JVMBuiltin {
   }
 
   public static JVMHalfExternClassType externClass(String qualifiedName, LanguageElement setup) {
-    return new JVMHalfExternClassType(JVMSharedNormalName.fromString(qualifiedName), setup);
+    return JVMHalfExternClassType.blank(JVMSharedNormalName.fromString(qualifiedName), setup);
   }
 
   public static class RetClass {

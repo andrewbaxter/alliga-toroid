@@ -15,28 +15,12 @@ public abstract class LuxemPathBuilder {
 
   public abstract LuxemPathBuilder unkey();
 
-  public LuxemPathBuilder push(final LuxemEvent e) {
-    if (e.getClass() == LArrayOpenEvent.class) {
-      return new LuxemArrayPathBuilder(value());
-    } else if (e.getClass() == LArrayCloseEvent.class) {
-      return pop();
-    } else if (e.getClass() == LRecordOpenEvent.class) {
-      return new LuxemRecordPathBuilder(value());
-    } else if (e.getClass() == LRecordCloseEvent.class) {
-      return pop();
-    } else if (e.getClass() == LTypeEvent.class) {
-      return type();
-    } else if (e.getClass() == LPrimitiveEvent.class) {
-      return value();
-    } else throw new AssertionError(String.format("Unknown luxem event type [%s]", e.getClass()));
-  }
-
   public LuxemPathBuilder pushArrayOpen() {
-    return new LuxemArrayPathBuilder(value());
+    return new LuxemArrayPathBuilder(this);
   }
 
   public LuxemPathBuilder pushRecordOpen() {
-    return new LuxemRecordPathBuilder(value());
+    return new LuxemRecordPathBuilder(this);
   }
 
   public abstract LuxemPathBuilder value();
@@ -47,10 +31,10 @@ public abstract class LuxemPathBuilder {
     return parent;
   }
 
-  protected abstract void renderInternal(TSList<ROPair<Integer, Boolean>> values);
+  protected abstract void renderInternal(TSList<LuxemPath.Element> values);
 
   public LuxemPath render() {
-    final TSList<ROPair<Integer, Boolean>> data = new TSList<>();
+    final TSList<LuxemPath.Element> data = new TSList<>();
     renderInternal(data);
     return new LuxemPath(data);
   }

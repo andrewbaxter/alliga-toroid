@@ -1,10 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.alligatoroid.compiler.inout.utils.classstate.PrototypeAuto;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateRecordBody;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.Deserializer;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateString;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto.AutoTreeMeta;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto.TypeInfo;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
@@ -12,11 +11,10 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.alligatoroid.compiler.modules.Logger;
-import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
+import com.zarbosoft.luxem.read.path.LuxemArrayPathBuilder;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Common;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.ROSetRef;
@@ -37,13 +35,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class LocalDependents {
+  private static final AutoTreeMeta serialMeta;
+
+  static {
+    serialMeta = new AutoTreeMeta();
+    serialMeta.scan(SerialFormat.class);
+  }
+
   private final ROSetRef<String> localDirty;
   private final List<ROPair<String, String>> localDependencies = new ArrayList<>();
   private final ConcurrentHashMap<String, String> localHashes = new ConcurrentHashMap<>();
   private Path cachePath;
 
   public LocalDependents(Logger logger, ModuleId rootModuleId, Path cacheRoot) {
-    final PrototypeAuto valueProto = new PrototypeAuto(DependentState.class);
     localDirty =
         rootModuleId.dispatch(
             new ModuleId.Dispatcher<ROSetRef<String>>() {
@@ -55,45 +59,15 @@ public class LocalDependents {
                             id.path.getBytes(StandardCharsets.UTF_8))
                         .resolve("dependents");
                 TSList<Error> errors = new TSList<>();
-                final BaseStateRecordBody<Void, ROMap<String, DependentState>> rootState =
-                    new BaseStateRecordBody<>() {
-                      final TSList<ROPair<String, BaseStateSingle<Void, DependentState>>> entries =
-                          new TSList<>();
-
-                      @Override
-                      public ROMap<String, DependentState> build(
-                          Void context, TSList<Error> errors) {
-                        TSMap<String, DependentState> out = new TSMap<>();
-                        for (ROPair<String, BaseStateSingle<Void, DependentState>> entry :
-                            entries) {
-                          out.put(entry.first, entry.second.build(null, errors));
-                        }
-                        return out;
-                      }
-
-                      @Override
-                      public BaseStateSingle createKeyState(
-                          Void context, TSList<Error> errors, LuxemPathBuilder luxemPath) {
-                        return new StateString();
-                      }
-
-                      @Override
-                      public BaseStateSingle createValueState(
-                          Void context,
-                          TSList<Error> errors,
-                          LuxemPathBuilder luxemPath,
-                          Object key) {
-                        final BaseStateSingle out = valueProto.create(errors, luxemPath);
-                        entries.add(new ROPair<>((String) key, out));
-                        return out;
-                      }
-                    };
+                final BaseStateSingle<Object, SerialFormat> rootState =
+                    serialMeta.deserialize(
+                        errors, new LuxemArrayPathBuilder(null), SerialFormat.class);
                 try {
-                    Deserializer.deserialize(null, errors, cachePath, new TSList<>(rootState));
+                  Deserializer.deserialize(null, errors, cachePath, new TSList<>(rootState));
                 } catch (Common.UncheckedFileNotFoundException ignored) {
-                    return ROSet.empty;
+                  return ROSet.empty;
                 }
-                ROMap<String, DependentState> dependents = rootState.build(null, errors);
+                SerialFormat dependents = rootState.build(null, errors);
                 if (errors.some()) {
                   for (Error error : errors) {
                     logger.warn(error);
@@ -103,7 +77,7 @@ public class LocalDependents {
                 TSSet<String> dirty = new TSSet<>();
                 new Object() {
                   {
-                    for (Map.Entry<String, DependentState> source : dependents) {
+                    for (Map.Entry<String, SerialFormatElement> source : dependents.elements) {
                       String gotHash = null;
                       try {
                         gotHash = new Utils.SHA256().add(Paths.get(source.getKey())).buildHex();
@@ -116,7 +90,7 @@ public class LocalDependents {
 
                   private void markDirty(String path) {
                     dirty.add(path);
-                    DependentState state = dependents.getOpt(path);
+                    SerialFormatElement state = dependents.elements.getOpt(path);
                     if (state != null)
                       for (String s : state.dependents) {
                         markDirty(s);
@@ -159,37 +133,39 @@ public class LocalDependents {
 
   public void write() {
     if (cachePath == null) return;
-    TSMap<String, TSSet<String>> dependents = new TSMap<>();
+    TSMap<String, SerialFormatElement> data = new TSMap<>();
     for (ROPair<String, String> dependency : localDependencies) {
-      dependents.getCreate(dependency.second, () -> new TSSet<>()).add(dependency.first);
+      data.getCreate(
+              dependency.second,
+              () -> new SerialFormatElement(localHashes.get(dependency.second), new TSSet<>()))
+          .dependents
+          .add(dependency.first);
     }
     uncheck(
         () -> {
           try (OutputStream os = Files.newOutputStream(cachePath)) {
             final Writer writer = new Writer(os, (byte) ' ', 4);
-            writer.recordBegin();
-            for (Map.Entry<String, TSSet<String>> e : dependents) {
-              writer.recordBegin();
-              writer.primitive("hash").primitive(localHashes.get(e.getKey()));
-              writer.primitive("dependents").arrayBegin();
-              for (String dependent : e.getValue()) {
-                writer.primitive(dependent);
-              }
-              writer.arrayEnd();
-              writer.recordEnd();
-            }
-            writer.recordEnd();
+            serialMeta.serialize(
+                writer, TypeInfo.fromClass(SerialFormat.class), new SerialFormat(data));
           }
         });
   }
 
-  private static class DependentState {
-    private final String hash;
-    private final ROSet<String> dependents;
+  public static class SerialFormatElement {
+    public final String hash;
+    public final TSSet<String> dependents;
 
-    public DependentState(String hash, ROSet<String> dependents) {
+    public SerialFormatElement(String hash, TSSet<String> dependents) {
       this.hash = hash;
       this.dependents = dependents;
+    }
+  }
+
+  public static class SerialFormat {
+    public final TSMap<String, SerialFormatElement> elements;
+
+    public SerialFormat(TSMap<String, SerialFormatElement> elements) {
+      this.elements = elements;
     }
   }
 }

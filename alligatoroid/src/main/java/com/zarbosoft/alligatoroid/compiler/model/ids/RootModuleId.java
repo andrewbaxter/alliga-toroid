@@ -1,17 +1,19 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
 import com.zarbosoft.luxem.write.Writer;
 
 /** Pseudo module-id for root of compilation (outside any file) */
-public class RootModuleId implements ModuleId {
+public class RootModuleId implements ModuleId, AutoBuiltinExportable, LeafExportable {
   @Override
   public String toString() {
     return "root";
   }
 
   @Override
-  public void treeSerialize(Writer writer) {
+  public void treeDump(Writer writer) {
     writer.type("root").recordBegin().recordEnd();
   }
 

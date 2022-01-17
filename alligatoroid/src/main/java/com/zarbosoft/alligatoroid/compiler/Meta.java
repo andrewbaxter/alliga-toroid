@@ -6,7 +6,10 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
+import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.language.Access;
 import com.zarbosoft.alligatoroid.compiler.model.language.Bind;
 import com.zarbosoft.alligatoroid.compiler.model.language.Block;
@@ -64,7 +67,12 @@ public class Meta {
     ModRemote.class
   };
   public static final Class[] OTHER_AUTO_GRAPH = {
-    BundleValue.class, JVMHalfExternClassType.class,
+    BundleValue.class,
+    JVMHalfExternClassType.class,
+    Location.class,
+    LocalModuleId.class,
+    RemoteModuleId.class,
+    BundleModuleSubId.class,
   };
   /** Initialized statically, never modified after (thread safe for reads). */
   public static TSMap<Class, MortarHalfAutoType> autoMortarHalfDataTypes = new TSMap<>();

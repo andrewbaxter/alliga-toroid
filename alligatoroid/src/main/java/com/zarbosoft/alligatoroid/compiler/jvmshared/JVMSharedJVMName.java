@@ -6,9 +6,9 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.RootExportable;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
-import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
-import com.zarbosoft.alligatoroid.compiler.mortar.BuiltinExportableType;
 import com.zarbosoft.rendaw.common.ROList;
 
 /** Like a/b/c */
@@ -18,9 +18,18 @@ public class JVMSharedJVMName implements LeafExportable {
   public static final JVMSharedJVMName INT = fromClass(Integer.class);
   public static final JVMSharedJVMName OBJECT = fromClass(Object.class);
   public static final JVMSharedJVMName STRING = fromClass(String.class);
-  public final String value;
-  public final static BuiltinExportableType exportableType =
-      new BuiltinExportableType() {
+  public static final RootExportable exportableType =
+      new RootExportable() {
+        @Override
+        public SemiserialSubvalue graphSemiserializeChild(
+            Exportable child,
+            ImportId spec,
+            Semiserializer semiserializer,
+            ROList<Exportable> path,
+            ROList<String> accessPath) {
+          return new SemiserialString(((JVMSharedJVMName) child).value);
+        }
+
         @Override
         public Exportable graphDesemiserializeChild(
             ModuleCompileContext context,
@@ -35,6 +44,7 @@ public class JVMSharedJVMName implements LeafExportable {
               });
         }
       };
+  public final String value;
 
   private JVMSharedJVMName(String value) {
     this.value = value;
@@ -61,16 +71,7 @@ public class JVMSharedJVMName implements LeafExportable {
   }
 
   @Override
-  public SemiserialSubvalue graphSemiserialize(
-      ImportId spec,
-      Semiserializer semiserializer,
-      ROList<Exportable> path,
-      ROList<String> accessPath) {
-    return new SemiserialString(value);
-  }
-
-  @Override
-  public void postDesemiserialize() {}
+  public void postInit() {}
 
   @Override
   public Exportable type() {

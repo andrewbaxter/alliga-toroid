@@ -5,7 +5,6 @@ import com.zarbosoft.luxem.write.Writer;
 import java.util.Objects;
 
 public final class SemiserialString implements SemiserialSubvalue {
-  public static final String SERIAL_TYPE = "string";
   public final String value;
 
   public SemiserialString(String value) {
@@ -15,11 +14,6 @@ public final class SemiserialString implements SemiserialSubvalue {
   @Override
   public <T> T dispatch(Dispatcher<T> dispatcher) {
     return dispatcher.handleString(this);
-  }
-
-  @Override
-  public void treeSerialize(Writer writer) {
-    writer.type(SERIAL_TYPE).primitive(value);
   }
 
   @Override

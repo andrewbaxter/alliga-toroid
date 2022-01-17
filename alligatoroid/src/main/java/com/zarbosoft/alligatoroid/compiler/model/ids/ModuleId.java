@@ -1,8 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
-import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeSerializable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
+import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeDumpable;
 
-public interface ModuleId extends TreeSerializable {
+public interface ModuleId extends TreeDumpable, Exportable {
+  public static final Class<? extends ModuleId>[] SERIAL_UNION =
+      new Class[] {
+        LocalModuleId.class, RemoteModuleId.class, BundleModuleSubId.class,
+      };
+
   String hash();
 
   boolean equal1(ModuleId other);

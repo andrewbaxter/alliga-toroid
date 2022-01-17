@@ -32,7 +32,7 @@ public class Luxem {
         new BufferedReader() {
           @Override
           protected void eatRecordBegin() {
-            state.path = new LuxemRecordPathBuilder(state.path.value());
+            state.path = state.path.pushRecordOpen();
             state.events.add(
                 new ROPair<>(
                     factory.objectOpen(), new Position(LRecordOpenEvent.instance, state.path)));
@@ -40,7 +40,7 @@ public class Luxem {
 
           @Override
           protected void eatArrayBegin() {
-            state.path = new LuxemArrayPathBuilder(state.path.value());
+            state.path = state.path.pushArrayOpen();
             state.events.add(
                 new ROPair<>(
                     factory.arrayOpen(), new Position(LArrayOpenEvent.instance, state.path)));
@@ -48,34 +48,34 @@ public class Luxem {
 
           @Override
           protected void eatArrayEnd() {
-            state.path = state.path.pop();
             state.events.add(
                 new ROPair<>(
                     factory.arrayClose(), new Position(LArrayCloseEvent.instance, state.path)));
+            state.path = state.path.parent.value();
           }
 
           @Override
           protected void eatRecordEnd() {
-            state.path = state.path.pop();
             state.events.add(
                 new ROPair<>(
                     factory.objectClose(), new Position(LRecordCloseEvent.instance, state.path)));
+            state.path = state.path.parent.value();
           }
 
           @Override
           protected void eatType(String text) {
-            state.path = state.path.type();
             state.events.add(
                 new ROPair<>(factory.type(text), new Position(new LTypeEvent(text), state.path)));
+            state.path = state.path.type();
           }
 
           @Override
           protected void eatPrimitive(String string) {
-            state.path = state.path.value();
             state.events.add(
                 new ROPair<>(
                     factory.primitive(string),
                     new Position(new LPrimitiveEvent(string), state.path)));
+            state.path = state.path.value();
           }
         };
     reader.feed(source);

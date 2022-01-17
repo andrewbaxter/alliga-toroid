@@ -5,17 +5,19 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class LuxemArrayPathBuilder extends LuxemPathBuilder {
-  private boolean type = false;
-  private int index = -1;
+  private final int index;
+  private final int typeCount;
 
   public LuxemArrayPathBuilder(final LuxemPathBuilder parent) {
     this.parent = parent;
+    this.index = 0;
+    this.typeCount = 0;
   }
 
-  public LuxemArrayPathBuilder(final LuxemPathBuilder parent, final boolean type, final int index) {
+  public LuxemArrayPathBuilder(final LuxemPathBuilder parent, final int index, int typeCount) {
     this.parent = parent;
-    this.type = type;
     this.index = index;
+    this.typeCount = typeCount;
   }
 
   @Override
@@ -25,25 +27,29 @@ public class LuxemArrayPathBuilder extends LuxemPathBuilder {
 
   @Override
   public LuxemPathBuilder value() {
-    if (this.type) return new LuxemArrayPathBuilder(parent, false, index);
-    else return new LuxemArrayPathBuilder(parent, false, index + 1);
+    return new LuxemArrayPathBuilder(parent, index + 1, 0);
   }
 
   @Override
   public LuxemPathBuilder type() {
-    return new LuxemArrayPathBuilder(parent, true, index + 1);
+    return new LuxemArrayPathBuilder(parent, index, typeCount + 1);
   }
 
   @Override
-  protected void renderInternal(TSList<ROPair<Integer, Boolean>> values) {
+  protected void renderInternal(TSList<LuxemPath.Element> values) {
     if (parent != null) parent.renderInternal(values);
-    values.add(new ROPair<>(index, false));
+    values.add(new LuxemPath.Element(index, false, typeCount));
   }
 
   @Override
   public String toString() {
-    return String.format(
-        "%s/%s",
-        parent == null ? "" : parent.toString(), index == -1 ? "" : ((Integer) index).toString());
+    StringBuilder out = new StringBuilder();
+    if (parent != null) out.append(parent.toString());
+    out.append("/");
+    out.append(index);
+    for (int i = 0; i < typeCount; i += 1) {
+      out.append(" value");
+    }
+    return out.toString();
   }
 }

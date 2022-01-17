@@ -1,15 +1,20 @@
 package com.zarbosoft.atstdlib;
 
 import com.zarbosoft.alligatoroid.compiler.Alligatorus;
+import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeDumpable;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.modules.MemoryLogger;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.ROList;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +29,6 @@ public class Main {
 
     // Collections
     generated.add(GenerateClass.generate(ArrayList.class));
-    /*
     generated.add(GenerateClass.generate(HashMap.class));
     generated.add(GenerateClass.generate(HashSet.class));
 
@@ -39,7 +43,6 @@ public class Main {
 
     // Date
     generated.add(GenerateClass.generate(ZonedDateTime.class));
-     */
 
     sync.join();
     System.out.flush();
@@ -49,23 +52,38 @@ public class Main {
     outWriter.recordBegin();
     for (Path p : generated) {
       outWriter.primitive(p.toString());
+      MemoryLogger logger = new MemoryLogger();
       Alligatorus.Result results =
-          compile(Alligatorus.defaultCachePath(), Alligatorus.rootModuleSpec(p));
+          compile(Alligatorus.defaultCachePath(), logger, Alligatorus.rootModuleSpec(p));
       outWriter.arrayBegin();
       for (Map.Entry<ImportId, ROList<Error>> value : results.errors.entrySet()) {
         outWriter.recordBegin();
 
         outWriter.primitive("id");
-        value.getKey().treeSerialize(outWriter);
+        value.getKey().treeDump(outWriter);
 
         if (value.getValue().some()) {
           hadErrors = true;
         }
 
+        outWriter.primitive("info");
+        outWriter.arrayBegin();
+        for (TreeDumpable message : logger.infos) {
+          message.treeDump(outWriter);
+        }
+        outWriter.arrayEnd();
+
+        outWriter.primitive("warn");
+        outWriter.arrayBegin();
+        for (TreeDumpable message : logger.warns) {
+          message.treeDump(outWriter);
+        }
+        outWriter.arrayEnd();
+
         outWriter.primitive("errors");
         outWriter.arrayBegin();
         for (Error error : value.getValue()) {
-          error.treeSerialize(outWriter);
+          error.treeDump(outWriter);
         }
         outWriter.arrayEnd();
 

@@ -5,7 +5,6 @@ import com.zarbosoft.luxem.write.Writer;
 import java.util.Objects;
 
 public final class SemiserialBool implements SemiserialSubvalue {
-  public static final String SERIAL_TYPE = "bool";
   public final boolean value;
 
   public SemiserialBool(boolean value) {
@@ -15,11 +14,6 @@ public final class SemiserialBool implements SemiserialSubvalue {
   @Override
   public <T> T dispatch(Dispatcher<T> dispatcher) {
     return dispatcher.handleBool(this);
-  }
-
-  @Override
-  public void treeSerialize(Writer writer) {
-    writer.type(SERIAL_TYPE).primitive(value ? "true" : "false");
   }
 
   @Override

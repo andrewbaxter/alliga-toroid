@@ -8,17 +8,17 @@ import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSMap;
 
 public class Pregen {
-  public static final ROMap<Class, AutoBuiltinExportableType.GraphAuxConverter> graphAuxConverters;
+  public static final ROMap<Class, AutoBuiltinExportableType.InlineExportableType> graphAuxConverters;
 
   static {
     //// Graph id/primitive type conversions
     // =============================
     /// Prepare type converters for non-value, non-collection types
-    TSMap<Class, AutoBuiltinExportableType.GraphAuxConverter> graphAuxConverters0 = new TSMap<>();
+    TSMap<Class, AutoBuiltinExportableType.InlineExportableType> graphAuxConverters0 = new TSMap<>();
 
     /// Simple types
-    AutoBuiltinExportableType.GraphAuxConverter intConverter =
-        new AutoBuiltinExportableType.GraphAuxConverter() {
+    AutoBuiltinExportableType.InlineExportableType intConverter =
+        new AutoBuiltinExportableType.InlineExportableType() {
           @Override
           public Object desemiserialize(SemiserialSubvalue data) {
             return data.dispatch(
@@ -37,8 +37,8 @@ public class Pregen {
         };
     graphAuxConverters0.put(Integer.class, intConverter);
     graphAuxConverters0.put(int.class, intConverter);
-    AutoBuiltinExportableType.GraphAuxConverter boolConverter =
-        new AutoBuiltinExportableType.GraphAuxConverter() {
+    AutoBuiltinExportableType.InlineExportableType boolConverter =
+        new AutoBuiltinExportableType.InlineExportableType() {
           @Override
           public Object desemiserialize(SemiserialSubvalue data) {
             return data.dispatch(
@@ -57,8 +57,8 @@ public class Pregen {
         };
     graphAuxConverters0.put(Boolean.class, boolConverter);
     graphAuxConverters0.put(boolean.class, boolConverter);
-    AutoBuiltinExportableType.GraphAuxConverter stringConverter =
-        new AutoBuiltinExportableType.GraphAuxConverter() {
+    AutoBuiltinExportableType.InlineExportableType stringConverter =
+        new AutoBuiltinExportableType.InlineExportableType() {
           @Override
           public Object desemiserialize(SemiserialSubvalue data) {
             return data.dispatch(

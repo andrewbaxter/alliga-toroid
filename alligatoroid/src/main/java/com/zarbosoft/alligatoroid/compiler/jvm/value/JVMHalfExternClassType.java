@@ -30,6 +30,12 @@ public class JVMHalfExternClassType extends JVMHalfClassType {
     this.setup = setup;
   }
 
+  public static JVMHalfExternClassType blank(JVMSharedNormalName name, LanguageElement setup) {
+    final JVMHalfExternClassType out = new JVMHalfExternClassType(name, setup);
+    out.postInit();
+    return out;
+  }
+
   @Override
   public void resolveMethods(EvaluationContext context) {
     if (setupDone) return;

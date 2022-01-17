@@ -1,9 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler.jvm.value;
 
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
-import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 
 /** Represents the metadata for interacting with (calling) a method. */
@@ -20,7 +20,7 @@ public class JVMMethodFieldType implements SimpleValue, AutoBuiltinExportable, L
   }
 
   @Override
-  public void postDesemiserialize() {
+  public void postInit() {
     specDetails = JVMUtils.methodSpecDetails(spec);
   }
 }

@@ -1,11 +1,13 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
+import com.zarbosoft.alligatoroid.compiler.model.error.Unexpected;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
+import com.zarbosoft.alligatoroid.compiler.modules.Logger;
 import com.zarbosoft.appdirsj.AppDirs;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
@@ -34,19 +36,19 @@ public class Alligatorus {
     }
   }
 
-  public static Result compile(Path cachePath, ImportId spec) {
+  public static Result compile(Path cachePath, Logger logger, ImportId spec) {
     RootModuleId rootModuleId = new RootModuleId();
     final ImportId rootImportId = new ImportId(rootModuleId);
     final Location rootLocation = new Location(rootModuleId, 0);
-    CompileContext context = new CompileContext(cachePath, spec);
+    CompileContext context = new CompileContext(cachePath, logger, spec);
     ModuleCompileContext moduleContext = new ModuleCompileContext(rootImportId, context, null);
     context.moduleErrors.put(rootImportId, moduleContext.errors);
     try {
       uncheck(() -> context.modules.get(moduleContext, spec).get());
-    } catch (Error.PreLocationlessError e) {
-      context.moduleErrors.put(rootImportId, new TSList<>(e.toError()));
     } catch (Error.PreError e) {
       context.moduleErrors.put(rootImportId, new TSList<>(e.toError(rootLocation)));
+    } catch (Throwable e) {
+      context.moduleErrors.put(rootImportId, new TSList<>(new Unexpected(rootLocation, e)));
     } finally {
       context.threads.join();
     }

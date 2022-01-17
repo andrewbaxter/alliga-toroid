@@ -8,6 +8,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -24,6 +27,10 @@ import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Utils {
   public static final String UNIQUE_PATH_FILENAME = "path";
+
+  public static Type[] genericArgs(Parameter param) {
+    return ((ParameterizedType) param.getParameterizedType()).getActualTypeArguments();
+  }
 
   public static Path uniqueDir(Path rootCachePath, byte[] id) {
     return uncheck(
@@ -108,6 +115,25 @@ public class Utils {
     bb.order(ByteOrder.LITTLE_ENDIAN);
     bb.putLong(x);
     return bb.array();
+  }
+
+  public static String toUnderscore(Class klass) {
+    return toUnderscore(klass.getSimpleName());
+  }
+
+  public static String toUnderscore(String name) {
+    StringBuilder out = new StringBuilder();
+    for (int i = 0; i < name.length(); ++i) {
+      if (Character.isUpperCase(name.codePointAt(i))) {
+        if (i > 0) {
+          out.append('_');
+        }
+        out.appendCodePoint(Character.toLowerCase(name.codePointAt(i)));
+      } else {
+        out.appendCodePoint(name.codePointAt(i));
+      }
+    }
+    return out.toString();
   }
 
   public static class SHA256 {

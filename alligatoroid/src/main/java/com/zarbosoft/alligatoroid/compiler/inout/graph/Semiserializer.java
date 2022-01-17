@@ -4,7 +4,6 @@ import com.zarbosoft.alligatoroid.compiler.Builtin;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.TypeDependencyLoopPre;
-import com.zarbosoft.alligatoroid.compiler.model.error.UnexportablePre;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
@@ -62,11 +61,13 @@ public class Semiserializer {
     final ArtifactId id = new ArtifactId(spec, index);
     artifactLookup.put(value, id);
     final TSList<Exportable> newPath = path.mut().add(value);
-    SemiserialSubvalue data = value.graphSemiserialize(spec, this, newPath, accessPath);
+    final Exportable exportableType = value.type();
+    SemiserialSubvalue data =
+        exportableType.graphSemiserializeChild(value, spec, this, newPath, accessPath);
     artifacts.set(
         index,
         new SemiserialValue(
-            process(spec, value.type(), newPath, accessPath.mut().add("(type)")), data));
+            process(spec, exportableType, newPath, accessPath.mut().add("(type)")), data));
     return new SemiserialRefArtifact(id);
   }
 }

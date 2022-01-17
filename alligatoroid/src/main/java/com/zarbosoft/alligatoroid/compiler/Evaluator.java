@@ -1,7 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRef;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.languageinout.LanguageDeserializer;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.DynamicClassLoader;
@@ -12,7 +11,6 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
-import com.zarbosoft.alligatoroid.compiler.model.error.LocationlessUnexpected;
 import com.zarbosoft.alligatoroid.compiler.model.error.Unexpected;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
@@ -20,6 +18,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -28,9 +27,9 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
@@ -42,31 +41,6 @@ public class Evaluator {
   public static final String GENERATED_CLASS_PREFIX = "com.zarbosoft.alligatoroidmortar.Generated";
   private static final Evaluator instance = new Evaluator();
   public final AtomicInteger uniqueClass = new AtomicInteger();
-
-  public static void processError(EvaluationContext context, Throwable e) {
-    if (e instanceof Common.UncheckedException) {
-      processError(context, e.getCause());
-    } else if (e instanceof ExecutionException) {
-      processError(context, e.getCause());
-    } else {
-      Location location = null; // TODO convert whole stack?
-      for (StackTraceElement t : new ReverseIterable<>(Arrays.asList(e.getStackTrace()))) {
-        if (t.getClassName().startsWith(GENERATED_CLASS_PREFIX)) {
-          location = context.sourceMapReverse.get(t.getLineNumber());
-          break;
-        }
-      }
-      if (location != null) {
-        if (e instanceof Error.PreError) {
-          context.moduleContext.errors.add(((Error.PreError) e).toError(location));
-        } else {
-          context.moduleContext.errors.add(new Unexpected(location, e));
-        }
-      } else {
-        context.moduleContext.errors.add(new LocationlessUnexpected(e));
-      }
-    }
-  }
 
   public static <T> SemiserialModule evaluate(
       ModuleCompileContext moduleContext,
@@ -148,11 +122,30 @@ public class Evaluator {
     }
     Object pass2;
     try {
-      pass2 = uncheck(() -> klass.getMethod(ENTRY_METHOD_NAME).invoke(null));
-    } catch (Exception e) {
-      processError(context, e);
-      return null;
+      pass2 = klass.getMethod(ENTRY_METHOD_NAME).invoke(null);
+    } catch (IllegalAccessException | NoSuchMethodException e) {
+      throw new Assertion();
+    } catch (InvocationTargetException e0) {
+      final Throwable e = e0.getTargetException();
+      Location location = null; // TODO convert whole stack?
+      for (StackTraceElement t : new ReverseIterable<>(Arrays.asList(e.getStackTrace()))) {
+        if (t.getClassName().startsWith(GENERATED_CLASS_PREFIX)) {
+          location = context.sourceMapReverse.get(t.getLineNumber());
+          break;
+        }
+      }
+      if (location != null) {
+        if (e instanceof Error.PreError) {
+          context.moduleContext.errors.add(((Error.PreError) e).toError(location));
+        } else {
+          context.moduleContext.errors.add(new Unexpected(location, e));
+        }
+        return null;
+      } else {
+        throw uncheck(e);
+      }
     }
-    return Semiserializer.semiserialize(moduleContext, lowered.dataType.unlower(pass2), rootStatement.location);
+    return Semiserializer.semiserialize(
+        moduleContext, lowered.dataType.unlower(pass2), rootStatement.location);
   }
 }

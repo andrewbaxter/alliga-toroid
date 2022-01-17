@@ -1,10 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.luxem.write.Writer;
 
-public final class LocalModuleId implements ModuleId {
+public final class LocalModuleId implements ModuleId, AutoBuiltinExportable, LeafExportable {
   public static final String GRAPH_KEY_PATH = "path";
   public final String path;
 
@@ -26,7 +28,7 @@ public final class LocalModuleId implements ModuleId {
   }
 
   @Override
-  public void treeSerialize(Writer writer) {
+  public void treeDump(Writer writer) {
     writer.type("local").recordBegin().primitive("path").primitive(path.toString()).recordEnd();
   }
 

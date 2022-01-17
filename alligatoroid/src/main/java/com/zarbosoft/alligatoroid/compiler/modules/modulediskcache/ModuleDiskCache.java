@@ -2,10 +2,12 @@ package com.zarbosoft.alligatoroid.compiler.modules.modulediskcache;
 
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
 import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemideserializeSemiserial;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.Deserializer;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateRecord;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto.AutoTreeMeta;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto.TypeInfo;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.LocationlessUnexpected;
@@ -28,17 +30,16 @@ import java.nio.file.Path;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class ModuleDiskCache implements ModuleResolver {
-  public static final String SUBDIR_RESULT = "result";
-  public static final String SUBDIR_SOURCE = "source";
-  public static final String CACHE_FILENAME_ID = "id.luxem";
-  public static final String CACHE_FILENAME_OUTPUT = "output.luxem";
-  public static final String CACHE_DIRECTORY_ARTIFACTS = "artifacts";
-  public static final String CACHE_SUBARTIFACT_TYPE_STRING = "string";
-  public static final String CACHE_SUBARTIFACT_TYPE_INT = "int";
-  public static final String CACHE_SUBARTIFACT_TYPE_BOOL = "bool";
-  public static final String CACHE_SUBARTIFACT_TYPE_BUILTIN = "builtin";
-  public static final String CACHE_SUBARTIFACT_TYPE_CACHE = "cache";
-  public static final String CACHE_SUBARTIFACT_TYPE_NULL = "null";
+  private static final AutoTreeMeta semisubMeta;
+  private static final AutoTreeMeta importIdMeta;
+
+  static {
+    semisubMeta = new AutoTreeMeta();
+    semisubMeta.scan(SemiserialModule.class);
+    importIdMeta = new AutoTreeMeta();
+    importIdMeta.scan(ImportId.class);
+  }
+
   public final Object cacheDirLock = new Object();
   public final Path rootCachePath;
   public final ModuleResolver inner;
@@ -54,6 +55,7 @@ public class ModuleDiskCache implements ModuleResolver {
     // Find the location the result would be written
     Path cachePath = null;
     Path hashPath = null;
+    Path outputPath = null;
     do {
       if (importId.moduleId.dispatch(
           new ModuleId.DefaultDispatcher<Boolean>(false) {
@@ -71,21 +73,22 @@ public class ModuleDiskCache implements ModuleResolver {
                     {
                       ByteArrayOutputStream wantIdBytes1 = new ByteArrayOutputStream();
                       Writer writer = new Writer(wantIdBytes1, (byte) ' ', 4);
-                      importId.treeSerialize(writer);
+                      importIdMeta.serialize(writer, TypeInfo.fromClass(ImportId.class), importId);
                       wantIdBytes = wantIdBytes1.toByteArray();
                     }
 
-                    return Utils.uniqueDir(rootCachePath.resolve(SUBDIR_RESULT), wantIdBytes);
+                    return Utils.uniqueDir(rootCachePath.resolve("result"), wantIdBytes);
                   }
                 });
         hashPath = cachePath.resolve("hash");
+        outputPath = cachePath.resolve("output.luxem");
         String outputHash = Files.readString(hashPath);
         if (source.hash.equals(outputHash)) {
           TSList<Error> deserializeErrors = new TSList<>();
-          final SemideserializeSemiserial rootState =
-              new SemideserializeSemiserial(new LuxemArrayPathBuilder(null));
-          Deserializer.deserialize(
-              null, deserializeErrors, cachePath, new TSList<>(new StateRecord(rootState)));
+          final BaseStateSingle<Void, SemiserialModule> rootState =
+              semisubMeta.deserialize(
+                  deserializeErrors, new LuxemArrayPathBuilder(null), SemiserialModule.class);
+          Deserializer.deserialize(null, deserializeErrors, outputPath, new TSList<>(rootState));
           SemiserialModule res = rootState.build(null, deserializeErrors);
           if (deserializeErrors.some()) {
             for (Error e : deserializeErrors) {
@@ -107,6 +110,8 @@ public class ModuleDiskCache implements ModuleResolver {
             }
           };
         }
+      } catch (Error.PreError e) {
+        context.logger.warn(e);
       } catch (Exception e) {
         context.logger.warn(new LocationlessUnexpected(e));
       }
@@ -122,14 +127,10 @@ public class ModuleDiskCache implements ModuleResolver {
       } catch (Throwable e) {
         context.logger.warn(new LocationlessUnexpected(e));
       }
-      Path outputPath = cachePath.resolve(CACHE_FILENAME_OUTPUT);
       Utils.recursiveDelete(outputPath);
-      final Path artifactDir = cachePath.resolve(CACHE_DIRECTORY_ARTIFACTS);
-      Utils.recursiveDelete(artifactDir);
-      uncheck(() -> Files.createDirectory(artifactDir));
       try (OutputStream stream = Files.newOutputStream(outputPath)) {
         Writer writer = new Writer(stream, (byte) ' ', 4);
-        out.result().treeSerialize(writer);
+        semisubMeta.serialize(writer, TypeInfo.fromClass(SemiserialModule.class), out.result());
       } catch (Throwable e) {
         context.logger.warn(new LocationlessUnexpected(e));
       }

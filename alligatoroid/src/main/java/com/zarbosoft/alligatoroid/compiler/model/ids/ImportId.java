@@ -1,10 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeSerializable;
+import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeDumpable;
 import com.zarbosoft.luxem.write.Writer;
 
-public final class ImportId implements TreeSerializable {
+public final class ImportId implements TreeDumpable {
   public final ModuleId moduleId;
 
   public ImportId(ModuleId moduleId) {
@@ -22,9 +22,9 @@ public final class ImportId implements TreeSerializable {
   }
 
   @Override
-  public void treeSerialize(Writer writer) {
+  public void treeDump(Writer writer) {
     // TODO encapsulate in another record when there are more fields
-    moduleId.treeSerialize(writer);
+    moduleId.treeDump(writer);
   }
 
   public boolean equal1(ImportId other) {

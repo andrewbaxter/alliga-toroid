@@ -1,13 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeSerializable;
+import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeDumpable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.model.error.ValueNotWhole;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 
-public interface WholeValue extends SimpleValue, TreeSerializable, LeafExportable, AutoBuiltinExportable {
+public interface WholeValue
+    extends SimpleValue, TreeDumpable, AutoBuiltinExportable, LeafExportable {
   public static WholeValue getWhole(EvaluationContext context, Location location, Value value) {
     if (value == ErrorValue.error) return null;
     if (!(value instanceof WholeValue)) {

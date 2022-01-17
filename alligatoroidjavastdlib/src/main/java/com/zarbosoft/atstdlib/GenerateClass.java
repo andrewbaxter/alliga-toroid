@@ -129,9 +129,8 @@ public class GenerateClass {
 
   public LSubtree lBuiltin(IdManager ids) {
     return writer -> {
-      writer.type("builtin").recordBegin();
-      ids.write(writer);
-      writer.recordEnd();
+      writer.type("builtin");
+      ids.writeNoKey(writer);
     };
   }
 
@@ -227,7 +226,7 @@ public class GenerateClass {
           try (OutputStream os = Files.newOutputStream(path)) {
             Writer writer = new Writer(os, (byte) '\t', 1);
             IdManager ids = new IdManager();
-            writer.type("alligatoroid:0.0.1");
+            writer.type("alligatorus:0.0.1");
             lCall(
                     ids,
                     lAccess(ids, jvm(ids), lString(ids, "externClass")),
@@ -364,6 +363,10 @@ public class GenerateClass {
 
     public void write(Writer writer) {
       writer.primitive("id").primitive(Integer.toString(nextId++));
+    }
+
+    public void writeNoKey(Writer writer) {
+      writer.primitive(Integer.toString(nextId++));
     }
   }
 

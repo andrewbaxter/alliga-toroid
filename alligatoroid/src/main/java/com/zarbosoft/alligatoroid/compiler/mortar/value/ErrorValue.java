@@ -3,13 +3,13 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public final class ErrorValue implements Value, NoExportValue, LeafExportable {
+public final class ErrorValue implements Value, NoExportValue, Exportable {
   public static final ErrorValue error = new ErrorValue();
 
   private ErrorValue() {}

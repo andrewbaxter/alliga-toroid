@@ -1,14 +1,16 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Format;
 
-public final class BundleModuleSubId implements ModuleId {
+public final class BundleModuleSubId implements ModuleId, AutoBuiltinExportable, LeafExportable {
   public static final String GRAPH_KEY_MODULE = "module";
   public static final String GRAPH_KEY_PATH = "path";
-  public final ModuleId module;
   public final String path;
+  public ModuleId module;
 
   public BundleModuleSubId(ModuleId module, String path) {
     this.module = module;
@@ -21,9 +23,9 @@ public final class BundleModuleSubId implements ModuleId {
   }
 
   @Override
-  public void treeSerialize(Writer writer) {
+  public void treeDump(Writer writer) {
     writer.type("local").recordBegin().primitive("module");
-    module.treeSerialize(writer);
+    module.treeDump(writer);
     writer.primitive("path").primitive(path).recordEnd();
   }
 

@@ -6,15 +6,25 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.RootExportable;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
-import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
-import com.zarbosoft.alligatoroid.compiler.mortar.BuiltinExportableType;
 import com.zarbosoft.rendaw.common.ROList;
 
 /** Like a.b.c */
 public class JVMSharedNormalName implements LeafExportable {
-  public static final BuiltinExportableType exportableType =
-      new BuiltinExportableType() {
+  public static final RootExportable exportableType =
+      new RootExportable() {
+        @Override
+        public SemiserialSubvalue graphSemiserializeChild(
+            Exportable child,
+            ImportId spec,
+            Semiserializer semiserializer,
+            ROList<Exportable> path,
+            ROList<String> accessPath) {
+          return new SemiserialString(((JVMSharedNormalName) child).value);
+        }
+
         @Override
         public Exportable graphDesemiserializeChild(
             ModuleCompileContext context,
@@ -44,16 +54,7 @@ public class JVMSharedNormalName implements LeafExportable {
   }
 
   @Override
-  public SemiserialSubvalue graphSemiserialize(
-      ImportId spec,
-      Semiserializer semiserializer,
-      ROList<Exportable> path,
-      ROList<String> accessPath) {
-    return new SemiserialString(value);
-  }
-
-  @Override
-  public void postDesemiserialize() {}
+  public void postInit() {}
 
   @Override
   public Exportable type() {

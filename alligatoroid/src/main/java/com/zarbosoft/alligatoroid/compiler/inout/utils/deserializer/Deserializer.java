@@ -48,26 +48,26 @@ public class Deserializer {
 
           @Override
           protected void eatArrayEnd() {
-            luxemPath = luxemPath.pop();
             stack.last().eatArrayEnd(context, errors, stack, luxemPath);
+            luxemPath = luxemPath.pop();
           }
 
           @Override
           protected void eatRecordEnd() {
-            luxemPath = luxemPath.pop();
             stack.last().eatRecordEnd(context, errors, stack, luxemPath);
+            luxemPath = luxemPath.pop();
           }
 
           @Override
           protected void eatType(String value) {
-            luxemPath = luxemPath.type();
             stack.last().eatType(context, errors, stack, luxemPath, value);
+            luxemPath = luxemPath.type();
           }
 
           @Override
           protected void eatPrimitive(String value) {
-            luxemPath = luxemPath.value();
             stack.last().eatPrimitive(context, errors, stack, luxemPath, value);
+            luxemPath = luxemPath.value();
           }
         };
     try {

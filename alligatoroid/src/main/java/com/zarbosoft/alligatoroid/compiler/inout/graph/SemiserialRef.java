@@ -1,6 +1,11 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
 public interface SemiserialRef extends SemiserialSubvalue {
+  public static final Class<? extends SemiserialSubvalue>[] SERIAL_UNION =
+      new Class[] {
+        SemiserialRefArtifact.class, SemiserialRefBuiltin.class,
+      };
+
   public <T> T dispatchRef(Dispatcher<T> dispatcher);
 
   @Override

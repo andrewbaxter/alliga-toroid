@@ -1,10 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.luxem.write.Writer;
 
-public final class RemoteModuleId implements ModuleId {
+public final class RemoteModuleId implements ModuleId, AutoBuiltinExportable, LeafExportable {
   public static final String GRAPH_KEY_URL = "url";
   public static final String GRAPH_KEY_HASH = "hash";
   public final String url;
@@ -26,7 +28,7 @@ public final class RemoteModuleId implements ModuleId {
   }
 
   @Override
-  public void treeSerialize(Writer writer) {
+  public void treeDump(Writer writer) {
     writer
         .type("local")
         .recordBegin()

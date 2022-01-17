@@ -5,7 +5,6 @@ import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExpo
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
-import com.zarbosoft.alligatoroid.compiler.mortar.BuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarBuiltin;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
@@ -57,7 +56,7 @@ public class Builtin {
         semiKeyToBuiltin.put(builtinKey, type);
       }
     };
-    for (ROPair<Class, BuiltinExportableType> builtinExportable :
+    for (ROPair<Class, Exportable> builtinExportable :
         new ROPair[] {
           new ROPair<>(JVMSharedJVMName.class, JVMSharedJVMName.exportableType),
           new ROPair<>(JVMSharedNormalName.class, JVMSharedNormalName.exportableType),

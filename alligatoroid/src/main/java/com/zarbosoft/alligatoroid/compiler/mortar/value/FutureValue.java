@@ -8,6 +8,8 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.RootExportable;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -17,7 +19,30 @@ import java.util.concurrent.Future;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class FutureValue implements SimpleValue {
+public class FutureValue implements SimpleValue, LeafExportable {
+  public static final RootExportable exportableType =
+      new RootExportable() {
+        @Override
+        public SemiserialSubvalue graphSemiserializeChild(
+            Exportable child,
+            ImportId spec,
+            Semiserializer semiserializer,
+            ROList<Exportable> path,
+            ROList<String> accessPath) {
+          final Value value = ((FutureValue) child).get();
+          return value
+              .type()
+              .graphSemiserializeChild(value, spec, semiserializer, path, accessPath);
+        }
+
+        @Override
+        public Exportable graphDesemiserializeChild(
+            ModuleCompileContext context,
+            Desemiserializer typeDesemiserializer,
+            SemiserialSubvalue data) {
+          throw new Assertion();
+        }
+      };
   public final Future<Value> future;
 
   public FutureValue(Future<Value> future) {
@@ -39,29 +64,12 @@ public class FutureValue implements SimpleValue {
   }
 
   @Override
-  public SemiserialSubvalue graphSemiserialize(
-      ImportId spec,
-      Semiserializer semiserializer,
-      ROList<Exportable> path,
-      ROList<String> accessPath) {
-    return get().graphSemiserialize(spec, semiserializer, path, accessPath);
-  }
-
-  @Override
-  public Exportable graphDesemiserializeChild(
-      ModuleCompileContext context,
-      Desemiserializer typeDesemiserializer,
-      SemiserialSubvalue data) {
-    return get().graphDesemiserializeChild(context, typeDesemiserializer, data);
-  }
-
-  @Override
-  public void postDesemiserialize() {
+  public void postInit() {
     throw new Assertion();
   }
 
   @Override
   public Exportable type() {
-    return get().type();
+    return exportableType;
   }
 }

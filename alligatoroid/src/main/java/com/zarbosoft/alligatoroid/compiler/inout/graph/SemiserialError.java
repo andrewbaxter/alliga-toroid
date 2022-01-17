@@ -12,9 +12,4 @@ public class SemiserialError implements SemiserialSubvalue {
   public <T> T dispatch(Dispatcher<T> dispatcher) {
     throw new Assertion();
   }
-
-  @Override
-  public void treeSerialize(Writer writer) {
-    throw new Assertion();
-  }
 }

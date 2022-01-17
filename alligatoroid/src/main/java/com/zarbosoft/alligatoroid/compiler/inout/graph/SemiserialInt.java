@@ -5,7 +5,6 @@ import com.zarbosoft.luxem.write.Writer;
 import java.util.Objects;
 
 public final class SemiserialInt implements SemiserialSubvalue {
-  public static final String SERIAL_TYPE = "int";
   public final int value;
 
   public SemiserialInt(int value) {
@@ -15,11 +14,6 @@ public final class SemiserialInt implements SemiserialSubvalue {
   @Override
   public <T> T dispatch(Dispatcher<T> dispatcher) {
     return dispatcher.handleInt(this);
-  }
-
-  @Override
-  public void treeSerialize(Writer writer) {
-    writer.type(SERIAL_TYPE).primitive(Integer.toString(value));
   }
 
   @Override

@@ -2,11 +2,9 @@ package com.zarbosoft.alligatoroid.compiler.jvm.value;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMError;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMProtocode;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMTargetModuleContext;
@@ -16,17 +14,15 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
-import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROTuple;
 
 import static com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType.getArgTuple;
 
-public class JVMPseudoStaticField implements SimpleValue, AutoBuiltinExportable {
+public class JVMPseudoStaticField implements SimpleValue, AutoBuiltinExportable, LeafExportable {
   public final String name;
   public JVMHalfClassType base;
 
@@ -87,13 +83,5 @@ public class JVMPseudoStaticField implements SimpleValue, AutoBuiltinExportable 
     return real.valueBind(
         JVMSharedCode.accessStaticField(
             context.sourceLocation(location), base.jvmName, name, real.jvmDesc()));
-  }
-
-  @Override
-  public Exportable graphDesemiserializeChild(
-      ModuleCompileContext context,
-      Desemiserializer typeDesemiserializer,
-      SemiserialSubvalue data) {
-    throw new Assertion();
   }
 }

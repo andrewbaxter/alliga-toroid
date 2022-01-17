@@ -148,7 +148,9 @@ public class ClassInfo {
                     });
               }
             };
-      } else throw new Assertion();
+      } else {
+        prototype = new PrototypeAuto(parameter.getType());
+      }
       fields.put(parameter.getName(), prototype);
     }
     this.constructor = constructor;

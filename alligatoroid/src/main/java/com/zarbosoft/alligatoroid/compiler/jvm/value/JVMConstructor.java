@@ -2,16 +2,16 @@ package com.zarbosoft.alligatoroid.compiler.jvm.value;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
-import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
 
 public class JVMConstructor implements SimpleValue, AutoBuiltinExportable, LeafExportable {
   private final Record spec;
@@ -25,12 +25,12 @@ public class JVMConstructor implements SimpleValue, AutoBuiltinExportable, LeafE
 
   public static JVMConstructor create(JVMHalfClassType base, Record spec) {
     final JVMConstructor out = new JVMConstructor(base, spec);
-    out.postDesemiserialize();
+    out.postInit();
     return out;
   }
 
   @Override
-  public void postDesemiserialize() {
+  public void postInit() {
     specDetails = JVMUtils.methodSpecDetails(spec);
   }
 

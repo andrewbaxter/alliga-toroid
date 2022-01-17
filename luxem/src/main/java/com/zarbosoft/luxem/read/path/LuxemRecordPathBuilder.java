@@ -1,24 +1,26 @@
 package com.zarbosoft.luxem.read.path;
 
 import com.zarbosoft.rendaw.common.DeadCode;
-import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class LuxemRecordPathBuilder extends LuxemPathBuilder {
-  private boolean type = false;
-  private boolean key = false;
-  private int index = -1;
+  private final boolean key;
+  private final int index;
+  private final int typeCount;
 
   public LuxemRecordPathBuilder(final LuxemPathBuilder parent) {
     this.parent = parent;
+    index = 0;
+    key = true;
+    typeCount = 0;
   }
 
   public LuxemRecordPathBuilder(
-      final LuxemPathBuilder parent, boolean key, final boolean type, final int index) {
+      final LuxemPathBuilder parent, int index, boolean key, int typeCount) {
     this.parent = parent;
-    this.key = key;
-    this.type = type;
     this.index = index;
+    this.key = key;
+    this.typeCount = typeCount;
   }
 
   @Override
@@ -28,38 +30,36 @@ public class LuxemRecordPathBuilder extends LuxemPathBuilder {
 
   @Override
   public LuxemPathBuilder value() {
-    LuxemRecordPathBuilder previous = this;
-    if (previous.key) {
-      if (previous.type) return new LuxemRecordPathBuilder(parent, true, false, index);
-      else return new LuxemRecordPathBuilder(parent, false, false, index);
+    if (key) {
+      return new LuxemRecordPathBuilder(parent, index, false, 0);
     } else {
-      if (previous.type) return new LuxemRecordPathBuilder(parent, false, false, index);
-      else return new LuxemRecordPathBuilder(parent, true, false, index + 1);
+      return new LuxemRecordPathBuilder(parent, index + 1, true, 0);
     }
   }
 
   @Override
   public LuxemPathBuilder type() {
-    LuxemRecordPathBuilder previous = this;
-    if (previous.key) {
-      return new LuxemRecordPathBuilder(parent, false, true, index);
-    } else {
-      return new LuxemRecordPathBuilder(parent, true, true, index + 1);
-    }
+    return new LuxemRecordPathBuilder(parent, index, key, typeCount + 1);
   }
 
   @Override
-  protected void renderInternal(TSList<ROPair<Integer, Boolean>> values) {
+  protected void renderInternal(TSList<LuxemPath.Element> values) {
     if (parent != null) parent.renderInternal(values);
-    values.add(new ROPair<>(index, key));
+    values.add(new LuxemPath.Element(index, key, typeCount));
   }
 
   @Override
   public String toString() {
-    return String.format(
-        "%s/%s%s",
-        parent == null ? "" : parent.toString(),
-        index == -1 ? "" : Integer.toString(index),
-        key ? " key" : "");
+    StringBuilder out = new StringBuilder();
+    if (parent != null) out.append(parent.toString());
+    out.append("/");
+    out.append(index);
+    if (key) {
+      out.append(" key");
+    }
+    for (int i = 0; i < typeCount; i += 1) {
+      out.append(" value");
+    }
+    return out.toString();
   }
 }

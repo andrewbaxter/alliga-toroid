@@ -4,10 +4,10 @@ import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class PrototypeArray implements Prototype {
+public class PrototypeROList implements Prototype {
   private final Prototype inner;
 
-  public PrototypeArray(Prototype inner) {
+  public PrototypeROList(Prototype inner) {
     this.inner = inner;
   }
 

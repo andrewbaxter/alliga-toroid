@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.jvm.value;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMProtocode;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfBoolType;
@@ -15,7 +16,6 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
@@ -36,7 +36,7 @@ import java.util.Map;
 
 /** Represents the metadata for interacting with a class - inheritance, fields */
 public class JVMHalfClassType extends JVMHalfObjectType
-    implements AutoBuiltinExportable, LeafExportable, SimpleValue {
+    implements AutoBuiltinExportable, SimpleValue, LeafExportable {
   public static final String ACCESS_NEW = "new";
   public final TSMap<ROTuple, JVMUtils.MethodSpecDetails> constructors;
   public final TSMap<String, JVMHalfDataType> dataFields;
@@ -44,9 +44,9 @@ public class JVMHalfClassType extends JVMHalfObjectType
   public final TSMap<String, JVMHalfDataType> staticDataFields;
   public final TSMap<ROTuple, JVMMethodFieldType> staticMethodFields;
   public final TSList<JVMHalfClassType> inherits;
-  public final JVMSharedJVMName jvmName;
-  public final TSSet<String> fields;
-  public final TSSet<String> staticFields;
+  public JVMSharedJVMName jvmName;
+  public TSSet<String> fields;
+  public TSSet<String> staticFields;
   public JVMSharedNormalName name;
 
   public JVMHalfClassType(
@@ -58,32 +58,26 @@ public class JVMHalfClassType extends JVMHalfObjectType
       TSMap<ROTuple, JVMMethodFieldType> staticMethodFields,
       TSList<JVMHalfClassType> inherits) {
     this.name = name;
-    this.jvmName = JVMSharedJVMName.fromNormalName(name);
     this.constructors = constructors;
     this.dataFields = dataFields;
     this.methodFields = methodFields;
-    fields = dataFields.keys().mut();
     this.inherits = inherits;
-    for (Map.Entry<ROTuple, JVMMethodFieldType> f : methodFields) {
-      fields.add((String) f.getKey().get(0));
-    }
     this.staticDataFields = staticDataFields;
     this.staticMethodFields = staticMethodFields;
-    staticFields = staticDataFields.keys().mut();
-    for (Map.Entry<ROTuple, JVMMethodFieldType> f : staticMethodFields) {
-      staticFields.add((String) f.getKey().get(0));
-    }
   }
 
   public static JVMHalfClassType blank(JVMSharedNormalName jvmExternalClass) {
-    return new JVMHalfClassType(
-        jvmExternalClass,
-        new TSMap<>(),
-        new TSMap<>(),
-        new TSMap<>(),
-        new TSMap<>(),
-        new TSMap<>(),
-        new TSList<>());
+    final JVMHalfClassType out =
+        new JVMHalfClassType(
+            jvmExternalClass,
+            new TSMap<>(),
+            new TSMap<>(),
+            new TSMap<>(),
+            new TSMap<>(),
+            new TSMap<>(),
+            new TSList<>());
+    out.postInit();
+    return out;
   }
 
   public static JVMHalfDataType getArgTupleInner(Value value) {
@@ -125,6 +119,19 @@ public class JVMHalfClassType extends JVMHalfObjectType
       }
       return new ROTuple(data);
     } else return ROTuple.create(getArgTupleInner(value));
+  }
+
+  @Override
+  public void postInit() {
+    this.jvmName = JVMSharedJVMName.fromNormalName(name);
+    fields = dataFields.keys().mut();
+    for (Map.Entry<ROTuple, JVMMethodFieldType> f : methodFields) {
+      fields.add((String) f.getKey().get(0));
+    }
+    staticFields = staticDataFields.keys().mut();
+    for (Map.Entry<ROTuple, JVMMethodFieldType> f : staticMethodFields) {
+      staticFields.add((String) f.getKey().get(0));
+    }
   }
 
   public void resolveMethods(EvaluationContext context) {}
