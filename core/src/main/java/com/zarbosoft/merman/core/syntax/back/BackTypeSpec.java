@@ -70,7 +70,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
 
   public void finish(MultiError errors, final Syntax syntax, SyntaxPath typePath) {
     super.finish(errors, syntax, typePath);
-    checkSingularNotTypeKey(errors, syntax, typePath.add("value"), value);
+    checkSingularNotKey(errors, syntax, typePath.add("value"), value);
     if (syntax.backType != BackType.LUXEM) {
       errors.add(new BackElementUnsupportedInBackFormat("type", syntax.backType, typePath));
     }

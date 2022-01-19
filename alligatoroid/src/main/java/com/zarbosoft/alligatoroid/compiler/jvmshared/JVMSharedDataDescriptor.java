@@ -18,6 +18,8 @@ public class JVMSharedDataDescriptor {
       JVMSharedDataDescriptor.fromJVMName(JVMSharedJVMName.STRING);
   public static final JVMSharedDataDescriptor BOXED_BOOL =
       JVMSharedDataDescriptor.fromClass(Boolean.class);
+  public static final JVMSharedDataDescriptor BOXED_INT =
+      JVMSharedDataDescriptor.fromClass(Integer.class);
   public static final JVMSharedDataDescriptor BOXED_BYTE =
       JVMSharedDataDescriptor.fromClass(Byte.class);
 

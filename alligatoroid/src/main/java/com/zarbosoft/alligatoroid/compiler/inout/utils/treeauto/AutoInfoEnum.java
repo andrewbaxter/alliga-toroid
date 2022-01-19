@@ -34,6 +34,7 @@ class AutoInfoEnum implements AutoInfo {
 
       @Override
       public Object build(Object context, TSList tsList) {
+        if (state == null) return null;
         return state.build(context, tsList);
       }
     };

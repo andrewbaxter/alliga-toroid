@@ -183,7 +183,10 @@ public class AutoBuiltinExportableType implements RootExportable {
                           public Object handleTuple(SemiserialTuple s) {
                             TSList out = new TSList();
                             for (SemiserialSubvalue subdata : s.values) {
-                              final Class t1 = (Class) ((ParameterizedType)parameter.getParameterizedType()).getActualTypeArguments()[0];
+                              final Class t1 =
+                                  (Class)
+                                      ((ParameterizedType) parameter.getParameterizedType())
+                                          .getActualTypeArguments()[0];
                               final Object primitiveArg = prepNonCollectionArg(t1, subdata);
                               if (primitiveArg == null) {
                                 if (Exportable.class.isAssignableFrom(t1)) {
@@ -216,6 +219,7 @@ public class AutoBuiltinExportableType implements RootExportable {
             pair.first.first.set(pair.first.second, context.artifactLookup.get(pair.second.id));
           }
         });
+    typeDesemiserializer.exportables.add(out);
     return out;
   }
 

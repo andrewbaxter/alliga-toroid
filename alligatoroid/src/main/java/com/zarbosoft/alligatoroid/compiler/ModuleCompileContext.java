@@ -25,7 +25,7 @@ public class ModuleCompileContext {
    * A mapping of artifacts imported, used while semiserializing output after compilation to prevent
    * re-semiserializing artifacts from other modules.
    */
-  public final TSMap<Exportable, ArtifactId> backArtifactLookup = new TSMap<>();
+  public final TSMap<ObjId<Exportable>, ArtifactId> backArtifactLookup = new TSMap<>();
 
   public ModuleCompileContext(
       ImportId importId, CompileContext compileContext, ImportPath importPath) {

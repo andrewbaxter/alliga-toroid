@@ -26,7 +26,7 @@ public class JVMPseudoConstructor implements SimpleValue, AutoBuiltinExportable,
 
   @Override
   public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
-    base.resolveMethods(context);
+    base.resolveInternals(context);
     ROTuple argTuple = getArgTuple(argument);
     JVMUtils.MethodSpecDetails real = base.constructors.getOpt(argTuple);
     if (real == null) {

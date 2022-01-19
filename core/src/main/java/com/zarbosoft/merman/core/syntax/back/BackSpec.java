@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.BackPath;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
@@ -11,7 +12,6 @@ import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.KeyInvalidAtLocation;
 import com.zarbosoft.merman.core.syntax.error.NonKeyInvalidAtLocation;
 import com.zarbosoft.merman.core.syntax.error.PluralInvalidAtLocation;
-import com.zarbosoft.merman.core.syntax.error.TypeInvalidAtLocation;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -76,26 +76,6 @@ public abstract class BackSpec {
 
   private static boolean isKey(BackSpec backSpec) {
     return backSpec instanceof BackKeySpec || backSpec instanceof BackDiscardKeySpec;
-  }
-
-  public static void checkSingularNotTypeKey(
-      MultiError errors, Syntax syntax, SyntaxPath rootPath, BackSpec root) {
-    root.walkSingularBack(
-        syntax,
-        rootPath,
-        new SingularBackWalkCb() {
-          @Override
-          public boolean consume(SyntaxPath path, BackSpec backSpec) {
-            if (backSpec instanceof BackTypeSpec || backSpec instanceof BackFixedTypeSpec) {
-              errors.add(new TypeInvalidAtLocation(rootPath, path));
-            } else if (isKey(backSpec)) {
-              errors.add(new KeyInvalidAtLocation(rootPath, path));
-            } else if (isSingular(backSpec)) {
-              errors.add(new PluralInvalidAtLocation(rootPath, path));
-            }
-            return false;
-          }
-        });
   }
 
   public static void checkSingularNotKey(
@@ -167,10 +147,9 @@ public abstract class BackSpec {
    * @param segments
    * @return
    */
-  public ROPair<Atom, Integer> backLocate(
-      Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
-    ROPair<Integer, Boolean> target = segments.get(0);
-    if (target.first == offset) {
+  public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<BackPath.Element> segments) {
+    BackPath.Element target = segments.get(0);
+    if (target.index == offset) {
       if (segments.size() > 1) return null;
       else return new ROPair<>(at, null);
     } else return new ROPair<>(null, offset + 1);

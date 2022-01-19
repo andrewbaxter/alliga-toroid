@@ -3,7 +3,6 @@ package com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.classstate.ClassInfo;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.classstate.StateClassBody;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateForwardSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateRecord;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
@@ -24,32 +23,37 @@ class AutoInfoClass implements AutoInfo {
   public final ClassInfo info;
   private final AutoTreeMeta meta;
 
-  AutoInfoClass(AutoTreeMeta meta) {
+  AutoInfoClass(AutoTreeMeta meta, Class klass) {
     this.meta = meta;
-    this.info = new ClassInfo("");
+    this.info = new ClassInfo(klass.getCanonicalName());
   }
 
   @Override
   public BaseStateSingle create(TSList<Error> errors, LuxemPathBuilder luxemPath) {
-    final int paramCount = info.constructor.getParameters().length;
-    if (paramCount == 1) {
-      final String fieldName = info.constructor.getParameters()[0].getName();
-      return new StateForwardSingle<Object, Object>(
-          info.fields.get(fieldName).create(errors, luxemPath)) {
-        @Override
-        public Object build(Object context, TSList<Error> errors) {
-          Object out = super.build(context, errors);
-          return uncheck(() -> info.constructor.newInstance(out));
-        }
-      };
-    } else {
-      return new StateRecord(new StateClassBody(luxemPath, info));
+    /*
+     final int paramCount = info.constructor.getParameters().length;
+     if (paramCount == 1) {
+       final String fieldName = info.constructor.getParameters()[0].getName();
+       return new StateForwardSingle<Object, Object>(
+           info.fields.get(fieldName).create(errors, luxemPath)) {
+         @Override
+         public Object build(Object context, TSList<Error> errors) {
+           Object out = super.build(context, errors);
+           return uncheck(() -> info.constructor.newInstance(out));
+         }
+       };
+     } else {
+    */
+    return new StateRecord(new StateClassBody(luxemPath, info));
+    /*
     }
+       */
   }
 
   @Override
   public void write(Writer writer, Object object) {
     final int paramCount = info.constructor.getParameters().length;
+    /*
     if (paramCount == 1) {
       final Parameter parameter = info.constructor.getParameters()[0];
       String fieldName = parameter.getName();
@@ -58,18 +62,21 @@ class AutoInfoClass implements AutoInfo {
           TypeInfo.fromParam(parameter),
           uncheck(() -> object.getClass().getField(fieldName).get(object)));
     } else {
-      writer.recordBegin();
-      for (int i = 0; i < paramCount; i++) {
-        Parameter parameter = info.constructor.getParameters()[i];
-        String fieldName = parameter.getName();
-        writer.primitive(parameter.getName());
-        writeParam(
-            writer,
-            TypeInfo.fromParam(parameter),
-            uncheck(() -> object.getClass().getField(fieldName).get(object)));
-      }
-      writer.recordEnd();
+     */
+    writer.recordBegin();
+    for (int i = 0; i < paramCount; i++) {
+      Parameter parameter = info.constructor.getParameters()[i];
+      String fieldName = parameter.getName();
+      writer.primitive(parameter.getName());
+      writeParam(
+          writer,
+          TypeInfo.fromParam(parameter),
+          uncheck(() -> object.getClass().getField(fieldName).get(object)));
     }
+    writer.recordEnd();
+    /*
+    }
+       */
   }
 
   private void writeParam(Writer writer, TypeInfo info, Object data) {

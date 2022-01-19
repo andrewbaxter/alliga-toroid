@@ -28,8 +28,6 @@ public interface WholeValue
     T handleBool(WholeBool value);
 
     T handleInt(WholeInt value);
-
-    T handleOther(WholeOther value);
   }
 
   public class DefaultDispatcher<T> implements Dispatcher<T> {
@@ -51,11 +49,6 @@ public interface WholeValue
 
     @Override
     public T handleInt(WholeInt value) {
-      return defaultRet;
-    }
-
-    @Override
-    public T handleOther(WholeOther value) {
       return defaultRet;
     }
   }

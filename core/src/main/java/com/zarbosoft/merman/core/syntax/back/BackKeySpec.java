@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.BackPath;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
@@ -32,8 +33,8 @@ public class BackKeySpec extends BackSpec {
 
   @Override
   public ROPair<Atom, Integer> backLocate(
-      Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
-    if (segments.get(0).second) return key.backLocate(at, offset, segments);
+      Atom at, int offset, ROList<BackPath.Element> segments) {
+    if (segments.get(0).key) return key.backLocate(at, offset, segments);
     else return value.backLocate(at, offset, segments);
   }
 

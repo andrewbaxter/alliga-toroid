@@ -1,10 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.inout.utils.languageinout;
 
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.DefaultStateArrayBody;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.DefaultStateInt;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.DefaultStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.Deserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.State;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateArray;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateErrorSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto.AutoInfo;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto.AutoTreeMeta;
@@ -51,10 +53,36 @@ public class LanguageDeserializer {
     languageMeta.scan(LanguageElement.class);
   }
 
-  public static LanguageElement deserialize(
+  public static TSList<LanguageElement> deserialize(
       ModuleId moduleId, TSList<Error> errors, String path, InputStream source) {
     TSList<State> stack = new TSList<>();
-    State[] rootNodes = new State[1];
+    BaseStateSingle<Object, TSList<LanguageElement>> rootNode =
+        new StateArray(
+            new DefaultStateArrayBody() {
+              TSList<State<Object, LanguageElement>> elements = new TSList<>();
+
+              @Override
+              public BaseStateSingle createElementState(
+                  Object context, TSList tsList, LuxemPathBuilder luxemPath) {
+                BaseStateSingle out =
+                    languageMeta.deserialize(errors, luxemPath, LanguageElement.class);
+                elements.add(out);
+                return out;
+              }
+
+              @Override
+              public Object build(Object context, TSList tsList) {
+                TSList<LanguageElement> out = new TSList<>();
+                boolean bad = false;
+                for (State<Object, LanguageElement> element : elements) {
+                  final LanguageElement val = element.build(context, tsList);
+                  if (val == null) bad = true;
+                  out.add(val);
+                }
+                if (bad) return null;
+                return out;
+              }
+            });
     stack.add(
         new DefaultStateSingle<ModuleId, Object>() {
           @Override
@@ -67,23 +95,17 @@ public class LanguageDeserializer {
               ModuleId module, TSList<Error> errors, LuxemPathBuilder luxemPath, String name) {
             String expected = "alligatorus:0.0.1";
             if (!expected.equals(name)) {
-              errors.add(new DeserializeUnknownLanguageVersion(luxemPath.render(), expected));
+              errors.add(new DeserializeUnknownLanguageVersion(luxemPath.render(), name));
               return StateErrorSingle.state;
             }
-            BaseStateSingle out =
-                languageMeta.deserialize(errors, luxemPath, LanguageElement.class);
-            rootNodes[0] = out;
-            return out;
+            return rootNode;
           }
         });
     Deserializer.deserialize(moduleId, errors, path, source, stack);
-    if (rootNodes[0] == null) {
-      return null;
-    }
-    Object out = rootNodes[0].build(moduleId, errors);
+    Object out = rootNode.build(moduleId, errors);
     if (out == errorRet) {
       return null;
     }
-    return (LanguageElement) out;
+    return (TSList<LanguageElement>) out;
   }
 }

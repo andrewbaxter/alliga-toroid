@@ -99,12 +99,6 @@ public class JVMHalfClassType extends JVMHalfObjectType
                 public JVMHalfDataType handleInt(WholeInt value) {
                   return JVMHalfIntType.value;
                 }
-
-                @Override
-                public JVMHalfDataType handleOther(WholeOther value) {
-                  // TODO return error?
-                  throw new Assertion();
-                }
               });
     } else if (value instanceof JVMHalfDataType) {
       return (JVMHalfDataType) value;
@@ -134,10 +128,11 @@ public class JVMHalfClassType extends JVMHalfObjectType
     }
   }
 
-  public void resolveMethods(EvaluationContext context) {}
+  public void resolveInternals(EvaluationContext context) {}
 
   @Override
   public EvaluateResult access(EvaluationContext context, Location location, Value field0) {
+    resolveInternals(context);
     WholeValue key = WholeValue.getWhole(context, location, field0);
     if (key.dispatch(
         new WholeValue.DefaultDispatcher<Boolean>(false) {
@@ -158,6 +153,7 @@ public class JVMHalfClassType extends JVMHalfObjectType
   @Override
   public EvaluateResult valueAccess(
       EvaluationContext context, Location location, Value field0, JVMProtocode lower) {
+    resolveInternals(context);
     WholeValue key = WholeValue.getWhole(context, location, field0);
     if (!fields.contains((String) key.concreteValue())) {
       context.moduleContext.errors.add(new NoField(location, key));

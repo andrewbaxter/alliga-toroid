@@ -96,7 +96,7 @@ public class Common {
       if (out.size() == n) {
         nextAt = text.length();
       } else {
-        nextAt = text.indexOf(delim, 0);
+        nextAt = text.indexOf(delim, at);
         if (nextAt == -1) nextAt = text.length();
       }
       out.add(text.substring(at, nextAt));

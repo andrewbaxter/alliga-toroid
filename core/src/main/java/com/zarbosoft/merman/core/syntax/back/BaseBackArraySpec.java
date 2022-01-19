@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.BackPath;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
@@ -36,9 +37,11 @@ public abstract class BaseBackArraySpec extends BackSpecData {
   public static final String NO_BOILERPLATE_YET = "";
   /** Base array element type */
   public final String type;
+
   public ROMap<String, BackSpec> boilerplate;
   /** Non-group atom type to back spec, for writing */
   public ROMap<String, BackSpec> splayedBoilerplate;
+
   protected BaseBackArraySpec(Config config) {
     super(config.id);
     this.type = config.element;
@@ -79,9 +82,8 @@ public abstract class BaseBackArraySpec extends BackSpecData {
   }
 
   @Override
-  public ROPair<Atom, Integer> backLocate(
-      Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
-    if (segments.get(0).first != offset) return new ROPair<>(null, offset + 1);
+  public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<BackPath.Element> segments) {
+    if (segments.get(0).index != offset) return new ROPair<>(null, offset + 1);
     segments = segments.subFrom(1);
     if (segments.none()) return new ROPair<>(at, null);
     offset = 0;

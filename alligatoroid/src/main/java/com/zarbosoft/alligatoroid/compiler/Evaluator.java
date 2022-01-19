@@ -14,12 +14,15 @@ import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.Unexpected;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.model.language.Block;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Common;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ReverseIterable;
@@ -44,15 +47,15 @@ public class Evaluator {
 
   public static <T> SemiserialModule evaluate(
       ModuleCompileContext moduleContext,
-      LanguageElement rootStatement,
+      ROList<LanguageElement> rootStatements,
       /** Only whole-ish values */
       ROOrderedMap<WholeValue, Value> initialScope) {
-    return instance.evaluateInner(moduleContext, rootStatement, initialScope);
+    return instance.evaluateInner(moduleContext, rootStatements, initialScope);
   }
 
   public static <T> SemiserialModule evaluate(
       ModuleCompileContext moduleContext, ImportId spec, String path, InputStream source) {
-    final LanguageElement res =
+    final TSList<LanguageElement> res =
         LanguageDeserializer.deserialize(spec.moduleId, moduleContext.errors, path, source);
     if (res == null) {
       return null;
@@ -62,7 +65,7 @@ public class Evaluator {
 
   private <T> SemiserialModule evaluateInner(
       ModuleCompileContext moduleContext,
-      LanguageElement rootStatement,
+      ROList<LanguageElement> rootStatements,
       /** Only whole-ish values */
       ROOrderedMap<WholeValue, Value> initialScope) {
     String className = GENERATED_CLASS_PREFIX + uniqueClass.getAndIncrement();
@@ -78,16 +81,18 @@ public class Evaluator {
       context.scope.put(local.first, local.second.bind(context, null).second);
     }
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
+    final Value evalResult =
+        ectx.record(
+            new com.zarbosoft.alligatoroid.compiler.model.language.Scope(
+                    null, new Block(null, rootStatements))
+                .evaluate(context));
+    if (evalResult == ErrorValue.error) return null;
     MortarTargetModuleContext.HalfLowerResult lowered =
-        MortarTargetModuleContext.halfLower(
-            context,
-            ectx.record(
-                new com.zarbosoft.alligatoroid.compiler.model.language.Scope(null, rootStatement)
-                    .evaluate(context)));
+        MortarTargetModuleContext.halfLower(context, evalResult);
     EvaluateResult evaluateResult = ectx.build(null);
     for (ROPair<Location, CompletableFuture> d : context.deferredErrors) {
       try {
-        d.second.get();
+        Utils.await(d.second);
       } catch (Error.PreError e) {
         moduleContext.errors.add(e.toError(d.first));
       } catch (Exception e) {
@@ -146,6 +151,6 @@ public class Evaluator {
       }
     }
     return Semiserializer.semiserialize(
-        moduleContext, lowered.dataType.unlower(pass2), rootStatement.location);
+        moduleContext, lowered.dataType.unlower(pass2), rootStatements.last().location);
   }
 }

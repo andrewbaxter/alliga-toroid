@@ -147,7 +147,7 @@ public class AutoTreeMeta {
         scan(element);
       }
     } else {
-      final AutoInfoClass info = new AutoInfoClass(this);
+      final AutoInfoClass info = new AutoInfoClass(this, klass);
       infos.put(klass, info);
       Constructor constructor = klass.getConstructors()[0];
       TSMap<String, Prototype> fields = new TSMap<>();

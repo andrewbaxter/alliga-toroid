@@ -2,10 +2,12 @@ package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeDumpable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
 import com.zarbosoft.luxem.write.Writer;
 
-public final class ImportId implements TreeDumpable {
-  public final ModuleId moduleId;
+public final class ImportId implements TreeDumpable, AutoBuiltinExportable, LeafExportable {
+  public ModuleId moduleId;
 
   public ImportId(ModuleId moduleId) {
     this.moduleId = moduleId;

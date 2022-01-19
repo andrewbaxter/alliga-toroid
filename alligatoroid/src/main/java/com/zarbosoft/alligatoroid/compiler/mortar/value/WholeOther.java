@@ -1,24 +1,16 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
+import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeDumpable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
 import com.zarbosoft.luxem.write.Writer;
 
-public class WholeOther implements WholeValue, AutoBuiltinExportable, Exportable {
+public class WholeOther
+    implements SimpleValue, TreeDumpable, AutoBuiltinExportable, LeafExportable {
   public final Object object;
 
   public WholeOther(Object object) {
     this.object = object;
-  }
-
-  @Override
-  public Object concreteValue() {
-    return object;
-  }
-
-  @Override
-  public <T> T dispatch(Dispatcher<T> dispatcher) {
-    return dispatcher.handleOther(this);
   }
 
   @Override

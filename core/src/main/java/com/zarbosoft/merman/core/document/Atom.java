@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.document;
 
+import com.zarbosoft.merman.core.BackPath;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.fields.Field;
@@ -41,7 +42,7 @@ public class Atom {
     this.type = type;
   }
 
-  public ROPair<Atom, Integer> backLocate(int offset, ROList<ROPair<Integer, Boolean>> segments) {
+  public ROPair<Atom, Integer> backLocate(int offset, ROList<BackPath.Element> segments) {
     return type.back().backLocate(this, offset, segments);
   }
 

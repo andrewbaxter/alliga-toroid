@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.BackPath;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
@@ -25,8 +26,7 @@ public class BackFixedSubArraySpec extends BackSpec {
   }
 
   @Override
-  public ROPair<Atom, Integer> backLocate(
-      Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
+  public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<BackPath.Element> segments) {
     for (BackSpec element : elements) {
       ROPair<Atom, Integer> res = element.backLocate(at, offset, segments);
       if (res == null || res.first != null) return res;

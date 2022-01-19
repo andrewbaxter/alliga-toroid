@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.BackPath;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.SyntaxPath;
@@ -50,8 +51,7 @@ public class BackSubArraySpec extends BaseBackArraySpec {
   }
 
   @Override
-  public ROPair<Atom, Integer> backLocate(
-      Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
+  public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<BackPath.Element> segments) {
     final FieldArray data = (FieldArray) at.namedFields.get(id);
     for (Atom e : data.data) {
       final ROPair<Atom, Integer> res = e.backLocate(offset, segments);

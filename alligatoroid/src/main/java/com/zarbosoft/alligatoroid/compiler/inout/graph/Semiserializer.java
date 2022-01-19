@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
 import com.zarbosoft.alligatoroid.compiler.Builtin;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
+import com.zarbosoft.alligatoroid.compiler.ObjId;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.TypeDependencyLoopPre;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
@@ -15,10 +16,10 @@ import com.zarbosoft.rendaw.common.TSMap;
 public class Semiserializer {
   public final TSList<Error.PreError> errors;
   public final TSList<SemiserialValue> artifacts = new TSList<>();
-  public final TSMap<Exportable, ArtifactId> artifactLookup;
+  public final TSMap<ObjId<Exportable>, ArtifactId> artifactLookup;
 
   public Semiserializer(
-      TSList<Error.PreError> errors, TSMap<Exportable, ArtifactId> artifactLookup) {
+          TSList<Error.PreError> errors, TSMap<ObjId<Exportable>, ArtifactId> artifactLookup) {
     this.errors = errors;
     this.artifactLookup = artifactLookup;
   }
@@ -51,7 +52,7 @@ public class Semiserializer {
       }
     }
     {
-      ArtifactId found = artifactLookup.getOpt(value);
+      ArtifactId found = artifactLookup.getOpt(new ObjId<>(value));
       if (found != null) {
         return new SemiserialRefArtifact(found);
       }
@@ -59,7 +60,7 @@ public class Semiserializer {
     int index = artifacts.size();
     artifacts.add(null);
     final ArtifactId id = new ArtifactId(spec, index);
-    artifactLookup.put(value, id);
+    artifactLookup.put(new ObjId<>(value), id);
     final TSList<Exportable> newPath = path.mut().add(value);
     final Exportable exportableType = value.type();
     SemiserialSubvalue data =

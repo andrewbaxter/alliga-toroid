@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMExternClassBuilder;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfExternClassType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
@@ -7,6 +8,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
@@ -73,27 +75,19 @@ public class Meta {
     LocalModuleId.class,
     RemoteModuleId.class,
     BundleModuleSubId.class,
+    ImportId.class,
+  };
+
+  public static final Class[] AUTO_VALUE = {
+    JVMExternClassBuilder.class,
   };
   /** Initialized statically, never modified after (thread safe for reads). */
   public static TSMap<Class, MortarHalfAutoType> autoMortarHalfDataTypes = new TSMap<>();
 
-  public static String toUnderscore(Class klass) {
-    return toUnderscore(klass.getSimpleName());
-  }
-
-  public static String toUnderscore(String name) {
-    StringBuilder out = new StringBuilder();
-    for (int i = 0; i < name.length(); ++i) {
-      if (Character.isUpperCase(name.codePointAt(i))) {
-        if (i > 0) {
-          out.append('_');
-        }
-        out.appendCodePoint(Character.toLowerCase(name.codePointAt(i)));
-      } else {
-        out.appendCodePoint(name.codePointAt(i));
-      }
+  static {
+    for (Class klass : AUTO_VALUE) {
+      autoMortarHalfDataType(klass);
     }
-    return out.toString();
   }
 
   /*

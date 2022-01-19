@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.BackPath;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
@@ -33,8 +34,7 @@ public class BackFixedTypeSpec extends BackSpec {
   }
 
   @Override
-  public ROPair<Atom, Integer> backLocate(
-      Atom at, int offset, ROList<ROPair<Integer, Boolean>> segments) {
+  public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<BackPath.Element> segments) {
     return value.backLocate(at, offset, segments);
   }
 
@@ -64,7 +64,7 @@ public class BackFixedTypeSpec extends BackSpec {
             return null;
           }
         };
-    BackSpec.checkSingularNotTypeKey(errors, syntax, typePath.add("value"), value);
+    checkSingularNotKey(errors, syntax, typePath.add("value"), value);
   }
 
   @Override

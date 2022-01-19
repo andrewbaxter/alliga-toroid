@@ -4,6 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
+import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
@@ -16,8 +17,6 @@ import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 
 import java.util.concurrent.Future;
-
-import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class FutureValue implements SimpleValue, LeafExportable {
   public static final RootExportable exportableType =
@@ -60,7 +59,7 @@ public class FutureValue implements SimpleValue, LeafExportable {
   }
 
   public Value get() {
-    return uncheck(() -> future.get());
+    return Utils.await(future);
   }
 
   @Override

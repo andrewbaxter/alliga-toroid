@@ -7,7 +7,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 public interface AutoBuiltinExportable extends Exportable {
   @Override
   default Exportable type() {
-    return Builtin.autoBuiltinTypes.get(getClass());
+    return Builtin.autoBuiltinExportTypes.get(getClass());
   }
 
   @Override

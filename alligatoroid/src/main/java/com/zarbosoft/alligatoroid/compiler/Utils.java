@@ -21,12 +21,24 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Utils {
   public static final String UNIQUE_PATH_FILENAME = "path";
+
+  public static <T> T await(Future<T> f) {
+    try {
+      return f.get();
+    } catch (ExecutionException e) {
+      throw uncheck(e.getCause());
+    } catch (InterruptedException e) {
+      throw uncheck(e);
+    }
+  }
 
   public static Type[] genericArgs(Parameter param) {
     return ((ParameterizedType) param.getParameterizedType()).getActualTypeArguments();

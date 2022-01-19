@@ -68,7 +68,7 @@ import java.util.function.Supplier;
 
 import static com.zarbosoft.merman.jfxeditor1.NotMain.META_KEY_ERROR;
 
-public class AlligatoroidSyntax {
+public class AlligatorusSyntax {
   public static final Pattern PATTERN_IDENTIFIER = new Repeat1(new SymbolCharacter());
   public static final Pattern PATTERN_INT;
   public static final Pattern PATTERN_HEXINT;
@@ -591,7 +591,7 @@ public class AlligatoroidSyntax {
             .atom("nested", GROUP_EXPR)
             .gapKey(",")
             .placeholder("￮", "children", COLOR_COMMENT)
-            .custom(AlligatoroidSyntax::commentArray)
+            .custom(AlligatorusSyntax::commentArray)
             .build(),
         GROUP_EXPR);
     class GenerateComments {
@@ -738,7 +738,7 @@ public class AlligatoroidSyntax {
                             new RootAtomType.Config(
                                 new BackFixedTypeSpec(
                                     new BackFixedTypeSpec.Config(
-                                        "alligatoroid:0.0.1",
+                                        "alligatorus:0.0.1",
                                         new BackArraySpec(
                                             new BaseBackArraySpec.Config(
                                                 "root_elements", GROUP_STATEMENT, ROList.empty)))),

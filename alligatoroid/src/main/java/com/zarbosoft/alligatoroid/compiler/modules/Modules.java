@@ -4,6 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.Asyncer;
 import com.zarbosoft.alligatoroid.compiler.Builtin;
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
+import com.zarbosoft.alligatoroid.compiler.ObjId;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRef;
@@ -110,7 +111,7 @@ public class Modules {
                       candidate.first.graphDesemiserializeChild(
                           context, typeDesemiserializer, candidate.second.second.data);
                   context.artifactLookup.put(candidate.second.first, value);
-                  context.backArtifactLookup.put(value, candidate.second.first);
+                  context.backArtifactLookup.put(new ObjId<>(value), candidate.second.first);
                 }
                 typeDesemiserializer.finish();
               } while (stratum.some());

@@ -1,7 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.Builtin;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.TargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
@@ -10,23 +12,26 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.error.IncompatibleTargetValues;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
+import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
+import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Tuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfBoolType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfIntType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfNullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfRecordType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfStringType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfTupleType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfNullType;
-import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
-import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Tuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarHalfValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.FutureValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarHalfValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeBool;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeInt;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeString;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -113,7 +118,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                 false));
   }
 
-  public static HalfLowerResult halfLower(EvaluationContext context, Value value) {
+  public static HalfLowerResult halfLower(EvaluationContext context, Object value) {
     if (value.getClass() == FutureValue.class) {
       return halfLower(context, ((FutureValue) value).get());
     }
@@ -162,21 +167,46 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       out.add(newRecordCode2);
       return new HalfLowerResult(new MortarHalfRecordType(types), out);
 
-    } else if (value instanceof WholeString) {
-      return new HalfLowerResult(
-          MortarHalfStringType.type, new JVMSharedCode().addString(((WholeString) value).value));
+    } else if (value instanceof WholeValue) {
+      return ((WholeValue) value)
+          .dispatch(
+              new WholeValue.Dispatcher<HalfLowerResult>() {
+                @Override
+                public HalfLowerResult handleString(WholeString value) {
+                  return new HalfLowerResult(
+                      MortarHalfStringType.type, new JVMSharedCode().addString(value.value));
+                }
 
-    } else if (value instanceof WholeBool) {
-      return new HalfLowerResult(
-          MortarHalfBoolType.type, new JVMSharedCode().addBool(((WholeBool) value).value));
+                @Override
+                public HalfLowerResult handleBool(WholeBool value) {
+                  return new HalfLowerResult(
+                      MortarHalfBoolType.type, new JVMSharedCode().addBool(value.value));
+                }
 
+                @Override
+                public HalfLowerResult handleInt(WholeInt value) {
+                  return new HalfLowerResult(
+                      MortarHalfIntType.type, new JVMSharedCode().addInt(value.value));
+                }
+              });
     } else if (value instanceof MortarHalfValue) {
-      return new HalfLowerResult(((MortarHalfValue) value).type, ((MortarHalfValue) value).lower(context));
+      return new HalfLowerResult(
+          ((MortarHalfValue) value).type, ((MortarHalfValue) value).lower(context));
 
     } else {
       if (value instanceof WholeValue) throw new Assertion();
+      HalfLowerResult out = Builtin.halfLowerSingleton(value);
+      if (out != null) {
+        return out;
+      }
+      if (value instanceof WholeOther) value = ((WholeOther) value).object;
+      out = Builtin.halfLowerSingleton(value);
+      if (out != null) {
+        return out;
+      }
       return new HalfLowerResult(
-          null /* TODO */, ((MortarTargetModuleContext) context.target).transfer(value));
+          Meta.autoMortarHalfDataTypes.get(value.getClass()),
+          ((MortarTargetModuleContext) context.target).transfer(value));
     }
   }
 

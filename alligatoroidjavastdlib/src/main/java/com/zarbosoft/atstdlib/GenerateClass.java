@@ -129,8 +129,9 @@ public class GenerateClass {
 
   public LSubtree lBuiltin(IdManager ids) {
     return writer -> {
-      writer.type("builtin");
-      ids.writeNoKey(writer);
+      writer.type("builtin").recordBegin();
+      ids.write(writer);
+      writer.recordEnd();
     };
   }
 
@@ -226,7 +227,7 @@ public class GenerateClass {
           try (OutputStream os = Files.newOutputStream(path)) {
             Writer writer = new Writer(os, (byte) '\t', 1);
             IdManager ids = new IdManager();
-            writer.type("alligatorus:0.0.1");
+            writer.type("alligatorus:0.0.1").arrayBegin();
             lCall(
                     ids,
                     lAccess(ids, jvm(ids), lString(ids, "externClass")),
@@ -309,24 +310,27 @@ public class GenerateClass {
                                 boolean isStatic = Modifier.isStatic(f.getModifiers());
                                 if (!(isPublic || isProtected)) continue;
                                 lCall(
-                                    ids,
-                                    lAccess(ids, accessBuilder(ids), lString(ids, "data")),
-                                    lTuple(
                                         ids,
-                                        lString(ids, f.getName()),
-                                        lRecord(
+                                        lAccess(ids, accessBuilder(ids), lString(ids, "data")),
+                                        lTuple(
                                             ids,
-                                            new ROPair<>(
-                                                lString(ids, "type"), lType(ids, f.getType())),
-                                            new ROPair<>(
-                                                lString(ids, "protected"), lBool(ids, isProtected)),
-                                            new ROPair<>(
-                                                lString(ids, "final"), lBool(ids, isFinal)),
-                                            new ROPair<>(
-                                                lString(ids, "static"), lBool(ids, isStatic)))));
+                                            lString(ids, f.getName()),
+                                            lRecord(
+                                                ids,
+                                                new ROPair<>(
+                                                    lString(ids, "type"), lType(ids, f.getType())),
+                                                new ROPair<>(
+                                                    lString(ids, "protected"),
+                                                    lBool(ids, isProtected)),
+                                                new ROPair<>(
+                                                    lString(ids, "final"), lBool(ids, isFinal)),
+                                                new ROPair<>(
+                                                    lString(ids, "static"), lBool(ids, isStatic)))))
+                                    .write(writer);
                               }
                             })))
                 .write(writer);
+            writer.arrayEnd();
           }
         });
   }

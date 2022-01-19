@@ -1,11 +1,11 @@
 package com.zarbosoft.merman.jfxeditor1;
 
-import com.zarbosoft.alligatoroid.compiler.CompileContext;
+import com.zarbosoft.alligatoroid.compiler.Alligatorus;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.Main;
-import com.zarbosoft.alligatoroid.compiler.modules.Module;
+import com.zarbosoft.alligatoroid.compiler.modules.StderrLogger;
+import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.merman.core.BackPath;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
@@ -249,19 +249,19 @@ public class NotMain extends Application {
       Environment env = new JFXEnvironment(Locale.getDefault());
 
       JavaSerializer serializer;
-      ROMap<String, AlligatoroidSyntax.EditorSyntaxOut> syntaxes =
-          new TSMap<String, AlligatoroidSyntax.EditorSyntaxOut>()
+      ROMap<String, AlligatorusSyntax.EditorSyntaxOut> syntaxes =
+          new TSMap<String, AlligatorusSyntax.EditorSyntaxOut>()
               .put(
                   "json",
-                  new AlligatoroidSyntax.EditorSyntaxOut(
+                  new AlligatorusSyntax.EditorSyntaxOut(
                       JsonSyntax.create(env, new Padding(5, 5, 5, 5)), new TSList<>()))
-              .put("at", AlligatoroidSyntax.create(env, new Padding(5, 5, 5, 5)));
+              .put("at", AlligatorusSyntax.create(env, new Padding(5, 5, 5, 5)));
 
       String rawPath = args.get(0);
       path = Paths.get(rawPath).toAbsolutePath();
       Document document;
       String extension = extension(rawPath);
-      AlligatoroidSyntax.EditorSyntaxOut editorSyntaxOut =
+      AlligatorusSyntax.EditorSyntaxOut editorSyntaxOut =
           syntaxes.getOr(
               extension,
               () -> {
@@ -280,6 +280,7 @@ public class NotMain extends Application {
             }
 
             private void updateMarkDisplay(Brick brick) {
+              if (editor == null) return;
               if (!brick.meta().has("mark")) return;
               Atom atom = brick.getVisual().atomVisual().atom;
               MarkerBox display = null;
@@ -340,7 +341,7 @@ public class NotMain extends Application {
       final HBox layout = new HBox();
       final Label messages = new Label();
 
-      ImportId rootModuleSpec = CompileContext.rootModuleSpec(path);
+      ImportId rootModuleSpec = Alligatorus.rootModuleSpec(path);
       TSList<Atom> errorAtoms = new TSList<>();
       if ("at".equals(extension)) {
         flushCallback =
@@ -353,14 +354,18 @@ public class NotMain extends Application {
                   new Thread(
                       () -> {
                         Exception e0mut = null;
-                        TSMap<ImportId, Module> modules0 = null;
+                        Alligatorus.Result modules0 = null;
                         try {
-                          modules0 = Main.compile(rootModuleSpec);
+                          modules0 =
+                              Alligatorus.compile(
+                                  Alligatorus.defaultCachePath(),
+                                  new StderrLogger(),
+                                  rootModuleSpec);
                         } catch (Exception e1) {
                           e0mut = e1;
                         }
                         Exception e0 = e0mut;
-                        TSMap<ImportId, Module> modules = modules0;
+                        Alligatorus.Result modules = modules0;
                         Platform.runLater(
                             () -> {
                               try {
@@ -382,8 +387,9 @@ public class NotMain extends Application {
                                   messages.setText(messages.getText() + "\n" + e0.toString());
                                 } else {
                                   TSMap<Atom, TSList<Object>> errorMessages = new TSMap<>();
-                                  for (Map.Entry<ImportId, Module> module : modules) {
-                                    for (Error error : module.getValue().log.errors) {
+                                  for (Map.Entry<ImportId, ROList<Error>> module :
+                                      modules.errors.entrySet()) {
+                                    for (Error error : module.getValue()) {
                                       error.dispatch(
                                           new Error.Dispatcher<Object>() {
                                             @Override
@@ -429,9 +435,16 @@ public class NotMain extends Application {
                                             public Object handle(Error.DeserializeError e) {
                                               if (!rootModuleSpec.moduleId.equals(
                                                   module.getKey().moduleId)) return null;
+                                              TSList<BackPath.Element> backPath = new TSList<>();
+                                              for (LuxemPath.Element element : e.backPath.data) {
+                                                backPath.add(
+                                                    new BackPath.Element(
+                                                        element.index,
+                                                        element.key,
+                                                        element.typeCount));
+                                              }
                                               Atom atom =
-                                                  editor.context.backLocate(
-                                                      new BackPath(e.backPath.data));
+                                                  editor.context.backLocate(new BackPath(backPath));
                                               if (atom == null) {
                                                 if (!layout.getChildren().contains(messages))
                                                   layout.getChildren().add(messages);

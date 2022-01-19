@@ -4,6 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeDumpable;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.luxem.write.Writer;
+import com.zarbosoft.rendaw.common.Assertion;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -71,6 +72,7 @@ public abstract class Error implements TreeDumpable {
     public final Location location;
 
     public LocationError(Location location) {
+      if (location == null) throw new Assertion();
       this.location = location;
     }
 

@@ -37,13 +37,13 @@ public class JVMHalfExternClassType extends JVMHalfClassType {
   }
 
   @Override
-  public void resolveMethods(EvaluationContext context) {
+  public void resolveInternals(EvaluationContext context) {
     if (setupDone) return;
     MortarHalfAutoType classValueType =
         Meta.autoMortarHalfDataTypes.get(JVMExternClassBuilder.class);
     Evaluator.evaluate(
         context.moduleContext,
-        setup,
+        new TSList<>(setup),
         new TSOrderedMap<WholeValue, Value>()
             .put(
                 new WholeString("class"), classValueType.unlower(new JVMExternClassBuilder(this))));

@@ -44,7 +44,7 @@ public class Alligatorus {
     ModuleCompileContext moduleContext = new ModuleCompileContext(rootImportId, context, null);
     context.moduleErrors.put(rootImportId, moduleContext.errors);
     try {
-      uncheck(() -> context.modules.get(moduleContext, spec).get());
+      uncheck(() -> Utils.await(context.modules.get(moduleContext, spec)));
     } catch (Error.PreError e) {
       context.moduleErrors.put(rootImportId, new TSList<>(e.toError(rootLocation)));
     } catch (Throwable e) {

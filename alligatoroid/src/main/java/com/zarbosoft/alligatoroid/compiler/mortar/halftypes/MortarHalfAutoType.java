@@ -8,6 +8,7 @@ import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.ROMap;
 
@@ -33,7 +34,7 @@ public class MortarHalfAutoType extends MortarHalfObjectType {
 
   @Override
   public Value unlower(Object object) {
-    return (Value) object;
+    return new WholeOther(object);
   }
 
   @Override
