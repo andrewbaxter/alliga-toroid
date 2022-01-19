@@ -12,7 +12,7 @@ public class Tuple extends LanguageElement {
   public ROList<LanguageElement> elements;
 
   public Tuple(Location id, ROList<LanguageElement> elements) {
-    super(id, hasLowerInSubtree(elements));
+    super(id, hasLowerInSubtreeList(elements));
     this.elements = elements;
   }
 

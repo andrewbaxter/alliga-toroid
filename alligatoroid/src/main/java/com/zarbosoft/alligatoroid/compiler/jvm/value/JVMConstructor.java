@@ -36,7 +36,7 @@ public class JVMConstructor implements SimpleValue, AutoBuiltinExportable, LeafE
 
   @Override
   public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
-    base.resolveInternals(context);
+    if (!base.resolveInternals(context, location)) return EvaluateResult.error;
     JVMSharedCode code = new JVMSharedCode();
     JVMTargetModuleContext.convertFunctionArgument(context, code, argument);
     code.add(

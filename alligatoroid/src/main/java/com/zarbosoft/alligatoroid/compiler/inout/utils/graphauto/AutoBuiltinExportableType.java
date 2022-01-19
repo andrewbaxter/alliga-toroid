@@ -142,7 +142,9 @@ public class AutoBuiltinExportableType implements RootExportable {
               Object primitiveArg = prepNonCollectionArg(t, subdata);
               if (primitiveArg != null) {
                 args[i] = primitiveArg;
-              } else if (Exportable.class.isAssignableFrom(t)) {
+              } else if (Exportable.class.isAssignableFrom(t) || t == Object.class) {
+                // Field maybe not exportable, but for the value to have been serialized it must
+                // have been exportable
                 args[i] =
                     subdata.dispatch(
                         new SemiserialSubvalue.DefaultDispatcher<>() {

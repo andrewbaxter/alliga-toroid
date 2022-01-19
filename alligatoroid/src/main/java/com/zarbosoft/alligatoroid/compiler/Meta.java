@@ -2,8 +2,6 @@ package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMExternClassBuilder;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfExternClassType;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
@@ -27,17 +25,19 @@ import com.zarbosoft.alligatoroid.compiler.model.language.Record;
 import com.zarbosoft.alligatoroid.compiler.model.language.RecordElement;
 import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
+import com.zarbosoft.alligatoroid.compiler.model.language.Wrap;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfArrayType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfAutoType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfAutoObjectType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfByteType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfMethodType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfStringType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoBuiltinStaticMethod;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -66,7 +66,8 @@ public class Meta {
     Lower.class,
     Import.class,
     ModLocal.class,
-    ModRemote.class
+    ModRemote.class,
+    Wrap.class,
   };
   public static final Class[] OTHER_AUTO_GRAPH = {
     BundleValue.class,
@@ -76,13 +77,14 @@ public class Meta {
     RemoteModuleId.class,
     BundleModuleSubId.class,
     ImportId.class,
+    WholeOther.class,
   };
 
   public static final Class[] AUTO_VALUE = {
     JVMExternClassBuilder.class,
   };
   /** Initialized statically, never modified after (thread safe for reads). */
-  public static TSMap<Class, MortarHalfAutoType> autoMortarHalfDataTypes = new TSMap<>();
+  public static TSMap<Class, MortarHalfAutoObjectType> autoMortarHalfDataTypes = new TSMap<>();
 
   static {
     for (Class klass : AUTO_VALUE) {
@@ -170,10 +172,10 @@ public class Meta {
       throw new Assertion();
     }
      */
-    MortarHalfAutoType out = autoMortarHalfDataTypes.getOpt(klass);
+    MortarHalfAutoObjectType out = autoMortarHalfDataTypes.getOpt(klass);
     JVMSharedJVMName jvmName = JVMSharedJVMName.fromClass(klass);
     if (out == null) {
-      out = new MortarHalfAutoType(jvmName);
+      out = new MortarHalfAutoObjectType(jvmName, Value.class.isAssignableFrom(klass));
       autoMortarHalfDataTypes.put(klass, out);
       TSMap<Object, MortarHalfType> fields = new TSMap<>();
       if (klass != Value.class)
@@ -190,31 +192,7 @@ public class Meta {
         ROPair<JVMSharedDataDescriptor, MortarHalfDataType> desc = dataDescriptor(field.getType());
         MortarHalfDataType dataType = desc.second;
         String fieldName = field.getName();
-        fields.putNew(
-            fieldName,
-            new MortarHalfType() {
-              @Override
-              public Value asValue(Location location, MortarProtocode lower) {
-                return dataType.asValue(
-                    location,
-                    new MortarProtocode() {
-                      @Override
-                      public JVMSharedCodeElement lower(EvaluationContext context) {
-                        return JVMSharedCode.accessField(
-                            context.sourceLocation(location),
-                            jvmName,
-                            fieldName,
-                            dataType.jvmDesc());
-                      }
-
-                      @Override
-                      public JVMSharedCodeElement drop(
-                          EvaluationContext context, Location location) {
-                        return null;
-                      }
-                    });
-              }
-            });
+        fields.putNew(fieldName, new MortarHalfFieldType(dataType, jvmName, fieldName));
       }
       out.fields = fields;
     }

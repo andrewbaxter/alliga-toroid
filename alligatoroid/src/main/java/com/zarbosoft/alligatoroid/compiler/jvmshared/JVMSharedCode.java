@@ -179,6 +179,10 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
 
     // Flatten for ease of use, find last uses
     TSMap<Object, Integer> lastUses = new TSMap<>();
+    for (Object key : initialIndexes) {
+      lastUses.put(key, -1);
+    }
+
     ArrayDeque<Iterator<JVMSharedCodeElement>> stack = new ArrayDeque<>();
     {
       Iterator<JVMSharedCodeElement> iter = this.children.iterator();
@@ -239,10 +243,8 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
                 for (int j = 0; j < indexes.size(); j++) {
                   {
                     Object lastKey;
-                    Integer lastIndex;
-                    if ((lastKey = indexes.get(j)) != null
-                        && (lastIndex = lastUses.get(lastKey)) != null
-                        && (lastIndex > finalI)) {
+                    if ((lastKey = indexes.get(j)) != null && (lastUses.get(lastKey) > finalI)) {
+                      // Can't use this slot, go to next
                       continue;
                     }
                   }

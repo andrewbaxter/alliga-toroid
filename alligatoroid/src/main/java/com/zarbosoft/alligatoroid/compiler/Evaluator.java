@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.languageinout.LanguageDeserializer;
+import com.zarbosoft.alligatoroid.compiler.jvm.modelother.Pass2Failed;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.DynamicClassLoader;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedClass;
@@ -86,7 +87,9 @@ public class Evaluator {
             new com.zarbosoft.alligatoroid.compiler.model.language.Scope(
                     null, new Block(null, rootStatements))
                 .evaluate(context));
-    if (evalResult == ErrorValue.error) return null;
+    if (evalResult == ErrorValue.error) {
+      return null;
+    }
     MortarTargetModuleContext.HalfLowerResult lowered =
         MortarTargetModuleContext.halfLower(context, evalResult);
     EvaluateResult evaluateResult = ectx.build(null);
@@ -132,24 +135,30 @@ public class Evaluator {
       throw new Assertion();
     } catch (InvocationTargetException e0) {
       final Throwable e = e0.getTargetException();
-      Location location = null; // TODO convert whole stack?
-      for (StackTraceElement t : new ReverseIterable<>(Arrays.asList(e.getStackTrace()))) {
-        if (t.getClassName().startsWith(GENERATED_CLASS_PREFIX)) {
-          location = context.sourceMapReverse.get(t.getLineNumber());
-          break;
-        }
-      }
-      if (location != null) {
-        if (e instanceof Error.PreError) {
-          context.moduleContext.errors.add(((Error.PreError) e).toError(location));
-        } else {
-          context.moduleContext.errors.add(new Unexpected(location, e));
-        }
-        return null;
+      if (e.getClass() == Pass2Failed.class) {
+        // Errors in module errors already
+        pass2 = null;
       } else {
-        throw uncheck(e);
+        Location location = null; // TODO convert whole stack?
+        for (StackTraceElement t : new ReverseIterable<>(Arrays.asList(e.getStackTrace()))) {
+          if (t.getClassName().startsWith(GENERATED_CLASS_PREFIX)) {
+            location = context.sourceMapReverse.get(t.getLineNumber());
+            break;
+          }
+        }
+        if (location != null) {
+          if (e instanceof Error.PreError) {
+            context.moduleContext.errors.add(((Error.PreError) e).toError(location));
+          } else {
+            context.moduleContext.errors.add(new Unexpected(location, e));
+          }
+          return null;
+        } else {
+          throw uncheck(e);
+        }
       }
     }
+    if (moduleContext.errors.some()) return null;
     return Semiserializer.semiserialize(
         moduleContext, lowered.dataType.unlower(pass2), rootStatements.last().location);
   }

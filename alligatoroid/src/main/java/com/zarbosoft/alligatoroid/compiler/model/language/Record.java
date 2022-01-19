@@ -15,7 +15,7 @@ public class Record extends LanguageElement {
   public final ROList<LanguageElement> elements;
 
   public Record(Location id, ROList<LanguageElement> elements) {
-    super(id, hasLowerInSubtree(elements));
+    super(id, hasLowerInSubtreeList(elements));
     this.elements = elements;
   }
 

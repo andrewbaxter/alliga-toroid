@@ -177,10 +177,22 @@ public class GenerateClass {
       return lAccess(ids, jvm(ids), lString(ids, klass.getName()));
     } else {
       return writer -> {
-        lImport(ids, lLocal(ids, path.getParent().relativize(generate(klass)).toString()))
+        lImport(
+                ids,
+                lLower(ids, lLocal(ids, path.getParent().relativize(generate(klass)).toString())))
             .write(writer);
       };
     }
+  }
+
+  private LSubtree lLower(IdManager ids, LSubtree value) {
+    return writer -> {
+      writer.type("lower").recordBegin();
+      ids.write(writer);
+      writer.primitive("child");
+      value.write(writer);
+      writer.recordEnd();
+    };
   }
 
   private LSubtree lImport(IdManager ids, LSubtree spec) {
@@ -212,7 +224,7 @@ public class GenerateClass {
   }
 
   public LSubtree accessBuilder(IdManager ids) {
-    return lLocal(ids, lString(ids, "builder"));
+    return lLocal(ids, lString(ids, "class"));
   }
 
   public LSubtree jvm(IdManager ids) {

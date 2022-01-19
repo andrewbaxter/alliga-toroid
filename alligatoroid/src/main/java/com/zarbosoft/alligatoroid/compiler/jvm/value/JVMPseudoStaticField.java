@@ -33,7 +33,7 @@ public class JVMPseudoStaticField implements SimpleValue, AutoBuiltinExportable,
 
   @Override
   public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
-    base.resolveInternals(context);
+    if (!base.resolveInternals(context, location)) return EvaluateResult.error;
     ROTuple argTuple = getArgTuple(argument);
     JVMMethodFieldType real = base.methodFields.getOpt(ROTuple.create(name).append(argTuple));
     if (real == null) {
@@ -51,7 +51,7 @@ public class JVMPseudoStaticField implements SimpleValue, AutoBuiltinExportable,
 
   @Override
   public EvaluateResult access(EvaluationContext context, Location location, Value field) {
-    base.resolveInternals(context);
+    if (!base.resolveInternals(context, location)) return EvaluateResult.error;
     JVMHalfDataType real = base.dataFields.getOpt(name);
     if (real == null) {
       context.moduleContext.errors.add(JVMError.noDataField(location, name));
@@ -77,8 +77,8 @@ public class JVMPseudoStaticField implements SimpleValue, AutoBuiltinExportable,
 
   @Override
   public ROPair<TargetCode, Binding> bind(EvaluationContext context, Location location) {
-    base.resolveInternals(context);
-    JVMHalfDataType real = base.dataFields.getOpt(name);
+    if (!base.resolveInternals(context, location)) return new ROPair<>(null, ErrorBinding.binding);
+    JVMHalfDataType real = base.staticDataFields.getOpt(name);
     if (real == null) {
       context.moduleContext.errors.add(JVMError.noDataField(location, name));
       return new ROPair<>(null, ErrorBinding.binding);

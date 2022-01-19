@@ -10,8 +10,8 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.ModuleIdValue;
 import com.zarbosoft.rendaw.common.Assertion;
 
 import java.nio.file.Path;
@@ -70,6 +70,6 @@ public class ModLocal extends LanguageElement {
                 }
             });
     if (newId == null) return EvaluateResult.error;
-    return ectx.build(new ModuleIdValue(newId));
+    return ectx.build(new WholeOther(newId));
   }
 }

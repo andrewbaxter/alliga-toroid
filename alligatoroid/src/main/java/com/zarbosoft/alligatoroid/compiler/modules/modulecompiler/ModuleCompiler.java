@@ -51,7 +51,6 @@ public class ModuleCompiler implements ModuleResolver {
     SemiserialModule res =
         importId.moduleId.dispatch(
             new ModuleId.Dispatcher<SemiserialModule>() {
-
               public SemiserialModule handleTopLevel() {
                 final String stringPath = source.path.toString();
                 if (stringPath.endsWith(".at")) {

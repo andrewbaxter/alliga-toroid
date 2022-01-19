@@ -1,15 +1,15 @@
 package com.zarbosoft.alligatoroid.compiler.model.language;
 
-import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.ModuleIdValue;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 
 public class ModRemote extends LanguageElement {
-  public  LanguageElement url;
+  public LanguageElement url;
   public LanguageElement hash;
 
   public ModRemote(Location id, LanguageElement url, LanguageElement hash) {
@@ -26,7 +26,7 @@ public class ModRemote extends LanguageElement {
     if (url0 == null || hash0 == null) return EvaluateResult.error;
 
     return ectx.build(
-        new ModuleIdValue(
+        new WholeOther(
             new RemoteModuleId((String) url0.concreteValue(), (String) hash0.concreteValue())));
   }
 }

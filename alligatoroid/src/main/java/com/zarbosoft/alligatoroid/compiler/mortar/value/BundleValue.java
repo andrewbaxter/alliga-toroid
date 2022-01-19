@@ -34,8 +34,7 @@ public class BundleValue implements SimpleValue, AutoBuiltinExportable, LeafExpo
     if (key == null) return EvaluateResult.error;
 
     CompletableFuture<Value> importResult =
-        context.moduleContext.compileContext.modules.get(
-            context.moduleContext,
+        context.moduleContext.getModule(
             new ImportId(
                 new BundleModuleSubId(
                     id.moduleId,

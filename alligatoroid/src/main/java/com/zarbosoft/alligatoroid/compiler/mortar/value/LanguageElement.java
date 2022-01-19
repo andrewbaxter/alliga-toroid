@@ -53,7 +53,7 @@ public abstract class LanguageElement implements AutoBuiltinExportable, LeafExpo
     this.hasLowerInSubtree = hasLowerInSubtree;
   }
 
-  protected static boolean hasLowerInSubtree(ROList<Object> elements) {
+  protected static boolean hasLowerInSubtreeList(ROList<?> elements) {
     boolean out = false;
     for (Object element : elements) {
       if (element instanceof LanguageElement)

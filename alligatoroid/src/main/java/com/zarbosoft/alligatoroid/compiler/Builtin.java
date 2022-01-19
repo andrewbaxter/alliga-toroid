@@ -11,6 +11,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarBuiltin;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
 import com.zarbosoft.rendaw.common.ROList;
@@ -55,6 +56,12 @@ public class Builtin {
             builtinSingletons0,
             MortarBuiltin.class,
             "");
+    for (ROPair<String, Exportable> o : new ROPair[] {new ROPair("null", NullValue.value)}) {
+      processSingleton(builtinSingletonIndexes0, builtinSingletons0, o);
+      String key = "_singleton_" + o.first;
+      builtinToSemiKey0.put(o.second, key);
+      semiKeyToBuiltin0.put(key, o.second);
+    }
     new Object() {
       {
         for (Class<AutoBuiltinExportable> languageElement : LANGUAGE) {
@@ -71,6 +78,7 @@ public class Builtin {
         String builtinKey = klass.getCanonicalName();
         builtinToSemiKey0.put(type, builtinKey);
         semiKeyToBuiltin0.put(builtinKey, type);
+        Meta.autoMortarHalfDataType(klass);
       }
     };
     for (ROPair<Class, Exportable> builtinExportable :
@@ -108,6 +116,16 @@ public class Builtin {
                         JVMSharedDataDescriptor.OBJECT, JVMSharedDataDescriptor.INT))));
   }
 
+  private static void processSingleton(
+      TSMap<ObjId, Integer> builtinSingletonIndexes,
+      TSList<Object> builtinSingletons,
+      Object data) {
+    int singletonIndex = builtinSingletons.size();
+    builtinSingletonIndexes.put(new ObjId(data), singletonIndex);
+    builtinSingletons.add(data);
+    Meta.autoMortarHalfDataType(data.getClass());
+  }
+
   private static LooseRecord aggregateBuiltinForGraph(
       TSMap<Exportable, String> builtinToSemikey,
       TSMap<String, Exportable> semikeyToBuiltin,
@@ -137,10 +155,7 @@ public class Builtin {
         builtinToSemikey.put(value, key);
         semikeyToBuiltin.put(key, value);
       } else {
-        int singletonIndex = builtinSingletons.size();
-        builtinSingletonIndexes.put(new ObjId(data), singletonIndex);
-        builtinSingletons.add(data);
-        Meta.autoMortarHalfDataType(data.getClass());
+        processSingleton(builtinSingletonIndexes, builtinSingletons, data);
         if (data instanceof Value) {
           values.put(name, EvaluateResult.pure((Value) data));
         } else {

@@ -3,9 +3,10 @@ package com.zarbosoft.alligatoroid.compiler.jvm.value;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Evaluator;
 import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMExternClassBuilder;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfAutoType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfAutoObjectType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeString;
@@ -17,6 +18,7 @@ import com.zarbosoft.rendaw.common.TSOrderedMap;
 public class JVMHalfExternClassType extends JVMHalfClassType {
   public LanguageElement setup;
   private boolean setupDone = false;
+  private boolean setupError = false;
 
   public JVMHalfExternClassType(JVMSharedNormalName name, LanguageElement setup) {
     super(
@@ -37,16 +39,24 @@ public class JVMHalfExternClassType extends JVMHalfClassType {
   }
 
   @Override
-  public void resolveInternals(EvaluationContext context) {
-    if (setupDone) return;
-    MortarHalfAutoType classValueType =
+  public boolean resolveInternals(EvaluationContext context) {
+    if (setupError) return false;
+    if (setupDone) return true;
+    MortarHalfAutoObjectType classValueType =
         Meta.autoMortarHalfDataTypes.get(JVMExternClassBuilder.class);
-    Evaluator.evaluate(
-        context.moduleContext,
-        new TSList<>(setup),
-        new TSOrderedMap<WholeValue, Value>()
-            .put(
-                new WholeString("class"), classValueType.unlower(new JVMExternClassBuilder(this))));
+    final SemiserialModule res =
+        Evaluator.evaluate(
+            context.moduleContext,
+            new TSList<>(setup),
+            new TSOrderedMap<WholeValue, Value>()
+                .put(
+                    new WholeString("class"),
+                    classValueType.unlower(new JVMExternClassBuilder(this))));
+    if (res == null) {
+      setupError = true;
+      return false;
+    }
     setupDone = true;
+    return true;
   }
 }

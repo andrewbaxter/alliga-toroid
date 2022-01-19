@@ -11,6 +11,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarHalfValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
@@ -26,7 +27,7 @@ import static com.zarbosoft.alligatoroid.compiler.Meta.autoMortarHalfDataType;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Stage extends LanguageElement {
-  public  LanguageElement child;
+  public LanguageElement child;
 
   public Stage(Location id, LanguageElement child) {
     super(id, hasLowerInSubtree(child));
@@ -39,6 +40,7 @@ public class Stage extends LanguageElement {
     JVMSharedCodeElement pre;
     if (element instanceof Lower) {
       EvaluateResult evalRes = ((Lower) element).child.evaluate(context);
+      if (evalRes.value == ErrorValue.error) return null;
       MortarTargetModuleContext.HalfLowerResult lowerRes =
           MortarTargetModuleContext.halfLower(context, evalRes.value);
       JVMSharedCodeElement pre0;
@@ -75,16 +77,24 @@ public class Stage extends LanguageElement {
           args.add(
               MortarTargetModuleContext.lowerRaw(
                   context, uncheck(() -> klass.getField("location").get(element)), false));
-        } else if (parameter.getType() == ROList.class) {
+
+        } else if (ROList.class.isAssignableFrom(parameter.getType())) {
           argDesc[i] = JVMSharedDataDescriptor.fromClass(ROList.class);
           args.add(MortarTargetModuleContext.newTSListCode);
           Object parameterValue = uncheck(() -> klass.getField(parameter.getName()).get(element));
+          boolean bad = false;
           for (Object o : ((TSList) parameterValue)) {
             StageLowerResult stageRes = stageLower(context, location, (LanguageElement) o);
-            args.add((JVMSharedCode) stageRes.pre);
-            args.add(MortarTargetModuleContext.tsListAddCode);
-            post.add(stageRes.post);
+            if (stageRes == null) {
+              bad = true;
+            } else {
+              args.add((JVMSharedCode) stageRes.pre);
+              args.add(MortarTargetModuleContext.tsListAddCode);
+              post.add(stageRes.post);
+            }
           }
+          if (bad) return null;
+
         } else if (parameter.getType() == LanguageElement.class) {
           argDesc[i] = JVMSharedDataDescriptor.fromClass(LanguageElement.class);
           StageLowerResult stageRes =
@@ -93,10 +103,15 @@ public class Stage extends LanguageElement {
                   location,
                   (LanguageElement)
                       uncheck(() -> klass.getField(parameter.getName()).get(element)));
+          if (stageRes == null) {
+            return null;
+          }
           args.add((JVMSharedCode) stageRes.pre);
           post.add(stageRes.post);
+
+        } else {
+          throw new Assertion();
         }
-        throw new Assertion();
       }
       pre =
           JVMSharedCode.instantiate(
@@ -114,6 +129,7 @@ public class Stage extends LanguageElement {
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
     StageLowerResult stageRes = stageLower(context, location, child);
+    if (stageRes == null) return EvaluateResult.error;
     return new EvaluateResult(
         null,
         stageRes.post,

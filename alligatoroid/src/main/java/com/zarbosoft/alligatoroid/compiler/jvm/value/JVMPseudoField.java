@@ -46,7 +46,7 @@ public class JVMPseudoField implements SimpleValue, NoExportValue, Exportable {
 
   @Override
   public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
-    base.resolveInternals(context);
+    if (!base.resolveInternals(context, location)) return EvaluateResult.error;
     ROTuple argTuple = getArgTuple(argument);
     JVMMethodFieldType real = base.methodFields.getOpt(ROTuple.create(name).append(argTuple));
     if (real == null) {
@@ -64,7 +64,7 @@ public class JVMPseudoField implements SimpleValue, NoExportValue, Exportable {
 
   @Override
   public EvaluateResult access(EvaluationContext context, Location location, Value field) {
-    base.resolveInternals(context);
+    if (!base.resolveInternals(context, location)) return EvaluateResult.error;
     JVMHalfDataType real = base.dataFields.getOpt(name);
     if (real == null) {
       context.moduleContext.errors.add(JVMError.noDataField(location, name));
@@ -90,7 +90,7 @@ public class JVMPseudoField implements SimpleValue, NoExportValue, Exportable {
 
   @Override
   public ROPair<TargetCode, Binding> bind(EvaluationContext context, Location location) {
-    base.resolveInternals(context);
+    if (!base.resolveInternals(context, location)) return new ROPair<>(null, ErrorBinding.binding);
     JVMHalfDataType real = base.dataFields.getOpt(name);
     if (real == null) {
       context.moduleContext.errors.add(JVMError.noDataField(location, name));

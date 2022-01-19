@@ -12,12 +12,14 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.ROMap;
 
-public class MortarHalfAutoType extends MortarHalfObjectType {
+public class MortarHalfAutoObjectType extends MortarHalfObjectType {
   public final JVMSharedJVMName jvmName;
+  public final boolean isValue;
   public ROMap<Object, MortarHalfType> fields;
 
-  public MortarHalfAutoType(JVMSharedJVMName jvmName) {
+  public MortarHalfAutoObjectType(JVMSharedJVMName jvmName, boolean isValue) {
     this.jvmName = jvmName;
+    this.isValue = isValue;
   }
 
   @Override
@@ -34,7 +36,8 @@ public class MortarHalfAutoType extends MortarHalfObjectType {
 
   @Override
   public Value unlower(Object object) {
-    return new WholeOther(object);
+    if (isValue) return (Value) object;
+    else return new WholeOther(object);
   }
 
   @Override

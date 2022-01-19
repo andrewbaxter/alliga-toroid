@@ -26,6 +26,7 @@ public class MortarMethodField implements SimpleValue, NoExportValue, Exportable
 
   @Override
   public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
+    if (argument == ErrorValue.error) return EvaluateResult.error;
     JVMSharedCode code = new JVMSharedCode().add(lower.lower(context));
     if (type.needsModule)
       code.add(((MortarTargetModuleContext) context.target).transfer(context.moduleContext));

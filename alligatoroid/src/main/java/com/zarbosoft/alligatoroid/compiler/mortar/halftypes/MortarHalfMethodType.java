@@ -16,10 +16,10 @@ public class MortarHalfMethodType implements MortarHalfType, AutoBuiltinExportab
 
   public final boolean needsModule;
 
-  public final MortarHalfAutoType base;
+  public final MortarHalfAutoObjectType base;
 
   public MortarHalfMethodType(
-      MortarHalfAutoType base,
+      MortarHalfAutoObjectType base,
       String name,
       JVMSharedFuncDescriptor jbcDesc,
       MortarHalfDataType returnType,

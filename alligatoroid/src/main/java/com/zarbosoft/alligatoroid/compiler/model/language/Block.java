@@ -14,7 +14,7 @@ public class Block extends LanguageElement {
   public final ROList<LanguageElement> statements;
 
   public Block(Location id, ROList<LanguageElement> statements) {
-    super(id, hasLowerInSubtree(statements));
+    super(id, hasLowerInSubtreeList(statements));
     this.statements = statements;
   }
 

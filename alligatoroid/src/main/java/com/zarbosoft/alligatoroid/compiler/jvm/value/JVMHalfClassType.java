@@ -14,6 +14,7 @@ import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfStringType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
+import com.zarbosoft.alligatoroid.compiler.model.error.ModuleError;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
@@ -21,7 +22,6 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeBool;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeInt;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeString;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -48,6 +48,7 @@ public class JVMHalfClassType extends JVMHalfObjectType
   public TSSet<String> fields;
   public TSSet<String> staticFields;
   public JVMSharedNormalName name;
+  public boolean error = false;
 
   public JVMHalfClassType(
       JVMSharedNormalName name,
@@ -128,11 +129,21 @@ public class JVMHalfClassType extends JVMHalfObjectType
     }
   }
 
-  public void resolveInternals(EvaluationContext context) {}
+  public boolean resolveInternals(EvaluationContext context) {
+    return false;
+  }
+
+  public boolean resolveInternals(EvaluationContext context, Location location) {
+    boolean out = resolveInternals(context);
+    if (!out) {
+      context.moduleContext.errors.add(new ModuleError(location));
+    }
+    return out;
+  }
 
   @Override
   public EvaluateResult access(EvaluationContext context, Location location, Value field0) {
-    resolveInternals(context);
+    if (!resolveInternals(context, location)) return EvaluateResult.error;
     WholeValue key = WholeValue.getWhole(context, location, field0);
     if (key.dispatch(
         new WholeValue.DefaultDispatcher<Boolean>(false) {
@@ -153,7 +164,7 @@ public class JVMHalfClassType extends JVMHalfObjectType
   @Override
   public EvaluateResult valueAccess(
       EvaluationContext context, Location location, Value field0, JVMProtocode lower) {
-    resolveInternals(context);
+    if (!resolveInternals(context, location)) return EvaluateResult.error;
     WholeValue key = WholeValue.getWhole(context, location, field0);
     if (!fields.contains((String) key.concreteValue())) {
       context.moduleContext.errors.add(new NoField(location, key));

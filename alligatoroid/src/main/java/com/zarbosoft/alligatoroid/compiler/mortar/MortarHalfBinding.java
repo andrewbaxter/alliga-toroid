@@ -22,7 +22,8 @@ public class MortarHalfBinding implements Binding {
   public EvaluateResult fork(EvaluationContext context, Location location) {
     return EvaluateResult.pure(
         type.asValue(
-                location, new MortarProtocode() {
+            location,
+            new MortarProtocode() {
               @Override
               public JVMSharedCodeElement lower(EvaluationContext context) {
                 return new JVMSharedCodeStoreLoad(type.loadOpcode(), key);

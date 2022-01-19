@@ -21,6 +21,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfNullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfRecordType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfStringType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfTupleType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.FutureValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
@@ -118,11 +119,19 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                 false));
   }
 
+  /**
+   * @param context
+   * @param value
+   * @return null == error
+   */
   public static HalfLowerResult halfLower(EvaluationContext context, Object value) {
     if (value.getClass() == FutureValue.class) {
       return halfLower(context, ((FutureValue) value).get());
     }
-    if (value == NullValue.value) {
+    if (value == ErrorValue.error) {
+      return null;
+
+    } else if (value == NullValue.value) {
       return new HalfLowerResult(MortarHalfNullType.type, new JVMSharedCode());
 
     } else if (value instanceof LooseTuple) {
@@ -130,14 +139,20 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       TSList<MortarHalfDataType> types = new TSList<>();
       out.add(newTupleCode1);
       out.add(newTSListCode);
+      boolean bad = false;
       for (EvaluateResult e : ((LooseTuple) value).data) {
         if (e.preEffect != null) out.add((JVMSharedCode) e.preEffect);
         HalfLowerResult lowerRes = halfLower(context, e.value);
+        if (lowerRes == null) {
+          bad = true;
+          continue;
+        }
         if (lowerRes.dataType != null) lowerRes = lowerRes.dataType.box(lowerRes.valueCode);
         types.add(lowerRes.dataType);
         out.add(lowerRes.valueCode);
         out.add(tsListAddCode);
       }
+      if (bad) return null;
       out.add(newTupleCode2);
       return new HalfLowerResult(new MortarHalfTupleType(types), out);
 
@@ -146,10 +161,15 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       TSOrderedMap<Object, MortarHalfDataType> types = new TSOrderedMap<>();
       out.add(newRecordCode1);
       out.add(newTSMapCode);
+      boolean bad = false;
       for (ROPair<Object, EvaluateResult> e : ((LooseRecord) value).data) {
         if (e.second.preEffect != null) out.add((JVMSharedCode) e.second.preEffect);
         out.add(lowerRaw(context, e.first, true));
         HalfLowerResult lowerRes = halfLower(context, e.second.value);
+        if (lowerRes == null) {
+          bad = true;
+          continue;
+        }
         if (lowerRes.dataType != null) lowerRes = lowerRes.dataType.box(lowerRes.valueCode);
         types.put(e.first, lowerRes.dataType);
         out.add(lowerRes.valueCode);
@@ -164,6 +184,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                     JVMDescriptorUtils.objDescriptorFromReal(Object.class)),
                 false));
       }
+      if (bad) return null;
       out.add(newRecordCode2);
       return new HalfLowerResult(new MortarHalfRecordType(types), out);
 
@@ -189,21 +210,23 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                       MortarHalfIntType.type, new JVMSharedCode().addInt(value.value));
                 }
               });
+
     } else if (value instanceof MortarHalfValue) {
       return new HalfLowerResult(
           ((MortarHalfValue) value).type, ((MortarHalfValue) value).lower(context));
 
     } else {
-      if (value instanceof WholeValue) throw new Assertion();
       HalfLowerResult out = Builtin.halfLowerSingleton(value);
       if (out != null) {
         return out;
       }
+
       if (value instanceof WholeOther) value = ((WholeOther) value).object;
       out = Builtin.halfLowerSingleton(value);
       if (out != null) {
         return out;
       }
+
       return new HalfLowerResult(
           Meta.autoMortarHalfDataTypes.get(value.getClass()),
           ((MortarTargetModuleContext) context.target).transfer(value));
@@ -214,8 +237,10 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       EvaluationContext context, Object value, boolean boxed) {
     if (value.getClass() == String.class) {
       return new JVMSharedCode().addString((String) value);
+
     } else if (value.getClass() == Integer.class && !boxed) {
       return new JVMSharedCode().addInt((Integer) value);
+
     } else if (value.getClass() == Location.class) {
       JVMSharedCode out = new JVMSharedCode();
       out.add(MortarTargetModuleContext.newLocationCode1);
@@ -224,6 +249,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       out.addInt(location.id);
       out.add(MortarTargetModuleContext.newLocationCode2);
       return out;
+
     } else throw new Assertion();
   }
 
@@ -232,10 +258,14 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     if (argument instanceof LooseTuple) {
       for (EvaluateResult e : ((LooseTuple) argument).data) {
         if (e.preEffect != null) code.add((JVMSharedCode) e.preEffect);
-        code.add(halfLower(context, e.value).valueCode);
+        final HalfLowerResult lowerRes = halfLower(context, e.value);
+        if (lowerRes == null) continue;
+        code.add(lowerRes.valueCode);
       }
     } else {
-      code.add(halfLower(context, argument).valueCode);
+      final HalfLowerResult lowerRes = halfLower(context, argument);
+      if (lowerRes == null) return;
+      code.add(lowerRes.valueCode);
     }
   }
 
