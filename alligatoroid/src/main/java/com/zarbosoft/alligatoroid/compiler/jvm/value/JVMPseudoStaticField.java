@@ -19,9 +19,6 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.rendaw.common.ROPair;
-import com.zarbosoft.rendaw.common.ROTuple;
-
-import static com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType.getArgTuple;
 
 public class JVMPseudoStaticField
     implements SimpleValue, AutoBuiltinExportable, LeafExportable, JVMValue {
@@ -46,11 +43,9 @@ public class JVMPseudoStaticField
   @Override
   public EvaluateResult jvmCall(
       EvaluationContext context, Location location, MortarValue argument) {
-    if (!base.resolveInternals(context, location)) return EvaluateResult.error;
-    ROTuple argTuple = getArgTuple(argument);
-    JVMMethodFieldType real = base.staticMethodFields.getOpt(ROTuple.create(name).append(argTuple));
+    JVMMethodFieldType real =
+        base.findMethod(context, location, base.staticMethodFields, name, argument);
     if (real == null) {
-      context.moduleContext.errors.add(JVMError.noMethodField(location, name));
       return EvaluateResult.error;
     }
     JVMSharedCode code = new JVMSharedCode();

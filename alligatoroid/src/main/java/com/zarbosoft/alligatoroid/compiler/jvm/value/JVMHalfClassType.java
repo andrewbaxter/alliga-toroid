@@ -5,6 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
+import com.zarbosoft.alligatoroid.compiler.jvm.JVMError;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMProtocode;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfBoolType;
@@ -27,14 +28,18 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeInt;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeString;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /** Represents the metadata for interacting with a class - inheritance, fields */
 public class JVMHalfClassType extends JVMHalfObjectType
@@ -42,9 +47,9 @@ public class JVMHalfClassType extends JVMHalfObjectType
   public static final String ACCESS_NEW = "new";
   public final TSMap<ROTuple, JVMUtils.MethodSpecDetails> constructors;
   public final TSMap<String, JVMHalfDataType> dataFields;
-  public final TSMap<ROTuple, JVMMethodFieldType> methodFields;
+  public final TSMap<String, TSList<JVMMethodFieldType>> methodFields;
   public final TSMap<String, JVMHalfDataType> staticDataFields;
-  public final TSMap<ROTuple, JVMMethodFieldType> staticMethodFields;
+  public final TSMap<String, TSList<JVMMethodFieldType>> staticMethodFields;
   public final TSList<JVMHalfClassType> inherits;
   public JVMSharedJVMName jvmName;
   public TSSet<String> fields;
@@ -56,9 +61,9 @@ public class JVMHalfClassType extends JVMHalfObjectType
       JVMSharedNormalName name,
       TSMap<ROTuple, JVMUtils.MethodSpecDetails> constructors,
       TSMap<String, JVMHalfDataType> dataFields,
-      TSMap<ROTuple, JVMMethodFieldType> methodFields,
+      TSMap<String, TSList<JVMMethodFieldType>> methodFields,
       TSMap<String, JVMHalfDataType> staticDataFields,
-      TSMap<ROTuple, JVMMethodFieldType> staticMethodFields,
+      TSMap<String, TSList<JVMMethodFieldType>> staticMethodFields,
       TSList<JVMHalfClassType> inherits) {
     this.name = name;
     this.constructors = constructors;
@@ -118,16 +123,66 @@ public class JVMHalfClassType extends JVMHalfObjectType
     } else return ROTuple.create(getArgTupleInner(value));
   }
 
+  public boolean walkParents(Function<JVMHalfClassType, Boolean> process) {
+    TSList<Iterator<JVMHalfClassType>> stack = new TSList<>();
+    stack.add(Arrays.asList(this).iterator());
+    while (stack.some()) {
+      final Iterator<JVMHalfClassType> iterator = stack.last();
+      JVMHalfClassType next = iterator.next();
+      if (!iterator.hasNext()) stack.removeLast();
+      final boolean res = process.apply(next);
+      if (res) return true;
+      final Iterator<JVMHalfClassType> parents = next.inherits.iterator();
+      if (parents.hasNext()) stack.add(parents);
+    }
+    return false;
+  }
+
+  public JVMMethodFieldType findMethod(
+      EvaluationContext context,
+      Location location,
+      TSMap<String, TSList<JVMMethodFieldType>> methods,
+      String name,
+      MortarValue argument) {
+    if (!resolveInternals(context, location)) return null;
+    ROTuple argTuple = getArgTuple(argument);
+    ROList<JVMMethodFieldType> candidates = methods.getOpt(name);
+    if (candidates == null) candidates = ROList.empty;
+    for (JVMMethodFieldType candidate : candidates) {
+      if (candidate.specDetails.argTuple.size() != argTuple.size()) continue;
+      boolean allMatch = true;
+      for (int i = 0; i < argTuple.size(); i += 1) {
+        final JVMHalfDataType arg = (JVMHalfDataType) argTuple.get(i);
+        final JVMHalfDataType bound = (JVMHalfDataType) candidate.specDetails.argTuple.get(i);
+        if (arg instanceof JVMHalfClassType) {
+          if (!walkParents(t -> t.jvmDesc().equals(bound.jvmDesc()))) {
+            allMatch = false;
+            break;
+          }
+        } else {
+          if (!arg.jvmDesc().equals(bound.jvmDesc())) {
+            allMatch = false;
+            break;
+          }
+        }
+      }
+      if (!allMatch) continue;
+      return candidate;
+    }
+    context.moduleContext.errors.add(JVMError.noMethodField(location, name));
+    return null;
+  }
+
   @Override
   public void postInit() {
     this.jvmName = JVMSharedJVMName.fromNormalName(name);
     fields = dataFields.keys().mut();
-    for (Map.Entry<ROTuple, JVMMethodFieldType> f : methodFields) {
-      fields.add((String) f.getKey().get(0));
+    for (Map.Entry<String, TSList<JVMMethodFieldType>> f : methodFields) {
+      fields.add(f.getKey());
     }
     staticFields = staticDataFields.keys().mut();
-    for (Map.Entry<ROTuple, JVMMethodFieldType> f : staticMethodFields) {
-      staticFields.add((String) f.getKey().get(0));
+    for (Map.Entry<String, TSList<JVMMethodFieldType>> f : staticMethodFields) {
+      staticFields.add(f.getKey());
     }
   }
 
@@ -144,7 +199,8 @@ public class JVMHalfClassType extends JVMHalfObjectType
   }
 
   @Override
-  public EvaluateResult mortarAccess(EvaluationContext context, Location location, MortarValue field0) {
+  public EvaluateResult mortarAccess(
+      EvaluationContext context, Location location, MortarValue field0) {
     if (!resolveInternals(context, location)) return EvaluateResult.error;
     WholeValue key = WholeValue.getWhole(context, location, field0);
     if (key.dispatch(
@@ -165,7 +221,7 @@ public class JVMHalfClassType extends JVMHalfObjectType
 
   @Override
   public EvaluateResult valueAccess(
-          EvaluationContext context, Location location, MortarValue field0, JVMProtocode lower) {
+      EvaluationContext context, Location location, MortarValue field0, JVMProtocode lower) {
     if (!resolveInternals(context, location)) return EvaluateResult.error;
     WholeValue key = WholeValue.getWhole(context, location, field0);
     if (!fields.contains((String) key.concreteValue())) {

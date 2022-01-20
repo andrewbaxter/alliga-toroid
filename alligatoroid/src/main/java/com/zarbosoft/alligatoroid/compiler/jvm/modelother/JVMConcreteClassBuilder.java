@@ -2,13 +2,14 @@ package com.zarbosoft.alligatoroid.compiler.jvm.modelother;
 
 import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
-import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMConstructor;
+import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedClass;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.ROTuple;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public class JVMConcreteClassBuilder {
@@ -26,8 +27,8 @@ public class JVMConcreteClassBuilder {
   @Meta.WrapExpose
   public RetConstructor constructor(Record spec) {
     JVMUtils.MethodSpecDetails specDetails = JVMUtils.methodSpecDetails(spec);
-    incompleteConstructors.add(specDetails.keyTuple);
-    base.constructors.put(specDetails.keyTuple, specDetails);
+    incompleteConstructors.add(specDetails.argTuple);
+    base.constructors.put(specDetails.argTuple, specDetails);
     final JVMConstructor constructor = JVMConstructor.create(base, spec);
     return new RetConstructor(constructor, new JVMConcreteConstructorBuilder(this, constructor));
   }
@@ -35,9 +36,11 @@ public class JVMConcreteClassBuilder {
   @Meta.WrapExpose
   public JVMConcreteMethodBuilder declareMethod(String name, Record spec) {
     JVMUtils.MethodSpecDetails specDetails = JVMUtils.methodSpecDetails(spec);
-    ROTuple keyTuple = ROTuple.create(name).append(specDetails.keyTuple);
+    ROTuple keyTuple = ROTuple.create(name).append(specDetails.argTuple);
     incompleteMethods.add(keyTuple);
-    base.methodFields.put(keyTuple, new JVMMethodFieldType(base, name, spec));
+    base.methodFields
+        .getCreate(name, () -> new TSList<>())
+        .add(JVMMethodFieldType.create(base, name, spec));
     base.fields.add(name);
     return new JVMConcreteMethodBuilder(this, keyTuple, specDetails);
   }

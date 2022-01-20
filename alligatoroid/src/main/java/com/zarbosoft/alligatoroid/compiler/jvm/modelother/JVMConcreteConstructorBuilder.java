@@ -35,6 +35,6 @@ public class JVMConcreteConstructorBuilder {
         constructor.specDetails.jvmSigDesc,
         new JVMSharedCode().add(built).addI(RETURN),
         new TSList<>());
-    classBuilder.incompleteMethods.remove(constructor.specDetails.keyTuple);
+    classBuilder.incompleteMethods.remove(constructor.specDetails.argTuple);
   }
 }

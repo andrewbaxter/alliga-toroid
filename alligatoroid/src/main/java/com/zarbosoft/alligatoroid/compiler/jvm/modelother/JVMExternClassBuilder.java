@@ -2,11 +2,11 @@ package com.zarbosoft.alligatoroid.compiler.jvm.modelother;
 
 import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
+import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfDataType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfExternClassType;
-import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
-import com.zarbosoft.rendaw.common.ROTuple;
+import com.zarbosoft.rendaw.common.TSList;
 
 public class JVMExternClassBuilder {
   public final JVMHalfExternClassType base;
@@ -22,30 +22,26 @@ public class JVMExternClassBuilder {
 
   @Meta.WrapExpose
   public void constructor(Record spec) {
-    JVMUtils.MethodSpecDetails specDetails =
-        JVMUtils.methodSpecDetails(spec);
-    base.constructors.put(specDetails.keyTuple, specDetails);
+    JVMUtils.MethodSpecDetails specDetails = JVMUtils.methodSpecDetails(spec);
+    base.constructors.put(specDetails.argTuple, specDetails);
   }
 
   @Meta.WrapExpose
   public void method(String name, Record spec) {
-    JVMUtils.MethodSpecDetails specDetails =
-        JVMUtils.methodSpecDetails(spec);
-    JVMMethodFieldType field =
-        new JVMMethodFieldType(base,name, spec);
+    JVMUtils.MethodSpecDetails specDetails = JVMUtils.methodSpecDetails(spec);
+    JVMMethodFieldType field = JVMMethodFieldType.create(base, name, spec);
     if (specDetails.isStatic) {
-      base.staticMethodFields.put(ROTuple.create(name).append(specDetails.keyTuple), field);
+      base.staticMethodFields.getCreate(name, () -> new TSList<>()).add(field);
       base.staticFields.add(name);
     } else {
-      base.methodFields.put(ROTuple.create(name).append(specDetails.keyTuple), field);
+      base.methodFields.getCreate(name, () -> new TSList<>()).add(field);
       base.fields.add(name);
     }
   }
 
   @Meta.WrapExpose
   public void data(String name, Record spec) {
-    JVMUtils.DataSpecDetails specDetails =
-        JVMUtils.dataSpecDetails(spec);
+    JVMUtils.DataSpecDetails specDetails = JVMUtils.dataSpecDetails(spec);
     if (specDetails.isStatic) {
       base.staticDataFields.putNew(name, specDetails.type);
       base.staticFields.add(name);

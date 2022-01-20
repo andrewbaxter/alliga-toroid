@@ -1,5 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
+import com.zarbosoft.alligatoroid.compiler.Utils;
+
+import java.util.Objects;
+
 /** Like La/b/c; */
 public class JVMSharedDataDescriptor {
   public static final JVMSharedDataDescriptor BOOL = new JVMSharedDataDescriptor("Z");
@@ -23,7 +27,7 @@ public class JVMSharedDataDescriptor {
   public static final JVMSharedDataDescriptor BOXED_BYTE =
       JVMSharedDataDescriptor.fromClass(Byte.class);
 
-  final String value;
+  public final String value;
 
   private JVMSharedDataDescriptor(String value) {
     this.value = value;
@@ -43,5 +47,15 @@ public class JVMSharedDataDescriptor {
 
   public JVMSharedDataDescriptor array() {
     return new JVMSharedDataDescriptor("[" + value);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return Utils.reflectEquals(this, o);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(value);
   }
 }

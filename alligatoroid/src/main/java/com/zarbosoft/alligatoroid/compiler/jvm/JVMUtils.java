@@ -76,7 +76,7 @@ public class JVMUtils {
   public static class MethodSpecDetails {
     public final JVMHalfDataType returnType;
     public final JVMSharedFuncDescriptor jvmSigDesc;
-    public final ROTuple keyTuple;
+    public final ROTuple argTuple;
     public final boolean isProtected;
     public final boolean isFinal;
     public final boolean isStatic;
@@ -84,13 +84,13 @@ public class JVMUtils {
     public MethodSpecDetails(
         JVMHalfDataType returnType,
         JVMSharedFuncDescriptor jvmSigDesc,
-        ROTuple keyTuple,
+        ROTuple argTuple,
         boolean isProtected,
         boolean isFinal,
         boolean isStatic) {
       this.returnType = returnType;
       this.jvmSigDesc = jvmSigDesc;
-      this.keyTuple = keyTuple;
+      this.argTuple = argTuple;
       this.isProtected = isProtected;
       this.isFinal = isFinal;
       this.isStatic = isStatic;

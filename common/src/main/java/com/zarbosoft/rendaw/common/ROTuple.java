@@ -38,4 +38,8 @@ public final class ROTuple {
   public int hashCode() {
     return Objects.hash(data);
   }
+
+  public int size() {
+    return data.size();
+  }
 }
