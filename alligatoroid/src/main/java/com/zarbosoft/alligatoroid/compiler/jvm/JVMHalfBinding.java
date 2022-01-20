@@ -7,36 +7,35 @@ import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfDataType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
+import com.zarbosoft.alligatoroid.compiler.model.MortarBinding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 
-public class JVMBinding implements Binding {
+public class JVMHalfBinding implements Binding {
   public final Object key;
   public final JVMHalfDataType type;
 
-  public JVMBinding(Object key, JVMHalfDataType type) {
+  public JVMHalfBinding(Object key, JVMHalfDataType type) {
     this.key = key;
     this.type = type;
   }
 
-  @Override
-  public EvaluateResult fork(EvaluationContext context, Location location) {
+  public EvaluateResult jvmFork(EvaluationContext context, Location location) {
     return EvaluateResult.pure(
         type.asValue(
             new JVMProtocode() {
               @Override
-              public JVMSharedCodeElement lower(EvaluationContext context) {
+              public JVMSharedCodeElement jvmLower(EvaluationContext context) {
                 return new JVMSharedCode().addVarInsn(type.loadOpcode(), key);
               }
 
               @Override
-              public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
+              public JVMSharedCodeElement jvmDrop(EvaluationContext context, Location location) {
                 return null;
               }
             }));
   }
 
-  @Override
-  public TargetCode drop(EvaluationContext context, Location location) {
+  public TargetCode jvmDrop(EvaluationContext context, Location location) {
     return null;
   }
 }

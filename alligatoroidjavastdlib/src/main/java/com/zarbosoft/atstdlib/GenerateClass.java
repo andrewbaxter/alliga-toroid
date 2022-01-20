@@ -159,7 +159,7 @@ public class GenerateClass {
 
   public LSubtree lType(IdManager ids, Class klass) {
     if (klass == this.klass) {
-      return lAccess(ids, lLocal(ids, lString(ids, "res")), lString(ids, "type"));
+      return lLocal(ids, lString(ids, "class"));
     } else if (klass.isArray()) {
       return lCall(
           ids, lAccess(ids, jvm(ids), lString(ids, "array")), lType(ids, klass.getComponentType()));
@@ -224,7 +224,7 @@ public class GenerateClass {
   }
 
   public LSubtree accessBuilder(IdManager ids) {
-    return lLocal(ids, lString(ids, "class"));
+    return lLocal(ids, lString(ids, "builder"));
   }
 
   public LSubtree jvm(IdManager ids) {
@@ -286,6 +286,8 @@ public class GenerateClass {
                               }
 
                               for (Method m : klass.getDeclaredMethods()) {
+                                if (m.isBridge()) continue;
+                                if (m.isSynthetic()) continue;
                                 boolean isPublic = Modifier.isPublic(m.getModifiers());
                                 boolean isProtected = Modifier.isProtected(m.getModifiers());
                                 boolean isFinal = Modifier.isFinal(m.getModifiers());

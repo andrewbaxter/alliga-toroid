@@ -29,11 +29,11 @@ public class BundleValue implements SimpleValue, AutoBuiltinExportable, LeafExpo
   }
 
   @Override
-  public EvaluateResult access(EvaluationContext context, Location location, Value field) {
+  public EvaluateResult mortarAccess(EvaluationContext context, Location location, MortarValue field) {
     WholeValue key = WholeValue.getWhole(context, location, field);
     if (key == null) return EvaluateResult.error;
 
-    CompletableFuture<Value> importResult =
+    CompletableFuture<MortarValue> importResult =
         context.moduleContext.getModule(
             new ImportId(
                 new BundleModuleSubId(

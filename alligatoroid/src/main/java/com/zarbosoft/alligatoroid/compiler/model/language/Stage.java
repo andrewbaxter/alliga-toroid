@@ -14,7 +14,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarHalfValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ReverseIterable;
@@ -134,15 +134,15 @@ public class Stage extends LanguageElement {
         null,
         stageRes.post,
         new MortarHalfValue(
-            autoMortarHalfDataType(Value.class),
+            autoMortarHalfDataType(MortarValue.class),
             new MortarProtocode() {
               @Override
-              public JVMSharedCodeElement lower(EvaluationContext context) {
+              public JVMSharedCodeElement mortarHalfLower(EvaluationContext context) {
                 return (JVMSharedCode) stageRes.pre;
               }
 
               @Override
-              public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
+              public JVMSharedCodeElement mortarDrop(EvaluationContext context, Location location) {
                 return null;
               }
             }));

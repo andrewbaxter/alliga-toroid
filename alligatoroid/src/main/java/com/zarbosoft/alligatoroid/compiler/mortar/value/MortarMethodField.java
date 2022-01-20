@@ -20,14 +20,14 @@ public class MortarMethodField implements SimpleValue, NoExportValue, Exportable
   }
 
   @Override
-  public TargetCode drop(EvaluationContext context, Location location) {
-    return lower.drop(context, location);
+  public TargetCode mortarDrop(EvaluationContext context, Location location) {
+    return lower.mortarDrop(context, location);
   }
 
   @Override
-  public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
+  public EvaluateResult mortarCall(EvaluationContext context, Location location, MortarValue argument) {
     if (argument == ErrorValue.error) return EvaluateResult.error;
-    JVMSharedCode code = new JVMSharedCode().add(lower.lower(context));
+    JVMSharedCode code = new JVMSharedCode().add(lower.mortarHalfLower(context));
     if (type.needsModule)
       code.add(((MortarTargetModuleContext) context.target).transfer(context.moduleContext));
     MortarTargetModuleContext.convertFunctionArgument(context, code, argument);

@@ -1,13 +1,13 @@
 package com.zarbosoft.alligatoroid.compiler.model.error;
 
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.rendaw.common.Format;
 
 public class IndexNotInteger extends Error.LocationError {
-  public final Value got;
+  public final MortarValue got;
 
-  public IndexNotInteger(Location location, Value got) {
+  public IndexNotInteger(Location location, MortarValue got) {
     super(location);
     this.got = got;
   }

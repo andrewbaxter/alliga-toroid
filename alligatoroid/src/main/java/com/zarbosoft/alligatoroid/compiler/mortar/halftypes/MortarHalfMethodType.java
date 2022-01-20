@@ -6,7 +6,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarMethodField;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 
 public class MortarHalfMethodType implements MortarHalfType, AutoBuiltinExportable, LeafExportable {
   public final String name;
@@ -32,7 +32,7 @@ public class MortarHalfMethodType implements MortarHalfType, AutoBuiltinExportab
   }
 
   @Override
-  public Value asValue(Location location, MortarProtocode lower) {
+  public MortarValue asValue(Location location, MortarProtocode lower) {
     return new MortarMethodField(lower, this);
   }
 }

@@ -1,15 +1,15 @@
 package com.zarbosoft.alligatoroid.compiler.model.language;
 
-import com.zarbosoft.alligatoroid.compiler.model.Binding;
-import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 
 public class Local extends LanguageElement {
-  public  LanguageElement key;
+  public LanguageElement key;
 
   public Local(Location id, LanguageElement key) {
     super(id, hasLowerInSubtree(key));
@@ -26,6 +26,6 @@ public class Local extends LanguageElement {
       context.moduleContext.errors.add(new NoField(location, key));
       return EvaluateResult.error;
     }
-    return ectx.build(ectx.record(value.fork(context, location)));
+    return ectx.build(ectx.record(context.target.fork(context, location, value)));
   }
 }

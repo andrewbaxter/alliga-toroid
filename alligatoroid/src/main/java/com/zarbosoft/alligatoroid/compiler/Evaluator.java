@@ -19,7 +19,7 @@ import com.zarbosoft.alligatoroid.compiler.model.language.Block;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Common;
@@ -50,7 +50,7 @@ public class Evaluator {
       ModuleCompileContext moduleContext,
       ROList<LanguageElement> rootStatements,
       /** Only whole-ish values */
-      ROOrderedMap<WholeValue, Value> initialScope) {
+      ROOrderedMap<WholeValue, MortarValue> initialScope) {
     return instance.evaluateInner(moduleContext, rootStatements, initialScope);
   }
 
@@ -68,7 +68,7 @@ public class Evaluator {
       ModuleCompileContext moduleContext,
       ROList<LanguageElement> rootStatements,
       /** Only whole-ish values */
-      ROOrderedMap<WholeValue, Value> initialScope) {
+      ROOrderedMap<WholeValue, MortarValue> initialScope) {
     String className = GENERATED_CLASS_PREFIX + uniqueClass.getAndIncrement();
     JVMSharedJVMName jvmClassName =
         JVMSharedJVMName.fromNormalName(JVMSharedNormalName.fromString(className));
@@ -78,8 +78,8 @@ public class Evaluator {
         new MortarTargetModuleContext(JVMDescriptorUtils.jvmName(className));
     EvaluationContext context =
         new EvaluationContext(moduleContext, targetContext, new Scope(null));
-    for (ROPair<WholeValue, Value> local : initialScope) {
-      context.scope.put(local.first, local.second.bind(context, null).second);
+    for (ROPair<WholeValue, MortarValue> local : initialScope) {
+      context.scope.put(local.first, local.second.mortarBind(context, null).second);
     }
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
     final Value evalResult =

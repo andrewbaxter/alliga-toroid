@@ -2,7 +2,6 @@ package com.zarbosoft.alligatoroid.compiler.jvm.modelother;
 
 import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
-import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMConstructor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedClass;

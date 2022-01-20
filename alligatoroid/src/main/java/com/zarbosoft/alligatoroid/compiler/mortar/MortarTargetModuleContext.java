@@ -6,9 +6,13 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.TargetModuleContext;
+import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
+import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
+import com.zarbosoft.alligatoroid.compiler.model.MortarBinding;
 import com.zarbosoft.alligatoroid.compiler.model.error.IncompatibleTargetValues;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
@@ -26,8 +30,8 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.FutureValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarHalfValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeBool;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeInt;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
@@ -213,7 +217,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
 
     } else if (value instanceof MortarHalfValue) {
       return new HalfLowerResult(
-          ((MortarHalfValue) value).type, ((MortarHalfValue) value).lower(context));
+          ((MortarHalfValue) value).type, ((MortarHalfValue) value).mortarLower(context));
 
     } else {
       HalfLowerResult out = Builtin.halfLowerSingleton(value);
@@ -254,7 +258,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
   }
 
   public static void convertFunctionArgument(
-      EvaluationContext context, JVMSharedCode code, Value argument) {
+      EvaluationContext context, JVMSharedCode code, MortarValue argument) {
     if (argument instanceof LooseTuple) {
       for (EvaluateResult e : ((LooseTuple) argument).data) {
         if (e.preEffect != null) code.add((JVMSharedCode) e.preEffect);
@@ -299,6 +303,45 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       code.add((JVMSharedCode) chunk);
     }
     return code;
+  }
+
+  @Override
+  public ROPair<TargetCode, ? extends Binding> bind(
+      EvaluationContext context, Location location, Value value) {
+    if (value == ErrorValue.error) return new ROPair<>(null, ErrorBinding.binding);
+    return ((MortarValue) value).mortarBind(context, location);
+  }
+
+  @Override
+  public EvaluateResult call(
+      EvaluationContext context, Location location, Value target, Value args) {
+    if (target == ErrorValue.error || args == ErrorValue.error) return EvaluateResult.error;
+    return ((MortarValue) target).mortarCall(context, location, (MortarValue) args);
+  }
+
+  @Override
+  public EvaluateResult access(
+      EvaluationContext context, Location location, Value target, Value field) {
+    if (target == ErrorValue.error || field == ErrorValue.error) return EvaluateResult.error;
+    return ((MortarValue) target).mortarAccess(context, location, (MortarValue) field);
+  }
+
+  @Override
+  public EvaluateResult fork(EvaluationContext context, Location location, Binding binding) {
+    if (binding == ErrorBinding.binding) return EvaluateResult.error;
+    return ((MortarBinding) binding).mortarFork(context, location);
+  }
+
+  @Override
+  public TargetCode drop(EvaluationContext context, Location location, Value value) {
+    if (value == ErrorValue.error) return null;
+    return ((MortarValue) value).mortarDrop(context, location);
+  }
+
+  @Override
+  public TargetCode drop(EvaluationContext context, Location location, Binding binding) {
+    if (binding == ErrorBinding.binding) return null;
+    return ((MortarBinding) binding).mortarDrop(context, location);
   }
 
   public static class HalfLowerResult {

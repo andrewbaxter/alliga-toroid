@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
+import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.model.error.IndexNotInteger;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
@@ -23,7 +24,8 @@ public class LooseTuple implements OkValue, NoExportValue, Exportable {
   }
 
   @Override
-  public EvaluateResult access(EvaluationContext context, Location location, Value key0) {
+  public EvaluateResult mortarAccess(
+      EvaluationContext context, Location location, MortarValue key0) {
     WholeValue key = WholeValue.getWhole(context, location, key0);
     if (key == null) return EvaluateResult.error;
     Integer index =
@@ -49,12 +51,12 @@ public class LooseTuple implements OkValue, NoExportValue, Exportable {
           out = e.value;
           post.add(e.postEffect);
         } else {
-          pre.add(e.value.drop(context, location));
+          pre.add(context.target.drop(context, location, e.value));
           pre.add(e.postEffect);
         }
       } else {
         post.add(e.preEffect);
-        post.add(e.value.drop(context, location));
+        post.add(context.target.drop(context, location, e.value));
         post.add(e.postEffect);
       }
     }
@@ -69,10 +71,10 @@ public class LooseTuple implements OkValue, NoExportValue, Exportable {
   }
 
   @Override
-  public TargetCode drop(EvaluationContext context, Location location) {
+  public TargetCode mortarDrop(EvaluationContext context, Location location) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     for (EvaluateResult value : new ReverseIterable<>(data)) {
-      ectx.recordPre(ectx.record(value).drop(context, location));
+      ectx.recordPre(context.target.drop(context, location, ectx.record(value)));
     }
     return ectx.build(NullValue.value).preEffect;
   }

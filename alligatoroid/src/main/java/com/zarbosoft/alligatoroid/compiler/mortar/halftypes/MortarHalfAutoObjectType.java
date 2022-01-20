@@ -7,7 +7,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -24,7 +24,7 @@ public class MortarHalfAutoObjectType extends MortarHalfObjectType {
 
   @Override
   public EvaluateResult valueAccess(
-      EvaluationContext context, Location location, Value field0, MortarProtocode lower) {
+          EvaluationContext context, Location location, MortarValue field0, MortarProtocode lower) {
     WholeValue key = WholeValue.getWhole(context, location, field0);
     MortarHalfType field = fields.getOpt(key.concreteValue());
     if (field == null) {
@@ -35,8 +35,8 @@ public class MortarHalfAutoObjectType extends MortarHalfObjectType {
   }
 
   @Override
-  public Value unlower(Object object) {
-    if (isValue) return (Value) object;
+  public MortarValue unlower(Object object) {
+    if (isValue) return (MortarValue) object;
     else return new WholeOther(object);
   }
 

@@ -9,20 +9,22 @@ import com.zarbosoft.alligatoroid.compiler.jvm.JVMError;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMProtocode;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfDataType;
+import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROTuple;
 
 import static com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType.getArgTuple;
 
-public class JVMPseudoStaticField implements SimpleValue, AutoBuiltinExportable, LeafExportable {
+public class JVMPseudoStaticField
+    implements SimpleValue, AutoBuiltinExportable, LeafExportable, JVMValue {
   public final String name;
   public JVMHalfClassType base;
 
@@ -32,10 +34,21 @@ public class JVMPseudoStaticField implements SimpleValue, AutoBuiltinExportable,
   }
 
   @Override
-  public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
+  public Location location() {
+    return SimpleValue.super.location();
+  }
+
+  @Override
+  public TargetCode jvmDrop(EvaluationContext context, Location location) {
+    return null;
+  }
+
+  @Override
+  public EvaluateResult jvmCall(
+      EvaluationContext context, Location location, MortarValue argument) {
     if (!base.resolveInternals(context, location)) return EvaluateResult.error;
     ROTuple argTuple = getArgTuple(argument);
-    JVMMethodFieldType real = base.methodFields.getOpt(ROTuple.create(name).append(argTuple));
+    JVMMethodFieldType real = base.staticMethodFields.getOpt(ROTuple.create(name).append(argTuple));
     if (real == null) {
       context.moduleContext.errors.add(JVMError.noMethodField(location, name));
       return EvaluateResult.error;
@@ -50,9 +63,9 @@ public class JVMPseudoStaticField implements SimpleValue, AutoBuiltinExportable,
   }
 
   @Override
-  public EvaluateResult access(EvaluationContext context, Location location, Value field) {
+  public EvaluateResult jvmAccess(EvaluationContext context, Location location, MortarValue field) {
     if (!base.resolveInternals(context, location)) return EvaluateResult.error;
-    JVMHalfDataType real = base.dataFields.getOpt(name);
+    JVMHalfDataType real = base.staticDataFields.getOpt(name);
     if (real == null) {
       context.moduleContext.errors.add(JVMError.noDataField(location, name));
       return EvaluateResult.error;
@@ -63,12 +76,12 @@ public class JVMPseudoStaticField implements SimpleValue, AutoBuiltinExportable,
         field,
         new JVMProtocode() {
           @Override
-          public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
+          public JVMSharedCodeElement jvmDrop(EvaluationContext context, Location location) {
             return null;
           }
 
           @Override
-          public JVMSharedCodeElement lower(EvaluationContext context) {
+          public JVMSharedCodeElement jvmLower(EvaluationContext context) {
             return JVMSharedCode.accessStaticField(
                 context.sourceLocation(location), base.jvmName, name, real.jvmDesc());
           }
@@ -76,7 +89,8 @@ public class JVMPseudoStaticField implements SimpleValue, AutoBuiltinExportable,
   }
 
   @Override
-  public ROPair<TargetCode, Binding> bind(EvaluationContext context, Location location) {
+  public ROPair<TargetCode, ? extends Binding> jvmBind(
+      EvaluationContext context, Location location) {
     if (!base.resolveInternals(context, location)) return new ROPair<>(null, ErrorBinding.binding);
     JVMHalfDataType real = base.staticDataFields.getOpt(name);
     if (real == null) {

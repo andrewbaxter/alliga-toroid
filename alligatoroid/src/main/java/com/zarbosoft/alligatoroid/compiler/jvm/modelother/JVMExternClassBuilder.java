@@ -2,7 +2,6 @@ package com.zarbosoft.alligatoroid.compiler.jvm.modelother;
 
 import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
-import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfExternClassType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfDataType;
@@ -36,8 +35,10 @@ public class JVMExternClassBuilder {
         new JVMMethodFieldType(base,name, spec);
     if (specDetails.isStatic) {
       base.staticMethodFields.put(ROTuple.create(name).append(specDetails.keyTuple), field);
+      base.staticFields.add(name);
     } else {
       base.methodFields.put(ROTuple.create(name).append(specDetails.keyTuple), field);
+      base.fields.add(name);
     }
   }
 

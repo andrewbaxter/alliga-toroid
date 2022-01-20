@@ -16,7 +16,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Tuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeInt;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -31,7 +31,7 @@ public class MortarHalfTupleType extends MortarHalfObjectType
   }
 
   @Override
-  public Value unlower(Object object) {
+  public MortarValue unlower(Object object) {
     Tuple source = (Tuple) object;
     final TSList<EvaluateResult> data = new TSList<>();
     for (int i = 0; i < source.data.size(); i++) {
@@ -49,7 +49,7 @@ public class MortarHalfTupleType extends MortarHalfObjectType
 
   @Override
   public EvaluateResult valueAccess(
-      EvaluationContext context, Location location, Value field0, MortarProtocode lower) {
+          EvaluationContext context, Location location, MortarValue field0, MortarProtocode lower) {
     if (field0 == ErrorValue.error) return EvaluateResult.error;
     if (!(field0 instanceof WholeInt)) {
       context.moduleContext.errors.add(new WrongType(location, field0, "int"));
@@ -65,9 +65,9 @@ public class MortarHalfTupleType extends MortarHalfObjectType
             location,
             new MortarProtocode() {
               @Override
-              public JVMSharedCodeElement lower(EvaluationContext context) {
+              public JVMSharedCodeElement mortarHalfLower(EvaluationContext context) {
                 JVMSharedCode out = new JVMSharedCode();
-                out.add(lower.lower(context));
+                out.add(lower.mortarHalfLower(context));
                 out.add(
                     JVMSharedCode.callMethod(
                         context.sourceLocation(location),
@@ -80,7 +80,7 @@ public class MortarHalfTupleType extends MortarHalfObjectType
               }
 
               @Override
-              public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
+              public JVMSharedCodeElement mortarDrop(EvaluationContext context, Location location) {
                 return null;
               }
             }));

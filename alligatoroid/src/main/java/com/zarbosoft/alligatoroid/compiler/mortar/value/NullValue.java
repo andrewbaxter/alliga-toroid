@@ -16,12 +16,12 @@ public class NullValue
   private NullValue() {}
 
   @Override
-  public JVMSharedCode lower(EvaluationContext context) {
+  public JVMSharedCode mortarHalfLower(EvaluationContext context) {
     throw new Assertion();
   }
 
   @Override
-  public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
+  public JVMSharedCodeElement mortarDrop(EvaluationContext context, Location location) {
     return null;
   }
 }

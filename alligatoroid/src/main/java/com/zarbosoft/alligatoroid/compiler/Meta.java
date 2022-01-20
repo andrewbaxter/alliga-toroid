@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMExternClassBuilder;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfExternClassType;
+import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMPseudoStaticField;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
@@ -36,7 +37,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfStringType
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoBuiltinStaticMethod;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -50,6 +51,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 
 public class Meta {
+  // Exportable, lowerable, deserializable
   public static final Class[] LANGUAGE = {
     Access.class,
     Bind.class,
@@ -69,6 +71,7 @@ public class Meta {
     ModRemote.class,
     Wrap.class,
   };
+  // Exportable, lowerable
   public static final Class[] OTHER_AUTO_GRAPH = {
     BundleValue.class,
     JVMHalfExternClassType.class,
@@ -78,8 +81,10 @@ public class Meta {
     BundleModuleSubId.class,
     ImportId.class,
     WholeOther.class,
+    JVMPseudoStaticField.class,
   };
 
+  // Lowerable, not exportable
   public static final Class[] AUTO_VALUE = {
     JVMExternClassBuilder.class,
   };
@@ -175,10 +180,10 @@ public class Meta {
     MortarHalfAutoObjectType out = autoMortarHalfDataTypes.getOpt(klass);
     JVMSharedJVMName jvmName = JVMSharedJVMName.fromClass(klass);
     if (out == null) {
-      out = new MortarHalfAutoObjectType(jvmName, Value.class.isAssignableFrom(klass));
+      out = new MortarHalfAutoObjectType(jvmName, MortarValue.class.isAssignableFrom(klass));
       autoMortarHalfDataTypes.put(klass, out);
       TSMap<Object, MortarHalfType> fields = new TSMap<>();
-      if (klass != Value.class)
+      if (klass != MortarValue.class)
         for (Method method : klass.getDeclaredMethods()) {
           if (!Modifier.isPublic(method.getModifiers())) continue;
           if (!method.isAnnotationPresent(WrapExpose.class)) continue;

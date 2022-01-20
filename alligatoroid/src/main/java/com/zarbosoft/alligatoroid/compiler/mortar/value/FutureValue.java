@@ -28,7 +28,7 @@ public class FutureValue implements SimpleValue, LeafExportable {
             Semiserializer semiserializer,
             ROList<Exportable> path,
             ROList<String> accessPath) {
-          final Value value = ((FutureValue) child).get();
+          final MortarValue value = ((FutureValue) child).get();
           return value
               .type()
               .graphSemiserializeChild(value, spec, semiserializer, path, accessPath);
@@ -42,23 +42,23 @@ public class FutureValue implements SimpleValue, LeafExportable {
           throw new Assertion();
         }
       };
-  public final Future<Value> future;
+  public final Future<MortarValue> future;
 
-  public FutureValue(Future<Value> future) {
+  public FutureValue(Future<MortarValue> future) {
     this.future = future;
   }
 
   @Override
-  public TargetCode drop(EvaluationContext context, Location location) {
-    return get().drop(context, location);
+  public TargetCode mortarDrop(EvaluationContext context, Location location) {
+    return get().mortarDrop(context, location);
   }
 
   @Override
-  public EvaluateResult access(EvaluationContext context, Location location, Value field) {
-    return get().access(context, location, field);
+  public EvaluateResult mortarAccess(EvaluationContext context, Location location, MortarValue field) {
+    return get().mortarAccess(context, location, field);
   }
 
-  public Value get() {
+  public MortarValue get() {
     return Utils.await(future);
   }
 

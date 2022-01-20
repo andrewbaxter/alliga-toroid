@@ -12,7 +12,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarBuiltin;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -156,8 +156,8 @@ public class Builtin {
         semikeyToBuiltin.put(key, value);
       } else {
         processSingleton(builtinSingletonIndexes, builtinSingletons, data);
-        if (data instanceof Value) {
-          values.put(name, EvaluateResult.pure((Value) data));
+        if (data instanceof MortarValue) {
+          values.put(name, EvaluateResult.pure((MortarValue) data));
         } else {
           values.put(name, EvaluateResult.pure(new WholeOther(data)));
         }

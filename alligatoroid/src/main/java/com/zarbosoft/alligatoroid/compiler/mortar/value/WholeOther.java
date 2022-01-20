@@ -18,7 +18,7 @@ public class WholeOther
   public Object object;
 
   public WholeOther(Object object) {
-    if (object instanceof Value) throw new Assertion();
+    if (object instanceof MortarValue) throw new Assertion();
     this.object = object;
   }
 
@@ -28,22 +28,22 @@ public class WholeOther
   }
 
   @Override
-  public EvaluateResult access(EvaluationContext context, Location location, Value field) {
+  public EvaluateResult mortarAccess(EvaluationContext context, Location location, MortarValue field) {
     return Meta.autoMortarHalfDataTypes
         .get(object.getClass())
         .asValue(
             location,
             new MortarProtocode() {
               @Override
-              public JVMSharedCodeElement lower(EvaluationContext context) {
+              public JVMSharedCodeElement mortarHalfLower(EvaluationContext context) {
                 return ((MortarTargetModuleContext) context.target).transfer(object);
               }
 
               @Override
-              public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
+              public JVMSharedCodeElement mortarDrop(EvaluationContext context, Location location) {
                 return null;
               }
             })
-        .access(context, location, field);
+        .mortarAccess(context, location, field);
   }
 }

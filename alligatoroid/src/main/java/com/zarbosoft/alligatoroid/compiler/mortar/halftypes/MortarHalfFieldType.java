@@ -6,7 +6,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 
 public class MortarHalfFieldType implements MortarHalfType {
   private final MortarHalfDataType dataType;
@@ -21,21 +21,21 @@ public class MortarHalfFieldType implements MortarHalfType {
   }
 
   @Override
-  public Value asValue(Location location, MortarProtocode lower) {
+  public MortarValue asValue(Location location, MortarProtocode lower) {
     return dataType.asValue(
         location,
         new MortarProtocode() {
           @Override
-          public JVMSharedCodeElement lower(EvaluationContext context) {
+          public JVMSharedCodeElement mortarHalfLower(EvaluationContext context) {
             return new JVMSharedCode()
-                .add(lower.lower(context))
+                .add(lower.mortarHalfLower(context))
                 .add(
                     JVMSharedCode.accessField(
                         context.sourceLocation(location), jvmName, fieldName, dataType.jvmDesc()));
           }
 
           @Override
-          public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
+          public JVMSharedCodeElement mortarDrop(EvaluationContext context, Location location) {
             return null;
           }
         });

@@ -2,19 +2,11 @@ package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
-import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.util.CheckClassAdapter;
 
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import static com.zarbosoft.rendaw.common.Common.uncheck;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.ACC_SUPER;
@@ -39,7 +31,7 @@ public class JVMSharedClass {
     mv.visitCode();
     MethodNode temp = new MethodNode();
     code.render(temp, initialIndexes);
-    JVMSharedCode.print(temp);
+    // JVMSharedCode.print(temp);
     code.render(mv, initialIndexes);
     mv.visitMaxs(-1, -1);
     mv.visitEnd();
@@ -47,12 +39,15 @@ public class JVMSharedClass {
   }
 
   public JVMSharedClass defineFunction(
-      String methodId, JVMSharedFuncDescriptor desc, JVMSharedCode code, TSList<Object> initialIndexes) {
+      String methodId,
+      JVMSharedFuncDescriptor desc,
+      JVMSharedCode code,
+      TSList<Object> initialIndexes) {
     MethodVisitor mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, methodId, desc.value, null, null);
     mv.visitCode();
     MethodNode temp = new MethodNode();
     code.render(temp, initialIndexes);
-    JVMSharedCode.print(temp);
+    // JVMSharedCode.print(temp);
     code.render(mv, initialIndexes);
     mv.visitMaxs(-1, -1);
     mv.visitEnd();
@@ -62,15 +57,17 @@ public class JVMSharedClass {
   public byte[] render() {
     cw.visitEnd();
 
-    uncheck( // DEBUG
-        () -> {
-          try (OutputStream os = Files.newOutputStream(Paths.get("dump.class"))) {
-            os.write(cw.toByteArray());
-          }
-        });
-    System.out.println("JVM CHECK");
-    CheckClassAdapter.verify(new ClassReader(cw.toByteArray()), true, new PrintWriter(System.out));
-    System.out.println("END JVM CHECK");
+    /*
+       uncheck( // DEBUG
+           () -> {
+             try (OutputStream os = Files.newOutputStream(Paths.get("dump.class"))) {
+               os.write(cw.toByteArray());
+             }
+           });
+       System.out.println("JVM CHECK");
+       CheckClassAdapter.verify(new ClassReader(cw.toByteArray()), true, new PrintWriter(System.out));
+       System.out.println("END JVM CHECK");
+    */
     return cw.toByteArray();
   }
 

@@ -30,7 +30,7 @@ public class AutoBuiltinStaticMethod implements SimpleValue, AutoBuiltinExportab
   }
 
   @Override
-  public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
+  public EvaluateResult mortarCall(EvaluationContext context, Location location, MortarValue argument) {
     JVMSharedCode code = new JVMSharedCode();
     convertFunctionArgument(context, code, argument);
     code.add(JVMSharedCode.callStaticMethod(context.sourceLocation(location), base, name, desc));

@@ -1,4 +1,4 @@
-package com.zarbosoft.alligatoroid.compiler.jvm.value;
+package com.zarbosoft.alligatoroid.compiler.jvm.modelother;
 
 import com.zarbosoft.alligatoroid.compiler.Builtin;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfBoolType;
@@ -12,9 +12,11 @@ import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfIntType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfLongType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfStringType;
 import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMConcreteClassBuilder;
+import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType;
+import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfExternClassType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 
 @Builtin.Aggregate
 public class JVMBuiltin {
@@ -27,7 +29,7 @@ public class JVMBuiltin {
   public static final JVMHalfLongType _long = JVMHalfLongType.value;
   public static final JVMHalfBoolType bool = JVMHalfBoolType.value;
 
-  public static JVMHalfHalfArrayType array(Value elementType) {
+  public static JVMHalfHalfArrayType array(MortarValue elementType) {
     return new JVMHalfHalfArrayType((JVMHalfDataType) elementType);
   }
 

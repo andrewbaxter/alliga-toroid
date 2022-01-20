@@ -8,7 +8,7 @@ import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMExternClassBuilder;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfAutoObjectType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeString;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.TSList;
@@ -42,16 +42,17 @@ public class JVMHalfExternClassType extends JVMHalfClassType {
   public boolean resolveInternals(EvaluationContext context) {
     if (setupError) return false;
     if (setupDone) return true;
-    MortarHalfAutoObjectType classValueType =
+    MortarHalfAutoObjectType builderType =
         Meta.autoMortarHalfDataTypes.get(JVMExternClassBuilder.class);
     final SemiserialModule res =
         Evaluator.evaluate(
             context.moduleContext,
             new TSList<>(setup),
-            new TSOrderedMap<WholeValue, Value>()
+            new TSOrderedMap<WholeValue, MortarValue>()
+                .put(new WholeString("class"), this)
                 .put(
-                    new WholeString("class"),
-                    classValueType.unlower(new JVMExternClassBuilder(this))));
+                    new WholeString("builder"),
+                    builderType.unlower(new JVMExternClassBuilder(this))));
     if (res == null) {
       setupError = true;
       return false;

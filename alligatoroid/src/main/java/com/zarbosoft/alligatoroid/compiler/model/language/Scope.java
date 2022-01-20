@@ -1,11 +1,11 @@
 package com.zarbosoft.alligatoroid.compiler.model.language;
 
-import com.zarbosoft.alligatoroid.compiler.model.Binding;
-import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -23,7 +23,7 @@ public class Scope extends LanguageElement {
     EvaluateResult res = inner.evaluate(context);
     TSList<TargetCode> pre = new TSList<>(res.preEffect);
     for (Binding binding : new ReverseIterable<>(context.scope.atLevel())) {
-      pre.add(binding.drop(context, location));
+      pre.add(context.target.drop(context, location, binding));
     }
     context.popScope();
     return new EvaluateResult(

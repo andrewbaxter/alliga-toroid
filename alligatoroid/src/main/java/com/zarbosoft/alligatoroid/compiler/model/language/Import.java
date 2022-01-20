@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
@@ -9,7 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.FutureValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
 import com.zarbosoft.rendaw.common.ROPair;
 
@@ -32,7 +33,7 @@ public class Import extends LanguageElement {
       context.moduleContext.errors.add(new WrongType(location, value, "module id"));
       return EvaluateResult.error;
     }
-    CompletableFuture<Value> importResult =
+    CompletableFuture<MortarValue> importResult =
         context.moduleContext.getModule(new ImportId((ModuleId) ((WholeOther) value).object));
     context.deferredErrors.add(new ROPair<>(location, importResult));
     return ectx.build(new FutureValue(importResult.exceptionally(e -> ErrorValue.error)));

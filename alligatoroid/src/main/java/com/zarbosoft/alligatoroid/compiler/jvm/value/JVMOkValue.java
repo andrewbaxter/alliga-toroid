@@ -1,36 +1,35 @@
-package com.zarbosoft.alligatoroid.compiler.mortar.value;
+package com.zarbosoft.alligatoroid.compiler.jvm.value;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.model.MortarBinding;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.AccessNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.BindNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.CallNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public interface OkValue extends MortarValue {
+public interface JVMOkValue extends JVMValue {
   @Override
-  public default EvaluateResult mortarCall(EvaluationContext context, Location location, MortarValue argument) {
+  public default EvaluateResult jvmCall(
+      EvaluationContext context, Location location, MortarValue argument) {
     context.moduleContext.errors.add(new CallNotSupported(location));
     return EvaluateResult.error;
   }
 
   @Override
-  public default EvaluateResult mortarAccess(EvaluationContext context, Location location, MortarValue field) {
+  public default EvaluateResult jvmAccess(
+      EvaluationContext context, Location location, MortarValue field) {
     context.moduleContext.errors.add(new AccessNotSupported(location));
     return EvaluateResult.error;
   }
 
   @Override
-  public default ROPair<TargetCode, MortarBinding> mortarBind(EvaluationContext context, Location location) {
+  public default ROPair<TargetCode, ? extends Binding> jvmBind(
+      EvaluationContext context, Location location) {
     context.moduleContext.errors.add(new BindNotSupported(location));
     return new ROPair<>(null, null);
-  }
-
-  @Override
-  default Location location() {
-    return null;
   }
 }

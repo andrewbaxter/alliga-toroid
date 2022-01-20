@@ -6,7 +6,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
 
 public class Call extends LanguageElement {
-  public  LanguageElement target;
+  public LanguageElement target;
   public LanguageElement argument;
 
   public Call(Location id, LanguageElement target, LanguageElement argument) {
@@ -19,6 +19,8 @@ public class Call extends LanguageElement {
   public EvaluateResult evaluate(EvaluationContext context) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     return ectx.build(
-        ectx.record(ectx.evaluate(target).call(context, location, ectx.evaluate(argument))));
+        ectx.record(
+            context.target.call(
+                context, location, ectx.evaluate(target), ectx.evaluate(argument))));
   }
 }

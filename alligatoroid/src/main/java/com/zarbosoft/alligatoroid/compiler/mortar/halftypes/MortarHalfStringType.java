@@ -1,7 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeString;
 
 import static org.objectweb.asm.Opcodes.ILOAD;
@@ -34,7 +34,7 @@ public class MortarHalfStringType extends MortarHalfObjectType {
   }
 
   @Override
-  public Value unlower(Object object) {
+  public MortarValue unlower(Object object) {
     return new WholeString((String) object);
   }
 }

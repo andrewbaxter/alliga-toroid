@@ -14,7 +14,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarProtocode;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -30,7 +30,7 @@ public class MortarHalfRecordType extends MortarHalfObjectType
   }
 
   @Override
-  public Value unlower(Object object) {
+  public MortarValue unlower(Object object) {
     Record source = (Record) object;
     final TSOrderedMap<Object, EvaluateResult> data = new TSOrderedMap<>();
     for (ROPair<Object, MortarHalfDataType> field : fields) {
@@ -47,7 +47,7 @@ public class MortarHalfRecordType extends MortarHalfObjectType
 
   @Override
   public EvaluateResult valueAccess(
-      EvaluationContext context, Location location, Value field0, MortarProtocode lower) {
+          EvaluationContext context, Location location, MortarValue field0, MortarProtocode lower) {
     WholeValue key = WholeValue.getWhole(context, location, field0);
     MortarHalfDataType field = fields.getOpt(key.concreteValue());
     if (field == null) {
@@ -59,9 +59,9 @@ public class MortarHalfRecordType extends MortarHalfObjectType
             location,
             new MortarProtocode() {
               @Override
-              public JVMSharedCodeElement lower(EvaluationContext context) {
+              public JVMSharedCodeElement mortarHalfLower(EvaluationContext context) {
                 JVMSharedCode out = new JVMSharedCode();
-                out.add(lower.lower(context));
+                out.add(lower.mortarHalfLower(context));
                 out.add(
                     JVMSharedCode.callMethod(
                         context.sourceLocation(location),
@@ -74,7 +74,7 @@ public class MortarHalfRecordType extends MortarHalfObjectType
               }
 
               @Override
-              public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
+              public JVMSharedCodeElement mortarDrop(EvaluationContext context, Location location) {
                 return null;
               }
             }));

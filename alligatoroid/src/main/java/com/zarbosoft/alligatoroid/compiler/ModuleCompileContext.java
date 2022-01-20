@@ -10,7 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.Value;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -36,7 +36,7 @@ public class ModuleCompileContext {
    * re-semiserializing artifacts from other modules.
    */
   public final TSMap<ObjId<Exportable>, ArtifactId> backArtifactLookup = new TSMap<>();
-  private final TSMap<ImportId, CompletableFuture<Value>> modules = new TSMap<>();
+  private final TSMap<ImportId, CompletableFuture<MortarValue>> modules = new TSMap<>();
 
   public ModuleCompileContext(
       ImportId importId, CompileContext compileContext, ImportPath importPath) {
@@ -60,7 +60,7 @@ public class ModuleCompileContext {
         });
   }
 
-  public CompletableFuture<Value> getModule(ImportId importId) {
+  public CompletableFuture<MortarValue> getModule(ImportId importId) {
     return modules.getCreate(
         importId,
         () -> {
@@ -114,7 +114,7 @@ public class ModuleCompileContext {
                        */
                       throw new Assertion();
                     }
-                    final Value out = (Value) lookupRef(semi.result().root);
+                    final MortarValue out = (MortarValue) lookupRef(semi.result().root);
                     if (out == null) {
                       /** Shouldn't happen unless someone messes with the cache data directly. */
                       throw new Assertion();
