@@ -6,10 +6,11 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.rendaw.common.ROPair;
+
+import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstKey;
+import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataStackValue.nullValue;
 
 public class Bind extends LanguageElement {
   public LanguageElement key;
@@ -24,7 +25,7 @@ public class Bind extends LanguageElement {
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
-    WholeValue key = WholeValue.getWhole(context, location, ectx.evaluate(this.key));
+    final Object key = assertConstKey(context, location, ectx.evaluate(this.key));
     Value value = ectx.evaluate(this.value);
     if (key == null) {
       context.scope.error = true;
@@ -32,11 +33,11 @@ public class Bind extends LanguageElement {
     }
     Binding old = context.scope.remove(key);
     if (old != null) {
-      ectx.recordPre(context.target.drop(context, location, old));
+      ectx.recordPre(old.dropCode(context, location));
     }
-    ROPair<TargetCode, ? extends Binding> bound = context.target.bind(context, location, value);
+    ROPair<TargetCode, Binding> bound = value.bind(context, location);
     context.scope.put(key, bound.second);
     ectx.recordPre(bound.first);
-    return ectx.build(NullValue.value);
+    return ectx.build(nullValue);
   }
 }

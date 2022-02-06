@@ -3,7 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.jvm;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfDataType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfNullType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarNullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Tuple;
 import com.zarbosoft.rendaw.common.ROList;
@@ -26,7 +26,7 @@ public class JVMUtils {
     Object outRaw = spec.data.getOpt("out");
     JVMHalfDataType returnType = null;
     JVMSharedDataDescriptor returnDescriptor;
-    if (outRaw == null || outRaw == MortarHalfNullType.type) {
+    if (outRaw == null || outRaw == MortarNullType.type) {
       returnDescriptor = JVMSharedDataDescriptor.VOID;
     } else {
       JVMHalfDataType inJvmType = (JVMHalfDataType) outRaw;

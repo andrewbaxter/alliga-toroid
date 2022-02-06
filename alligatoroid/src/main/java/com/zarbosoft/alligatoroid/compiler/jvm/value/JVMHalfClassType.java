@@ -17,16 +17,12 @@ import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
-import com.zarbosoft.alligatoroid.compiler.model.error.ModuleError;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeBool;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeInt;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeString;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROTuple;
@@ -89,23 +85,23 @@ public class JVMHalfClassType extends JVMHalfObjectType
   }
 
   public static JVMHalfDataType getArgTupleInner(Value value) {
-    if (value instanceof WholeValue) {
-      return ((WholeValue) value)
+    if (value instanceof ConstPrimitive) {
+      return ((ConstPrimitive) value)
           .dispatch(
-              new WholeValue.Dispatcher<JVMHalfDataType>() {
+              new ConstPrimitive.Dispatcher<JVMHalfDataType>() {
                 @Override
-                public JVMHalfDataType handleString(WholeString value) {
+                public JVMHalfDataType handleString(ConstString value) {
                   return JVMHalfStringType.value;
                 }
 
                 @Override
-                public JVMHalfDataType handleBool(WholeBool value) {
-                  return JVMHalfBoolType.value;
+                public JVMHalfDataType handleBool(ConstBool value) {
+                  return JVMHalfBoolType.type;
                 }
 
                 @Override
-                public JVMHalfDataType handleInt(WholeInt value) {
-                  return JVMHalfIntType.value;
+                public JVMHalfDataType handleInt(ConstInt value) {
+                  return JVMHalfIntType.type;
                 }
               });
     } else if (value instanceof JVMHalfDataType) {
@@ -113,7 +109,7 @@ public class JVMHalfClassType extends JVMHalfObjectType
     } else throw new Assertion();
   }
 
-  public static ROTuple getArgTuple(MortarValue value) {
+  public static ROTuple getArgTuple(VariableDataStackValue value) {
     if (value instanceof LooseTuple) {
       List data = new ArrayList();
       for (EvaluateResult e : ((LooseTuple) value).data) {
@@ -143,7 +139,7 @@ public class JVMHalfClassType extends JVMHalfObjectType
       Location location,
       TSMap<String, TSList<JVMMethodFieldType>> methods,
       String name,
-      MortarValue argument) {
+      VariableDataStackValue argument) {
     if (!resolveInternals(context, location)) return null;
     ROTuple argTuple = getArgTuple(argument);
     ROList<JVMMethodFieldType> candidates = methods.getOpt(name);
@@ -193,20 +189,20 @@ public class JVMHalfClassType extends JVMHalfObjectType
   public boolean resolveInternals(EvaluationContext context, Location location) {
     boolean out = resolveInternals(context);
     if (!out) {
-      context.moduleContext.errors.add(new ModuleError(location));
+      context.moduleContext.errors.add(Error.moduleError.toError(location));
     }
     return out;
   }
 
   @Override
   public EvaluateResult mortarAccess(
-      EvaluationContext context, Location location, MortarValue field0) {
+      EvaluationContext context, Location location, VariableDataStackValue field0) {
     if (!resolveInternals(context, location)) return EvaluateResult.error;
-    WholeValue key = WholeValue.getWhole(context, location, field0);
+    ConstPrimitive key = ConstPrimitive.getWhole(context, location, field0);
     if (key.dispatch(
-        new WholeValue.DefaultDispatcher<Boolean>(false) {
+        new ConstPrimitive.DefaultDispatcher<Boolean>(false) {
           @Override
-          public Boolean handleString(WholeString value) {
+          public Boolean handleString(ConstString value) {
             return ACCESS_NEW.equals(value.value);
           }
         })) {
@@ -221,9 +217,9 @@ public class JVMHalfClassType extends JVMHalfObjectType
 
   @Override
   public EvaluateResult valueAccess(
-      EvaluationContext context, Location location, MortarValue field0, JVMProtocode lower) {
+          EvaluationContext context, Location location, VariableDataStackValue field0, JVMProtocode lower) {
     if (!resolveInternals(context, location)) return EvaluateResult.error;
-    WholeValue key = WholeValue.getWhole(context, location, field0);
+    ConstPrimitive key = ConstPrimitive.getWhole(context, location, field0);
     if (!fields.contains((String) key.concreteValue())) {
       context.moduleContext.errors.add(new NoField(location, key));
       return EvaluateResult.error;

@@ -4,16 +4,18 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarCarry;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarBuiltin;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
+import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.MortarBuiltin;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -29,6 +31,7 @@ import java.lang.reflect.Modifier;
 
 import static com.zarbosoft.alligatoroid.compiler.Meta.LANGUAGE;
 import static com.zarbosoft.alligatoroid.compiler.Meta.OTHER_AUTO_GRAPH;
+import static com.zarbosoft.alligatoroid.compiler.Meta.autoMortarHalfDataType;
 import static com.zarbosoft.alligatoroid.compiler.Meta.autoMortarHalfStaticMethodType;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
@@ -56,7 +59,7 @@ public class Builtin {
             builtinSingletons0,
             MortarBuiltin.class,
             "");
-    for (ROPair<String, Exportable> o : new ROPair[] {new ROPair("null", NullValue.value)}) {
+    for (ROPair<String, Exportable> o : new ROPair[] {new ROPair("null", ConstNull.value)}) {
       processSingleton(builtinSingletonIndexes0, builtinSingletons0, o);
       String key = "_singleton_" + o.first;
       builtinToSemiKey0.put(o.second, key);
@@ -156,10 +159,10 @@ public class Builtin {
         semikeyToBuiltin.put(key, value);
       } else {
         processSingleton(builtinSingletonIndexes, builtinSingletons, data);
-        if (data instanceof MortarValue) {
-          values.put(name, EvaluateResult.pure((MortarValue) data));
+        if (data instanceof VariableDataStackValue) {
+          values.put(name, EvaluateResult.pure((VariableDataStackValue) data));
         } else {
-          values.put(name, EvaluateResult.pure(new WholeOther(data)));
+          values.put(name, EvaluateResult.pure(new MortarObject(autoMortarHalfDataType(data.getClass()), carry(data))));
         }
       }
     }
@@ -172,6 +175,30 @@ public class Builtin {
       values.put(name, EvaluateResult.pure(autoMortarHalfStaticMethodType(klass, m.getName())));
     }
     return new LooseRecord(values);
+  }
+
+  public static MortarCarry carry(Object data) {
+  return new MortarCarry() {
+    @Override
+    public boolean isWhole() {
+    return true;
+    }
+
+    @Override
+    public Object whole() {
+    return data;
+    }
+
+    @Override
+    public JVMSharedCodeElement half(EvaluationContext context) {
+      throw new Assertion();
+    }
+
+    @Override
+    public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
+      throw new Assertion();
+    }
+  };
   }
 
   @Retention(RetentionPolicy.RUNTIME)

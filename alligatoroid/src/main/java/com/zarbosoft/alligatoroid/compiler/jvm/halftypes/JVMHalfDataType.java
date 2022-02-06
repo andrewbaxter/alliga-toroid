@@ -12,14 +12,14 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.error.AccessNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import static org.objectweb.asm.Opcodes.POP;
 
 public interface JVMHalfDataType extends JVMHalfType {
   default EvaluateResult valueAccess(
-      EvaluationContext context, Location location, MortarValue field, JVMProtocode lower) {
+          EvaluationContext context, Location location, VariableDataStackValue field, JVMProtocode lower) {
     context.moduleContext.errors.add(new AccessNotSupported(location));
     return EvaluateResult.error;
   }
@@ -40,12 +40,12 @@ public interface JVMHalfDataType extends JVMHalfType {
         this,
         new JVMProtocode() {
           @Override
-          public JVMSharedCodeElement jvmLower(EvaluationContext context) {
+          public JVMSharedCodeElement code(EvaluationContext context) {
             return code;
           }
 
           @Override
-          public JVMSharedCodeElement jvmDrop(EvaluationContext context, Location location) {
+          public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
             return JVMSharedCode.inst(POP);
           }
         });

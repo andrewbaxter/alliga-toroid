@@ -6,13 +6,13 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
 import com.zarbosoft.rendaw.common.ROPair;
 
 public interface JVMValue extends Value {
-  EvaluateResult jvmCall(EvaluationContext context, Location location, MortarValue argument);
+  EvaluateResult jvmCall(EvaluationContext context, Location location, VariableDataStackValue argument);
 
-  EvaluateResult jvmAccess(EvaluationContext context, Location location, MortarValue field);
+  EvaluateResult jvmAccess(EvaluationContext context, Location location, VariableDataStackValue field);
 
   TargetCode jvmDrop(EvaluationContext context, Location location);
 

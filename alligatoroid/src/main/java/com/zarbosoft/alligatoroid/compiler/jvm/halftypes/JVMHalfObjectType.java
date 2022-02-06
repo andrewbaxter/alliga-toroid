@@ -29,12 +29,12 @@ public class JVMHalfObjectType implements JVMHalfDataType {
         this,
         new JVMProtocode() {
           @Override
-          public JVMSharedCodeElement jvmLower(EvaluationContext context) {
+          public JVMSharedCodeElement code(EvaluationContext context) {
             return code;
           }
 
           @Override
-          public JVMSharedCodeElement jvmDrop(EvaluationContext context, Location location) {
+          public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
             return JVMSharedCode.inst(POP);
           }
         });

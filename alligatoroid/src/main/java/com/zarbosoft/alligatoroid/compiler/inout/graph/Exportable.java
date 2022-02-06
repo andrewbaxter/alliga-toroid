@@ -6,7 +6,7 @@ import com.zarbosoft.rendaw.common.ROList;
 
 public interface Exportable {
   /** Called after deferred initialization in graph desemiserialization. */
-  void postInit();
+  default void postInit() {}
 
   Exportable type();
 

@@ -4,20 +4,18 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
+import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 
 public class Wrap extends LanguageElement {
-  public Object data;
+  public Value value;
 
-  public Wrap(Location id, Object data) {
+  public Wrap(Location id, Value value) {
     super(id, false);
-    this.data = data;
+    this.value = value;
   }
 
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
-    if (data instanceof Value) return EvaluateResult.pure((Value) data);
-    else return EvaluateResult.pure(new WholeOther(data));
+    return EvaluateResult.pure(value);
   }
 }

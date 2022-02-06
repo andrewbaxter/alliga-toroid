@@ -11,8 +11,7 @@ import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.rendaw.common.ROTuple;
 
@@ -33,7 +32,7 @@ public class JVMPseudoConstructor
 
   @Override
   public EvaluateResult jvmCall(
-      EvaluationContext context, Location location, MortarValue argument) {
+      EvaluationContext context, Location location, VariableDataStackValue argument) {
     if (!base.resolveInternals(context, location)) return EvaluateResult.error;
     ROTuple argTuple = getArgTuple(argument);
     JVMUtils.MethodSpecDetails real = base.constructors.getOpt(argTuple);
@@ -46,7 +45,7 @@ public class JVMPseudoConstructor
     JVMSharedCodeElement code =
         JVMSharedCode.instantiate(
             context.sourceLocation(location), base.jvmName, real.jvmSigDesc, argCode);
-    if (real.returnType == null) return new EvaluateResult(code, null, NullValue.value);
+    if (real.returnType == null) return new EvaluateResult(code, null, ConstNull.value);
     else return EvaluateResult.pure(real.returnType.stackAsValue(code));
   }
 

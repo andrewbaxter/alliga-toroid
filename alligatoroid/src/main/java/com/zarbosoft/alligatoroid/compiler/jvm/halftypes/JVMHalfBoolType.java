@@ -6,7 +6,7 @@ import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.ISTORE;
 
 public class JVMHalfBoolType implements JVMHalfDataType {
-  public static final JVMHalfBoolType value = new JVMHalfBoolType();
+  public static final JVMHalfBoolType type = new JVMHalfBoolType();
 
   private JVMHalfBoolType() {}
 

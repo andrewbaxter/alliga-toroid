@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
@@ -11,6 +12,8 @@ import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
+
+import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstString;
 
 public class BundleValue implements SimpleValue, AutoBuiltinExportable, LeafExportable {
   private static final String GRAPH_KEY_ROOT = "root";
@@ -29,16 +32,13 @@ public class BundleValue implements SimpleValue, AutoBuiltinExportable, LeafExpo
   }
 
   @Override
-  public EvaluateResult mortarAccess(EvaluationContext context, Location location, MortarValue field) {
-    WholeValue key = WholeValue.getWhole(context, location, field);
+  public EvaluateResult access(EvaluationContext context, Location location, Value field) {
+    final String key = assertConstString(context, location, field);
     if (key == null) return EvaluateResult.error;
-
-    CompletableFuture<MortarValue> importResult =
+    CompletableFuture<Value> importResult =
         context.moduleContext.getModule(
             new ImportId(
-                new BundleModuleSubId(
-                    id.moduleId,
-                    Paths.get(root).resolve((String) key.concreteValue()).toString())));
+                new BundleModuleSubId(id.moduleId, Paths.get(root).resolve(key).toString())));
     return EvaluateResult.pure(new FutureValue(importResult));
   }
 }

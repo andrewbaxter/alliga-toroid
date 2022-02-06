@@ -6,11 +6,9 @@ import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMExternClassBuilder;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfAutoObjectType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeString;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarAutoObjectType;
+import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -42,17 +40,17 @@ public class JVMHalfExternClassType extends JVMHalfClassType {
   public boolean resolveInternals(EvaluationContext context) {
     if (setupError) return false;
     if (setupDone) return true;
-    MortarHalfAutoObjectType builderType =
+    MortarAutoObjectType builderType =
         Meta.autoMortarHalfDataTypes.get(JVMExternClassBuilder.class);
     final SemiserialModule res =
         Evaluator.evaluate(
             context.moduleContext,
             new TSList<>(setup),
-            new TSOrderedMap<WholeValue, MortarValue>()
-                .put(new WholeString("class"), this)
+            new TSOrderedMap<Object, VariableDataStackValue>()
+                .put("class", this)
                 .put(
-                    new WholeString("builder"),
-                    builderType.unlower(new JVMExternClassBuilder(this))));
+                    "builder",
+                    builderType.constAsValue(new JVMExternClassBuilder(this))));
     if (res == null) {
       setupError = true;
       return false;

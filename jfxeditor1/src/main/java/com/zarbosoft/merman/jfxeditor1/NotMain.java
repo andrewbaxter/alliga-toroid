@@ -2,6 +2,7 @@ package com.zarbosoft.merman.jfxeditor1;
 
 import com.zarbosoft.alligatoroid.compiler.Alligatorus;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
+import com.zarbosoft.alligatoroid.compiler.model.error.WarnUnexpected;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.modules.StderrLogger;
@@ -393,7 +394,7 @@ public class NotMain extends Application {
                                       error.dispatch(
                                           new Error.Dispatcher<Object>() {
                                             @Override
-                                            public Object handle(Error.LocationlessError e) {
+                                            public Object handle(WarnUnexpected e) {
                                               if (!rootModuleSpec.moduleId.equals(
                                                   module.getKey().moduleId)) return null;
                                               if (!layout.getChildren().contains(messages))

@@ -7,16 +7,22 @@ import com.zarbosoft.rendaw.common.Format;
 import java.util.concurrent.ExecutionException;
 
 public class Unexpected extends Error.LocationError {
-  public final Throwable exception;
-
   public Unexpected(Location location, Throwable exception) {
-    super(location);
-    if (exception instanceof PreError || exception instanceof ExecutionException) throw new Assertion();
-    this.exception = exception;
+    super(location, new PreError(exception));
+    if (exception instanceof PreError || exception instanceof ExecutionException)
+      throw new Assertion();
   }
 
-  @Override
-  public String toString() {
-    return Format.format("An unexpected error occurred while processing: %s", exception);
+  private static class PreError extends Error.PreError {
+    private final Throwable exception;
+
+    public PreError(Throwable exception) {
+      this.exception = exception;
+    }
+
+    @Override
+    public String toString() {
+      return Format.format("An unexpected error occurred while processing: %s", exception);
+    }
   }
 }

@@ -10,8 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.rendaw.common.Assertion;
 
@@ -20,11 +19,6 @@ public class JVMConstructor
   private final Record spec;
   public JVMHalfClassType base;
   public JVMUtils.MethodSpecDetails specDetails;
-
-  @Override
-  public Location location() {
-    return SimpleValue.super.location();
-  }
 
   public JVMConstructor(JVMHalfClassType base, Record spec) {
     this.base = base;
@@ -38,20 +32,25 @@ public class JVMConstructor
   }
 
   @Override
+  public Location location() {
+    return SimpleValue.super.location();
+  }
+
+  @Override
   public void postInit() {
     specDetails = JVMUtils.methodSpecDetails(spec);
   }
 
   @Override
   public EvaluateResult mortarCall(
-      EvaluationContext context, Location location, MortarValue argument) {
+      EvaluationContext context, Location location, VariableDataStackValue argument) {
     if (!base.resolveInternals(context, location)) return EvaluateResult.error;
     JVMSharedCode code = new JVMSharedCode();
     JVMTargetModuleContext.convertFunctionArgument(context, code, argument);
     code.add(
         JVMSharedCode.instantiate(
             context.sourceLocation(location), base.jvmName, specDetails.jvmSigDesc, code));
-    return new EvaluateResult(code, null, NullValue.value);
+    return new EvaluateResult(code, null, ConstNull.value);
   }
 
   @Override

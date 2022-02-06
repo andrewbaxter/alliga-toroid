@@ -3,7 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 
 public class Call extends LanguageElement {
   public LanguageElement target;
@@ -19,8 +19,6 @@ public class Call extends LanguageElement {
   public EvaluateResult evaluate(EvaluationContext context) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     return ectx.build(
-        ectx.record(
-            context.target.call(
-                context, location, ectx.evaluate(target), ectx.evaluate(argument))));
+        ectx.record(ectx.evaluate(target).call(context, location, ectx.evaluate(argument))));
   }
 }

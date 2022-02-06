@@ -24,12 +24,12 @@ public class JVMHalfBinding implements Binding {
         type.asValue(
             new JVMProtocode() {
               @Override
-              public JVMSharedCodeElement jvmLower(EvaluationContext context) {
+              public JVMSharedCodeElement code(EvaluationContext context) {
                 return new JVMSharedCode().addVarInsn(type.loadOpcode(), key);
               }
 
               @Override
-              public JVMSharedCodeElement jvmDrop(EvaluationContext context, Location location) {
+              public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
                 return null;
               }
             }));

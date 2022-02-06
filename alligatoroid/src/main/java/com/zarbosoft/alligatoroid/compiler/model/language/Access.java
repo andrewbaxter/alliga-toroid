@@ -3,7 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 
 public class Access extends LanguageElement {
   public LanguageElement base;
@@ -20,7 +20,7 @@ public class Access extends LanguageElement {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     return ectx.build(
         ectx.record(
-            context.target.access(
-                context, location, ectx.evaluate(this.base), ectx.evaluate(this.key))));
+            ectx.evaluate(this.base).access(
+                context, location, ectx.evaluate(this.key))));
   }
 }

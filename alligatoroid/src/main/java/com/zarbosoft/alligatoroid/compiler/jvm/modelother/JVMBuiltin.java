@@ -11,25 +11,24 @@ import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfHalfArrayType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfIntType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfLongType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMHalfStringType;
-import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMConcreteClassBuilder;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType;
 import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfExternClassType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
 
 @Builtin.Aggregate
 public class JVMBuiltin {
   public static final JVMHalfStringType string = JVMHalfStringType.value;
-  public static final JVMHalfIntType _int = JVMHalfIntType.value;
+  public static final JVMHalfIntType _int = JVMHalfIntType.type;
   public static final JVMHalfByteType _byte = JVMHalfByteType.value;
   public static final JVMHalfCharType _char = JVMHalfCharType.value;
   public static final JVMHalfDoubleType _double = JVMHalfDoubleType.value;
   public static final JVMHalfFloatType _float = JVMHalfFloatType.value;
   public static final JVMHalfLongType _long = JVMHalfLongType.value;
-  public static final JVMHalfBoolType bool = JVMHalfBoolType.value;
+  public static final JVMHalfBoolType bool = JVMHalfBoolType.type;
 
-  public static JVMHalfHalfArrayType array(MortarValue elementType) {
+  public static JVMHalfHalfArrayType array(VariableDataStackValue elementType) {
     return new JVMHalfHalfArrayType((JVMHalfDataType) elementType);
   }
 

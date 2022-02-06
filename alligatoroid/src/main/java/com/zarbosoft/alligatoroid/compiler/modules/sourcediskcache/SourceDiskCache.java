@@ -3,15 +3,12 @@ package com.zarbosoft.alligatoroid.compiler.modules.sourcediskcache;
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.model.error.CacheUnexpectedPre;
-import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.ImportNotFoundPre;
-import com.zarbosoft.alligatoroid.compiler.model.error.RemoteModuleHashMismatch;
 import com.zarbosoft.alligatoroid.compiler.model.error.RemoteModuleHashMismatchPre;
-import com.zarbosoft.alligatoroid.compiler.model.error.RemoteModuleProtocolUnsupported;
+import com.zarbosoft.alligatoroid.compiler.model.error.RemoteModuleProtocolUnsupportedPre;
 import com.zarbosoft.alligatoroid.compiler.model.error.WarnUnexpected;
 import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
-import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
@@ -155,24 +152,13 @@ public class SourceDiskCache implements SourceResolver {
                               return new Utils.SHA256().add(downloadPath).buildHex();
                             });
                     if (!downloadHash.equals(id.hash)) {
-                      throw new Error.PreError() {
-                        @Override
-                        public Error toError(Location location) {
-                          return new RemoteModuleHashMismatch(
-                              location, id.url, id.hash, downloadHash);
-                        }
-                      };
+                      throw new RemoteModuleHashMismatchPre(id.url, id.hash, downloadHash);
                     }
                     return new Source(id.hash, downloadPath);
                   }
                 }
               default:
-                throw new Error.PreError() {
-                  @Override
-                  public Error toError(Location location) {
-                    return new RemoteModuleProtocolUnsupported(location, id.url);
-                  }
-                };
+                throw new RemoteModuleProtocolUnsupportedPre(id.url);
             }
           }
 

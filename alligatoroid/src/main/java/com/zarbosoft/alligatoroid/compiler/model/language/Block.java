@@ -5,8 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -26,7 +25,7 @@ public class Block extends LanguageElement {
     for (LanguageElement child : children) {
       if (lastRes != null) {
         pre.add(lastRes.preEffect);
-        pre.add(context.target.drop(context, lastLocation, lastRes.value));
+        pre.add(lastRes.value.drop(context, lastLocation));
         pre.add(lastRes.postEffect);
       }
       lastLocation = child.location();
@@ -39,7 +38,7 @@ public class Block extends LanguageElement {
       last = lastRes.value;
       post = lastRes.postEffect;
     } else {
-      last = NullValue.value;
+      last = ConstNull.value;
     }
     return new EvaluateResult(context.target.merge(context, location, pre), post, last);
   }

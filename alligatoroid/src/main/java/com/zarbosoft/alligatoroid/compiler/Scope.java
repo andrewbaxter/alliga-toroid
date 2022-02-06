@@ -1,9 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
-import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
-import com.zarbosoft.alligatoroid.compiler.model.MortarBinding;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -19,19 +17,19 @@ public class Scope {
     this.parent = parent;
   }
 
-  public void put(WholeValue key, Binding binding) {
-    data.putNew(key.concreteValue(), binding);
+  public void put(Object key, Binding binding) {
+    data.putNew(key, binding);
   }
 
-  public Binding remove(WholeValue key) {
-    return data.removeGet(key.concreteValue());
+  public Binding remove(Object key) {
+    return data.removeGet(key);
   }
 
-  public Binding get(WholeValue key) {
-    if (error) return ErrorBinding.binding;
+  public Binding get(Object key) {
+    if (error) return ErrorValue.binding;
     Scope at = this;
     while (at != null) {
-      Binding out = at.data.getOpt(key.concreteValue());
+      Binding out = at.data.getOpt(key);
       if (out != null) return out;
       at = at.parent;
     }

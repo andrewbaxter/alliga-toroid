@@ -5,8 +5,9 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
+
+import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstKey;
 
 public class Local extends LanguageElement {
   public LanguageElement key;
@@ -19,13 +20,13 @@ public class Local extends LanguageElement {
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
-    WholeValue key = WholeValue.getWhole(context, location, ectx.evaluate(this.key));
+    final Object key = assertConstKey(context, location, ectx.evaluate(this.key));
     if (key == null) return EvaluateResult.error;
     Binding value = context.scope.get(key);
     if (value == null) {
       context.moduleContext.errors.add(new NoField(location, key));
       return EvaluateResult.error;
     }
-    return ectx.build(ectx.record(context.target.fork(context, location, value)));
+    return ectx.build(ectx.record(value.fork(context, location)));
   }
 }

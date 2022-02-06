@@ -14,7 +14,7 @@ import com.zarbosoft.alligatoroid.compiler.model.error.DeserializeUnknownLanguag
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Assertion;

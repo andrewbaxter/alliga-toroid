@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.model.error;
 
-import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 
 public class UnexportablePre extends Error.PreError {
@@ -11,7 +11,7 @@ public class UnexportablePre extends Error.PreError {
   }
 
   @Override
-  public Error toError(Location location) {
-    return new Unexportable(location, accessPath);
+  public String toString() {
+    return Format.format("Object at [%s] cannot be exported", accessPath);
   }
 }

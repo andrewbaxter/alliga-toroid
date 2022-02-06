@@ -1,29 +1,28 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class EvaluateResult<V extends Value> {
+public class EvaluateResult {
   public static final EvaluateResult error = new EvaluateResult(null, null, ErrorValue.error);
-  /** TargetCode or null if no effect */
+  /** Code that results in no stack change. */
   public final TargetCode preEffect;
-
+  /** Code that results in no stack change. */
   public final TargetCode postEffect;
 
-  public final V value;
+  public final Value value;
 
-  public EvaluateResult(TargetCode preEffect, TargetCode postEffect, V value) {
+  public EvaluateResult(TargetCode preEffect, TargetCode postEffect, Value value) {
     this.preEffect = preEffect;
     this.postEffect = postEffect;
     this.value = value;
   }
 
-  public static <T extends Value> EvaluateResult<T> pure(T value) {
-    return new EvaluateResult<>(null, null, value);
+  public static <T extends Value> EvaluateResult pure(T value) {
+    return new EvaluateResult(null, null, value);
   }
 
   public static class Context {

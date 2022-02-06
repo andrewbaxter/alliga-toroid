@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
+import com.zarbosoft.alligatoroid.compiler.BindingKey;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
@@ -21,6 +22,7 @@ import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.Iterator;
 
+import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.BASTORE;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
@@ -29,6 +31,8 @@ import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.FSTORE;
 import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.GETSTATIC;
+import static org.objectweb.asm.Opcodes.IALOAD;
+import static org.objectweb.asm.Opcodes.IASTORE;
 import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.ICONST_1;
 import static org.objectweb.asm.Opcodes.ICONST_2;
@@ -42,6 +46,7 @@ import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.ISTORE;
 import static org.objectweb.asm.Opcodes.LSTORE;
 import static org.objectweb.asm.Opcodes.NEW;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
 
 public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
   public static final JVMSharedCodeElement boxBool =
@@ -84,6 +89,14 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
     return code;
   }
 
+  public static JVMSharedCodeElement setField(
+      int location, JVMSharedJVMName klass, String field, JVMSharedDataDescriptor fieldDesc) {
+    final JVMSharedCode code = new JVMSharedCode();
+    if (location >= 0) code.line(location);
+    code.add(new FieldInsnNode(PUTFIELD, klass.value, field, fieldDesc.value));
+    return code;
+  }
+
   public static JVMSharedCodeElement accessStaticField(
       int location, JVMSharedJVMName klass, String field, JVMSharedDataDescriptor fieldDesc) {
     final JVMSharedCode code = new JVMSharedCode();
@@ -105,6 +118,20 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
     final JVMSharedCode code = new JVMSharedCode();
     if (location >= 0) code.line(location);
     code.add(new MethodInsnNode(INVOKESTATIC, klass.value, method, methodDesc.value, false));
+    return code;
+  }
+
+  public static JVMSharedCodeElement accessArray(int location) {
+    final JVMSharedCode code = new JVMSharedCode();
+    if (location >= 0) code.line(location);
+    code.add(new InsnNode(IALOAD));
+    return code;
+  }
+
+  public static JVMSharedCodeElement setArray(int location) {
+    final JVMSharedCode code = new JVMSharedCode();
+    if (location >= 0) code.line(location);
+    code.add(new InsnNode(IASTORE));
     return code;
   }
 
@@ -148,6 +175,10 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
 
   public static JVMSharedCodeElement cast(JVMSharedDataDescriptor toClass) {
     return new JVMSharedCodeInstruction(new TypeInsnNode(CHECKCAST, toClass.value));
+  }
+
+  public static JVMSharedCodeElement bool_(boolean value) {
+    return inst(value ? ICONST_1 : ICONST_0);
   }
 
   public JVMSharedCode addString(String value) {
@@ -296,11 +327,7 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
     return this;
   }
 
-  public JVMSharedCodeElement bool_(boolean value) {
-    return inst(value ? ICONST_1 : ICONST_0);
-  }
-
-  public JVMSharedCode addVarInsn(int opcode, Object key) {
+  public JVMSharedCode addVarInsn(int opcode, BindingKey key) {
     return add(new JVMSharedCodeStoreLoad(opcode, key));
   }
 

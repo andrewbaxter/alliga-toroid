@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.model.error;
 
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.Format;
 
 import java.util.concurrent.ExecutionException;
 
@@ -16,7 +17,7 @@ public class CacheUnexpectedPre extends Error.PreError {
     }
 
     @Override
-    public Error toError(Location location) {
-        return new CacheUnexpected(location, cachePath, exception);
+    public String toString() {
+        return Format.format("An unexpected error occurred while loading cache file: %s", exception);
     }
 }

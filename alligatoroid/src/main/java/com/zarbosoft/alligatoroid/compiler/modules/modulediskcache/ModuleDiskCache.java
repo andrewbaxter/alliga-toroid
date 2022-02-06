@@ -3,14 +3,13 @@ package com.zarbosoft.alligatoroid.compiler.modules.modulediskcache;
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.Deserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto.AutoTreeMeta;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto.TypeInfo;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
-import com.zarbosoft.alligatoroid.compiler.model.error.LocationlessUnexpected;
+import com.zarbosoft.alligatoroid.compiler.model.error.WarnUnexpected;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
@@ -113,7 +112,7 @@ public class ModuleDiskCache implements ModuleResolver {
       } catch (Error.PreError e) {
         context.logger.warn(e);
       } catch (Exception e) {
-        context.logger.warn(new LocationlessUnexpected(e));
+        context.logger.warn(new WarnUnexpected(source.path.toString(), e));
       }
     } while (false);
 
@@ -125,14 +124,14 @@ public class ModuleDiskCache implements ModuleResolver {
       try {
         Files.writeString(hashPath, source.hash);
       } catch (Throwable e) {
-        context.logger.warn(new LocationlessUnexpected(e));
+        context.logger.warn(new WarnUnexpected(source.path.toString(), e));
       }
       Utils.recursiveDelete(outputPath);
       try (OutputStream stream = Files.newOutputStream(outputPath)) {
         Writer writer = new Writer(stream, (byte) ' ', 4);
         semisubMeta.serialize(writer, TypeInfo.fromClass(SemiserialModule.class), out.result());
       } catch (Throwable e) {
-        context.logger.warn(new LocationlessUnexpected(e));
+        context.logger.warn(new WarnUnexpected(source.path.toString(), e));
       }
     }
 

@@ -12,11 +12,10 @@ import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
-import com.zarbosoft.alligatoroid.compiler.model.ErrorBinding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NoExportValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.SimpleValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -39,33 +38,33 @@ public class JVMPseudoField implements SimpleValue, NoExportValue, Exportable, J
 
   @Override
   public TargetCode mortarDrop(EvaluationContext context, Location location) {
-    return lower.jvmDrop(context, location);
+    return lower.drop(context, location);
   }
 
   @Override
-  public MortarValue type() {
+  public VariableDataStackValue type() {
     throw new Assertion();
   }
 
   @Override
   public EvaluateResult jvmCall(
-      EvaluationContext context, Location location, MortarValue argument) {
+      EvaluationContext context, Location location, VariableDataStackValue argument) {
     if (!base.resolveInternals(context, location)) return EvaluateResult.error;
     JVMMethodFieldType real = base.findMethod(context, location, base.methodFields, name, argument);
     if (real == null) {
       return EvaluateResult.error;
     }
-    JVMSharedCode code = new JVMSharedCode().add(lower.jvmLower(context));
+    JVMSharedCode code = new JVMSharedCode().add(lower.code(context));
     JVMTargetModuleContext.convertFunctionArgument(context, code, argument);
     code.add(
         JVMSharedCode.callMethod(
             context.sourceLocation(location), base.jvmName, name, real.specDetails.jvmSigDesc));
-    if (real.specDetails.returnType == null) return new EvaluateResult(code, null, NullValue.value);
+    if (real.specDetails.returnType == null) return new EvaluateResult(code, null, ConstNull.value);
     else return EvaluateResult.pure(real.specDetails.returnType.stackAsValue(code));
   }
 
   @Override
-  public EvaluateResult jvmAccess(EvaluationContext context, Location location, MortarValue field) {
+  public EvaluateResult jvmAccess(EvaluationContext context, Location location, VariableDataStackValue field) {
     if (!base.resolveInternals(context, location)) return EvaluateResult.error;
     JVMHalfDataType real = base.dataFields.getOpt(name);
     if (real == null) {
@@ -78,12 +77,12 @@ public class JVMPseudoField implements SimpleValue, NoExportValue, Exportable, J
         field,
         new JVMProtocode() {
           @Override
-          public JVMSharedCodeElement jvmDrop(EvaluationContext context, Location location) {
-            return lower.jvmDrop(context, location);
+          public JVMSharedCodeElement drop(EvaluationContext context, Location location) {
+            return lower.drop(context, location);
           }
 
           @Override
-          public JVMSharedCodeElement jvmLower(EvaluationContext context) {
+          public JVMSharedCodeElement code(EvaluationContext context) {
             return JVMSharedCode.accessField(
                 context.sourceLocation(location), base.jvmName, name, real.jvmDesc());
           }
@@ -92,21 +91,21 @@ public class JVMPseudoField implements SimpleValue, NoExportValue, Exportable, J
 
   @Override
   public TargetCode jvmDrop(EvaluationContext context, Location location) {
-    return lower.jvmDrop(context, location);
+    return lower.drop(context, location);
   }
 
   @Override
   public ROPair<TargetCode, ? extends Binding> jvmBind(
       EvaluationContext context, Location location) {
-    if (!base.resolveInternals(context, location)) return new ROPair<>(null, ErrorBinding.binding);
+    if (!base.resolveInternals(context, location)) return new ROPair<>(null, ErrorValue.binding);
     JVMHalfDataType real = base.dataFields.getOpt(name);
     if (real == null) {
       context.moduleContext.errors.add(JVMError.noDataField(location, name));
-      return new ROPair<>(null, ErrorBinding.binding);
+      return new ROPair<>(null, ErrorValue.binding);
     }
     return real.valueBind(
         new JVMSharedCode()
-            .add(lower.jvmLower(context))
+            .add(lower.code(context))
             .add(
                 JVMSharedCode.accessField(
                     context.sourceLocation(location), base.jvmName, name, real.jvmDesc())));

@@ -8,6 +8,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.DynamicClassLoader;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedClass;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeInstruction;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
@@ -16,11 +17,14 @@ import com.zarbosoft.alligatoroid.compiler.model.error.Unexpected;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.language.Block;
+import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarNullType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.DataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.ROList;
@@ -29,6 +33,7 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
+import org.objectweb.asm.tree.InsnNode;
 
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -50,7 +55,7 @@ public class Evaluator {
       ModuleCompileContext moduleContext,
       ROList<LanguageElement> rootStatements,
       /** Only whole-ish values */
-      ROOrderedMap<WholeValue, MortarValue> initialScope) {
+      ROOrderedMap<Object, VariableDataStackValue> initialScope) {
     return instance.evaluateInner(moduleContext, rootStatements, initialScope);
   }
 
@@ -68,7 +73,7 @@ public class Evaluator {
       ModuleCompileContext moduleContext,
       ROList<LanguageElement> rootStatements,
       /** Only whole-ish values */
-      ROOrderedMap<WholeValue, MortarValue> initialScope) {
+      ROOrderedMap<Object, VariableDataStackValue> initialScope) {
     String className = GENERATED_CLASS_PREFIX + uniqueClass.getAndIncrement();
     JVMSharedJVMName jvmClassName =
         JVMSharedJVMName.fromNormalName(JVMSharedNormalName.fromString(className));
@@ -78,21 +83,18 @@ public class Evaluator {
         new MortarTargetModuleContext(JVMDescriptorUtils.jvmName(className));
     EvaluationContext context =
         new EvaluationContext(moduleContext, targetContext, new Scope(null));
-    for (ROPair<WholeValue, MortarValue> local : initialScope) {
-      context.scope.put(local.first, local.second.mortarBind(context, null).second);
+    for (ROPair<Object, VariableDataStackValue> local : initialScope) {
+      context.scope.put(local.first, local.second.bind(context, null).second);
     }
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
-    final Value evalResult =
+    final Value resultValue =
         ectx.record(
             new com.zarbosoft.alligatoroid.compiler.model.language.Scope(
                     null, new Block(null, rootStatements))
                 .evaluate(context));
-    if (evalResult == ErrorValue.error) {
+    if (resultValue == ErrorValue.error) {
       return null;
     }
-    MortarTargetModuleContext.HalfLowerResult lowered =
-        MortarTargetModuleContext.halfLower(context, evalResult);
-    EvaluateResult evaluateResult = ectx.build(null);
     for (ROPair<Location, CompletableFuture> d : context.deferredErrors) {
       try {
         Utils.await(d.second);
@@ -102,12 +104,28 @@ public class Evaluator {
         moduleContext.errors.add(new Unexpected(d.first, e));
       }
     }
+
+    MortarDataType resultType;
+    boolean resultIsVariable = false;
+
+    EvaluateResult evaluateResult = ectx.build(null);
+    TSList<TargetCode> codePieces = new TSList<>();
+    codePieces.add(evaluateResult.preEffect);
+    if (resultValue instanceof DataValue) {
+      resultType = ((DataValue) resultValue).mortarType();
+      if (resultValue instanceof VariableDataValue) {
+        resultIsVariable = true;
+        codePieces.add(
+            ((VariableDataValue) resultValue).mortarVaryCode(context, null).half(context));
+      } else {
+        codePieces.add(JVMSharedCodeInstruction.null_);
+      }
+    } else {
+      resultType = MortarNullType.type;
+    }
+    codePieces.add(evaluateResult.postEffect);
     JVMSharedCode code = new JVMSharedCode();
-    code.add(
-        targetContext.merge(
-            context,
-            null,
-            new TSList<>(evaluateResult.preEffect, lowered.valueCode, evaluateResult.postEffect)));
+    code.add(targetContext.merge(context, null, codePieces));
     if (moduleContext.errors.some()) {
       return null;
     }
@@ -119,8 +137,8 @@ public class Evaluator {
     }
     preClass.defineFunction(
         ENTRY_METHOD_NAME,
-        JVMSharedFuncDescriptor.fromParts(lowered.dataType.jvmDesc()),
-        new JVMSharedCode().add(code).addI(lowered.dataType.returnOpcode()),
+        JVMSharedFuncDescriptor.fromParts(resultType.jvmDesc()),
+        new JVMSharedCode().add(code).addI(resultType.returnOpcode()),
         new TSList<>());
     Class klass =
         DynamicClassLoader.loadTree(
@@ -128,16 +146,16 @@ public class Evaluator {
     for (ROPair<Object, String> e : Common.iterable(targetContext.transfers.iterator())) {
       uncheck(() -> klass.getDeclaredField(e.second).set(null, e.first));
     }
-    Object pass2;
+    Object resultVariable;
     try {
-      pass2 = klass.getMethod(ENTRY_METHOD_NAME).invoke(null);
+      resultVariable = klass.getMethod(ENTRY_METHOD_NAME).invoke(null);
     } catch (IllegalAccessException | NoSuchMethodException e) {
       throw new Assertion();
     } catch (InvocationTargetException e0) {
       final Throwable e = e0.getTargetException();
       if (e.getClass() == Pass2Failed.class) {
         // Errors in module errors already
-        pass2 = null;
+        resultVariable = null;
       } else {
         Location location = null; // TODO convert whole stack?
         for (StackTraceElement t : new ReverseIterable<>(Arrays.asList(e.getStackTrace()))) {
@@ -160,6 +178,8 @@ public class Evaluator {
     }
     if (moduleContext.errors.some()) return null;
     return Semiserializer.semiserialize(
-        moduleContext, lowered.dataType.unlower(pass2), rootStatements.last().location);
+        moduleContext,
+        resultIsVariable ? resultType.constAsValue(resultVariable) : resultValue,
+        rootStatements.last().location);
   }
 }

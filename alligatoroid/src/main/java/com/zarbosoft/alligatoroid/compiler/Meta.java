@@ -20,25 +20,22 @@ import com.zarbosoft.alligatoroid.compiler.model.language.LiteralBool;
 import com.zarbosoft.alligatoroid.compiler.model.language.LiteralString;
 import com.zarbosoft.alligatoroid.compiler.model.language.Local;
 import com.zarbosoft.alligatoroid.compiler.model.language.Lower;
-import com.zarbosoft.alligatoroid.compiler.model.language.ModLocal;
-import com.zarbosoft.alligatoroid.compiler.model.language.ModRemote;
 import com.zarbosoft.alligatoroid.compiler.model.language.Record;
 import com.zarbosoft.alligatoroid.compiler.model.language.RecordElement;
 import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
 import com.zarbosoft.alligatoroid.compiler.model.language.Wrap;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfArrayType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfAutoObjectType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfByteType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfFieldType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfMethodType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfStringType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarHalfType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.AutoBuiltinStaticMethod;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarArrayType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarAutoObjectType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarByteType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStringType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.StaticMethodValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeOther;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -67,8 +64,6 @@ public class Meta {
     Stage.class,
     Lower.class,
     Import.class,
-    ModLocal.class,
-    ModRemote.class,
     Wrap.class,
   };
   // Exportable, lowerable
@@ -80,7 +75,6 @@ public class Meta {
     RemoteModuleId.class,
     BundleModuleSubId.class,
     ImportId.class,
-    WholeOther.class,
     JVMPseudoStaticField.class,
   };
 
@@ -89,7 +83,7 @@ public class Meta {
     JVMExternClassBuilder.class,
   };
   /** Initialized statically, never modified after (thread safe for reads). */
-  public static TSMap<Class, MortarHalfAutoObjectType> autoMortarHalfDataTypes = new TSMap<>();
+  public static TSMap<Class, MortarAutoObjectType> autoMortarHalfDataTypes = new TSMap<>();
 
   static {
     for (Class klass : AUTO_VALUE) {
@@ -135,6 +129,12 @@ public class Meta {
   }
    */
 
+  /**
+   * Must be called during initialization (single thread)!
+   *
+   * @param method
+   * @return
+   */
   public static FuncInfo funcDescriptor(Method method) {
     boolean needsModule = false;
     JVMSharedDataDescriptor[] argDescriptor =
@@ -144,67 +144,70 @@ public class Meta {
       if (i == 0 && parameter.getType() == ModuleCompileContext.class) {
         needsModule = true;
       }
-      ROPair<JVMSharedDataDescriptor, MortarHalfDataType> paramDesc =
+      ROPair<JVMSharedDataDescriptor, MortarDataType> paramDesc =
           dataDescriptor(parameter.getType());
       argDescriptor[i] = paramDesc.first;
     }
 
-    ROPair<JVMSharedDataDescriptor, MortarHalfDataType> retDesc =
+    ROPair<JVMSharedDataDescriptor, MortarDataType> retDesc =
         dataDescriptor(method.getReturnType());
 
     return new FuncInfo(
+        method,
         JVMSharedFuncDescriptor.fromParts(retDesc.first, argDescriptor),
         retDesc.second,
         needsModule);
   }
 
-  public static ROPair<JVMSharedDataDescriptor, MortarHalfDataType> dataDescriptor(Class klass) {
+  /**
+   * Must be called during initialization (single thread)!
+   *
+   * @param klass
+   * @return
+   */
+  public static ROPair<JVMSharedDataDescriptor, MortarDataType> dataDescriptor(Class klass) {
     if (klass == void.class) {
       return new ROPair<>(JVMSharedDataDescriptor.VOID, null);
     } else if (klass == String.class) {
-      return new ROPair<>(JVMSharedDataDescriptor.STRING, MortarHalfStringType.type);
+      return new ROPair<>(JVMSharedDataDescriptor.STRING, MortarStringType.type);
     } else if (klass == byte[].class) {
       return new ROPair<>(
-          JVMSharedDataDescriptor.BYTE_ARRAY, new MortarHalfArrayType(MortarHalfByteType.type));
+          JVMSharedDataDescriptor.BYTE_ARRAY, new MortarArrayType(MortarByteType.type));
     } else {
       return new ROPair<>(JVMSharedDataDescriptor.fromClass(klass), autoMortarHalfDataType(klass));
     }
   }
 
-  public static MortarHalfDataType autoMortarHalfDataType(Class klass) {
+  public static MortarAutoObjectType autoMortarHalfDataType(Class klass) {
     /*
     if (klass == Value.class) {
       throw new Assertion();
     }
      */
-    MortarHalfAutoObjectType out = autoMortarHalfDataTypes.getOpt(klass);
+    MortarAutoObjectType out = autoMortarHalfDataTypes.getOpt(klass);
     JVMSharedJVMName jvmName = JVMSharedJVMName.fromClass(klass);
     if (out == null) {
-      out = new MortarHalfAutoObjectType(jvmName, MortarValue.class.isAssignableFrom(klass));
+      out = new MortarAutoObjectType(jvmName, VariableDataStackValue.class.isAssignableFrom(klass));
       autoMortarHalfDataTypes.put(klass, out);
-      TSMap<Object, MortarHalfType> fields = new TSMap<>();
-      if (klass != MortarValue.class)
+      TSMap<Object, MortarFieldType> fields = new TSMap<>();
+      if (klass != VariableDataStackValue.class)
         for (Method method : klass.getDeclaredMethods()) {
           if (!Modifier.isPublic(method.getModifiers())) continue;
           if (!method.isAnnotationPresent(WrapExpose.class)) continue;
-          FuncInfo info = funcDescriptor(method);
-          fields.putNew(
-              method.getName(),
-              new MortarHalfMethodType(
-                  out, method.getName(), info.descriptor, info.returnType, info.needsModule));
+          fields.putNew(method.getName(), new MortarMethodFieldType(funcDescriptor(method)));
         }
       for (Field field : klass.getDeclaredFields()) {
-        ROPair<JVMSharedDataDescriptor, MortarHalfDataType> desc = dataDescriptor(field.getType());
-        MortarHalfDataType dataType = desc.second;
+        ROPair<JVMSharedDataDescriptor, MortarDataType> desc = dataDescriptor(field.getType());
+        MortarDataType dataType = desc.second;
         String fieldName = field.getName();
-        fields.putNew(fieldName, new MortarHalfFieldType(dataType, jvmName, fieldName));
+        fields.putNew(fieldName, new MortarDataFieldType(field, dataType));
       }
       out.fields = fields;
     }
     return out;
   }
 
-  public static AutoBuiltinStaticMethod autoMortarHalfStaticMethodType(Class klass, String name) {
+  public static StaticMethodValue autoMortarHalfStaticMethodType(Class klass, String name) {
     Method method = null;
     for (Method checkMethod : klass.getMethods()) {
       if (!checkMethod.getName().equals(name)) continue;
@@ -213,21 +216,24 @@ public class Meta {
     }
     if (method == null)
       throw Assertion.format("builtin wrap [%s] function [%s] missing", klass.getName(), name);
-    FuncInfo info = funcDescriptor(method);
-    return new AutoBuiltinStaticMethod(
-        JVMSharedJVMName.fromClass(klass), name, info.descriptor, info.returnType);
+    return new StaticMethodValue(funcDescriptor(method));
   }
 
   @Retention(RetentionPolicy.RUNTIME)
   public @interface WrapExpose {}
 
   public static class FuncInfo {
+    public final Method method;
     public final JVMSharedFuncDescriptor descriptor;
-    public final MortarHalfDataType returnType;
+    public final MortarDataType returnType;
     public final boolean needsModule;
 
     public FuncInfo(
-        JVMSharedFuncDescriptor descriptor, MortarHalfDataType returnType, boolean needsModule) {
+        Method method,
+        JVMSharedFuncDescriptor descriptor,
+        MortarDataType returnType,
+        boolean needsModule) {
+      this.method = method;
       this.descriptor = descriptor;
       this.returnType = returnType;
       this.needsModule = needsModule;

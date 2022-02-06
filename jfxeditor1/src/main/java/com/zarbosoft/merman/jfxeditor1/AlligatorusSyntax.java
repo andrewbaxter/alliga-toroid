@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.jfxeditor1;
 
-import com.zarbosoft.alligatoroid.compiler.model.error.RemoteModuleHashMismatch;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
+import com.zarbosoft.alligatoroid.compiler.model.error.RemoteModuleHashMismatchPre;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.document.Atom;
@@ -1268,14 +1269,14 @@ public class AlligatorusSyntax {
       if (atoms.size() != 1) return null;
       final Atom atom = atoms.get(0);
       if (!atom.type.id.equals(TYPE_IMPORT)) return null;
-      TSList<Object> errors = (TSList<Object>) atom.metaGet(META_KEY_ERROR);
+      TSList<Error> errors = (TSList<Error>) atom.metaGet(META_KEY_ERROR);
       if (errors == null || errors.isEmpty()) {
         return null;
       }
       String foundHash = null;
-      for (Object error : errors) {
-        if (error instanceof RemoteModuleHashMismatch) {
-          foundHash = ((RemoteModuleHashMismatch) error).foundHash;
+      for (Error error : errors) {
+        if (error.inner instanceof RemoteModuleHashMismatchPre) {
+          foundHash = ((RemoteModuleHashMismatchPre) error.inner).foundHash;
           break;
         }
       }

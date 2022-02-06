@@ -4,19 +4,20 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
-import com.zarbosoft.alligatoroid.compiler.model.error.IndexNotInteger;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
+import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstInt;
+import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataStackValue.nullValue;
+
 /**
  * Represents consecutive stack elements - needs to be converted to an actual tuple to bind/access
  * (TODO conversion)
  */
-public class LooseTuple implements OkValue, NoExportValue, Exportable {
+public class LooseTuple implements Value {
   public final ROList<EvaluateResult> data;
 
   public LooseTuple(ROList<EvaluateResult> data) {
@@ -24,22 +25,9 @@ public class LooseTuple implements OkValue, NoExportValue, Exportable {
   }
 
   @Override
-  public EvaluateResult mortarAccess(
-      EvaluationContext context, Location location, MortarValue key0) {
-    WholeValue key = WholeValue.getWhole(context, location, key0);
+  public EvaluateResult access(EvaluationContext context, Location location, Value field) {
+    final Integer key = assertConstInt(context, location, field);
     if (key == null) return EvaluateResult.error;
-    Integer index =
-        key.dispatch(
-            new WholeValue.DefaultDispatcher<>(null) {
-              @Override
-              public Integer handleInt(WholeInt value) {
-                return value.value;
-              }
-            });
-    if (index == null) {
-      context.moduleContext.errors.add(new IndexNotInteger(location, key0));
-      return EvaluateResult.error;
-    }
     TSList<TargetCode> pre = new TSList<>();
     TSList<TargetCode> post = new TSList<>();
     Value out = null;
@@ -47,16 +35,16 @@ public class LooseTuple implements OkValue, NoExportValue, Exportable {
       EvaluateResult e = data.get(i);
       if (out == null) {
         pre.add(e.preEffect);
-        if (index == i) {
+        if (key == i) {
           out = e.value;
           post.add(e.postEffect);
         } else {
-          pre.add(context.target.drop(context, location, e.value));
+          pre.add(e.value.drop(context, location));
           pre.add(e.postEffect);
         }
       } else {
         post.add(e.preEffect);
-        post.add(context.target.drop(context, location, e.value));
+        post.add(e.value.drop(context, location));
         post.add(e.postEffect);
       }
     }
@@ -71,11 +59,11 @@ public class LooseTuple implements OkValue, NoExportValue, Exportable {
   }
 
   @Override
-  public TargetCode mortarDrop(EvaluationContext context, Location location) {
+  public TargetCode drop(EvaluationContext context, Location location) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     for (EvaluateResult value : new ReverseIterable<>(data)) {
-      ectx.recordPre(context.target.drop(context, location, ectx.record(value)));
+      ectx.recordPre(ectx.record(value).drop(context, location));
     }
-    return ectx.build(NullValue.value).preEffect;
+    return ectx.build(nullValue).preEffect;
   }
 }

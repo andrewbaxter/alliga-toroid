@@ -10,7 +10,6 @@ import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -28,6 +27,7 @@ public class ModuleCompileContext {
    * module context thread safe post-evaluation (?)
    */
   public final TSList<Error> errors = new TSList<>();
+
   public final ImportPath importPath;
   /** Already desemiserialized artifacts generated via imports. */
   public final TSMap<ArtifactId, Exportable> artifactLookup = new TSMap<>();
@@ -36,7 +36,8 @@ public class ModuleCompileContext {
    * re-semiserializing artifacts from other modules.
    */
   public final TSMap<ObjId<Exportable>, ArtifactId> backArtifactLookup = new TSMap<>();
-  private final TSMap<ImportId, CompletableFuture<MortarValue>> modules = new TSMap<>();
+
+  private final TSMap<ImportId, CompletableFuture<Value>> modules = new TSMap<>();
 
   public ModuleCompileContext(
       ImportId importId, CompileContext compileContext, ImportPath importPath) {
@@ -60,7 +61,7 @@ public class ModuleCompileContext {
         });
   }
 
-  public CompletableFuture<MortarValue> getModule(ImportId importId) {
+  public CompletableFuture<Value> getModule(ImportId importId) {
     return modules.getCreate(
         importId,
         () -> {
@@ -114,7 +115,7 @@ public class ModuleCompileContext {
                        */
                       throw new Assertion();
                     }
-                    final MortarValue out = (MortarValue) lookupRef(semi.result().root);
+                    final Value out = (Value) lookupRef(semi.result().root);
                     if (out == null) {
                       /** Shouldn't happen unless someone messes with the cache data directly. */
                       throw new Assertion();

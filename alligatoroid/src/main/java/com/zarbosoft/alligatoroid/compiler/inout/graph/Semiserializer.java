@@ -8,7 +8,6 @@ import com.zarbosoft.alligatoroid.compiler.model.error.TypeDependencyLoopPre;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarValue;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -25,7 +24,7 @@ public class Semiserializer {
   }
 
   public static SemiserialModule semiserialize(
-          ModuleCompileContext moduleContext, MortarValue value, Location location) {
+          ModuleCompileContext moduleContext, Exportable value, Location location) {
     TSList<Error.PreError> errors = new TSList<>();
     Semiserializer s = new Semiserializer(errors, moduleContext.backArtifactLookup);
     final SemiserialRef out =

@@ -2,11 +2,10 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.error.NotRecordPair;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.WholeValue;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -30,7 +29,7 @@ public class Record extends LanguageElement {
         continue;
       }
       EvaluateResult keyRes = ((RecordElement) element).key.evaluate(context);
-      WholeValue key = WholeValue.getWhole(context, location, keyRes.value);
+      ConstPrimitive key = ConstPrimitive.getWhole(context, location, keyRes.value);
       if (key == null) return EvaluateResult.error;
       EvaluateResult valueRes = ((RecordElement) element).value.evaluate(context);
       data.put(
