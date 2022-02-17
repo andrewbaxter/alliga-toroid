@@ -2,24 +2,24 @@ package com.zarbosoft.alligatoroid.compiler.jvm.modelother;
 
 import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
-import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMConstructor;
-import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMHalfClassType;
+import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMClassInstanceType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedClass;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
+import com.zarbosoft.alligatoroid.compiler.mortar.ContinueError;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.ROTuple;
-import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public class JVMConcreteClassBuilder {
   public final TSSet<ROTuple> incompleteConstructors = new TSSet<>();
   public final TSSet<ROTuple> incompleteMethods = new TSSet<>();
   public final JVMSharedClass jvmClass;
-  public final JVMHalfClassType base;
+  public final JVMClassInstanceType base;
   public byte[] built;
+  public boolean error;
 
-  public JVMConcreteClassBuilder(JVMHalfClassType base) {
+  public JVMConcreteClassBuilder(JVMClassInstanceType base) {
     this.base = base;
     this.jvmClass = new JVMSharedClass(JVMSharedJVMName.fromNormalName(base.name));
   }
@@ -29,7 +29,7 @@ public class JVMConcreteClassBuilder {
     JVMUtils.MethodSpecDetails specDetails = JVMUtils.methodSpecDetails(spec);
     incompleteConstructors.add(specDetails.argTuple);
     base.constructors.put(specDetails.argTuple, specDetails);
-    final JVMConstructor constructor = JVMConstructor.create(base, spec);
+    final JVMConstructor constructor = new JVMConstructor(base, specDetails);
     return new RetConstructor(constructor, new JVMConcreteConstructorBuilder(this, constructor));
   }
 
@@ -38,10 +38,7 @@ public class JVMConcreteClassBuilder {
     JVMUtils.MethodSpecDetails specDetails = JVMUtils.methodSpecDetails(spec);
     ROTuple keyTuple = ROTuple.create(name).append(specDetails.argTuple);
     incompleteMethods.add(keyTuple);
-    base.methodFields
-        .getCreate(name, () -> new TSList<>())
-        .add(JVMMethodFieldType.create(base, name, spec));
-    base.fields.add(name);
+    base.ensureField(name).methods.add(specDetails);
     return new JVMConcreteMethodBuilder(this, keyTuple, specDetails);
   }
 
@@ -52,6 +49,7 @@ public class JVMConcreteClassBuilder {
   }
 
   public void build() {
+    if (error) throw new ContinueError();
     if (built != null) return;
     if (incompleteConstructors.some()) {
       throw new ConstructorsNotDefined(incompleteConstructors.ro());

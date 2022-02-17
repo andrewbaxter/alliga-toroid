@@ -58,8 +58,8 @@ public class StateClassBody<C, T> extends BaseStateRecordBody<C, T> {
   @Override
   public T build(C context, TSList<Error> errors) {
     if (!ok) return null;
-    Object[] args = new Object[info.fields.size()];
-    for (Map.Entry<String, Integer> field : info.argOrder) {
+    T out = (T) uncheck(() -> info.constructor.newInstance());
+    for (Map.Entry<String, Prototype> field : info.fields) {
       State fieldState = fields.getOpt(field.getKey());
       if (fieldState == null) {
         ok = false;
@@ -71,9 +71,9 @@ public class StateClassBody<C, T> extends BaseStateRecordBody<C, T> {
         ok = false;
         continue;
       }
-      args[field.getValue()] = value;
+      uncheck(() -> info.constructor.getDeclaringClass().getField(field.getKey()).set(out, value));
     }
     if (!ok) return null;
-    else return (T) uncheck(() -> info.constructor.newInstance(args));
+    else return out;
   }
 }

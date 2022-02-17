@@ -1,14 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
-import com.zarbosoft.rendaw.common.ROPair;
 
 public class SemiserialRecord implements SemiserialSubvalue {
-  public final ROOrderedMap<SemiserialSubvalue, SemiserialSubvalue> data;
+  @Exportable.Param public ROOrderedMap<SemiserialSubvalue, SemiserialSubvalue> data;
 
-  public SemiserialRecord(ROOrderedMap<SemiserialSubvalue, SemiserialSubvalue> data) {
-    this.data = data;
+  public static SemiserialRecord create(ROOrderedMap<SemiserialSubvalue, SemiserialSubvalue> data) {
+    final SemiserialRecord out = new SemiserialRecord();
+    out.data = data;
+    return out;
   }
 
   @Override

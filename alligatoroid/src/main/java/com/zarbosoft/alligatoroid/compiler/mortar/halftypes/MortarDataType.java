@@ -5,18 +5,19 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.AccessNotSupported;
+import com.zarbosoft.alligatoroid.compiler.model.error.CallNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
-import com.zarbosoft.alligatoroid.compiler.model.error.SetNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarCarry;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataBinding;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataStackValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.DataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableBoundDataValue;
@@ -26,7 +27,7 @@ import com.zarbosoft.rendaw.common.TSList;
 
 import static org.objectweb.asm.Opcodes.POP;
 
-public interface MortarDataType {
+public interface MortarDataType extends Exportable {
   public static boolean assertAssignableFromUnion(
       EvaluationContext context,
       Location location,
@@ -34,9 +35,7 @@ public interface MortarDataType {
       MortarDataType... types) {
     TSList<Error> errors = new TSList<>();
     for (MortarDataType type : types) {
-      final Error error = type.checkAssignableFrom(location, receiveType);
-      if (error == null) return true;
-      errors.add(error);
+      if (type.checkAssignableFrom(errors, location, receiveType, new TSList<>())) return true;
     }
     context.moduleContext.errors.addAll(errors);
     return false;
@@ -75,10 +74,15 @@ public interface MortarDataType {
     return new VariableDataStackValue(MortarCarry.ofHalf(code, JVMSharedCode.inst(POP)), this);
   }
 
-  MortarTargetModuleContext.HalfLowerResult box(JVMSharedCodeElement valueCode);
+  default ConstDataBuiltinSingletonValue constBuiltinSingletonAsValue(Object value) {
+    return new ConstDataBuiltinSingletonValue(this, value);
+  }
 
   default Value constAsValue(Object value) {
-    return new ConstDataStackValue(this, value);
+    final ConstDataStackValue out = new ConstDataStackValue();
+    out.type = this;
+    out.value = value;
+    return out;
   }
 
   JVMSharedCodeElement constValueVary(EvaluationContext context, Object value);
@@ -90,34 +94,32 @@ public interface MortarDataType {
     return EvaluateResult.error;
   }
 
-  default Error checkAssignableFrom(Location location, MortarDataType type) {
-    return new SetNotSupported(location);
-  }
+  boolean checkAssignableFrom(
+      TSList<Error> errors, Location location, MortarDataType type, TSList<Object> path);
 
   default boolean checkAssignableFrom(Location location, Value value) {
     if (!(value instanceof DataValue)) return false;
-    return checkAssignableFrom(location, ((DataValue) value).mortarType()) == null;
+    return checkAssignableFrom(
+        new TSList<>(), location, ((DataValue) value).mortarType(), new TSList<>());
   }
 
   default boolean assertAssignableFrom(
       EvaluationContext context, Location location, MortarDataType type) {
-    final Error error = checkAssignableFrom(location, type);
-    if (error != null) {
-      context.moduleContext.errors.add(error);
-      return false;
-    }
-    return true;
+    return checkAssignableFrom(context.moduleContext.errors, location, type, new TSList<>());
   }
 
   default boolean assertAssignableFrom(EvaluationContext context, Location location, Value value) {
     if (!(value instanceof DataValue)) {
-      context.moduleContext.errors.add(new WrongType(location, value.toString(), "data value"));
+      context.moduleContext.errors.add(
+          new WrongType(location, new TSList<>(), value.toString(), "data value"));
     }
-    final Error error = checkAssignableFrom(location, ((DataValue) value).mortarType());
-    if (error != null) {
-      context.moduleContext.errors.add(error);
-      return false;
-    }
-    return true;
+    return checkAssignableFrom(
+        context.moduleContext.errors, location, ((DataValue) value).mortarType(), new TSList<>());
+  }
+
+  default EvaluateResult constCall(
+      EvaluationContext context, Location location, Object inner, Value argument) {
+    context.moduleContext.errors.add(new CallNotSupported(location));
+    return EvaluateResult.error;
   }
 }

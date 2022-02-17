@@ -7,6 +7,11 @@ import org.objectweb.asm.MethodVisitor;
 public interface JVMSharedCodeElement extends TargetCode {
   String JVM_TARGET_NAME = "jvm";
 
+  static boolean empty(JVMSharedCodeElement e) {
+  if (e == null) return true;
+  if (e instanceof JVMSharedCode && ((JVMSharedCode)e).size() == 0) return true;
+  return false;}
+
   void dispatch(Dispatcher dispatcher);
 
   @Override

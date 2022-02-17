@@ -47,6 +47,15 @@ public class TSOrderedMap<K, V> implements ROOrderedMap<K, V> {
   }
 
   @Override
+  public V get(K key) {
+    V got = unordered.get(key);
+    if (got == null) {
+      throw new Assertion();
+    }
+    return got;
+  }
+
+  @Override
   public V getOpt(K key) {
     return unordered.get(key);
   }

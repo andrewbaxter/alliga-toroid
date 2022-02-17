@@ -13,7 +13,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 import com.zarbosoft.rendaw.common.ROPair;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataStackValue.nullValue;
+import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue.nullValue;
 
 public class VariableDataFieldValue implements VariableDataValue {
   private final MortarDataFieldType type;

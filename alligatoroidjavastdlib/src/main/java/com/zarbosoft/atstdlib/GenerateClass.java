@@ -206,13 +206,16 @@ public class GenerateClass {
   }
 
   private LSubtree lLocal(IdManager ids, String path) {
-    return writer -> {
-      writer.type("mod_local").recordBegin();
-      ids.write(writer);
-      writer.primitive("path");
-      lString(ids, path).write(writer);
-      writer.recordEnd();
-    };
+    /*
+     return writer -> {
+       writer.type("mod_local").recordBegin();
+       ids.write(writer);
+       writer.primitive("path");
+       lString(ids, path).write(writer);
+       writer.recordEnd();
+     };
+    */
+    return lCall(ids, lAccess(ids, lBuiltin(ids), lString(ids, "modLocal")), lString(ids, path));
   }
 
   public LSubtree lType(IdManager ids, Parameter[] params) {

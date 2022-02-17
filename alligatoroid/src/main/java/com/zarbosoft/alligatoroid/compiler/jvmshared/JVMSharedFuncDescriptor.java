@@ -1,7 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
 public class JVMSharedFuncDescriptor {
-  final String value;
+  public final String value;
 
   private JVMSharedFuncDescriptor(String value) {
     this.value = value;

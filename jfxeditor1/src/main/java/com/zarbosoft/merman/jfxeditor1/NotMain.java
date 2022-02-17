@@ -394,18 +394,6 @@ public class NotMain extends Application {
                                       error.dispatch(
                                           new Error.Dispatcher<Object>() {
                                             @Override
-                                            public Object handle(WarnUnexpected e) {
-                                              if (!rootModuleSpec.moduleId.equals(
-                                                  module.getKey().moduleId)) return null;
-                                              if (!layout.getChildren().contains(messages))
-                                                layout.getChildren().add(messages);
-                                              messages.setText(
-                                                  messages.getText() + "\n" + e.toString());
-                                              System.out.format("pre deserialize error: %s\n", e);
-                                              return null;
-                                            }
-
-                                            @Override
                                             public Object handle(Error.LocationError e) {
                                               final Location location = e.location;
                                               if (!rootModuleSpec.moduleId.equal1(location.module))

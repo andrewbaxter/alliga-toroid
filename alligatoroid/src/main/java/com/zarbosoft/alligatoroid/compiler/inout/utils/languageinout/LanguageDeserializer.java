@@ -40,7 +40,7 @@ public class LanguageDeserializer {
                 if (value == null) {
                   return null;
                 }
-                return new Location(module, value);
+                return Location.create(module, value);
               }
             };
           }

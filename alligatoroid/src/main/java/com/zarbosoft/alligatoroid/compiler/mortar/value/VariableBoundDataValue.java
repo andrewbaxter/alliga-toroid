@@ -12,7 +12,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataBinding;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 import com.zarbosoft.rendaw.common.ROPair;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataStackValue.nullValue;
+import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue.nullValue;
 
 public class VariableBoundDataValue implements VariableDataValue {
   private final MortarDataBinding binding;
@@ -55,8 +55,7 @@ public class VariableBoundDataValue implements VariableDataValue {
 
   @Override
   public EvaluateResult set(EvaluationContext context, Location location, Value value) {
-    if (!binding.type.assertAssignableFrom(context, location, value.mortarType()))
-      return EvaluateResult.error;
+    if (!binding.type.assertAssignableFrom(context, location, value)) return EvaluateResult.error;
     final MortarCarry carry = ((VariableDataStackValue) value).carry;
     return new EvaluateResult(
         new JVMSharedCode()

@@ -1,11 +1,13 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
 public class SemiserialValue {
-  public final SemiserialRef type;
-  public final SemiserialSubvalue data;
+  @Exportable.Param public SemiserialRef type;
+  @Exportable.Param public SemiserialSubvalue data;
 
-  public SemiserialValue(SemiserialRef type, SemiserialSubvalue data) {
-    this.type = type;
-    this.data = data;
+  public static SemiserialValue create(SemiserialRef type, SemiserialSubvalue data) {
+    final SemiserialValue out = new SemiserialValue();
+    out.type = type;
+    out.data = data;
+    return out;
   }
 }

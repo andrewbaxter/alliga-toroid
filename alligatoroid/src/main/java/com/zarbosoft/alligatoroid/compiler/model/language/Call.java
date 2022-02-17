@@ -2,23 +2,21 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 
 public class Call extends LanguageElement {
-  public LanguageElement target;
-  public LanguageElement argument;
+  @Param public LanguageElement target;
+  @Param public LanguageElement argument;
 
-  public Call(Location id, LanguageElement target, LanguageElement argument) {
-    super(id, hasLowerInSubtree(target, argument));
-    this.target = target;
-    this.argument = argument;
+  @Override
+  protected boolean innerHasLowerInSubtree() {
+    return hasLowerInSubtree(target, argument);
   }
 
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
-    EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
+    EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
     return ectx.build(
-        ectx.record(ectx.evaluate(target).call(context, location, ectx.evaluate(argument))));
+        ectx.record(ectx.evaluate(target).call(context, id, ectx.evaluate(argument))));
   }
 }

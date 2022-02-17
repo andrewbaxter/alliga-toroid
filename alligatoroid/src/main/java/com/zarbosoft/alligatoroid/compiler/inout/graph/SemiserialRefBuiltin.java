@@ -1,10 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
 public class SemiserialRefBuiltin implements SemiserialRef {
-  public final String key;
+  @Exportable.Param public String key;
 
-  public SemiserialRefBuiltin(String key) {
-    this.key = key;
+  public static SemiserialRefBuiltin create(String key) {
+    final SemiserialRefBuiltin out = new SemiserialRefBuiltin();
+    out.key = key;
+    return out;
   }
 
   @Override

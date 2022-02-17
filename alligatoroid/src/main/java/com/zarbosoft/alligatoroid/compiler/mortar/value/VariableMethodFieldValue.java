@@ -11,9 +11,10 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarAutoObjectType;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataStackValue.nullValue;
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarBuiltin.nullType;
+import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue.nullValue;
 
-public class VariableMethodFieldValue implements SimpleValue {
+public class VariableMethodFieldValue implements Value, NoExportValue {
   private final MortarMethodFieldType type;
   private final MortarAutoObjectType base;
   private final MortarCarry carry;
@@ -32,20 +33,23 @@ public class VariableMethodFieldValue implements SimpleValue {
 
   @Override
   public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
+    if (!MortarTargetModuleContext.assertTarget(context, location)) return EvaluateResult.error;
     if (argument == ErrorValue.error) return EvaluateResult.error;
     JVMSharedCode pre = new JVMSharedCode();
     JVMSharedCode code = new JVMSharedCode().add(carry.half(context));
     JVMSharedCode post = new JVMSharedCode();
     if (type.funcInfo.needsModule)
       code.add(((MortarTargetModuleContext) context.target).transfer(context.moduleContext));
-    MortarTargetModuleContext.convertFunctionArgument(context, location, pre, code, post, argument);
+    MortarTargetModuleContext.convertFunctionArgumentRoot(
+        context, location, pre, code, post, argument);
     code.add(
         JVMSharedCode.callMethod(
             context.sourceLocation(location),
             base.jvmName,
             type.funcInfo.method.getName(),
             type.funcInfo.descriptor));
-    if (type.funcInfo.returnType == null) return new EvaluateResult(pre.add(code), post, nullValue);
+    if (type.funcInfo.returnType == nullType)
+      return new EvaluateResult(pre.add(code), post, nullValue);
     else return new EvaluateResult(pre, post, type.funcInfo.returnType.stackAsValue(code));
   }
 }

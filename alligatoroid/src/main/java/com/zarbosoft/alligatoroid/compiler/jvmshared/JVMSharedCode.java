@@ -19,10 +19,10 @@ import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.Iterator;
 
-import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.BASTORE;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
@@ -40,6 +40,7 @@ import static org.objectweb.asm.Opcodes.ICONST_3;
 import static org.objectweb.asm.Opcodes.ICONST_4;
 import static org.objectweb.asm.Opcodes.ICONST_5;
 import static org.objectweb.asm.Opcodes.ICONST_M1;
+import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
@@ -105,12 +106,47 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
     return code;
   }
 
+  public static JVMSharedCodeElement callConstructor(
+      int location, JVMSharedJVMName klass, JVMSharedFuncDescriptor methodDesc) {
+    final JVMSharedCode code = new JVMSharedCode();
+    if (location >= 0) code.line(location);
+    code.add(new MethodInsnNode(INVOKESPECIAL, klass.value, "<init>", methodDesc.value, false));
+    return code;
+  }
+
+  public static JVMSharedCodeElement callInterfaceMthod(
+      int location, JVMSharedJVMName klass, String method, JVMSharedFuncDescriptor methodDesc) {
+    final JVMSharedCode code = new JVMSharedCode();
+    if (location >= 0) code.line(location);
+    code.add(new MethodInsnNode(INVOKEINTERFACE, klass.value, method, methodDesc.value, false));
+    return code;
+  }
+
   public static JVMSharedCodeElement callMethod(
       int location, JVMSharedJVMName klass, String method, JVMSharedFuncDescriptor methodDesc) {
     final JVMSharedCode code = new JVMSharedCode();
     if (location >= 0) code.line(location);
     code.add(new MethodInsnNode(INVOKEVIRTUAL, klass.value, method, methodDesc.value, false));
     return code;
+  }
+
+  public static JVMSharedCodeElement callStaticMethodReflect(Class klass, String method) {
+    for (Method method1 : klass.getMethods()) {
+      if (!method.equals(method1.getName())) continue;
+      JVMSharedDataDescriptor ret = JVMSharedDataDescriptor.fromClass(method1.getReturnType());
+      JVMSharedDataDescriptor args[] = new JVMSharedDataDescriptor[method1.getParameterCount()];
+      for (int i = 0; i < method1.getParameters().length; i++) {
+        args[i] = JVMSharedDataDescriptor.fromClass(method1.getParameters()[i].getType());
+      }
+      return new JVMSharedCodeInstruction(
+          new MethodInsnNode(
+              INVOKESTATIC,
+              JVMSharedJVMName.fromClass(klass).value,
+              method,
+              JVMSharedFuncDescriptor.fromParts(ret, args).value,
+              false));
+    }
+    throw new Assertion();
   }
 
   public static JVMSharedCodeElement callStaticMethod(
@@ -179,16 +215,6 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
 
   public static JVMSharedCodeElement bool_(boolean value) {
     return inst(value ? ICONST_1 : ICONST_0);
-  }
-
-  public JVMSharedCode addString(String value) {
-    add(string(value));
-    return this;
-  }
-
-  public JVMSharedCode addInt(int value) {
-    add(int_(value));
-    return this;
   }
 
   @Override
@@ -308,7 +334,10 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
   }
 
   public JVMSharedCode add(JVMSharedCodeElement element) {
-    children.add(element);
+    if (element != null) {
+      if (element instanceof JVMSharedCode) children.addAll(((JVMSharedCode) element).children);
+      else children.add(element);
+    }
     return this;
   }
 
@@ -322,16 +351,11 @@ public class JVMSharedCode implements TargetCode, JVMSharedCodeElement {
     return this;
   }
 
-  public JVMSharedCode add(JVMSharedCode child) {
-    if (child != null) children.add(child);
-    return this;
-  }
-
   public JVMSharedCode addVarInsn(int opcode, BindingKey key) {
     return add(new JVMSharedCodeStoreLoad(opcode, key));
   }
 
-  public JVMSharedCode addBool(boolean value) {
-    return add(bool_(value));
+  public int size() {
+    return children.size();
   }
 }

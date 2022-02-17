@@ -1,6 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.modules.modulediskcache;
 
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
+import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
@@ -97,6 +98,10 @@ public class ModuleDiskCache implements ModuleResolver {
           }
           if (res == null)
             throw new Assertion(); // Can this happen? no errors, no exception, but dead return
+
+          // Validate by desemiserializing once
+          new ModuleCompileContext(null, context, null).desemiserialize(res, importId);
+
           return new Module() {
             @Override
             public ImportId spec() {

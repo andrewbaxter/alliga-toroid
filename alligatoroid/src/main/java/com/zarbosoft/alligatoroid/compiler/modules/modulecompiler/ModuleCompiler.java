@@ -62,7 +62,7 @@ public class ModuleCompiler implements ModuleResolver {
                       });
                 } else if (stringPath.endsWith(".zip")) {
                   return Semiserializer.semiserialize(
-                      moduleContext, new BundleValue(importId, ""), null);
+                      moduleContext, BundleValue.create(importId, ""), null);
                 } else {
                   throw new UnknownImportFileTypePre(importId.moduleId);
                 }
@@ -94,7 +94,7 @@ public class ModuleCompiler implements ModuleResolver {
                         }
                         if (e.isDirectory()) {
                           return Semiserializer.semiserialize(
-                              moduleContext, new BundleValue(new ImportId(id.module), path), null);
+                              moduleContext, BundleValue.create(ImportId.create(id.module), path), null);
                         }
                         if (path.endsWith(".at")) {
                           try (InputStream stream = bundle.getInputStream(e)) {

@@ -7,17 +7,13 @@ import com.zarbosoft.alligatoroid.compiler.model.error.CantSetStackValue;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarCarry;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarNullType;
+import com.zarbosoft.rendaw.common.Assertion;
 
 public class ConstDataStackValue extends ConstDataValue {
-  public static final ConstDataStackValue nullValue =
-      new ConstDataStackValue(MortarNullType.type, null);
-  private final MortarDataType type;
+  public MortarDataType type;
   public Object value;
 
-  public ConstDataStackValue(MortarDataType type, Object value) {
-    this.type = type;
-    this.value = value;
+  public ConstDataStackValue() {
   }
 
   @Override

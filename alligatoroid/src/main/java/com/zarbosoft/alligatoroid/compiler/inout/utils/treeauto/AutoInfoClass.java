@@ -30,39 +30,12 @@ class AutoInfoClass implements AutoInfo {
 
   @Override
   public BaseStateSingle create(TSList<Error> errors, LuxemPathBuilder luxemPath) {
-    /*
-     final int paramCount = info.constructor.getParameters().length;
-     if (paramCount == 1) {
-       final String fieldName = info.constructor.getParameters()[0].getName();
-       return new StateForwardSingle<Object, Object>(
-           info.fields.get(fieldName).create(errors, luxemPath)) {
-         @Override
-         public Object build(Object context, TSList<Error> errors) {
-           Object out = super.build(context, errors);
-           return uncheck(() -> info.constructor.newInstance(out));
-         }
-       };
-     } else {
-    */
     return new StateRecord(new StateClassBody(luxemPath, info));
-    /*
-    }
-       */
   }
 
   @Override
   public void write(Writer writer, Object object) {
     final int paramCount = info.constructor.getParameters().length;
-    /*
-    if (paramCount == 1) {
-      final Parameter parameter = info.constructor.getParameters()[0];
-      String fieldName = parameter.getName();
-      writeParam(
-          writer,
-          TypeInfo.fromParam(parameter),
-          uncheck(() -> object.getClass().getField(fieldName).get(object)));
-    } else {
-     */
     writer.recordBegin();
     for (int i = 0; i < paramCount; i++) {
       Parameter parameter = info.constructor.getParameters()[i];
@@ -74,9 +47,6 @@ class AutoInfoClass implements AutoInfo {
           uncheck(() -> object.getClass().getField(fieldName).get(object)));
     }
     writer.recordEnd();
-    /*
-    }
-       */
   }
 
   private void writeParam(Writer writer, TypeInfo info, Object data) {

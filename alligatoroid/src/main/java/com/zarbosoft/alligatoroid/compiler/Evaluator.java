@@ -3,9 +3,7 @@ package com.zarbosoft.alligatoroid.compiler;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.languageinout.LanguageDeserializer;
-import com.zarbosoft.alligatoroid.compiler.jvm.modelother.Pass2Failed;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.DynamicClassLoader;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptorUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedClass;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeInstruction;
@@ -17,13 +15,13 @@ import com.zarbosoft.alligatoroid.compiler.model.error.Unexpected;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.language.Block;
+import com.zarbosoft.alligatoroid.compiler.mortar.ContinueError;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarNullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.DataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Common;
@@ -33,7 +31,6 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
-import org.objectweb.asm.tree.InsnNode;
 
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -45,8 +42,6 @@ import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Evaluator {
   public static final String ENTRY_METHOD_NAME = "enter";
-  public static final String METHOD_DESCRIPTOR =
-      JVMDescriptorUtils.func(JVMDescriptorUtils.VOID_DESCRIPTOR);
   public static final String GENERATED_CLASS_PREFIX = "com.zarbosoft.alligatoroidmortar.Generated";
   private static final Evaluator instance = new Evaluator();
   public final AtomicInteger uniqueClass = new AtomicInteger();
@@ -55,7 +50,7 @@ public class Evaluator {
       ModuleCompileContext moduleContext,
       ROList<LanguageElement> rootStatements,
       /** Only whole-ish values */
-      ROOrderedMap<Object, VariableDataStackValue> initialScope) {
+      ROOrderedMap<Object, Value> initialScope) {
     return instance.evaluateInner(moduleContext, rootStatements, initialScope);
   }
 
@@ -73,28 +68,24 @@ public class Evaluator {
       ModuleCompileContext moduleContext,
       ROList<LanguageElement> rootStatements,
       /** Only whole-ish values */
-      ROOrderedMap<Object, VariableDataStackValue> initialScope) {
+      ROOrderedMap<Object, Value> initialScope) {
     String className = GENERATED_CLASS_PREFIX + uniqueClass.getAndIncrement();
     JVMSharedJVMName jvmClassName =
         JVMSharedJVMName.fromNormalName(JVMSharedNormalName.fromString(className));
 
     // Do first pass flat evaluation
-    MortarTargetModuleContext targetContext =
-        new MortarTargetModuleContext(JVMDescriptorUtils.jvmName(className));
+    MortarTargetModuleContext targetContext = new MortarTargetModuleContext(jvmClassName.value);
     EvaluationContext context =
         new EvaluationContext(moduleContext, targetContext, new Scope(null));
-    for (ROPair<Object, VariableDataStackValue> local : initialScope) {
+    for (ROPair<Object, Value> local : initialScope) {
       context.scope.put(local.first, local.second.bind(context, null).second);
     }
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
     final Value resultValue =
         ectx.record(
-            new com.zarbosoft.alligatoroid.compiler.model.language.Scope(
-                    null, new Block(null, rootStatements))
+            com.zarbosoft.alligatoroid.compiler.model.language.Scope.create(
+                    null, Block.create(null, rootStatements))
                 .evaluate(context));
-    if (resultValue == ErrorValue.error) {
-      return null;
-    }
     for (ROPair<Location, CompletableFuture> d : context.deferredErrors) {
       try {
         Utils.await(d.second);
@@ -103,6 +94,9 @@ public class Evaluator {
       } catch (Exception e) {
         moduleContext.errors.add(new Unexpected(d.first, e));
       }
+    }
+    if (resultValue == ErrorValue.error) {
+      return null;
     }
 
     MortarDataType resultType;
@@ -153,7 +147,7 @@ public class Evaluator {
       throw new Assertion();
     } catch (InvocationTargetException e0) {
       final Throwable e = e0.getTargetException();
-      if (e.getClass() == Pass2Failed.class) {
+      if (e.getClass() == ContinueError.class) {
         // Errors in module errors already
         resultVariable = null;
       } else {
@@ -180,6 +174,6 @@ public class Evaluator {
     return Semiserializer.semiserialize(
         moduleContext,
         resultIsVariable ? resultType.constAsValue(resultVariable) : resultValue,
-        rootStatements.last().location);
+        rootStatements.last().id);
   }
 }

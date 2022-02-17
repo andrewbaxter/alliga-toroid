@@ -34,12 +34,23 @@ public abstract class Error implements TreeDumpable {
     this.inner = inner;
   }
 
+  @Override
+  public String toString() {
+    return inner.toString();
+  }
+
   public abstract <T> T dispatch(Dispatcher<T> dispatcher);
 
   @Override
   public void treeDump(Writer writer) {
-    writer.type(inner.getClass().getName()).recordBegin();
+    writer.type(getClass().getName()).recordBegin();
     writer.primitive("message").primitive(inner.toString());
+    for (Field field : getClass().getFields()) {
+      if (Modifier.isStatic(field.getModifiers())) continue;
+      if ("inner".equals(field.getName())) continue;
+      writer.primitive(field.getName());
+      TreeDumpable.treeDump(writer, uncheck(() -> field.get(this)));
+    }
     for (Field field : inner.getClass().getFields()) {
       if (Modifier.isStatic(field.getModifiers())) continue;
       writer.primitive(field.getName());
@@ -83,7 +94,6 @@ public abstract class Error implements TreeDumpable {
 
     public LocationError(Location location, PreError inner) {
       super(inner);
-      if (location == null) throw new Assertion();
       this.location = location;
     }
 

@@ -1,6 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
+import com.zarbosoft.rendaw.common.Assertion;
 
 import java.util.Objects;
 
@@ -21,11 +22,11 @@ public class JVMSharedDataDescriptor {
   public static final JVMSharedDataDescriptor STRING =
       JVMSharedDataDescriptor.fromJVMName(JVMSharedJVMName.STRING);
   public static final JVMSharedDataDescriptor BOXED_BOOL =
-      JVMSharedDataDescriptor.fromClass(Boolean.class);
+      JVMSharedDataDescriptor.fromObjectClass(Boolean.class);
   public static final JVMSharedDataDescriptor BOXED_INT =
-      JVMSharedDataDescriptor.fromClass(Integer.class);
+      JVMSharedDataDescriptor.fromObjectClass(Integer.class);
   public static final JVMSharedDataDescriptor BOXED_BYTE =
-      JVMSharedDataDescriptor.fromClass(Byte.class);
+      JVMSharedDataDescriptor.fromObjectClass(Byte.class);
 
   public final String value;
 
@@ -37,8 +38,21 @@ public class JVMSharedDataDescriptor {
     return new JVMSharedDataDescriptor("L" + name + ";");
   }
 
-  public static JVMSharedDataDescriptor fromClass(Class klass) {
+  public static JVMSharedDataDescriptor fromObjectClass(Class klass) {
     return fromJVMName(JVMSharedJVMName.fromClass(klass));
+  }
+
+  public static JVMSharedDataDescriptor fromClass(Class t) {
+    if (t == int.class) return INT;
+    if (t == byte.class) return BYTE;
+    if (t == char.class) return CHAR;
+    if (t == short.class) return SHORT;
+    if (t == long.class) return LONG;
+    if (t == boolean.class) return BOOL;
+    if (t == float.class) return FLOAT;
+    if (t == double.class) return DOUBLE;
+    if (t.isPrimitive()) throw new Assertion();
+    return fromObjectClass(t);
   }
 
   public String toString() {

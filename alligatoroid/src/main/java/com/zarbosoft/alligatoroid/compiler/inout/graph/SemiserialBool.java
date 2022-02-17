@@ -1,14 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-import com.zarbosoft.luxem.write.Writer;
-
 import java.util.Objects;
 
 public final class SemiserialBool implements SemiserialSubvalue {
-  public final boolean value;
+  @Exportable.Param public boolean value;
 
-  public SemiserialBool(boolean value) {
-    this.value = value;
+  public static SemiserialBool create(boolean value) {
+    final SemiserialBool out = new SemiserialBool();
+    out.value = value;
+    return out;
   }
 
   @Override

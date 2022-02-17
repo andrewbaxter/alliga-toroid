@@ -6,22 +6,12 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.SimpleBinding;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public final class ErrorValue implements Value {
+public final class ErrorValue implements Value, NoExportValue {
   public static final ErrorValue error = new ErrorValue();
-  public static final Binding binding =
-      new Binding() {
-        @Override
-        public EvaluateResult fork(EvaluationContext context, Location location) {
-          return EvaluateResult.error;
-        }
-
-        @Override
-        public TargetCode dropCode(EvaluationContext context, Location location) {
-          return null;
-        }
-      };
+  public static final Binding binding = new SimpleBinding(error);
 
   private ErrorValue() {}
 
@@ -48,11 +38,6 @@ public final class ErrorValue implements Value {
   @Override
   public EvaluateResult vary(EvaluationContext context, Location location) {
     return EvaluateResult.error;
-  }
-
-  @Override
-  public Location location() {
-    return null;
   }
 
   @Override

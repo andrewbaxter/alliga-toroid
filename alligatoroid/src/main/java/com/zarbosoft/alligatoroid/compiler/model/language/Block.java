@@ -9,16 +9,21 @@ import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class Block extends LanguageElement {
-  public final ROList<LanguageElement> statements;
+import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue.nullValue;
 
-  public Block(Location id, ROList<LanguageElement> statements) {
-    super(id, hasLowerInSubtreeList(statements));
-    this.statements = statements;
+public class Block extends LanguageElement {
+  @Param public ROList<LanguageElement> statements;
+
+  public static Block create(Location id, ROList<LanguageElement> statements) {
+    final Block block = new Block();
+    block.id = id;
+    block.statements = statements;
+    block.postInit();
+    return block;
   }
 
   public static EvaluateResult evaluate(
-          EvaluationContext context, Location location, ROList<LanguageElement> children) {
+      EvaluationContext context, Location location, ROList<LanguageElement> children) {
     TSList<TargetCode> pre = new TSList<>();
     EvaluateResult lastRes = null;
     Location lastLocation = null;
@@ -38,13 +43,18 @@ public class Block extends LanguageElement {
       last = lastRes.value;
       post = lastRes.postEffect;
     } else {
-      last = ConstNull.value;
+      last = nullValue;
     }
     return new EvaluateResult(context.target.merge(context, location, pre), post, last);
   }
 
   @Override
+  protected boolean innerHasLowerInSubtree() {
+    return hasLowerInSubtreeList(statements);
+  }
+
+  @Override
   public EvaluateResult evaluate(EvaluationContext context) {
-    return evaluate(context, location, statements);
+    return evaluate(context, id, statements);
   }
 }

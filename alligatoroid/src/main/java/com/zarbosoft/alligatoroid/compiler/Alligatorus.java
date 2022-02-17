@@ -24,7 +24,7 @@ public class Alligatorus {
 
   public static ImportId rootModuleSpec(Path path) {
     path = path.toAbsolutePath().normalize();
-    return new ImportId(new LocalModuleId(path.toString()));
+    return ImportId.create(LocalModuleId.create(path.toString()));
   }
 
   public static Path defaultCachePath() {
@@ -38,8 +38,8 @@ public class Alligatorus {
 
   public static Result compile(Path cachePath, Logger logger, ImportId spec) {
     RootModuleId rootModuleId = new RootModuleId();
-    final ImportId rootImportId = new ImportId(rootModuleId);
-    final Location rootLocation = new Location(rootModuleId, 0);
+    final ImportId rootImportId = ImportId.create(rootModuleId);
+    final Location rootLocation = Location.create(rootModuleId, 0);
     CompileContext context = new CompileContext(cachePath, logger, spec);
     ModuleCompileContext moduleContext = new ModuleCompileContext(rootImportId, context, null);
     context.moduleErrors.put(rootImportId, moduleContext.errors);

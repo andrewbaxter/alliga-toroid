@@ -1,6 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.Prototype;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeBool;
@@ -21,8 +22,8 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.util.Map;
 
 import static com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.DefaultStateBool.BOOL_FALSE;
@@ -151,39 +152,37 @@ public class AutoTreeMeta {
       infos.put(klass, info);
       Constructor constructor = klass.getConstructors()[0];
       TSMap<String, Prototype> fields = new TSMap<>();
-      TSMap<String, Integer> argOrder = new TSMap<>();
-      for (int i = 0; i < constructor.getParameters().length; i++) {
-        Parameter parameter = constructor.getParameters()[i];
-        TypeInfo paramInfo = TypeInfo.fromParam(parameter);
-        argOrder.put(parameter.getName(), i);
+      for (Field field : klass.getFields()) {
+        if (Modifier.isStatic(field.getModifiers())) continue;
+        if (field.getAnnotation(Exportable.Param.class) == null) continue;
+        TypeInfo fieldInfo = TypeInfo.fromField(field);
         Prototype prototype;
-        if (ROList.class.isAssignableFrom(parameter.getType())) {
-          final Class genericArg = paramInfo.genericArgs[0].klass;
+        if (ROList.class.isAssignableFrom(fieldInfo.klass)) {
+          final Class genericArg = fieldInfo.genericArgs[0].klass;
           scan(genericArg);
           prototype = new PrototypeROList(new PrototypeAutoRef(this, genericArg));
-        } else if (ROSetRef.class.isAssignableFrom(parameter.getType())) {
-          final Class genericArg = paramInfo.genericArgs[0].klass;
+        } else if (ROSetRef.class.isAssignableFrom(fieldInfo.klass)) {
+          final Class genericArg = fieldInfo.genericArgs[0].klass;
           scan(genericArg);
           prototype = new PrototypeROList(new PrototypeAutoRef(this, genericArg));
-        } else if (ROMap.class.isAssignableFrom(parameter.getType())) {
-          final Class genericArg = paramInfo.genericArgs[1].klass;
+        } else if (ROMap.class.isAssignableFrom(fieldInfo.klass)) {
+          final Class genericArg = fieldInfo.genericArgs[1].klass;
           scan(genericArg);
           prototype =
               new PrototypeROMap(PrototypeString.instance, new PrototypeAutoRef(this, genericArg));
-        } else if (ROOrderedMap.class.isAssignableFrom(parameter.getType())) {
-          final Class genericArg = paramInfo.genericArgs[1].klass;
+        } else if (ROOrderedMap.class.isAssignableFrom(fieldInfo.klass)) {
+          final Class genericArg = fieldInfo.genericArgs[1].klass;
           scan(genericArg);
           prototype =
               new PrototypeROOrderedMap(
                   PrototypeString.instance, new PrototypeAutoRef(this, genericArg));
         } else {
-          scan(parameter.getType());
-          prototype = new PrototypeAutoRef(this, parameter.getType());
+          scan(fieldInfo.klass);
+          prototype = new PrototypeAutoRef(this, fieldInfo.klass);
         }
-        fields.put(parameter.getName(), prototype);
+        fields.put(field.getName(), prototype);
       }
       info.info.constructor = constructor;
-      info.info.argOrder = argOrder;
       info.info.fields = fields;
     }
   }

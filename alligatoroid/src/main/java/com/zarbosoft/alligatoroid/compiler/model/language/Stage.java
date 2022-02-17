@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
@@ -10,7 +11,6 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarAutoObjectType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.DataValue;
@@ -18,23 +18,19 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 import static com.zarbosoft.alligatoroid.compiler.Meta.autoMortarHalfDataTypes;
-import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext.newWrapCode1;
-import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext.newWrapCode2;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
+import static org.objectweb.asm.Opcodes.DUP;
 
 public class Stage extends LanguageElement {
-  public LanguageElement child;
-
-  public Stage(Location id, LanguageElement child) {
-    super(id, hasLowerInSubtree(child));
-    this.child = child;
-  }
+  @Param public LanguageElement child;
 
   public static EvaluateResult stageLower(
       EvaluationContext context, Location location, LanguageElement element) {
@@ -46,12 +42,11 @@ public class Stage extends LanguageElement {
       if (languageElementType.checkAssignableFrom(location, evalRes)) {
         return ectx.build(evalRes);
       }
-      final MortarAutoObjectType wrapType = autoMortarHalfDataTypes.get(Wrap.class);
+      final MortarDataType wrapType = autoMortarHalfDataTypes.get(Wrap.class);
       if (evalRes instanceof VariableDataValue) {
         return ectx.build(
             wrapType.stackAsValue(
                 new JVMSharedCode()
-                    .add(newWrapCode1)
                     .add(
                         ((VariableDataValue)
                                 ectx.record(
@@ -66,41 +61,41 @@ public class Stage extends LanguageElement {
                             .mortarVaryCode(context, location)
                             .half(context))
                     .add(
-                        JVMSharedCode.callMethod(
+                        JVMSharedCode.callStaticMethod(
                             context.sourceLocation(location),
                             JVMSharedJVMName.fromClass(MortarDataType.class),
                             "constAsValue",
                             JVMSharedFuncDescriptor.fromParts(
-                                JVMSharedDataDescriptor.fromClass(Value.class),
+                                JVMSharedDataDescriptor.fromObjectClass(Value.class),
                                 JVMSharedDataDescriptor.OBJECT)))
-                    .add(newWrapCode2)));
+                    .add(JVMSharedCode.callStaticMethodReflect(Wrap.class, "create"))));
       } else {
-        return ectx.build(wrapType.constAsValue(new Wrap(location, evalRes)));
+        return ectx.build(wrapType.constAsValue(Wrap.create(location, evalRes)));
       }
     }
 
-    if (element.hasLowerInSubtree) {
+    if (element.hasLowerInSubtree()) {
       Class klass = element.getClass();
-
-      Constructor<?> constructor = klass.getConstructors()[0];
-      Parameter[] parameters = constructor.getParameters();
-      Object[] evaluations = new Object[parameters.length];
+      TSList<ROPair<Field, Object>> evaluations = new TSList<>();
       boolean allImmediate = true;
       boolean bad = false;
-      for (int i = 0; i < parameters.length; i++) {
-        Parameter parameter = parameters[i];
-        if (parameter.getType() == Location.class) {
+      for (Field field : klass.getFields()) {
+        if (Modifier.isStatic(field.getModifiers())) continue;
+        if (field.getAnnotation(Param.class) == null) continue;
+        if (field.getType() == Location.class) {
           // Location
-          evaluations[i] =
-              EvaluateResult.pure(
-                  locationType.constAsValue(
-                      uncheck(() -> klass.getField("location").get(element))));
+          evaluations.add(
+              new ROPair<>(
+                  field,
+                  EvaluateResult.pure(
+                      locationType.constAsValue(
+                          uncheck(() -> klass.getField("id").get(element))))));
 
-        } else if (ROList.class.isAssignableFrom(parameter.getType())) {
+        } else if (ROList.class.isAssignableFrom(field.getType())) {
           // List of language elements
           TSList immediateList = new TSList();
           TSList evaluationList = new TSList();
-          Object parameterValue = uncheck(() -> klass.getField(parameter.getName()).get(element));
+          Object parameterValue = uncheck(() -> klass.getField(field.getName()).get(element));
           for (Object o : ((TSList) parameterValue)) {
             EvaluateResult stageRes = stageLower(context, location, (LanguageElement) o);
             if (stageRes == EvaluateResult.error) {
@@ -115,21 +110,20 @@ public class Stage extends LanguageElement {
             }
           }
           if (bad) return null;
-          evaluations[i] = evaluationList;
+          evaluations.add(new ROPair<>(field, evaluationList));
 
-        } else if (parameter.getType() == LanguageElement.class) {
+        } else if (field.getType() == LanguageElement.class) {
           // Single language element
           EvaluateResult stageRes =
               stageLower(
                   context,
                   location,
-                  (LanguageElement)
-                      uncheck(() -> klass.getField(parameter.getName()).get(element)));
+                  (LanguageElement) uncheck(() -> klass.getField(field.getName()).get(element)));
           if (stageRes == EvaluateResult.error) {
             bad = true;
             continue;
           }
-          evaluations[i] = stageRes;
+          evaluations.add(new ROPair<>(field, stageRes));
           if (stageRes.value instanceof VariableDataValue) {
             allImmediate = false;
           }
@@ -142,57 +136,70 @@ public class Stage extends LanguageElement {
 
       EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
       if (allImmediate) {
-        Object[] immediateArgs = new Object[parameters.length];
-        for (int i = 0; i < parameters.length; i++) {
-          if (evaluations[i] instanceof ROList) {
+        final Object out =
+            uncheck(() -> ((Constructor<?>) klass.getConstructors()[0]).newInstance());
+        for (ROPair<Field, Object> evaluation : evaluations) {
+          if (evaluation.second instanceof ROList) {
             TSList elementList = new TSList();
-            for (Object o : ((ROList) ectx.record((EvaluateResult) evaluations[i]))) {
-              elementList.add(((ConstDataValue) o).getInner());
+            for (Object o : ((ROList) evaluation.second)) {
+              elementList.add(((ConstDataValue) ectx.record((EvaluateResult) o)).getInner());
             }
-            immediateArgs[i] = element;
+            uncheck(() -> evaluation.first.set(out, elementList));
           } else {
-            immediateArgs[i] =
-                ((ConstDataValue) ectx.record((EvaluateResult) evaluations[i])).getInner();
+            uncheck(
+                () ->
+                    evaluation.first.set(
+                        out,
+                        ((ConstDataValue) ectx.record((EvaluateResult) evaluation.second))
+                            .getInner()));
           }
         }
-        return ectx.build(
-            languageElementType.constAsValue(
-                uncheck(() -> constructor.newInstance(immediateArgs))));
+        return ectx.build(languageElementType.constAsValue(out));
       } else {
-        final JVMSharedCode args = new JVMSharedCode();
-        JVMSharedDataDescriptor[] argDesc = new JVMSharedDataDescriptor[parameters.length];
-        for (int i = 0; i < parameters.length; i++) {
-          if (evaluations[i] instanceof ROList) {
-            argDesc[i] = JVMSharedDataDescriptor.fromClass(ROList.class);
-            args.add(MortarTargetModuleContext.newTSListCode);
-            for (Object sub : ((ROList) ectx.record((EvaluateResult) evaluations[i]))) {
+        final JVMSharedCode code = new JVMSharedCode();
+        final JVMSharedJVMName klassJvmName = JVMSharedJVMName.fromClass(klass);
+        code.add(
+            JVMSharedCode.instantiate(
+                -1, klassJvmName, JVMSharedFuncDescriptor.fromConstructorParts(), null));
+        code.addI(DUP);
+        for (ROPair<Field, Object> evaluation : evaluations) {
+          JVMSharedDataDescriptor fieldDesc;
+          if (evaluation.second instanceof ROList) {
+            fieldDesc = JVMSharedDataDescriptor.fromObjectClass(ROList.class);
+            code.add(MortarTargetModuleContext.newTSListCode);
+            for (Object sub : ((ROList) ectx.record((EvaluateResult) evaluation.second))) {
               final Value subValue =
                   ectx.record(ectx.record((EvaluateResult) sub).vary(context, location));
               if (subValue == ErrorValue.error) {
                 bad = true;
                 continue;
               }
-              args.add(((DataValue) subValue).mortarVaryCode(context, location).half(context));
-              args.add(MortarTargetModuleContext.tsListAddCode);
+              code.add(((DataValue) subValue).mortarVaryCode(context, location).half(context));
+              code.add(MortarTargetModuleContext.tsListAddCode);
             }
           } else {
+            fieldDesc = JVMSharedDataDescriptor.fromClass(evaluation.first.getType());
             final Value val =
-                ectx.record(ectx.record((EvaluateResult) evaluations[i]).vary(context, location));
+                ectx.record(
+                    ectx.record((EvaluateResult) evaluation.second).vary(context, location));
             if (val == ErrorValue.error) {
               bad = true;
               continue;
             }
-            args.add(((DataValue) val).mortarVaryCode(context, location).half(context));
+            code.add(((DataValue) val).mortarVaryCode(context, location).half(context));
           }
+          code.add(JVMSharedCode.setField(-1, klassJvmName, evaluation.first.getName(), fieldDesc));
         }
         if (bad) return EvaluateResult.error;
         return ectx.build(
             languageElementType.stackAsValue(
-                JVMSharedCode.instantiate(
-                    -1,
-                    JVMSharedJVMName.fromClass(klass),
-                    JVMSharedFuncDescriptor.fromConstructorParts(argDesc),
-                    args)));
+                code.addI(DUP)
+                    .add(
+                        JVMSharedCode.callInterfaceMthod(
+                            -1,
+                            JVMSharedJVMName.fromClass(Exportable.class),
+                            "postInit",
+                            JVMSharedFuncDescriptor.fromParts(JVMSharedDataDescriptor.VOID)))));
       }
     }
 
@@ -200,7 +207,12 @@ public class Stage extends LanguageElement {
   }
 
   @Override
+  protected boolean innerHasLowerInSubtree() {
+    return hasLowerInSubtree(child);
+  }
+
+  @Override
   public EvaluateResult evaluate(EvaluationContext context) {
-    return stageLower(context, location, child);
+    return stageLower(context, id, child);
   }
 }

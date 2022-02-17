@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.inout.utils.classstate;
 
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateRecordBody;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.DefaultStateArrayBody;
@@ -10,6 +11,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateArray;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateInt;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateRecord;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateString;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto.TypeInfo;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -22,8 +24,8 @@ import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
 public class ClassInfo {
@@ -31,25 +33,23 @@ public class ClassInfo {
   public final String luxemType;
   public Constructor constructor;
   public ROMap<String, Prototype> fields;
-  public TSMap<String, Integer> argOrder;
 
   public ClassInfo(String luxemType) {
     this.luxemType = luxemType;
   }
 
   public void fill(Class klass) {
-    Constructor constructor = klass.getConstructors()[0];
     TSMap<String, Prototype> fields = new TSMap<>();
-    TSMap<String, Integer> argOrder = new TSMap<>();
-    for (int i = 0; i < constructor.getParameters().length; i++) {
-      Parameter parameter = constructor.getParameters()[i];
-      argOrder.put(parameter.getName(), i);
+    for (Field field0 : klass.getFields()) {
+      if (Modifier.isStatic(field0.getModifiers())) continue;
+      if (field0.getAnnotation(Exportable.Param.class) == null) continue;
+      final TypeInfo field = TypeInfo.fromField(field0);
       Prototype prototype;
-      if (parameter.getType() == int.class) {
+      if (field.klass == int.class) {
         prototype = PrototypeInt.instance;
-      } else if (parameter.getType() == String.class) {
+      } else if (field.klass == String.class) {
         prototype = PrototypeString.instance;
-      } else if (ROList.class.isAssignableFrom(parameter.getType())) {
+      } else if (ROList.class.isAssignableFrom(field.klass)) {
         prototype =
             new Prototype() {
               @Override
@@ -61,10 +61,7 @@ public class ClassInfo {
                       @Override
                       public BaseStateSingle createElementState(
                           Object context, TSList tsList, LuxemPathBuilder luxemPath) {
-                        final BaseStateSingle state =
-                            createSingleState(
-                                ((ParameterizedType) parameter.getParameterizedType())
-                                    .getActualTypeArguments()[0]);
+                        final BaseStateSingle state = createSingleState(field.genericArgs[0].klass);
                         data.add(state);
                         return state;
                       }
@@ -80,7 +77,7 @@ public class ClassInfo {
                     });
               }
             };
-      } else if (ROSetRef.class.isAssignableFrom(parameter.getType())) {
+      } else if (ROSetRef.class.isAssignableFrom(field.klass)) {
         prototype =
             new Prototype() {
               @Override
@@ -92,10 +89,7 @@ public class ClassInfo {
                       @Override
                       public BaseStateSingle createElementState(
                           Object context, TSList tsList, LuxemPathBuilder luxemPath) {
-                        final BaseStateSingle state =
-                            createSingleState(
-                                ((ParameterizedType) parameter.getParameterizedType())
-                                    .getActualTypeArguments()[0]);
+                        final BaseStateSingle state = createSingleState(field.genericArgs[0].klass);
                         data.add(state);
                         return state;
                       }
@@ -111,7 +105,7 @@ public class ClassInfo {
                     });
               }
             };
-      } else if (ROMap.class.isAssignableFrom(parameter.getType())) {
+      } else if (ROMap.class.isAssignableFrom(field.klass)) {
         prototype =
             new Prototype() {
               @Override
@@ -129,10 +123,7 @@ public class ClassInfo {
                       @Override
                       public BaseStateSingle createValueState(
                           Object context, TSList tsList, LuxemPathBuilder luxemPath, Object key) {
-                        final BaseStateSingle state =
-                            createSingleState(
-                                ((ParameterizedType) parameter.getParameterizedType())
-                                    .getActualTypeArguments()[1]);
+                        final BaseStateSingle state = createSingleState(field.genericArgs[1].klass);
                         data.add(new ROPair<>((String) key, state));
                         return state;
                       }
@@ -149,12 +140,11 @@ public class ClassInfo {
               }
             };
       } else {
-        prototype = new PrototypeAuto(parameter.getType());
+        prototype = new PrototypeAuto(field.klass);
       }
-      fields.put(parameter.getName(), prototype);
+      fields.put(field0.getName(), prototype);
     }
     this.constructor = constructor;
-    this.argOrder = argOrder;
     this.fields = fields;
   }
 

@@ -1,25 +1,25 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.LeafExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.luxem.write.Writer;
 
-public final class LocalModuleId implements ModuleId, AutoBuiltinExportable, LeafExportable {
+public final class LocalModuleId implements ModuleId, AutoBuiltinExportable, Exportable {
   public static final String GRAPH_KEY_PATH = "path";
-  public final String path;
-
-  /**
-   *
-   * @param path Absolute path
-   */
-  public LocalModuleId(String path) {
-    this.path = path;
-  }
+  @Param public String path;
 
   public static LocalModuleId graphDeserialize(Record data) {
-    return new LocalModuleId((String) data.data.get(GRAPH_KEY_PATH));
+    return create((String) data.data.get(GRAPH_KEY_PATH));
+  }
+
+  /** @param path Absolute path */
+  public static LocalModuleId create(String path) {
+    final LocalModuleId out = new LocalModuleId();
+    out.path = path;
+    out.postInit();
+    return out;
   }
 
   @Override

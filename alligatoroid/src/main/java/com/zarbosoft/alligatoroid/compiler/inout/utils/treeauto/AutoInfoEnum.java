@@ -2,6 +2,8 @@ package com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto;
 
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.DefaultStateSingle;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateErrorSingle;
+import com.zarbosoft.alligatoroid.compiler.model.error.DeserializeUnknownType;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.luxem.write.Writer;
@@ -28,7 +30,16 @@ class AutoInfoEnum implements AutoInfo {
       @Override
       protected BaseStateSingle innerEatType(
           Object context, TSList tsList, LuxemPathBuilder luxemPath, String name) {
-        state = autoTreeMeta.infos.get(keyToClass.get(name)).create(errors, luxemPath);
+        final Class klass = keyToClass.getOpt(name);
+        if (klass == null) {
+          final TSList<String> known = new TSList<>();
+          for (String key : classToKey.values()) {
+            known.add(key);
+          }
+          errors.add(new DeserializeUnknownType(luxemPath.render(), name, known));
+          return StateErrorSingle.state;
+        }
+        state = autoTreeMeta.infos.get(klass).create(errors, luxemPath);
         return state;
       }
 

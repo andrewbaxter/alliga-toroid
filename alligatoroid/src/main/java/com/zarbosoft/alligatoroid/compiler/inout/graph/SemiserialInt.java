@@ -1,14 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-import com.zarbosoft.luxem.write.Writer;
-
 import java.util.Objects;
 
 public final class SemiserialInt implements SemiserialSubvalue {
-  public final int value;
+  @Exportable.Param public int value;
 
-  public SemiserialInt(int value) {
-    this.value = value;
+  public static SemiserialInt create(int value) {
+    final SemiserialInt out = new SemiserialInt();
+    out.value = value;
+    return out;
   }
 
   @Override

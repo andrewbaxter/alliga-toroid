@@ -3,9 +3,11 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarCarry;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.graph.ConstExportType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;

@@ -27,11 +27,6 @@ public abstract class MortarObjectType implements MortarDataType {
   }
 
   @Override
-  public MortarTargetModuleContext.HalfLowerResult box(JVMSharedCodeElement valueCode) {
-    return new MortarTargetModuleContext.HalfLowerResult(this, valueCode);
-  }
-
-  @Override
   public JVMSharedCodeElement constValueVary(EvaluationContext context, Object value) {
     return ((MortarTargetModuleContext) context.target).transfer(value);
   }

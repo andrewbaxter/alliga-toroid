@@ -18,4 +18,16 @@ public interface SemiserialRef extends SemiserialSubvalue {
 
     T handleBuiltin(SemiserialRefBuiltin s);
   }
+
+  public interface DefaultDispatcher<T> extends Dispatcher<T> {
+    @Override
+    default T handleArtifact(SemiserialRefArtifact s) {
+      throw new RuntimeException("got unexpected semiserial artifact ref");
+    }
+
+    @Override
+    default T handleBuiltin(SemiserialRefBuiltin s) {
+      throw new RuntimeException("got unexpected semiserial builtin ref");
+    }
+  }
 }

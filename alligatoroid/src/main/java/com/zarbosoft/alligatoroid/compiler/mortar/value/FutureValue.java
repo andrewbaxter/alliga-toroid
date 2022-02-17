@@ -2,27 +2,32 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.RootExportable;
-import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.alligatoroid.compiler.mortar.SimpleBinding;
+import com.zarbosoft.rendaw.common.ROPair;
 
 import java.util.concurrent.Future;
 
-public class FutureValue implements Value {
+public class FutureValue implements Value, NoExportValue {
   public final Future<Value> future;
 
   public FutureValue(Future<Value> future) {
     this.future = future;
+  }
+
+  @Override
+  public EvaluateResult export(EvaluationContext context, Location location) {
+    return EvaluateResult.pure(get());
+  }
+
+  @Override
+  public ROPair<TargetCode, Binding> bind(EvaluationContext context, Location location) {
+    return new ROPair<>(null, new SimpleBinding(this));
   }
 
   @Override
@@ -42,5 +47,10 @@ public class FutureValue implements Value {
 
   public Value get() {
     return Utils.await(future);
+  }
+
+  @Override
+  public ExportableType graphType() {
+    return get().graphType();
   }
 }

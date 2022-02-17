@@ -2,10 +2,13 @@ package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRef;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRefArtifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRefBuiltin;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialValue;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.IdentityExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
@@ -46,19 +49,71 @@ public class ModuleCompileContext {
     this.importPath = importPath;
   }
 
-  private Exportable lookupRef(SemiserialRef ref) {
+  public Object lookupRef(SemiserialRef ref) {
     return ref.dispatchRef(
-        new SemiserialRef.Dispatcher<Exportable>() {
+        new SemiserialRef.Dispatcher<Object>() {
           @Override
-          public Exportable handleArtifact(SemiserialRefArtifact s) {
-            return artifactLookup.getOpt(s.id);
+          public Object handleArtifact(SemiserialRefArtifact s) {
+            return artifactLookup.get(s.id);
           }
 
           @Override
-          public Exportable handleBuiltin(SemiserialRefBuiltin s) {
-            return Builtin.semiKeyToBuiltin.get(s.key);
+          public Object handleBuiltin(SemiserialRefBuiltin s) {
+            return Meta.semiKeyToBuiltin.get(s.key);
           }
         });
+  }
+
+  public Value desemiserialize(SemiserialModule semi, ImportId importId) {
+    TSList<ROPair<ArtifactId, SemiserialValue>> remaining =
+        new TSList<ROPair<ArtifactId, SemiserialValue>>();
+    for (int i = 0; i < semi.artifacts.size(); ++i) {
+      final SemiserialValue semiValue = semi.artifacts.get(i);
+      final ArtifactId artifactId = new ArtifactId(importId, i);
+      remaining.add(new ROPair<>(artifactId, semiValue));
+    }
+    // type, (id, semivalue)
+    TSList<ROPair<IdentityExportableType, ROPair<ArtifactId, SemiserialValue>>> stratum = new TSList<>();
+    do {
+      stratum.clear();
+      final Iterator<ROPair<ArtifactId, SemiserialValue>> iter = remaining.iterator();
+
+      // Find next subset of artifacts whose types are all resolved
+      while (iter.hasNext()) {
+        final ROPair<ArtifactId, SemiserialValue> pair = iter.next();
+        final SemiserialValue semiValue = pair.second;
+        IdentityExportableType type = (IdentityExportableType) lookupRef(semiValue.type);
+        if (type != null) {
+          stratum.add(new ROPair<>(type, pair));
+          iter.remove();
+        }
+      }
+
+      // Desemiserialize this stratum
+      Desemiserializer typeDesemiserializer = new Desemiserializer();
+      for (ROPair<IdentityExportableType, ROPair<ArtifactId, SemiserialValue>> candidate : stratum) {
+        final Exportable value =
+            (Exportable)
+                candidate.first.graphDesemiserializeArtifact(
+                    this, typeDesemiserializer, candidate.second.second.data);
+        artifactLookup.put(candidate.second.first, value);
+        backArtifactLookup.put(new ObjId<>(value), candidate.second.first);
+      }
+      typeDesemiserializer.finish();
+    } while (stratum.some());
+    if (remaining.some()) {
+      /**
+       * Type dependency loop. Probbly needs user-facing error but this shouldn't ever happen - it
+       * should be cought during initial semiserialization.
+       */
+      throw new Assertion();
+    }
+    final Value out = (Value) lookupRef(semi.root);
+    if (out == null) {
+      /** Shouldn't happen unless someone messes with the cache data directly. */
+      throw new Assertion();
+    }
+    return out;
   }
 
   public CompletableFuture<Value> getModule(ImportId importId) {
@@ -70,57 +125,7 @@ public class ModuleCompileContext {
               .getModule(compileContext, importPath, importId)
               .thenApply(
                   semi -> {
-                    TSList<ROPair<ArtifactId, SemiserialValue>> remaining =
-                        new TSList<ROPair<ArtifactId, SemiserialValue>>();
-                    for (int i = 0; i < semi.result().artifacts.size(); ++i) {
-                      final SemiserialValue semiValue = semi.result().artifacts.get(i);
-                      final ArtifactId artifactId = new ArtifactId(importId, i);
-                      remaining.add(new ROPair<>(artifactId, semiValue));
-                    }
-                    // type, (id, semivalue)
-                    TSList<ROPair<Exportable, ROPair<ArtifactId, SemiserialValue>>> stratum =
-                        new TSList<>();
-                    do {
-                      stratum.clear();
-                      final Iterator<ROPair<ArtifactId, SemiserialValue>> iter =
-                          remaining.iterator();
-
-                      // Find next subset of artifacts whose types are all resolved
-                      while (iter.hasNext()) {
-                        final ROPair<ArtifactId, SemiserialValue> pair = iter.next();
-                        final SemiserialValue semiValue = pair.second;
-                        Exportable type = lookupRef(semiValue.type);
-                        if (type != null) {
-                          stratum.add(new ROPair<>(type, pair));
-                          iter.remove();
-                        }
-                      }
-
-                      // Desemiserialize this stratum
-                      Desemiserializer typeDesemiserializer = new Desemiserializer();
-                      for (ROPair<Exportable, ROPair<ArtifactId, SemiserialValue>> candidate :
-                          stratum) {
-                        final Exportable value =
-                            candidate.first.graphDesemiserializeChild(
-                                this, typeDesemiserializer, candidate.second.second.data);
-                        artifactLookup.put(candidate.second.first, value);
-                        backArtifactLookup.put(new ObjId<>(value), candidate.second.first);
-                      }
-                      typeDesemiserializer.finish();
-                    } while (stratum.some());
-                    if (remaining.some()) {
-                      /**
-                       * Type dependency loop. Probbly needs user-facing error but this shouldn't
-                       * ever happen - it should be cought during initial semiserialization.
-                       */
-                      throw new Assertion();
-                    }
-                    final Value out = (Value) lookupRef(semi.result().root);
-                    if (out == null) {
-                      /** Shouldn't happen unless someone messes with the cache data directly. */
-                      throw new Assertion();
-                    }
-                    return out;
+                    return desemiserialize(semi.result(), importId);
                   });
         });
   }

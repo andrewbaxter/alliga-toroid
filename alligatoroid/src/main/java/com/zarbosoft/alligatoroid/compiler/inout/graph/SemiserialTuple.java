@@ -1,13 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.ROList;
 
 public class SemiserialTuple implements SemiserialSubvalue {
-  public final ROList<SemiserialSubvalue> values;
+  @Exportable.Param public ROList<SemiserialSubvalue> values;
 
-  public SemiserialTuple(ROList<SemiserialSubvalue> values) {
-    this.values = values;
+  public static SemiserialTuple createSemiserialTuple(ROList<SemiserialSubvalue> values) {
+    final SemiserialTuple out = new SemiserialTuple();
+    out.values = values;
+    return out;
   }
 
   @Override

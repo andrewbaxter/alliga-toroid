@@ -8,8 +8,9 @@ import com.zarbosoft.alligatoroid.compiler.Scope;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.ContinueError;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -37,7 +38,8 @@ public class JVMConcreteMethodBuilder {
     EvaluationContext context = new EvaluationContext(module, targetContext, new Scope(null));
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
     if (ectx.record(body.evaluate(context)) == ErrorValue.error) {
-      throw new Pass2Failed();
+      classBuilder.error = true;
+      throw new ContinueError();
     }
     built = (JVMSharedCode) ectx.build(null).preEffect;
     classBuilder.jvmClass.defineFunction(

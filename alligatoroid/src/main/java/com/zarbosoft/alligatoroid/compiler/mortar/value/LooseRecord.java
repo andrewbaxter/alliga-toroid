@@ -6,13 +6,19 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstKey;
 
-public class LooseRecord implements Value {
+public class LooseRecord implements Value, NoExportValue {
   public final ROOrderedMap<Object, EvaluateResult> data;
 
   public LooseRecord(ROOrderedMap<Object, EvaluateResult> data) {
@@ -61,5 +67,19 @@ public class LooseRecord implements Value {
         context.target.merge(context, location, pre),
         context.target.merge(context, location, post),
         out);
+  }
+
+  @Override
+  public EvaluateResult export(EvaluationContext context, Location location) {
+    TSOrderedMap<Object, MortarDataType> types = new TSOrderedMap();
+    final TSMap<Object, Object> data = new TSMap<>();
+    final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
+    for (ROPair<Object, EvaluateResult> e : this.data) {
+      Value exported = ectx.record(ectx.record(e.second).export(context, location));
+      if (!(exported instanceof ConstDataValue)) throw new Assertion();
+      types.put(e.first, ((ConstDataValue) exported).mortarType());
+      data.put(e.first, ((ConstDataValue) exported).getInner());
+    }
+    return ectx.build(new MortarRecordType(types).constAsValue(new Record(data)));
   }
 }

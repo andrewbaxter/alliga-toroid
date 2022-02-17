@@ -21,6 +21,7 @@ import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.core.syntax.alignments.RelativeAlignmentSpec;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
+import com.zarbosoft.merman.core.syntax.back.BackFixedArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedTypeSpec;
@@ -149,6 +150,7 @@ public class AlligatorusSyntax {
   private static final String BACK_TYPE_LITERAL_RECORD = "record";
   private static final String TYPE_LITERAL_RECORD = "record";
   private static final String TYPE_LITERAL_TUPLE = "tuple";
+  private static final String BACK_TYPE_LITERAL_TUPLE = "tuple";
   private static final String TYPE_EXIT = "exit";
   private static final String TYPE_RETURN = "return";
   private static final String TYPE_IMPORT = "import";
@@ -283,6 +285,44 @@ public class AlligatorusSyntax {
     TypeGrouper types = new TypeGrouper();
 
     types.add(GROUP_EXPR, GROUP_STATEMENT);
+
+    // Sugars first
+    types.add(
+        new FreeAtomType(
+            new FreeAtomType.Config(
+                "Local Module",
+                new AtomType.Config(
+                    TYPE_MODULE_LOCAL,
+                    backBuiltinFunc(
+                        "modLocal", new BackAtomSpec(new BackAtomSpec.Config("path", GROUP_EXPR))),
+                    new AFrontBuilder()
+                        .fixed("mod", COLOR_KEYWORD)
+                        .space()
+                        .compactSplit()
+                        .atom("path")
+                        .front))));
+    types.add(
+        new FreeAtomType(
+            new FreeAtomType.Config(
+                "Remote Module",
+                new AtomType.Config(
+                    TYPE_MODULE_REMOTE,
+                    backBuiltinFunc(
+                        "modRemote",
+                        backTuple(
+                            new BackAtomSpec(new BackAtomSpec.Config("url", GROUP_EXPR)),
+                            new BackAtomSpec(
+                                new BackAtomSpec.Config(FIELD_MODULE_REMOTE_HASH, GROUP_EXPR)))),
+                    new AFrontBuilder()
+                        .fixed("mod", COLOR_KEYWORD)
+                        .space()
+                        .compactSplit()
+                        .atom("url")
+                        .space()
+                        .compactSplit()
+                        .atom(FIELD_MODULE_REMOTE_HASH)
+                        .front))),
+        GROUP_EXPR);
 
     // Variables, fields
     types.add(
@@ -433,25 +473,6 @@ public class AlligatorusSyntax {
             .text("import", COLOR_KEYWORD)
             .space()
             .atom(FIELD_IMPORT_SPEC, GROUP_EXPR)
-            .build(),
-        GROUP_EXPR);
-    types.add(
-        new ATypeBuilder(TYPE_MODULE_LOCAL, "Local Module")
-            .text("mod", COLOR_KEYWORD)
-            .space()
-            .compactSplit()
-            .atom("path", GROUP_EXPR)
-            .build(),
-        GROUP_EXPR);
-    types.add(
-        new ATypeBuilder(TYPE_MODULE_REMOTE, "Remote Module")
-            .text("mod", COLOR_KEYWORD)
-            .space()
-            .compactSplit()
-            .atom("url", GROUP_EXPR)
-            .space()
-            .compactSplit()
-            .atom(FIELD_MODULE_REMOTE_HASH, GROUP_EXPR)
             .build(),
         GROUP_EXPR);
 
@@ -788,22 +809,6 @@ public class AlligatorusSyntax {
     b.back.array("children", GROUP_COMMENT_BODY);
   }
 
-  /*
-  private static BackSpec tuple(BackSpec... data) {
-    return new BackFixedTypeSpec(
-        new BackFixedTypeSpec.Config(
-            TYPE_LITERAL_TUPLE,
-            new BackFixedRecordSpec(
-                new BackFixedRecordSpec.Config(
-                    new TSOrderedMap<String, BackSpec>()
-                        .put(
-                            "elements",
-                            new BackFixedArraySpec(
-                                new BackFixedArraySpec.Config().elements(new TSList<>(data)))),
-                    ROSet.empty))));
-  }
-   */
-
   private static BackSpec backBuiltinField(BackSpec child) {
     return new ABackBuilder(BACK_TYPE_ACCESS)
         .raw(ACCESS_BACK_FIELD_BASE, new ABackBuilder(BACK_TYPE_BUILTIN).build())
@@ -811,12 +816,18 @@ public class AlligatorusSyntax {
         .build();
   }
 
-  public static BackSpec backBuiltinFunc(String field, BackSpec args) {
+  public static BackSpec backTuple(BackSpec... values) {
+    return new ABackBuilder(BACK_TYPE_LITERAL_TUPLE)
+        .fixedArray("elements", new TSList<>(values))
+        .build();
+  }
+
+  public static BackSpec backBuiltinFunc(String field, BackSpec arg) {
     return new ABackBuilder(BACK_TYPE_CALL)
         .raw(
             CALL_BACK_FIELD_TARGET,
             backBuiltinField(literalStringBack(new BackFixedPrimitiveSpec(field))))
-        .raw(CALL_BACK_FIELD_ARGUMENT, args)
+        .raw(CALL_BACK_FIELD_ARGUMENT, arg)
         .build();
   }
 
@@ -1051,6 +1062,11 @@ public class AlligatorusSyntax {
 
     public ABackBuilder array(String id, String elementType) {
       put(id, new BackArraySpec(new BaseBackArraySpec.Config(id, elementType, ROList.empty)));
+      return this;
+    }
+
+    public ABackBuilder fixedArray(String id, ROList<BackSpec> elements) {
+      put(id, new BackFixedArraySpec(new BackFixedArraySpec.Config().elements(elements)));
       return this;
     }
 

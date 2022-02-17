@@ -11,7 +11,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarCarry;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 import com.zarbosoft.rendaw.common.ROPair;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataStackValue.nullValue;
+import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue.nullValue;
 
 public class VariableDataArrayElementValue implements VariableDataValue {
   private final MortarDataType elementType;

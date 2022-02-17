@@ -10,11 +10,19 @@ import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class Scope extends LanguageElement {
-  public  LanguageElement inner;
+  @Param public LanguageElement inner;
 
-  public Scope(Location id, LanguageElement inner) {
-    super(id, hasLowerInSubtree(inner));
-    this.inner = inner;
+  public static Scope create(Location id, LanguageElement inner) {
+    final Scope scope = new Scope();
+    scope.id = id;
+    scope.inner = inner;
+    scope.postInit();
+    return scope;
+  }
+
+  @Override
+  protected boolean innerHasLowerInSubtree() {
+    return hasLowerInSubtree(inner);
   }
 
   @Override
@@ -23,10 +31,10 @@ public class Scope extends LanguageElement {
     EvaluateResult res = inner.evaluate(context);
     TSList<TargetCode> pre = new TSList<>(res.preEffect);
     for (Binding binding : new ReverseIterable<>(context.scope.atLevel())) {
-      pre.add(context.target.drop(context, location, binding));
+      pre.add(binding.dropCode(context, id));
     }
     context.popScope();
     return new EvaluateResult(
-        context.target.merge(context, location, pre), res.postEffect, res.value);
+        context.target.merge(context, id, pre), res.postEffect, res.value);
   }
 }

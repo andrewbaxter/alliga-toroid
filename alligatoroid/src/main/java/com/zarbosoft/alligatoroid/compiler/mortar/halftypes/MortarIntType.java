@@ -4,14 +4,17 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarCarry;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
+import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinExportable;
+import com.zarbosoft.rendaw.common.TSList;
 
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.IRETURN;
 import static org.objectweb.asm.Opcodes.ISTORE;
 
-public class MortarIntType implements MortarDataType {
+public class MortarIntType implements MortarDataType, SingletonBuiltinExportable {
   public static final MortarIntType type = new MortarIntType();
 
   private MortarIntType() {}
@@ -37,14 +40,18 @@ public class MortarIntType implements MortarDataType {
   }
 
   @Override
-  public MortarTargetModuleContext.HalfLowerResult box(JVMSharedCodeElement valueCode) {
-    return new MortarTargetModuleContext.HalfLowerResult(
-        MortarBoxedIntType.type, new JVMSharedCode().add(valueCode).add(JVMSharedCode.boxInt));
+  public JVMSharedCodeElement constValueVary(EvaluationContext context, Object value) {
+    return JVMSharedCode.int_((Integer) value);
   }
 
   @Override
-  public MortarCarry valueVary(EvaluationContext context, MortarCarry carry) {
-    if (!carry.isWhole()) return carry;
-    return MortarCarry.ofDeferredHalf(c -> new JVMSharedCode().addInt((Integer) carry.whole()));
+  public boolean checkAssignableFrom(
+      TSList<Error> errors, Location location, MortarDataType type, TSList<Object> path) {
+    if (type instanceof MortarImmutableType) type = ((MortarImmutableType) type).innerType;
+    if (type != this.type) {
+      errors.add(new WrongType(location, path, type.toString(), toString()));
+      return false;
+    }
+    return true;
   }
 }

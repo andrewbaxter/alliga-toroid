@@ -1,16 +1,19 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeInstruction;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
+import com.zarbosoft.alligatoroid.compiler.model.error.Error;
+import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinExportable;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.TSList;
 
 import static org.objectweb.asm.Opcodes.RETURN;
 
-public class MortarNullType implements MortarDataType {
+public class MortarNullType implements MortarDataType, SingletonBuiltinExportable {
   public static final MortarNullType type = new MortarNullType();
 
   private MortarNullType() {}
@@ -36,12 +39,18 @@ public class MortarNullType implements MortarDataType {
   }
 
   @Override
-  public MortarTargetModuleContext.HalfLowerResult box(JVMSharedCodeElement valueCode) {
-    return new MortarTargetModuleContext.HalfLowerResult(this, valueCode);
+  public JVMSharedCodeElement constValueVary(EvaluationContext context, Object value) {
+    return JVMSharedCodeInstruction.null_;
   }
 
   @Override
-  public JVMSharedCodeElement constValueVary(EvaluationContext context, Object value) {
-    return JVMSharedCodeInstruction.null_;
+  public boolean checkAssignableFrom(
+      TSList<Error> errors, Location location, MortarDataType type, TSList<Object> path) {
+    if (type instanceof MortarImmutableType) type = ((MortarImmutableType) type).innerType;
+    if (type != this.type) {
+      errors.add(new WrongType(location, path, type.toString(), toString()));
+      return false;
+    }
+    return true;
   }
 }

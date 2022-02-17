@@ -1,12 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
 public class SemiserialType implements SemiserialSubvalue {
-  public final String type;
-  public final SemiserialSubvalue value;
+  @Exportable.Param public String type;
+  @Exportable.Param public SemiserialSubvalue value;
 
-  public SemiserialType(String type, SemiserialSubvalue value) {
-    this.type = type;
-    this.value = value;
+  public static SemiserialType create(String type, SemiserialSubvalue value) {
+    final SemiserialType out = new SemiserialType();
+    out.type = type;
+    out.value = value;
+    return out;
   }
 
   @Override
