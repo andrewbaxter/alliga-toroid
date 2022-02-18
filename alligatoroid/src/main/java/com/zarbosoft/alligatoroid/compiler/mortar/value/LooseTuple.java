@@ -14,7 +14,7 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstInt;
+import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstIntlike;
 import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue.nullValue;
 
 /**
@@ -29,8 +29,17 @@ public class LooseTuple implements Value, NoExportValue {
   }
 
   @Override
+  public ROList<String> traceFields(EvaluationContext context) {
+    final TSList<String> out = new TSList<>();
+    for (int i = 0; i < data.size(); i++) {
+      out.add(Integer.toString(i));
+    }
+    return out;
+  }
+
+  @Override
   public EvaluateResult access(EvaluationContext context, Location location, Value field) {
-    final Integer key = assertConstInt(context, location, field);
+    final Integer key = assertConstIntlike(context, location, field);
     if (key == null) return EvaluateResult.error;
     TSList<TargetCode> pre = new TSList<>();
     TSList<TargetCode> post = new TSList<>();

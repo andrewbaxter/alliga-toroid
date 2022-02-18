@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto;
 
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.classstate.ClassInfo;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.classstate.StateClassBody;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
@@ -14,7 +15,8 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
 
-import java.lang.reflect.Parameter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
@@ -35,15 +37,15 @@ class AutoInfoClass implements AutoInfo {
 
   @Override
   public void write(Writer writer, Object object) {
-    final int paramCount = info.constructor.getParameters().length;
     writer.recordBegin();
-    for (int i = 0; i < paramCount; i++) {
-      Parameter parameter = info.constructor.getParameters()[i];
-      String fieldName = parameter.getName();
-      writer.primitive(parameter.getName());
+    for (Field field : info.klass.getFields()) {
+      if (field.getAnnotation(Exportable.Param.class) == null) continue;
+      if (Modifier.isStatic(field.getModifiers())) continue;
+      String fieldName = field.getName();
+      writer.primitive(field.getName());
       writeParam(
           writer,
-          TypeInfo.fromParam(parameter),
+          TypeInfo.fromField(field),
           uncheck(() -> object.getClass().getField(fieldName).get(object)));
     }
     writer.recordEnd();
@@ -72,7 +74,7 @@ class AutoInfoClass implements AutoInfo {
     } else if (ROOrderedMap.class.isAssignableFrom(info.klass)) {
       writer.recordBegin();
       for (ROPair<?, ?> e : ((ROOrderedMap<?, ?>) data)) {
-        writer.primitive((String) e.first);
+        writeParam(writer, info.genericArgs[0], e.first);
         writeParam(writer, info.genericArgs[1], e.second);
       }
       writer.recordEnd();

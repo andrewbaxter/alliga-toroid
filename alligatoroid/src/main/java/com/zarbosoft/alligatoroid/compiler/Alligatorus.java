@@ -10,6 +10,8 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.alligatoroid.compiler.modules.Logger;
 import com.zarbosoft.appdirsj.AppDirs;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.nio.file.Path;
@@ -52,16 +54,22 @@ public class Alligatorus {
     } finally {
       context.threads.join();
     }
-    return new Result(context.moduleErrors, context.localSources);
+    return new Result(
+        context.moduleErrors, context.localSources, (Map) context.traceModuleStringFields);
   }
 
   public static class Result {
     public final Map<ImportId, ROList<Error>> errors;
     public final Map<ModuleId, Path> localSources;
+    public final Map<ModuleId, ROMap<Location, ROSetRef<String>>> traceStringFields;
 
-    public Result(Map<ImportId, ROList<Error>> errors, Map<ModuleId, Path> localSources) {
+    public Result(
+        Map<ImportId, ROList<Error>> errors,
+        Map<ModuleId, Path> localSources,
+        Map<ModuleId, ROMap<Location, ROSetRef<String>>> traceStringFields) {
       this.errors = errors;
       this.localSources = localSources;
+      this.traceStringFields = traceStringFields;
     }
   }
 }

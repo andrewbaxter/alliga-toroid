@@ -12,6 +12,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.ConstBinding;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.graph.ConstExportType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import java.util.function.Consumer;
@@ -70,6 +71,11 @@ public abstract class ConstDataValue implements DataValue {
   @Override
   public final EvaluateResult access(EvaluationContext context, Location location, Value field) {
     return mortarType().constValueAccess(context, location, getInner(), field);
+  }
+
+  @Override
+  public ROList<String> traceFields(EvaluationContext context) {
+    return mortarType().traceFields(getInner());
   }
 
   @Override

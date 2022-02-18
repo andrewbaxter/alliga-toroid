@@ -18,6 +18,7 @@ import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.function.Function;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstKey;
@@ -33,6 +34,16 @@ public class MortarAutoObjectType extends MortarObjectType implements SingletonB
     this.klass = klass;
     this.jvmName = JVMSharedJVMName.fromClass(klass);
     this.isValue = isValue;
+  }
+
+  @Override
+  public ROList<String> traceFields(Object inner) {
+    final TSList<String> out = new TSList<>();
+    for (Map.Entry<Object, MortarFieldType> field : fields) {
+      if (!(field.getKey() instanceof String)) continue;
+      out.add((String) field.getKey());
+    }
+    return out;
   }
 
   private boolean walkParents(Function<MortarDataType, Boolean> process) {

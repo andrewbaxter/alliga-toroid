@@ -1,6 +1,5 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.IdentityExportableType;
@@ -59,7 +58,7 @@ public class Semiserializer {
     }
     int index = artifacts.size();
     artifacts.add(null);
-    final ArtifactId id = new ArtifactId(spec, index);
+    final ArtifactId id = ArtifactId.create(spec, index);
     artifactLookup.put(new ObjId<>(value), id);
     final TSList<Exportable> newPath = path.mut().add(value);
     artifacts.set(

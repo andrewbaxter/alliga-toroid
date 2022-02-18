@@ -2,7 +2,6 @@ package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRef;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRefArtifact;
@@ -69,11 +68,12 @@ public class ModuleCompileContext {
         new TSList<ROPair<ArtifactId, SemiserialValue>>();
     for (int i = 0; i < semi.artifacts.size(); ++i) {
       final SemiserialValue semiValue = semi.artifacts.get(i);
-      final ArtifactId artifactId = new ArtifactId(importId, i);
+      final ArtifactId artifactId = ArtifactId.create(importId, i);
       remaining.add(new ROPair<>(artifactId, semiValue));
     }
     // type, (id, semivalue)
-    TSList<ROPair<IdentityExportableType, ROPair<ArtifactId, SemiserialValue>>> stratum = new TSList<>();
+    TSList<ROPair<IdentityExportableType, ROPair<ArtifactId, SemiserialValue>>> stratum =
+        new TSList<>();
     do {
       stratum.clear();
       final Iterator<ROPair<ArtifactId, SemiserialValue>> iter = remaining.iterator();
@@ -91,7 +91,8 @@ public class ModuleCompileContext {
 
       // Desemiserialize this stratum
       Desemiserializer typeDesemiserializer = new Desemiserializer();
-      for (ROPair<IdentityExportableType, ROPair<ArtifactId, SemiserialValue>> candidate : stratum) {
+      for (ROPair<IdentityExportableType, ROPair<ArtifactId, SemiserialValue>> candidate :
+          stratum) {
         final Exportable value =
             (Exportable)
                 candidate.first.graphDesemiserializeArtifact(

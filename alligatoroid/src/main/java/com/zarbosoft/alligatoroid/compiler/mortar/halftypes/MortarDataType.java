@@ -22,6 +22,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataStackValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.DataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableBoundDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -121,5 +122,9 @@ public interface MortarDataType extends Exportable {
       EvaluationContext context, Location location, Object inner, Value argument) {
     context.moduleContext.errors.add(new CallNotSupported(location));
     return EvaluateResult.error;
+  }
+
+  default ROList<String> traceFields(Object inner) {
+    return ROList.empty;
   }
 }

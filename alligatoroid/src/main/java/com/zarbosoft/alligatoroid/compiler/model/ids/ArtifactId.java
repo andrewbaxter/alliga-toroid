@@ -1,14 +1,19 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 
 public final class ArtifactId {
-  public final ImportId spec;
-  public final int index;
+  @Exportable.Param public ImportId spec;
+  @Exportable.Param public int index;
 
-  public ArtifactId(ImportId spec, int index) {
-    this.spec = spec;
-    this.index = index;
+  public ArtifactId() {}
+
+  public static ArtifactId create(ImportId spec, int index) {
+    ArtifactId out = new ArtifactId();
+    out.spec = spec;
+    out.index = index;
+    return out;
   }
 
   @Override

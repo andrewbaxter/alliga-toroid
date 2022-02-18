@@ -9,6 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.SimpleBinding;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import java.util.concurrent.Future;
@@ -18,6 +19,11 @@ public class FutureValue implements Value, NoExportValue {
 
   public FutureValue(Future<Value> future) {
     this.future = future;
+  }
+
+  @Override
+  public ROList<String> traceFields(EvaluationContext context) {
+    return get().traceFields(context);
   }
 
   @Override

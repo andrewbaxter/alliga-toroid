@@ -10,6 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.model.error.SetNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.VaryNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
 public interface Value extends Exportable {
@@ -57,5 +58,9 @@ public interface Value extends Exportable {
   default EvaluateResult set(EvaluationContext context, Location location, Value value) {
     context.moduleContext.errors.add(new SetNotSupported(location));
     return EvaluateResult.error;
+  }
+
+  default ROList<String> traceFields(EvaluationContext context) {
+    return ROList.empty;
   }
 }

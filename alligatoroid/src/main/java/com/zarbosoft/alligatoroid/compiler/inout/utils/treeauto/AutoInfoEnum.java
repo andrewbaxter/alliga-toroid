@@ -12,14 +12,19 @@ import com.zarbosoft.rendaw.common.TSMap;
 
 class AutoInfoEnum implements AutoInfo {
   private final AutoTreeMeta autoTreeMeta;
+  private final Object fallback;
   private final TSMap<Class, String> classToKey;
   private final TSMap<String, Class> keyToClass;
 
   public AutoInfoEnum(
-      AutoTreeMeta autoTreeMeta, TSMap<String, Class> keyToClass, TSMap<Class, String> classToKey) {
+      AutoTreeMeta autoTreeMeta,
+      TSMap<String, Class> keyToClass,
+      TSMap<Class, String> classToKey,
+      Object fallback) {
     this.autoTreeMeta = autoTreeMeta;
     this.classToKey = classToKey;
     this.keyToClass = keyToClass;
+    this.fallback = fallback;
   }
 
   @Override
@@ -45,7 +50,7 @@ class AutoInfoEnum implements AutoInfo {
 
       @Override
       public Object build(Object context, TSList tsList) {
-        if (state == null) return null;
+        if (state == null) return fallback;
         return state.build(context, tsList);
       }
     };

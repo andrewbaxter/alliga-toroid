@@ -23,6 +23,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.DataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataValue;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -74,18 +75,23 @@ public class MortarRecordType extends MortarObjectType
     return (ModuleId) ((ConstDataValue) value).getInner();
   }
 
-  public static Integer assertConstInt(EvaluationContext context, Location location, Value value) {
-    if (!(value instanceof DataValue)) {
-      context.moduleContext.errors.add(
-          new WrongType(location, new TSList<>(), value.toString(), "data value"));
-      return null;
-    }
-    if (!MortarIntType.type.assertAssignableFrom(context, location, value)) return null;
+  public static Integer assertConstIntlike(
+      EvaluationContext context, Location location, Value value) {
     if (!(value instanceof ConstDataValue)) {
       context.moduleContext.errors.add(new ValueNotWhole(location));
       return null;
     }
-    return (Integer) ((ConstDataValue) value).getInner();
+    if (MortarIntType.type.checkAssignableFrom(location, value)) {
+      return (Integer) ((ConstDataValue) value).getInner();
+    } else if (MortarStringType.type.checkAssignableFrom(location, value)) {
+      try {
+        return Integer.parseInt((String) ((ConstDataValue) value).getInner());
+      } catch (Exception ignored) {
+      }
+    }
+    context.moduleContext.errors.add(
+        new WrongType(location, new TSList<>(), value.toString(), "constant string or int"));
+    return null;
   }
 
   public static String assertConstString(
@@ -101,6 +107,16 @@ public class MortarRecordType extends MortarObjectType
       return null;
     }
     return (String) ((ConstDataValue) value).getInner();
+  }
+
+  @Override
+  public ROList<String> traceFields(Object inner) {
+    final TSList<String> out = new TSList<>();
+    for (ROPair<Object, MortarDataType> field : fields) {
+      if (!(field.first instanceof String)) continue;
+      out.add((String) field.first);
+    }
+    return out;
   }
 
   @Override

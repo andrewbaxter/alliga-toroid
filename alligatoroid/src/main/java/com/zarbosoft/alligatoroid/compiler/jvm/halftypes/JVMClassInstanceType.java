@@ -16,12 +16,14 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROTuple;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.function.Function;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstString;
@@ -94,12 +96,17 @@ public class JVMClassInstanceType implements AutoBuiltinExportable, JVMBaseObjec
     return null;
   }
 
-  public JVMPseudoFieldMeta ensureField(String name) {
-    return fields.getCreate(name, () -> JVMPseudoFieldMeta.blank(this, name));
+  @Override
+  public ROList<String> traceFields() {
+    final TSList<String> out = new TSList<>();
+    for (Map.Entry<String, JVMPseudoFieldMeta> field : fields) {
+      out.add(field.getKey());
+    }
+    return out;
   }
 
-  public JVMPseudoFieldMeta ensureStaticField(String name) {
-    return staticFields.getCreate(name, () -> JVMPseudoFieldMeta.blank(this, name));
+  public JVMPseudoFieldMeta ensureField(String name) {
+    return fields.getCreate(name, () -> JVMPseudoFieldMeta.blank(this, name));
   }
 
   public boolean resolveInternals(EvaluationContext context, Location location) {

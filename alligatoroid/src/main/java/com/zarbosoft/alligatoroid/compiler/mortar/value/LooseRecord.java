@@ -10,6 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -23,6 +24,16 @@ public class LooseRecord implements Value, NoExportValue {
 
   public LooseRecord(ROOrderedMap<Object, EvaluateResult> data) {
     this.data = data;
+  }
+
+  @Override
+  public ROList<String> traceFields(EvaluationContext context) {
+    final TSList<String> out = new TSList<>();
+    for (ROPair<Object, EvaluateResult> datum : data) {
+      if (!(datum.first instanceof String)) continue;
+      out.add((String) datum.first);
+    }
+    return out;
   }
 
   @Override

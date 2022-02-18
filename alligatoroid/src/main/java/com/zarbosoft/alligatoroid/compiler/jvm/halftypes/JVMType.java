@@ -18,6 +18,7 @@ import com.zarbosoft.alligatoroid.compiler.model.error.AccessNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.SetNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import static com.zarbosoft.alligatoroid.compiler.jvm.JVMTargetModuleContext.correspondJvmType;
@@ -33,6 +34,7 @@ public interface JVMType extends Exportable {
   default Error checkAssignableFrom(Location location, JVMType type) {
     return new SetNotSupported(location);
   }
+
   default boolean assertAssignableFrom(EvaluationContext context, Location location, Value value) {
     final Error error = checkAssignableFrom(location, correspondJvmType(value));
     if (error != null) {
@@ -61,5 +63,9 @@ public interface JVMType extends Exportable {
 
   default Value boundAsValue(JVMBinding binding) {
     return new JVMDataBoundValue(binding);
+  }
+
+  default ROList<String> traceFields() {
+    return ROList.empty;
   }
 }

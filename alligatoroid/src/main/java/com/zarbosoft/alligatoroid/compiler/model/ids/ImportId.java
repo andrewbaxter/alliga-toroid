@@ -7,8 +7,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExpo
 import com.zarbosoft.luxem.write.Writer;
 
 public final class ImportId implements TreeDumpable, AutoBuiltinExportable, Exportable {
-@Param
-  public ModuleId moduleId;
+  @Param public ModuleId moduleId;
 
   public static ImportId create(ModuleId moduleId) {
     final ImportId importId = new ImportId();

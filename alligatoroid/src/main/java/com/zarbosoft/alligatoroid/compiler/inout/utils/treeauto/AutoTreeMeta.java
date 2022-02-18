@@ -17,11 +17,11 @@ import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Map;
@@ -68,6 +68,7 @@ public class AutoTreeMeta {
         }
       };
   public final TSMap<Class, AutoInfo> infos = new TSMap<>();
+  public final TSList<ROPair<Class, Object>> fallbacks = new TSList<ROPair<Class, Object>>();
 
   public AutoTreeMeta() {
     infos.put(String.class, stringInfo);
@@ -111,6 +112,10 @@ public class AutoTreeMeta {
 
   public void scan(Class klass) {
     if (infos.has(klass)) return;
+    Object fallback = null;
+    for (ROPair<Class, Object> pair : fallbacks) {
+      if (pair.first.isAssignableFrom(klass)) fallback = pair.second;
+    }
     if (Modifier.isAbstract(klass.getModifiers()) || Modifier.isInterface(klass.getModifiers())) {
       Class[] elements;
       try {
@@ -143,14 +148,13 @@ public class AutoTreeMeta {
         classToKey.put(element, key);
       }
 
-      infos.put(klass, new AutoInfoEnum(this, keyToClass, classToKey));
+      infos.put(klass, new AutoInfoEnum(this, keyToClass, classToKey, fallback));
       for (Class element : elements) {
         scan(element);
       }
     } else {
       final AutoInfoClass info = new AutoInfoClass(this, klass);
       infos.put(klass, info);
-      Constructor constructor = klass.getConstructors()[0];
       TSMap<String, Prototype> fields = new TSMap<>();
       for (Field field : klass.getFields()) {
         if (Modifier.isStatic(field.getModifiers())) continue;
@@ -166,23 +170,27 @@ public class AutoTreeMeta {
           scan(genericArg);
           prototype = new PrototypeROList(new PrototypeAutoRef(this, genericArg));
         } else if (ROMap.class.isAssignableFrom(fieldInfo.klass)) {
-          final Class genericArg = fieldInfo.genericArgs[1].klass;
-          scan(genericArg);
+          scan(fieldInfo.genericArgs[0].klass);
+          scan(fieldInfo.genericArgs[1].klass);
           prototype =
-              new PrototypeROMap(PrototypeString.instance, new PrototypeAutoRef(this, genericArg));
+              new PrototypeROMap(
+                  new PrototypeAutoRef(this, fieldInfo.genericArgs[0].klass),
+                  new PrototypeAutoRef(this, fieldInfo.genericArgs[1].klass));
         } else if (ROOrderedMap.class.isAssignableFrom(fieldInfo.klass)) {
-          final Class genericArg = fieldInfo.genericArgs[1].klass;
-          scan(genericArg);
+          scan(fieldInfo.genericArgs[0].klass);
+          scan(fieldInfo.genericArgs[1].klass);
           prototype =
               new PrototypeROOrderedMap(
-                  PrototypeString.instance, new PrototypeAutoRef(this, genericArg));
+                  new PrototypeAutoRef(this, fieldInfo.genericArgs[0].klass),
+                  new PrototypeAutoRef(this, fieldInfo.genericArgs[1].klass));
         } else {
           scan(fieldInfo.klass);
           prototype = new PrototypeAutoRef(this, fieldInfo.klass);
         }
         fields.put(field.getName(), prototype);
       }
-      info.info.constructor = constructor;
+      info.info.fallback = fallback;
+      info.info.klass = klass;
       info.info.fields = fields;
     }
   }

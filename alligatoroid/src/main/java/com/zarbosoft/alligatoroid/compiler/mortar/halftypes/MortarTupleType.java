@@ -16,9 +16,10 @@ import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarCarry;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Tuple;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstInt;
+import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstIntlike;
 
 public class MortarTupleType extends MortarObjectType implements AutoBuiltinExportable {
   public static final JVMSharedJVMName JVMNAME = JVMSharedJVMName.fromClass(Tuple.class);
@@ -27,6 +28,15 @@ public class MortarTupleType extends MortarObjectType implements AutoBuiltinExpo
 
   public MortarTupleType(TSList<MortarDataType> fields) {
     this.fields = fields;
+  }
+
+  @Override
+  public ROList<String> traceFields(Object inner) {
+    final TSList<String> out = new TSList<>();
+    for (int i = 0; i < fields.size(); i++) {
+    out.add(Integer.toString(i));
+    }
+    return out;
   }
 
   @Override
@@ -64,7 +74,7 @@ public class MortarTupleType extends MortarObjectType implements AutoBuiltinExpo
   @Override
   public EvaluateResult variableValueAccess(
       EvaluationContext context, Location location, MortarCarry targetCarry, Value field0) {
-    Integer key = assertConstInt(context, location, field0);
+    Integer key = assertConstIntlike(context, location, field0);
     if (key == null) return EvaluateResult.error;
     if (key < 0 || key >= fields.size()) {
       context.moduleContext.errors.add(new NoField(location, key));

@@ -31,8 +31,9 @@ import java.lang.reflect.Type;
 public class ClassInfo {
   // TODO move into derivation
   public final String luxemType;
-  public Constructor constructor;
+  public Class klass;
   public ROMap<String, Prototype> fields;
+  public Object fallback;
 
   public ClassInfo(String luxemType) {
     this.luxemType = luxemType;
@@ -112,26 +113,26 @@ public class ClassInfo {
               public BaseStateSingle create(TSList<Error> errors, LuxemPathBuilder luxemPath) {
                 return new StateRecord(
                     new BaseStateRecordBody() {
-                      final TSList<ROPair<String, BaseStateSingle>> data = new TSList<>();
+                      final TSList<ROPair<Object, BaseStateSingle>> data = new TSList<>();
 
                       @Override
                       public BaseStateSingle createKeyState(
                           Object context, TSList tsList, LuxemPathBuilder luxemPath) {
-                        return new StateString();
+                          return createSingleState(field.genericArgs[0].klass);
                       }
 
                       @Override
                       public BaseStateSingle createValueState(
                           Object context, TSList tsList, LuxemPathBuilder luxemPath, Object key) {
                         final BaseStateSingle state = createSingleState(field.genericArgs[1].klass);
-                        data.add(new ROPair<>((String) key, state));
+                        data.add(new ROPair<>(key, state));
                         return state;
                       }
 
                       @Override
                       public Object build(Object context, TSList tsList) {
                         TSMap out = new TSMap();
-                        for (ROPair<String, BaseStateSingle> e : data) {
+                        for (ROPair<Object, BaseStateSingle> e : data) {
                           out.put(e.first, e.second.build(context, errors));
                         }
                         return out;
@@ -144,7 +145,7 @@ public class ClassInfo {
       }
       fields.put(field0.getName(), prototype);
     }
-    this.constructor = constructor;
+    this.klass = klass;
     this.fields = fields;
   }
 

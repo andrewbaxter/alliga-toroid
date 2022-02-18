@@ -15,18 +15,30 @@ import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinExportab
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarImmutableType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectType;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
+
+import java.util.Map;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstString;
 
-public class JVMClassType extends MortarObjectType
-    implements SingletonBuiltinExportable {
+public class JVMClassType extends MortarObjectType implements SingletonBuiltinExportable {
   public static final JVMClassType type = new JVMClassType();
   public static final String ACCESS_NEW = "new";
   private static final JVMSharedDataDescriptor DESC =
       JVMSharedDataDescriptor.fromObjectClass(JVMClassInstanceType.class);
 
   private JVMClassType() {}
+
+  @Override
+  public ROList<String> traceFields(Object inner) {
+    final JVMClassInstanceType type = (JVMClassInstanceType) inner;
+    final TSList<String> out = new TSList<>();
+    for (Map.Entry<String, JVMPseudoFieldMeta> field : type.fields) {
+      out.add(field.getKey());
+    }
+    return out;
+  }
 
   @Override
   public boolean checkAssignableFrom(

@@ -8,13 +8,27 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
 import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
+import com.zarbosoft.alligatoroid.compiler.modules.Source;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSList;
 
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemAlreadyExistsException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstString;
+import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class BundleValue implements Value, AutoBuiltinExportable, Exportable {
   private static final String GRAPH_KEY_ROOT = "root";
@@ -31,6 +45,53 @@ public class BundleValue implements Value, AutoBuiltinExportable, Exportable {
     out.id = id;
     out.root = root;
     out.postInit();
+    return out;
+  }
+
+  @Override
+  public ROList<String> traceFields(EvaluationContext context) {
+    final Source source =
+        context.moduleContext.compileContext.sources.get(
+            context.moduleContext.compileContext, id.moduleId);
+    TSList<String> out = new TSList<String>();
+    String path =
+        id.moduleId.dispatch(
+            new ModuleId.Dispatcher<String>() {
+              @Override
+              public String handleLocal(LocalModuleId id) {
+                return "";
+              }
+
+              @Override
+              public String handleRemote(RemoteModuleId id) {
+                return "";
+              }
+
+              @Override
+              public String handleBundle(BundleModuleSubId id) {
+                return id.path;
+              }
+
+              @Override
+              public String handleRoot(RootModuleId id) {
+                return "";
+              }
+            });
+    final URI zipUri = URI.create("jar:file:" + source.path.toString());
+    uncheck(
+        () -> {
+          FileSystem fs;
+          try {
+            fs = FileSystems.newFileSystem(zipUri, Collections.emptyMap());
+          } catch (FileSystemAlreadyExistsException e) {
+            fs = FileSystems.getFileSystem(zipUri);
+          }
+          Files.list(fs.getPath(path))
+              .forEach(
+                  s -> {
+                    out.add(s.getFileName().toString());
+                  });
+        });
     return out;
   }
 
