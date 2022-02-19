@@ -17,6 +17,7 @@ import com.zarbosoft.rendaw.common.TSList;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
@@ -46,7 +47,14 @@ public class Alligatorus {
     ModuleCompileContext moduleContext = new ModuleCompileContext(rootImportId, context, null);
     context.moduleErrors.put(rootImportId, moduleContext.errors);
     try {
-      uncheck(() -> Utils.await(moduleContext.getModule(spec)));
+      try {
+        moduleContext.getModule(spec).get();
+      } catch (ExecutionException e) {
+        throw e.getCause();
+      }
+    } catch (InterruptedException e) {
+      context.threads.interrupt();
+      throw uncheck(e);
     } catch (Error.PreError e) {
       context.moduleErrors.put(rootImportId, new TSList<>(e.toError(rootLocation)));
     } catch (Throwable e) {

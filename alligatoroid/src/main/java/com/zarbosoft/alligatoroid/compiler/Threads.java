@@ -43,4 +43,12 @@ public class Threads {
       threads.put(thread, null);
     }
   }
+
+  public void interrupt() {
+    synchronized (threads) {
+      for (Thread thread : threads.keySet()) {
+        thread.interrupt();
+      }
+    }
+  }
 }

@@ -1,5 +1,6 @@
 package com.zarbosoft.rendaw.common;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -18,6 +19,10 @@ public interface ROSetRef<T> extends Iterable<T> {
     TSSet<T> copy = mut();
     copy.inner_().retainAll(other.inner_());
     return copy;
+  }
+
+  default TSList<T> toList() {
+    return TSList.fromList(new ArrayList<>(inner_()));
   }
 
   default TSSet<T> difference(ROSetRef<T> other) {

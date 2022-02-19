@@ -2,7 +2,6 @@ package com.zarbosoft.merman.jfxeditor1;
 
 import com.zarbosoft.alligatoroid.compiler.Alligatorus;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
-import com.zarbosoft.alligatoroid.compiler.model.error.WarnUnexpected;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.modules.StderrLogger;
@@ -54,10 +53,13 @@ import com.zarbosoft.pidgoon.events.Position;
 import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -363,6 +365,10 @@ public class NotMain extends Application {
                                   new StderrLogger(),
                                   rootModuleSpec);
                         } catch (Exception e1) {
+                          if (e1 instanceof Common.UncheckedException
+                              && e1.getCause().getClass() == InterruptedException.class) {
+                            return;
+                          }
                           e0mut = e1;
                         }
                         Exception e0 = e0mut;
@@ -372,9 +378,10 @@ public class NotMain extends Application {
                               try {
                                 layout.getChildren().remove(messages);
                                 messages.setText("");
-                                TSSet<Atom> changedAtoms = new TSSet<>();
 
+                                /// Errors
                                 // Clear existing errors
+                                TSSet<Atom> changedAtoms = new TSSet<>();
                                 for (Atom atom : errorAtoms) {
                                   atom.metaRemove(editor.context, META_KEY_ERROR);
                                   changedAtoms.add(atom);
@@ -472,8 +479,31 @@ public class NotMain extends Application {
                                     }
                                   }
                                 }
+
+                                /// Autocomplete
+                                editor.autocomplete.clear();
+                                if (modules != null) {
+                                  final ROMap<Location, ROSetRef<String>> moduleTraceStringFields =
+                                      modules.traceStringFields.get(rootModuleSpec.moduleId);
+                                  if (moduleTraceStringFields != null) {
+                                    TSMap<Integer, ROSetRef<String>> accessOptions = new TSMap<>();
+                                    for (Map.Entry<Location, ROSetRef<String>> access :
+                                        moduleTraceStringFields) {
+                                      accessOptions.put(access.getKey().id, access.getValue());
+                                    }
+                                    editor.autocomplete.put(
+                                        new ROPair<>("access", "key"), accessOptions);
+                                    editor.autocomplete.put(
+                                        new ROPair<>("local", "key"), accessOptions);
+                                  }
+                                }
+                                if (editor.context.cursor instanceof CursorFieldPrimitive) {
+                                  ((CursorFieldPrimitive) editor.context.cursor)
+                                      .updateAutocomplete(editor);
+                                }
+
                               } catch (Exception e1) {
-                                System.out.format("Error processing errors: %s\n", e1);
+                                System.out.format("Error processing compile results: %s\n", e1);
                               }
                             });
                       });

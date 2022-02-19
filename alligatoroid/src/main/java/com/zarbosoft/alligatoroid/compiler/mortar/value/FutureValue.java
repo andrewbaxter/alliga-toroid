@@ -22,8 +22,8 @@ public class FutureValue implements Value, NoExportValue {
   }
 
   @Override
-  public ROList<String> traceFields(EvaluationContext context) {
-    return get().traceFields(context);
+  public ROList<String> traceFields(EvaluationContext context, Location location) {
+    return get().traceFields(context, location);
   }
 
   @Override

@@ -31,7 +31,7 @@ public class MortarTupleType extends MortarObjectType implements AutoBuiltinExpo
   }
 
   @Override
-  public ROList<String> traceFields(Object inner) {
+  public ROList<String> traceFields(EvaluationContext context, Location location, Object inner) {
     final TSList<String> out = new TSList<>();
     for (int i = 0; i < fields.size(); i++) {
     out.add(Integer.toString(i));

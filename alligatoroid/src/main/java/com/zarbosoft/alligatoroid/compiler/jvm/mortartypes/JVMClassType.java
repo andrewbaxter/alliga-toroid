@@ -18,8 +18,6 @@ import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectType;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.Map;
-
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstString;
 
 public class JVMClassType extends MortarObjectType implements SingletonBuiltinExportable {
@@ -31,13 +29,8 @@ public class JVMClassType extends MortarObjectType implements SingletonBuiltinEx
   private JVMClassType() {}
 
   @Override
-  public ROList<String> traceFields(Object inner) {
-    final JVMClassInstanceType type = (JVMClassInstanceType) inner;
-    final TSList<String> out = new TSList<>();
-    for (Map.Entry<String, JVMPseudoFieldMeta> field : type.fields) {
-      out.add(field.getKey());
-    }
-    return out;
+  public ROList<String> traceFields(EvaluationContext context, Location location, Object inner) {
+    return ((JVMClassInstanceType) inner).traceStaticFields(context, location);
   }
 
   @Override

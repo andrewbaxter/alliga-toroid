@@ -27,7 +27,7 @@ public class LooseRecord implements Value, NoExportValue {
   }
 
   @Override
-  public ROList<String> traceFields(EvaluationContext context) {
+  public ROList<String> traceFields(EvaluationContext context, Location location) {
     final TSList<String> out = new TSList<>();
     for (ROPair<Object, EvaluateResult> datum : data) {
       if (!(datum.first instanceof String)) continue;

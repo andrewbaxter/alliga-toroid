@@ -30,6 +30,7 @@ import javafx.stage.Screen;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.zarbosoft.merman.core.hid.Key.A;
 import static com.zarbosoft.merman.core.hid.Key.ACCEPT;
@@ -329,10 +330,13 @@ public class JavaFXDisplay extends Display {
             e.consume();
           }
         });
+    final Pattern printablePattern = Pattern.compile("\\p{Print}");
     node.setOnKeyTyped(
         e -> {
           String character = e.getCharacter();
-          if (!CHAR_UNDEFINED.equals(character) && this.typingListener.apply(character)) {
+          if (printablePattern.matcher(character).matches()
+              && !CHAR_UNDEFINED.equals(character)
+              && this.typingListener.apply(character)) {
             e.consume();
           }
         });

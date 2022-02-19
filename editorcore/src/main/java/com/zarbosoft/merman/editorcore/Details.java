@@ -15,7 +15,7 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 public class Details {
-  final double tabTransverseSpan;
+  private final double tabTransverseSpan;
   private final TSMap<Object, Slot> slotsLookup = new TSMap<>();
   private final TSList<Slot> slots = new TSList<>();
   private final Group boxGroup;
@@ -91,31 +91,6 @@ public class Details {
     detailsRoot = new BeddingContainerRoot(editor.context, false);
   }
 
-  /**
-   * Should be called from page.close()
-   *
-   * @param editor
-   * @param key
-   * @param page if null, clear whatever
-   */
-  private void unsetTab(Editor editor, Object key, Page page) {
-    Slot slot = slotsLookup.removeGet(key);
-    if (slot == null) return;
-    if (page != null && slot.page != page) return;
-    slots.removeVal(slot);
-    boxGroup.removeAt(boxes.size() - 1);
-    boxes.removeLast();
-    if (slot == current) {
-      slot.page.inner().removeFromParent(editor.context);
-      if (slots.some()) {
-        setCurrent(editor, slots.last());
-      } else {
-        current = null;
-        detailsRoot.removeInner(editor, innerRoot);
-      }
-    }
-  }
-
   private void setCurrent(Editor editor, Slot slot) {
     current = slot;
     vContainer.add(editor.context, slot.page.inner());
@@ -139,8 +114,6 @@ public class Details {
       }
       boxes.add(box);
       boxGroup.add(box);
-    } else {
-      slot.page.close(editor);
     }
     slot.page = page;
     if (current == null) {
@@ -156,10 +129,6 @@ public class Details {
     return current.page.handleKey(editor, event);
   }
 
-  public void clearTab(Editor editor, Class tabKey) {
-    unsetTab(editor, tabKey, null);
-  }
-
   public interface Page {
     public void close(Editor editor);
 
@@ -168,7 +137,25 @@ public class Details {
     public boolean handleKey(Editor editor, ButtonEvent event);
 
     default void closeInner(Editor editor, Object key) {
-      editor.details.unsetTab(editor, key, this);
+      Slot slot = editor.details.slotsLookup.removeGet(key);
+      if (slot == null) {
+        return;
+      }
+      if (this != null && slot.page != this) {
+        return;
+      }
+      editor.details.slots.removeVal(slot);
+      editor.details.boxGroup.removeAt(editor.details.boxes.size() - 1);
+      editor.details.boxes.removeLast();
+      if (slot == editor.details.current) {
+        slot.page.inner().removeFromParent(editor.context);
+        if (editor.details.slots.some()) {
+          editor.details.setCurrent(editor, editor.details.slots.last());
+        } else {
+          editor.details.current = null;
+          editor.details.detailsRoot.removeInner(editor, editor.details.innerRoot);
+        }
+      }
     }
   }
 

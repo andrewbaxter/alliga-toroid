@@ -26,9 +26,9 @@ public class ErrorPage implements Atom.MetaListener {
   public void metaChanged(Context context) {
     if (atom == null) return;
     Editor editor = Editor.get(context);
+    clear(editor);
     TSList<Object> errors = (TSList<Object>) atom.metaGet(META_KEY_ERROR);
     if (errors == null || errors.isEmpty()) {
-      clear(editor);
       return;
     }
     StringBuilder textText = new StringBuilder();

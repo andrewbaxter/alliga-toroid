@@ -65,7 +65,7 @@ public interface JVMType extends Exportable {
     return new JVMDataBoundValue(binding);
   }
 
-  default ROList<String> traceFields() {
+  default ROList<String> traceFields(EvaluationContext context, Location id) {
     return ROList.empty;
   }
 }

@@ -17,8 +17,8 @@ public interface JVMDataValue extends Value, NoExportValue {
   JVMProtocode jvmCode(EvaluationContext context, Location location);
 
   @Override
-  default ROList<String> traceFields(EvaluationContext context) {
-    return jvmType().traceFields();
+  default ROList<String> traceFields(EvaluationContext context, Location location) {
+    return jvmType().traceFields(context, location);
   }
 
   JVMType jvmType();

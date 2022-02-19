@@ -50,7 +50,6 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
   public static Reference.Key<ROPair<PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>>
       GAP_ROOT_KEY = new Reference.Key<>();
   public final Grammar grammar;
-  public String currentText;
   public GapChoicePage choicePage;
 
   public BaseEditCursorGapFieldPrimitive(

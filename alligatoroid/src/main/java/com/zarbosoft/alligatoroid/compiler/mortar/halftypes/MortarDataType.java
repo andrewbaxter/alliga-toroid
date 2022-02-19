@@ -124,7 +124,7 @@ public interface MortarDataType extends Exportable {
     return EvaluateResult.error;
   }
 
-  default ROList<String> traceFields(Object inner) {
+  default ROList<String> traceFields(EvaluationContext context, Location location, Object inner) {
     return ROList.empty;
   }
 }

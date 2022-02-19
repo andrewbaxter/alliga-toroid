@@ -74,8 +74,8 @@ public abstract class ConstDataValue implements DataValue {
   }
 
   @Override
-  public ROList<String> traceFields(EvaluationContext context) {
-    return mortarType().traceFields(getInner());
+  public ROList<String> traceFields(EvaluationContext context, Location location) {
+    return mortarType().traceFields(context, location, getInner());
   }
 
   @Override

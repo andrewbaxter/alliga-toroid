@@ -18,6 +18,7 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class ModuleCompileContext {
@@ -114,6 +115,31 @@ public class ModuleCompileContext {
       /** Shouldn't happen unless someone messes with the cache data directly. */
       throw new Assertion();
     }
+    // DEBUG
+    /*
+    {
+      TSMap<String, Integer> counts = new TSMap<>();
+      TSMap<Integer, Integer> aiCounts = new TSMap<>();
+      for (Map.Entry<ObjId<Exportable>, ArtifactId> e : backArtifactLookup) {
+        if (!e.getValue().spec.equal1(importId)) continue;
+        String name = e.getKey().objId.getClass().getCanonicalName();
+        counts.putReplace(name, counts.getCreate(name, () -> 0) + 1);
+        aiCounts.putReplace(
+            e.getValue().index, aiCounts.getCreate(e.getValue().index, () -> 0) + 1);
+      }
+      for (Map.Entry<String, Integer> count : counts) {
+        System.out.format("count %s -> %s\n", count.getKey(), count.getValue());
+      }
+      for (Map.Entry<Integer, Integer> count : aiCounts) {
+        if (count.getValue() > 1)
+          System.out.format("artifact id %s -> %s\n", count.getKey(), count.getValue());
+      }
+    }
+    System.out.format(
+        "back artifact lookup %s %s %d\n",
+        importPath, importId.moduleId, backArtifactLookup.size());
+     */
+    // DEBUG
     return out;
   }
 

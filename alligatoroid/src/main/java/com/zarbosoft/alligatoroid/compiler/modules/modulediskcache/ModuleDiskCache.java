@@ -100,7 +100,7 @@ public class ModuleDiskCache implements ModuleResolver {
             throw new Assertion(); // Can this happen? no errors, no exception, but dead return
 
           // Validate by desemiserializing once
-          new ModuleCompileContext(null, context, null).desemiserialize(res, importId);
+          //new ModuleCompileContext(null, context, null).desemiserialize(res, importId);
 
           return new Module() {
             @Override

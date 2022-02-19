@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler;
 
 /** Wrapper for creating identity-based hash maps with exportables. */
 public class ObjId<T> {
-  private final T objId;
+  public final T objId;
 
   public ObjId(T objId) {
     this.objId = objId;
@@ -15,6 +15,6 @@ public class ObjId<T> {
 
   @Override
   public int hashCode() {
-    return objId.hashCode();
+    return System.identityHashCode(objId);
   }
 }

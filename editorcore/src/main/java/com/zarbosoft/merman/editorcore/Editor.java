@@ -35,7 +35,9 @@ import com.zarbosoft.merman.editorcore.history.changes.ChangeAtom;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeId;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
@@ -61,6 +63,9 @@ public class Editor {
   public final TSMap<Integer, Atom> fileIdMap;
   public Banner banner;
   public Details details;
+  // atom id/field -> id -> autocomplete options
+  public TSMap<ROPair<String, String>, ROMap<Integer, ROSetRef<String>>> autocomplete =
+      new TSMap<>();
 
   public Editor(
       final Syntax syntax,

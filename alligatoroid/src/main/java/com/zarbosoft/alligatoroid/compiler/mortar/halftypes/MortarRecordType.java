@@ -110,7 +110,7 @@ public class MortarRecordType extends MortarObjectType
   }
 
   @Override
-  public ROList<String> traceFields(Object inner) {
+  public ROList<String> traceFields(EvaluationContext context, Location location, Object inner) {
     final TSList<String> out = new TSList<>();
     for (ROPair<Object, MortarDataType> field : fields) {
       if (!(field.first instanceof String)) continue;

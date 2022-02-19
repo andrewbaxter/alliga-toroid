@@ -11,9 +11,13 @@ import com.zarbosoft.rendaw.common.TSList;
 
 public class Refactorer {
   public static Class tabKey = Refactorer.class;
+  public Details.Page page;
 
   public void close(Editor editor) {
-    editor.details.clearTab(editor, tabKey);
+    if (page != null) {
+      page.close(editor);
+      page = null;
+    }
   }
 
   public void refactor(Editor editor, ROList<Atom> atom) {

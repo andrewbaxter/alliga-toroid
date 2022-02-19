@@ -76,8 +76,4 @@ public class ROSet<T> implements ROSetRef<T> {
   public boolean contains(T t) {
     return data.contains(t);
   }
-
-  public TSList<T> toList() {
-    return TSList.fromList(new ArrayList<>(inner_()));
-  }
 }

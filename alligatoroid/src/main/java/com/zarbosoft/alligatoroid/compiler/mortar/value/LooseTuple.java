@@ -29,7 +29,7 @@ public class LooseTuple implements Value, NoExportValue {
   }
 
   @Override
-  public ROList<String> traceFields(EvaluationContext context) {
+  public ROList<String> traceFields(EvaluationContext context, Location location) {
     final TSList<String> out = new TSList<>();
     for (int i = 0; i < data.size(); i++) {
       out.add(Integer.toString(i));

@@ -26,7 +26,7 @@ public class Access extends LanguageElement {
   public EvaluateResult evaluate(EvaluationContext context) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
     final Value base = ectx.evaluate(this.base);
-    ROList<String> stringFields = base.traceFields(context);
+    ROList<String> stringFields = base.traceFields(context, id);
     context.moduleContext.compileContext.traceModuleStringFields.compute(
         context.moduleContext.importId.moduleId,
         new BiFunction<

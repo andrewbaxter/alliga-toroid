@@ -97,9 +97,19 @@ public class JVMClassInstanceType implements AutoBuiltinExportable, JVMBaseObjec
   }
 
   @Override
-  public ROList<String> traceFields() {
+  public ROList<String> traceFields(EvaluationContext context, Location location) {
+    if (!resolveInternals(context, location)) return ROList.empty;
     final TSList<String> out = new TSList<>();
     for (Map.Entry<String, JVMPseudoFieldMeta> field : fields) {
+      out.add(field.getKey());
+    }
+    return out;
+  }
+
+  public ROList<String> traceStaticFields(EvaluationContext context, Location location) {
+    if (!resolveInternals(context, location)) return ROList.empty;
+    final TSList<String> out = new TSList<>();
+    for (Map.Entry<String, JVMPseudoFieldMeta> field : staticFields) {
       out.add(field.getKey());
     }
     return out;

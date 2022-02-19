@@ -37,7 +37,7 @@ public class MortarAutoObjectType extends MortarObjectType implements SingletonB
   }
 
   @Override
-  public ROList<String> traceFields(Object inner) {
+  public ROList<String> traceFields(EvaluationContext context, Location location, Object inner) {
     final TSList<String> out = new TSList<>();
     for (Map.Entry<Object, MortarFieldType> field : fields) {
       if (!(field.getKey() instanceof String)) continue;

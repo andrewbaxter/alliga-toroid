@@ -49,13 +49,13 @@ public class BundleValue implements Value, AutoBuiltinExportable, Exportable {
   }
 
   @Override
-  public ROList<String> traceFields(EvaluationContext context) {
+  public ROList<String> traceFields(EvaluationContext context, Location location) {
     final Source source =
         context.moduleContext.compileContext.sources.get(
-            context.moduleContext.compileContext, id.moduleId);
+            context.moduleContext.compileContext, this.id.moduleId);
     TSList<String> out = new TSList<String>();
     String path =
-        id.moduleId.dispatch(
+        this.id.moduleId.dispatch(
             new ModuleId.Dispatcher<String>() {
               @Override
               public String handleLocal(LocalModuleId id) {

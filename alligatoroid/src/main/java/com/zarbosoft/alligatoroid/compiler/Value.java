@@ -60,7 +60,7 @@ public interface Value extends Exportable {
     return EvaluateResult.error;
   }
 
-  default ROList<String> traceFields(EvaluationContext context) {
+  default ROList<String> traceFields(EvaluationContext context, Location location) {
     return ROList.empty;
   }
 }
