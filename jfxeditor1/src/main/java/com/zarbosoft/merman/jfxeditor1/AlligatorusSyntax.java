@@ -331,6 +331,7 @@ public class AlligatorusSyntax {
             .type(BACK_TYPE_ACCESS)
             .atom(ACCESS_BACK_FIELD_BASE, GROUP_EXPR)
             .text(".", COLOR_OTHER)
+            .compactSplit()
             .nestedIdentifier(ACCESS_BACK_FIELD_FIELD, COLOR_IDENTIFIER)
             .build(),
         GROUP_EXPR);
@@ -981,6 +982,8 @@ public class AlligatorusSyntax {
       front.add(
           new FrontPrimitiveSpec(
               new FrontPrimitiveSpec.Config(id)
+                  .hardSplitAlignmentId(ALIGN_BASE)
+                  .softSplitAlignmentId(ALIGN_BASE)
                   .meta(markMeta(DirectStylist.meta(baseCodeStyle().color(color))))));
       return this;
     }

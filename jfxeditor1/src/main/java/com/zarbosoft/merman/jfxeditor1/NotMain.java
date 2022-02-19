@@ -257,8 +257,8 @@ public class NotMain extends Application {
               .put(
                   "json",
                   new AlligatorusSyntax.EditorSyntaxOut(
-                      JsonSyntax.create(env, new Padding(5, 5, 5, 5)), new TSList<>()))
-              .put("at", AlligatorusSyntax.create(env, new Padding(5, 5, 5, 5)));
+                      JsonSyntax.create(env, new Padding(20, 20, 5, 5)), new TSList<>()))
+              .put("at", AlligatorusSyntax.create(env, new Padding(20, 20, 5, 5)));
 
       String rawPath = args.get(0);
       path = Paths.get(rawPath).toAbsolutePath();
