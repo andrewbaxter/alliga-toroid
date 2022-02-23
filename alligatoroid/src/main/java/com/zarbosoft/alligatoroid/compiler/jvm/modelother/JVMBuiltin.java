@@ -1,6 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.jvm.modelother;
 
 import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMArrayType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMBoolType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMByteType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMCharType;
@@ -8,13 +9,11 @@ import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMClassInstanceType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMDoubleType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMExternClassInstanceType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMFloatType;
-import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMArrayType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMIntType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMLongType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMStringType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
-import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 
 @Meta.Aggregate
 public class JVMBuiltin {
@@ -28,16 +27,34 @@ public class JVMBuiltin {
   public static final JVMBoolType bool = JVMBoolType.type;
 
   public static JVMArrayType array(JVMType elementType) {
-    return new JVMArrayType(elementType);
+    return JVMArrayType.create(elementType);
   }
 
   public static RetClass newClass(String qualifiedName) {
-    JVMClassInstanceType type = JVMClassInstanceType.blank(JVMSharedNormalName.fromString(qualifiedName));
+    JVMClassInstanceType type =
+        JVMClassInstanceType.blank(JVMSharedNormalName.fromString(qualifiedName));
     return new RetClass(type, new JVMConcreteClassBuilder(type));
   }
 
-  public static JVMExternClassInstanceType externClass(String qualifiedName, LanguageElement setup) {
-    return JVMExternClassInstanceType.blank(JVMSharedNormalName.fromString(qualifiedName), setup);
+  public static RetExternClass externClass(String qualifiedName) {
+    final JVMExternClassInstanceType type =
+        JVMExternClassInstanceType.blank(JVMSharedNormalName.fromString(qualifiedName));
+    return new RetExternClass(type, new JVMExternClassBuilder(type));
+  }
+
+  public static JVMSoftTypeArray deferredArray(Object object) {
+    return JVMSoftTypeArray.create(
+        JVMExternClassBuilder.convertType(object));
+  }
+
+  public static class RetExternClass {
+    public final JVMExternClassInstanceType type;
+    public final JVMExternClassBuilder builder;
+
+    public RetExternClass(JVMExternClassInstanceType type, JVMExternClassBuilder builder) {
+      this.type = type;
+      this.builder = builder;
+    }
   }
 
   public static class RetClass {

@@ -49,7 +49,10 @@ public class JVMClassInstanceType implements AutoBuiltinExportable, JVMBaseObjec
   }
 
   public static boolean walkParents(
-      JVMClassInstanceType start, Function<JVMClassInstanceType, Boolean> process) {
+      EvaluationContext context,
+      Location location,
+      JVMClassInstanceType start,
+      Function<JVMClassInstanceType, Boolean> process) {
     TSList<Iterator<JVMClassInstanceType>> stack = new TSList<>();
     stack.add(Arrays.asList(start).iterator());
     while (stack.some()) {
@@ -58,6 +61,7 @@ public class JVMClassInstanceType implements AutoBuiltinExportable, JVMBaseObjec
       if (!iterator.hasNext()) stack.removeLast();
       final boolean res = process.apply(next);
       if (res) return true;
+      if (!next.resolveParents(context, location)) return false;
       final Iterator<JVMClassInstanceType> parents = next.inherits.iterator();
       if (parents.hasNext()) stack.add(parents);
     }
@@ -78,7 +82,11 @@ public class JVMClassInstanceType implements AutoBuiltinExportable, JVMBaseObjec
         final JVMType arg = (JVMType) argTuple.get(i);
         final JVMType bound = (JVMType) candidate.argTuple.get(i);
         if (arg instanceof JVMClassInstanceType) {
-          if (!walkParents((JVMClassInstanceType) arg, t -> t.jvmDesc().equals(bound.jvmDesc()))) {
+          if (!walkParents(
+              context,
+              location,
+              (JVMClassInstanceType) arg,
+              t -> t.jvmDesc().equals(bound.jvmDesc()))) {
             allMatch = false;
             break;
           }
@@ -96,9 +104,12 @@ public class JVMClassInstanceType implements AutoBuiltinExportable, JVMBaseObjec
     return null;
   }
 
+  protected boolean resolveParents(EvaluationContext context, Location location) {
+    return true;
+  }
+
   @Override
   public ROList<String> traceFields(EvaluationContext context, Location location) {
-    if (!resolveInternals(context, location)) return ROList.empty;
     final TSList<String> out = new TSList<>();
     for (Map.Entry<String, JVMPseudoFieldMeta> field : fields) {
       out.add(field.getKey());
@@ -107,7 +118,6 @@ public class JVMClassInstanceType implements AutoBuiltinExportable, JVMBaseObjec
   }
 
   public ROList<String> traceStaticFields(EvaluationContext context, Location location) {
-    if (!resolveInternals(context, location)) return ROList.empty;
     final TSList<String> out = new TSList<>();
     for (Map.Entry<String, JVMPseudoFieldMeta> field : staticFields) {
       out.add(field.getKey());
@@ -119,12 +129,8 @@ public class JVMClassInstanceType implements AutoBuiltinExportable, JVMBaseObjec
     return fields.getCreate(name, () -> JVMPseudoFieldMeta.blank(this, name));
   }
 
-  public boolean resolveInternals(EvaluationContext context, Location location) {
-    boolean out = resolveInternals(context);
-    if (!out) {
-      context.moduleContext.errors.add(Error.moduleError.toError(location));
-    }
-    return out;
+  public JVMPseudoFieldMeta ensureStaticField(String name) {
+    return staticFields.getCreate(name, () -> JVMPseudoFieldMeta.blank(this, name));
   }
 
   @Override
@@ -137,21 +143,38 @@ public class JVMClassInstanceType implements AutoBuiltinExportable, JVMBaseObjec
     this.jvmName = JVMSharedJVMName.fromNormalName(name);
   }
 
-  public boolean resolveInternals(EvaluationContext context) {
-    return false;
-  }
-
   @Override
   public EvaluateResult valueAccess(
       EvaluationContext context, Location location, JVMProtocode carry, Value field0) {
-    if (!resolveInternals(context, location)) return EvaluateResult.error;
     String key = assertConstString(context, location, field0);
     if (key == null) return EvaluateResult.error;
+    if (!resolveField(context, location, key)) return EvaluateResult.error;
     final JVMPseudoFieldMeta field = fields.getOpt(key);
     if (field == null) {
+
       context.moduleContext.errors.add(new NoField(location, key));
       return EvaluateResult.error;
     }
     return EvaluateResult.pure(new JVMPseudoFieldValue(field, carry));
+  }
+
+  public boolean resolveStaticField(EvaluationContext context, Location location, String key) {
+    boolean out = resolveStaticField(context, key);
+    if (!out) {
+      context.moduleContext.errors.add(Error.moduleError.toError(location));
+    }
+    return out;
+  }
+
+  private boolean resolveStaticField(EvaluationContext context, String key) {
+    return true;
+  }
+
+  public boolean resolveField(EvaluationContext context, Location location, String key) {
+    return true;
+  }
+
+  public boolean resolveConstructors(EvaluationContext context, Location location) {
+    return true;
   }
 }

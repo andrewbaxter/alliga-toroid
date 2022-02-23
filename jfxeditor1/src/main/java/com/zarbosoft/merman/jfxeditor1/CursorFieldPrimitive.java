@@ -20,6 +20,7 @@ import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Locale;
 
 public class CursorFieldPrimitive extends BaseEditCursorFieldPrimitive2 {
   public final NotMain main;
@@ -108,11 +109,11 @@ public class CursorFieldPrimitive extends BaseEditCursorFieldPrimitive2 {
     if (options0 == null || options0.none()) return;
     final TSList<String> options = options0.toList();
 
-    final String current = field.data.toString();
+    final String current = field.data.toString().toLowerCase(Locale.ROOT);
     ROPair<String, Double>[] sorted = new ROPair[options.size()];
     for (int i = 0; i < options.size(); i++) {
       final String option = options.get(i);
-      sorted[i] = new ROPair<>(option, prefixSimilarity(option, current));
+      sorted[i] = new ROPair<>(option, prefixSimilarity(option.toLowerCase(Locale.ROOT), current));
     }
     Arrays.sort(
         sorted,

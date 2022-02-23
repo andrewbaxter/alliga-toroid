@@ -48,12 +48,12 @@ public class JVMClassType extends MortarObjectType implements SingletonBuiltinEx
   public EvaluateResult constValueAccess(
       EvaluationContext context, Location location, Object value, Value field0) {
     final JVMClassInstanceType type = (JVMClassInstanceType) value;
-    if (!type.resolveInternals(context, location)) return EvaluateResult.error;
     String key = assertConstString(context, location, field0);
     if (key == null) return EvaluateResult.error;
     if (ACCESS_NEW.equals(key)) {
       return EvaluateResult.pure(JVMConstructorType.type.constAsValue(type));
     }
+    if (!type.resolveStaticField(context, location, key)) return EvaluateResult.error;
     final JVMPseudoFieldMeta field = type.staticFields.getOpt(key);
     if (field == null) {
       context.moduleContext.errors.add(new NoField(location, key));

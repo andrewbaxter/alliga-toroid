@@ -5,19 +5,11 @@ import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeDumpable;
 import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMBuiltin;
-import com.zarbosoft.alligatoroid.compiler.model.error.ImportOutsideOwningBundleModule;
-import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
-import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
-import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
-import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.CreatedFile;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarNullType;
 import com.zarbosoft.luxem.write.Writer;
-import com.zarbosoft.rendaw.common.Assertion;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue.nullValue;
 
@@ -42,42 +34,11 @@ public class MortarBuiltin {
     return new CreatedFile(path);
   }
 
-  public static RemoteModuleId modRemote(String url, String hash) {
-    return RemoteModuleId.create(url, hash);
+  public static ImportId modRemote(String url, String hash) {
+    return ImportId.create(RemoteModuleId.create(url, hash));
   }
 
-  public static ModuleId modLocal(ModuleCompileContext modContext, String path) {
-    return modContext.importId.moduleId.dispatch(
-        new ModuleId.Dispatcher<ModuleId>() {
-
-          @Override
-          public ModuleId handleLocal(LocalModuleId id) {
-            return LocalModuleId.create(
-                Paths.get(id.path).resolveSibling(path).normalize().toString());
-          }
-
-          @Override
-          public ModuleId handleRemote(RemoteModuleId id) {
-            Path subpath = Paths.get(path).normalize();
-            if (subpath.startsWith("..")) {
-              throw new ImportOutsideOwningBundleModule(subpath.toString(), id);
-            }
-            return BundleModuleSubId.create(id, subpath.toString());
-          }
-
-          @Override
-          public ModuleId handleBundle(BundleModuleSubId id) {
-            Path subpath = Paths.get(id.path).resolveSibling(path).normalize();
-            if (subpath.startsWith("..")) {
-              throw new ImportOutsideOwningBundleModule(subpath.toString(), id.module);
-            }
-            return BundleModuleSubId.create(id.module, subpath.toString());
-          }
-
-          @Override
-          public ModuleId handleRoot(RootModuleId id) {
-            throw new Assertion();
-          }
-        });
+  public static ImportId modLocal(ModuleCompileContext modContext, String path) {
+    return ImportId.create(modContext.importId.moduleId.relative(path));
   }
 }

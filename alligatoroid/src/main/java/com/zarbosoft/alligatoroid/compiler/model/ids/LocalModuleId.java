@@ -6,6 +6,8 @@ import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExpo
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.luxem.write.Writer;
 
+import java.nio.file.Paths;
+
 public final class LocalModuleId implements ModuleId, AutoBuiltinExportable, Exportable {
   public static final String GRAPH_KEY_PATH = "path";
   @Param public String path;
@@ -25,6 +27,12 @@ public final class LocalModuleId implements ModuleId, AutoBuiltinExportable, Exp
   @Override
   public String toString() {
     return path.toString();
+  }
+
+  @Override
+  public ModuleId relative(String localPath) {
+    return LocalModuleId.create(
+            Paths.get(path).resolveSibling(localPath).normalize().toString());
   }
 
   @Override

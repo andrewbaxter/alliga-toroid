@@ -71,7 +71,7 @@ public class Atom {
   }
 
   public void metaRemove(Context context, String key) {
-    meta.removeGet(key);
+    meta.removeGetOpt(key);
     for (MetaListener l : metaListeners) {
       l.metaChanged(context);
     }

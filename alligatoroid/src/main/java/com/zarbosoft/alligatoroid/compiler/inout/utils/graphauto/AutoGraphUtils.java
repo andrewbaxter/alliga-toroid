@@ -99,6 +99,7 @@ public class AutoGraphUtils {
     if ((primitiveExportType = Meta.primitiveTypeToExportType.getOpt(type.klass)) != null) {
       return primitiveExportType.semiserialize(data);
     } else if (Exportable.class.isAssignableFrom(type.klass)) {
+      if (data == null) return SemiserialString.create("null");
       return ((Exportable) data)
           .graphType()
           .graphSemiserialize(data, spec, semiserializer, path, accessPath);
@@ -145,6 +146,12 @@ public class AutoGraphUtils {
     } else if (Exportable.class.isAssignableFrom(type.klass)) {
       return data.dispatch(
           new SemiserialSubvalue.DefaultDispatcher<>() {
+            @Override
+            public Object handleString(SemiserialString s) {
+              if (s.value.equals("null")) return null;
+              else return super.handleString(s);
+            }
+
             @Override
             public Exportable handleRef(SemiserialRef s) {
               return (Exportable) context.lookupRef(s);

@@ -5,14 +5,16 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 
 public class JVMArrayType implements AutoBuiltinExportable, JVMBaseObjectType {
-  public JVMType elementType;
-
-  public JVMArrayType(JVMType elementType) {
-    this.elementType = elementType;
-  }
+  @Param public JVMType elementType;
 
   public static JVMArrayType graphDeserialize(Record data) {
-    return new JVMArrayType((JVMType) data.data.get("element"));
+    return create((JVMType) data.data.get("element"));
+  }
+
+  public static JVMArrayType create(JVMType elementType) {
+    final JVMArrayType out = new JVMArrayType();
+    out.elementType = elementType;
+    return out;
   }
 
   @Override

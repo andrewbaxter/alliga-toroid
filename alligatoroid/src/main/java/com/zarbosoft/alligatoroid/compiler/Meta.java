@@ -9,13 +9,18 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.PrimitiveExportType;
+import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMClassInstanceType;
 import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMExternClassInstanceType;
+import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMNullType;
 import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMConstructor;
 import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMExternClassBuilder;
+import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMSoftType;
+import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMSoftTypeArray;
+import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMSoftTypeDeferred;
+import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMSoftTypeType;
 import com.zarbosoft.alligatoroid.compiler.jvm.mortartypes.JVMClassType;
 import com.zarbosoft.alligatoroid.compiler.jvm.mortartypes.JVMConstructorType;
-import com.zarbosoft.alligatoroid.compiler.jvm.value.JVMPseudoStaticFieldValue;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
@@ -231,6 +236,7 @@ public class Meta {
       working.singletonExportable((SingletonBuiltinExportable) pair.second);
     }
     working.generateMortarType(ModuleId.class);
+    working.generateMortarType(JVMSoftType.class);
     working.generateMortarType(JVMExternClassBuilder.class);
     {
       // working.singletonExportable(nullValue);
@@ -238,6 +244,7 @@ public class Meta {
       // working.singletonExportable(nullValue.type);
     }
     working.singletonExportable(ConstExportType.exportType);
+    working.singletonExportable(JVMNullType.type);
     for (Class<AutoBuiltinExportable> languageElement :
         new Class[] {
           Access.class,
@@ -270,9 +277,18 @@ public class Meta {
           ImportId.class,
           JVMSharedNormalName.class,
           JVMSharedJVMName.class,
+          JVMUtils.MethodSpecDetailsAttributes.class,
+          JVMUtils.DataSpecDetailsAttributes.class,
+          JVMExternClassInstanceType.SoftConstructor.class,
+          JVMExternClassInstanceType.SoftMethodField.class,
+          JVMExternClassInstanceType.SoftDataField.class,
+          JVMExternClassInstanceType.SoftField.class,
+          JVMSoftTypeDeferred.class,
+          JVMSoftTypeArray.class,
+          JVMSoftTypeType.class,
         }) {
-        if (NoExportValue.class.isAssignableFrom(klass)) throw new Assertion();
-        if (!AutoBuiltinExportable.class.isAssignableFrom(klass)) throw new Assertion();
+      if (NoExportValue.class.isAssignableFrom(klass)) throw new Assertion();
+      if (!AutoBuiltinExportable.class.isAssignableFrom(klass)) throw new Assertion();
       working.nonSingletonExportable(klass);
       working.generateMortarType(klass);
     }

@@ -44,7 +44,7 @@ public class JVMConstructorType extends MortarObjectType implements SingletonBui
       EvaluationContext context, Location location, Object inner, Value argument) {
     if (!JVMTargetModuleContext.assertTarget(context, location)) return EvaluateResult.error;
     JVMConstructor meta = (JVMConstructor) inner;
-    if (!meta.type.resolveInternals(context, location)) return EvaluateResult.error;
+    if (!meta.type.resolveConstructors(context, location)) return EvaluateResult.error;
     ROTuple argTuple = correspondJvmTypeTuple(argument);
     final JVMUtils.MethodSpecDetails constructor = meta.type.constructors.getOpt(argTuple);
     if (constructor == null) {

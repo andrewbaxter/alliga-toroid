@@ -3,8 +3,12 @@ package com.zarbosoft.alligatoroid.compiler.model.ids;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.model.error.ImportOutsideOwningBundleModule;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Format;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public final class BundleModuleSubId implements ModuleId, AutoBuiltinExportable, Exportable {
   public static final String GRAPH_KEY_MODULE = "module";
@@ -23,6 +27,15 @@ public final class BundleModuleSubId implements ModuleId, AutoBuiltinExportable,
   @Override
   public String toString() {
     return Format.format("%s %s", module, path);
+  }
+
+  @Override
+  public ModuleId relative(String localPath) {
+    Path subpath = Paths.get(path).resolveSibling(localPath).normalize();
+    if (subpath.startsWith("..")) {
+      throw new ImportOutsideOwningBundleModule(subpath.toString(), module);
+    }
+    return BundleModuleSubId.create(module, subpath.toString());
   }
 
   @Override

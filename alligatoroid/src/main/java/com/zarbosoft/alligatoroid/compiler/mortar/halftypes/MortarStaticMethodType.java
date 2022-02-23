@@ -60,7 +60,7 @@ public class MortarStaticMethodType extends MortarObjectType implements Singleto
         if (res == null || !res.isWhole) return res;
         out.add(res.whole);
       }
-      return ConvertImmediateArgRes.resWhole(new Tuple(out));
+      return ConvertImmediateArgRes.resWhole(Tuple.create(out));
     } else if (value instanceof LooseRecord) {
       final ROOrderedMap<Object, EvaluateResult> recordValue = ((LooseRecord) value).data;
       TSMap<Object, Object> out = new TSMap<>();
@@ -73,7 +73,7 @@ public class MortarStaticMethodType extends MortarObjectType implements Singleto
         if (res == null || !res.isWhole) return res;
         out.put(e.first, res.whole);
       }
-      return ConvertImmediateArgRes.resWhole(new Record(out));
+      return ConvertImmediateArgRes.resWhole(Record.create(out));
     } else if (value instanceof DataValue) {
       if (value instanceof ConstDataValue)
         return ConvertImmediateArgRes.resWhole(((ConstDataValue) value).getInner());

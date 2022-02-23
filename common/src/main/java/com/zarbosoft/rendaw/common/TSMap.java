@@ -76,7 +76,7 @@ public class TSMap<K, V> implements ROMap<K, V> {
     return this;
   }
 
-  public V removeGet(K k) {
+  public V removeGetOpt(K k) {
     return inner.remove(k);
   }
 

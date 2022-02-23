@@ -17,6 +17,8 @@ public interface ModuleId extends TreeDumpable, Exportable {
 
   String toString();
 
+  ModuleId relative(String localPath);
+
   interface Dispatcher<T> {
     T handleLocal(LocalModuleId id);
 

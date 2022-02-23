@@ -137,7 +137,7 @@ public class Details {
     public boolean handleKey(Editor editor, ButtonEvent event);
 
     default void closeInner(Editor editor, Object key) {
-      Slot slot = editor.details.slotsLookup.removeGet(key);
+      Slot slot = editor.details.slotsLookup.removeGetOpt(key);
       if (slot == null) {
         return;
       }

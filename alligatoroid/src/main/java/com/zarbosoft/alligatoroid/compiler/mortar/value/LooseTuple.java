@@ -91,6 +91,6 @@ public class LooseTuple implements Value, NoExportValue {
       types.add(((ConstDataValue) exported).mortarType());
       data.add(((ConstDataValue) exported).getInner());
     }
-    return ectx.build(new MortarTupleType(types).constAsValue(new Tuple(data)));
+    return ectx.build(new MortarTupleType(types).constAsValue(Tuple.create(data)));
   }
 }

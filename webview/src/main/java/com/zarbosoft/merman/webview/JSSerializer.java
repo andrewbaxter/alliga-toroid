@@ -131,7 +131,7 @@ public class JSSerializer implements Serializer {
         keys.put(key, i);
       }
       for (String key : prioritizeKeys) {
-        Integer i = keys.removeGet(key);
+        Integer i = keys.removeGetOpt(key);
         if (i == null) continue;
         events.add(new ROPair<>(new EPrimitiveEvent(key), path));
         walkJSJson(events, ((JsPropertyMap) o).get(key), path.add(i));

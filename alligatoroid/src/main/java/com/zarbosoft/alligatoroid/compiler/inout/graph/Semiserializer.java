@@ -46,15 +46,15 @@ public class Semiserializer {
       Exportable value,
       ROList<Exportable> path,
       ROList<String> accessPath) {
-    if (path.contains(value)) {
-      errors.add(new TypeDependencyLoopPre(accessPath));
-      return null;
-    }
     {
       ArtifactId found = artifactLookup.getOpt(new ObjId<>(value));
       if (found != null) {
         return SemiserialRefArtifact.create(found);
       }
+    }
+    if (path.contains(value)) {
+      errors.add(new TypeDependencyLoopPre(accessPath));
+      return null;
     }
     int index = artifacts.size();
     artifacts.add(null);

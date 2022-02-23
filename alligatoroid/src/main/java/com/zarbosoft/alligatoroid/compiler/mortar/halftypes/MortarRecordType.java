@@ -16,8 +16,8 @@ import com.zarbosoft.alligatoroid.compiler.model.error.MissingField;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.error.ValueNotWhole;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
+import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarCarry;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue;
@@ -58,7 +58,7 @@ public class MortarRecordType extends MortarObjectType
     return ((ConstDataValue) value).getInner();
   }
 
-  public static ModuleId assertConstModuleId(
+  public static ImportId assertConstImportId(
       EvaluationContext context, Location location, Value value) {
     if (!(value instanceof DataValue)) {
       context.moduleContext.errors.add(
@@ -66,13 +66,13 @@ public class MortarRecordType extends MortarObjectType
       return null;
     }
     if (!Meta.autoMortarHalfDataTypes
-        .get(ModuleId.class)
+        .get(ImportId.class)
         .assertAssignableFrom(context, location, value)) return null;
     if (!(value instanceof ConstDataValue)) {
       context.moduleContext.errors.add(new ValueNotWhole(location));
       return null;
     }
-    return (ModuleId) ((ConstDataValue) value).getInner();
+    return (ImportId) ((ConstDataValue) value).getInner();
   }
 
   public static Integer assertConstIntlike(

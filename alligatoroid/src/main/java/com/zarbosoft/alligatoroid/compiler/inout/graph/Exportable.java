@@ -1,8 +1,5 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
-import com.zarbosoft.rendaw.common.ROList;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 

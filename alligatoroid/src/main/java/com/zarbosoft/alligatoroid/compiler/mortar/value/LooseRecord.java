@@ -91,6 +91,6 @@ public class LooseRecord implements Value, NoExportValue {
       types.put(e.first, ((ConstDataValue) exported).mortarType());
       data.put(e.first, ((ConstDataValue) exported).getInner());
     }
-    return ectx.build(new MortarRecordType(types).constAsValue(new Record(data)));
+    return ectx.build(new MortarRecordType(types).constAsValue(Record.create(data)));
   }
 }
