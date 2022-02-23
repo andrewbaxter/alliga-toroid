@@ -486,15 +486,10 @@ public class NotMain extends Application {
                                   final ROMap<Location, ROSetRef<String>> moduleTraceStringFields =
                                       modules.traceStringFields.get(rootModuleSpec.moduleId);
                                   if (moduleTraceStringFields != null) {
-                                    TSMap<Integer, ROSetRef<String>> accessOptions = new TSMap<>();
                                     for (Map.Entry<Location, ROSetRef<String>> access :
                                         moduleTraceStringFields) {
-                                      accessOptions.put(access.getKey().id, access.getValue());
+                                      editor.autocomplete.put(access.getKey().id, access.getValue());
                                     }
-                                    editor.autocomplete.put(
-                                        new ROPair<>("access", "key"), accessOptions);
-                                    editor.autocomplete.put(
-                                        new ROPair<>("local", "key"), accessOptions);
                                   }
                                 }
                                 if (editor.context.cursor instanceof CursorFieldPrimitive) {

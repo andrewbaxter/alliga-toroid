@@ -63,8 +63,8 @@ public class Editor {
   public final TSMap<Integer, Atom> fileIdMap;
   public Banner banner;
   public Details details;
-  // atom id/field -> id -> autocomplete options
-  public TSMap<ROPair<String, String>, ROMap<Integer, ROSetRef<String>>> autocomplete =
+  // (location) id -> autocomplete options
+  public TSMap<Integer, ROSetRef<String>> autocomplete =
       new TSMap<>();
 
   public Editor(

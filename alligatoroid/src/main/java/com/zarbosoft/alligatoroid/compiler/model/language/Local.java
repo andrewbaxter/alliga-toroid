@@ -5,6 +5,8 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstKey;
 
@@ -18,6 +20,14 @@ public class Local extends LanguageElement {
 
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
+    TSList<String> stringFields = new TSList<>();
+    for (ROPair<Object, Binding> pair : context.scope.keys()) {
+      if (!(pair.first instanceof String)) continue;
+      stringFields.add((String) pair.first);
+    }
+    context.moduleContext.compileContext.addTraceModuleStringFields(
+        context.moduleContext.importId.moduleId, id, stringFields.toSet());
+
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
     final Object key = assertConstKey(context, id, ectx.evaluate(this.key));
     if (key == null) return EvaluateResult.error;

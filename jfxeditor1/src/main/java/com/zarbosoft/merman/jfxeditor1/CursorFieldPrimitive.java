@@ -13,7 +13,6 @@ import com.zarbosoft.merman.editorcore.AutocompleteChoicePage;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldPrimitive2;
 import com.zarbosoft.merman.editorcore.history.History;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
@@ -102,10 +101,7 @@ public class CursorFieldPrimitive extends BaseEditCursorFieldPrimitive2 {
     }
     if (id == null) return;
 
-    ROMap<Integer, ROSetRef<String>> optionsLookup =
-        editor.autocomplete.getOpt(new ROPair<>(atom.type.id, field.back.id));
-    if (optionsLookup == null) return;
-    final ROSetRef<String> options0 = optionsLookup.getOpt(id);
+    ROSetRef<String> options0 = editor.autocomplete.getOpt(id);
     if (options0 == null || options0.none()) return;
     final TSList<String> options = options0.toList();
 

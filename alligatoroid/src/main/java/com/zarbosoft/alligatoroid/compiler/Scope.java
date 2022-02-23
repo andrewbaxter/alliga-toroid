@@ -43,4 +43,8 @@ public class Scope {
     }
     return out;
   }
+
+  public Iterable<ROPair<Object, Binding>> keys() {
+    return data;
+  }
 }
