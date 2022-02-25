@@ -31,6 +31,7 @@ import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.front.ConditionNode;
 import com.zarbosoft.merman.core.syntax.front.ConditionValue;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
@@ -85,6 +86,7 @@ public class AlligatorusSyntax {
   public static final ModelColor COLOR_KEYWORD = ModelColor.RGB.hex("#e66ea5");
   public static final ModelColor COLOR_LABEL = ModelColor.RGB.hex("#557fde");
   public static final ModelColor COLOR_OTHER = ModelColor.RGB.hex("#a27878");
+  public static final ModelColor COLOR_OTHER_FADE = ModelColor.RGB.hex("#67556e");
   public static final ModelColor COLOR_INCOMPLETE = ModelColor.RGB.hex("#ea4c3b");
   public static final ModelColor COLOR_BG = ModelColor.RGB.hex("#2b323a");
   // public static final ModelColor COLOR_DETAIL_TAB = ModelColor.RGB.hex("#484e6c");
@@ -202,6 +204,10 @@ public class AlligatorusSyntax {
   private static final String FIELD_LITERAL_VALUE = "value";
   private static final String BIND_BACK_FIELD_NAME = "key";
   private static final String BIND_BACK_FIELD_VALUE = "value";
+  private static final int PRECEDENCE_ACCESS = 500;
+  private static final int PRECEDENCE_BIND = 0;
+  private static final int PRECEDENCE_SET = 0;
+  private static final int PRECEDENCE_CALL = 400;
 
   static {
     Pattern maybeNegative =
@@ -300,7 +306,7 @@ public class AlligatorusSyntax {
                         .space()
                         .compactSplit()
                         .atom("path")
-                        .front))));
+                        .build()))));
     types.add(
         new FreeAtomType(
             new FreeAtomType.Config(
@@ -321,13 +327,13 @@ public class AlligatorusSyntax {
                         .space()
                         .compactSplit()
                         .atom(FIELD_MODULE_REMOTE_HASH)
-                        .front))),
+                        .build()))),
         GROUP_EXPR);
 
     // Variables, fields
     types.add(
         new ATypeBuilder(TYPE_ACCESS, "Access")
-            .precedence(0)
+            .precedence(PRECEDENCE_ACCESS)
             .type(BACK_TYPE_ACCESS)
             .atom(ACCESS_BACK_FIELD_BASE, GROUP_EXPR)
             .text(".", COLOR_OTHER)
@@ -338,7 +344,7 @@ public class AlligatorusSyntax {
     types.add(
         new ATypeBuilder(TYPE_ACCESS_DYNAMIC, "Dynamic Access")
             .type(BACK_TYPE_ACCESS)
-            .precedence(0)
+            .precedence(PRECEDENCE_ACCESS)
             .atom(ACCESS_BACK_FIELD_BASE, GROUP_EXPR)
             .startBracket("[", COLOR_OTHER)
             .compactSplit()
@@ -356,7 +362,7 @@ public class AlligatorusSyntax {
         new ATypeBuilder(TYPE_BIND, "Bind")
             .type(BACK_TYPE_BIND)
             .defaultSelection(BIND_BACK_FIELD_VALUE)
-            .precedence(0)
+            .precedence(PRECEDENCE_BIND)
             .nestedIdentifier(BIND_BACK_FIELD_NAME, COLOR_IDENTIFIER)
             .space()
             .text(":=", COLOR_OTHER)
@@ -367,7 +373,7 @@ public class AlligatorusSyntax {
     types.add(
         new ATypeBuilder(TYPE_BIND_DYNAMIC, "Dynamic Bind")
             .type(BACK_TYPE_BIND)
-            .precedence(0)
+            .precedence(PRECEDENCE_BIND)
             .startBracket("[", COLOR_OTHER)
             .compactSplit()
             .atom(BIND_BACK_FIELD_NAME, GROUP_EXPR)
@@ -381,7 +387,7 @@ public class AlligatorusSyntax {
     types.add(
         new ATypeBuilder(TYPE_ASSIGN, "Set")
             .type(BACK_TYPE_ASSIGN)
-            .precedence(0)
+            .precedence(PRECEDENCE_SET)
             .atom(BIND_BACK_FIELD_NAME, GROUP_EXPR)
             .space()
             .text("=", COLOR_OTHER)
@@ -393,7 +399,7 @@ public class AlligatorusSyntax {
     // Calls
     types.add(
         new ATypeBuilder(TYPE_CALL, "Call")
-            .precedence(Integer.MAX_VALUE)
+            .precedence(PRECEDENCE_CALL)
             .atom(CALL_BACK_FIELD_TARGET, GROUP_EXPR)
             .text(" ", COLOR_OTHER)
             .atom(CALL_BACK_FIELD_ARGUMENT, GROUP_EXPR)
@@ -865,6 +871,7 @@ public class AlligatorusSyntax {
   public static class AFrontBuilder {
     private final TSList<FrontSpec> front = new TSList<>();
     private boolean createdFirstDisplayed = false;
+    private boolean needsParens;
 
     public TSMap<String, Object> markMeta(TSMap<String, Object> meta) {
       if (!createdFirstDisplayed) {
@@ -918,6 +925,7 @@ public class AlligatorusSyntax {
     }
 
     public AFrontBuilder atom(String id) {
+      if (front.isEmpty()) needsParens = true;
       front.add(new FrontAtomSpec(new FrontAtomSpec.Config(id)));
       return this;
     }
@@ -941,6 +949,7 @@ public class AlligatorusSyntax {
     }
 
     public AFrontBuilder arraySuffix(String id, String suffix) {
+      if (front.isEmpty()) needsParens = true;
       front.add(
           new FrontArraySpec(
               new FrontArraySpec.Config(
@@ -960,6 +969,7 @@ public class AlligatorusSyntax {
     }
 
     public AFrontBuilder arraySep(String id, String separator) {
+      if (front.isEmpty()) needsParens = true;
       front.add(
           new FrontArraySpec(
               new FrontArraySpec.Config(
@@ -1036,6 +1046,29 @@ public class AlligatorusSyntax {
                           .meta(
                               DirectStylist.meta(
                                   baseCodeStyle().ascent(ascent).descent(descent)))))));
+    }
+
+    public ROList<FrontSpec> build() {
+      if (needsParens) {
+        final ConditionNode condition =
+            new ConditionNode(new ConditionNode.Config(ConditionNode.Is.PRECEDENT, true));
+        TSMap<String, Object> textStyle =
+            DirectStylist.meta(baseCodeStyle().color(COLOR_OTHER_FADE));
+        front.insert(
+            0,
+            new FrontSymbolSpec(
+                new FrontSymbolSpec.Config(
+                        new SymbolTextSpec(
+                            new SymbolTextSpec.Config("(").meta(markMeta(textStyle))))
+                    .condition(condition)));
+        front.add(
+            new FrontSymbolSpec(
+                new FrontSymbolSpec.Config(
+                        new SymbolTextSpec(
+                            new SymbolTextSpec.Config(")").meta(markMeta(textStyle))))
+                    .condition(condition)));
+      }
+      return front;
     }
   }
 
@@ -1138,7 +1171,7 @@ public class AlligatorusSyntax {
       return new FreeAtomType(
           new FreeAtomType.Config(
                   description,
-                  new AtomType.Config(id, back.build(), front.front)
+                  new AtomType.Config(id, back.build(), front.build())
                       .defaultSelection(defaultSelection))
               .alignments(
                   new TSMap<String, AlignmentSpec>()
@@ -1156,7 +1189,7 @@ public class AlligatorusSyntax {
     public AtomType build(Function<TSList<BackSpec>, BackSpec> wrap) {
       return new FreeAtomType(
           new FreeAtomType.Config(
-              description, new AtomType.Config(id, wrap.apply(back.back), front.front)));
+              description, new AtomType.Config(id, wrap.apply(back.back), front.build())));
     }
 
     public ATypeBuilder text(String text, ModelColor color) {

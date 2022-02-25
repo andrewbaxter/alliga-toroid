@@ -7,6 +7,7 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.visual.condition.ConditionAttachment;
+import com.zarbosoft.rendaw.common.Assertion;
 
 public class ConditionNode extends ConditionType {
   public final Is is;
@@ -19,12 +20,22 @@ public class ConditionNode extends ConditionType {
   @Override
   public ConditionAttachment create(final Context context, final Atom atom) {
     final boolean show;
-    if (atom.fieldParentRef == null) {
-      show = true;
-    } else if (!(atom.type instanceof FreeAtomType)) {
-      show = true;
-    } else {
-      show = AtomType.isPrecedent((FreeAtomType) atom.type, atom.fieldParentRef, true);
+    switch (is) {
+      case PRECEDENT:
+        {
+          if (atom.fieldParentRef == null) {
+            show = true;
+            break;
+          }
+          if (!(atom.type instanceof FreeAtomType)) {
+            show = true;
+            break;
+          }
+          show = AtomType.isPrecedent(atom);
+          break;
+        }
+      default:
+        throw new Assertion();
     }
     final ConditionAttachment condition =
         new ConditionAttachment(invert, show) {

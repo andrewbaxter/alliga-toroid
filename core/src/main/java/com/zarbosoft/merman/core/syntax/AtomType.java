@@ -29,9 +29,13 @@ import com.zarbosoft.merman.core.syntax.error.DuplicateBackId;
 import com.zarbosoft.merman.core.syntax.error.MissingBack;
 import com.zarbosoft.merman.core.syntax.error.NonexistentDefaultSelection;
 import com.zarbosoft.merman.core.syntax.error.UnusedBackData;
-import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
+import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Color;
 import com.zarbosoft.pidgoon.nodes.MergeSequence;
@@ -87,45 +91,79 @@ public abstract class AtomType {
     errors.raise();
   }
 
+  private static boolean symbolDelimits(FrontSymbolSpec s) {
+    if (s.type instanceof SymbolSpaceSpec) return false;
+    if (s.type instanceof SymbolTextSpec) {
+      final String text = ((SymbolTextSpec) s.type).text;
+      if (text.trim().isEmpty()) return false;
+    }
+    if (s.condition != null) return false;
+    return true;
+  }
+
   /**
    * @param type
    * @param test
    * @param allowed type is allowed to be placed here. Only for sliding suffix gaps.
    * @return
    */
-  public static boolean isPrecedent(
-      final FreeAtomType type, final Field.Parent test, final boolean allowed) {
-    final Atom testAtom = test.field.atomParentRef.atom();
+  public static boolean isPrecedent(Atom atom) {
+    final Atom parentAtom = atom.fieldParentRef.field.atomParentRef.atom();
+    final String id = atom.fieldParentRef.id();
 
-    // Can't move up if current level is bounded by any other front parts
-    final int index = getIndexOfData(test, testAtom);
-    final ROList<FrontSpec> front = testAtom.type.front();
-    if (index != front.size() - 1) return false;
-    final FrontSpec frontNext = front.get(index);
-    if (frontNext instanceof FrontArraySpec && !((FrontArraySpec) frontNext).suffix.isEmpty())
-      return false;
-
-    if (allowed) {
-      // Can't move up if next level has lower precedence
-      if (testAtom.type.precedence() < type.precedence) return false;
-
-      // Can't move up if next level has same precedence and parent is forward-associative
-      if (testAtom.type.precedence() == type.precedence && testAtom.type.associateForward())
-        return false;
+    boolean foreChild = true; // This atom isn't bound by succeeding symbols
+    {
+      boolean backChild = true; // This atom isn't bound by preceding symbols
+      boolean foundField = false;
+      for (FrontSpec front : parentAtom.type.front) {
+        if (front instanceof FrontSymbolSpec) {
+          if (symbolDelimits((FrontSymbolSpec) front)) {
+            if (!foundField) backChild = false;
+            else foreChild = false;
+          }
+        } else if (front instanceof FrontPrimitiveSpec) {
+          if (!foundField) backChild = false;
+          else foreChild = false;
+        } else if (front instanceof FrontArraySpecBase) {
+          final FrontArraySpecBase arrayFront = (FrontArraySpecBase) front;
+          if (!foundField) {
+            for (FrontSymbolSpec prefix : arrayFront.prefix) {
+              if (!symbolDelimits(prefix)) continue;
+              backChild = false;
+            }
+          }
+          if (id.equals(arrayFront.fieldId())) {
+            if (((FieldArray.Parent) atom.fieldParentRef).index > 0) backChild = false;
+            foundField = true;
+            if (((FieldArray.Parent) atom.fieldParentRef).index
+                < ((FieldArray) atom.fieldParentRef.field).data.size() - 1) foreChild = false;
+          }
+          if (foundField) {
+            for (FrontSymbolSpec suffix : arrayFront.suffix) {
+              if (!symbolDelimits(suffix)) continue;
+              foreChild = false;
+            }
+          }
+        } else if (front instanceof FrontAtomSpec) {
+          if (id.equals(((FrontAtomSpec) front).fieldId())) foundField = true;
+        } else throw new Assertion();
+      }
+      if (!backChild && !foreChild) return true;
+      // thus backChild == !foreChild
     }
 
-    return true;
-  }
-
-  private static int getIndexOfData(final Field.Parent parent, final Atom atom) {
-    for (int i = 0; i < atom.type.front.size(); ++i) {
-      FrontSpec front = atom.type.front.get(i);
-      String id = null;
-      if (front instanceof FrontAtomSpec) id = ((FrontAtomSpec) front).fieldId();
-      else if (front instanceof FrontArraySpec) id = ((FrontArraySpec) front).fieldId();
-      if (parent.id().equals(id)) return i;
+    // Precedent if precedence is higher than parent
+    if (parentAtom.type.precedence() < atom.type.precedence()) {
+      return true;
     }
-    throw new Assertion();
+
+    // Precedent if precedences equal and matches associativity
+    if (parentAtom.type.precedence() == atom.type.precedence()
+        && foreChild == parentAtom.type.associateForward()) {
+      return true;
+    }
+
+    return false;
   }
 
   public abstract ROMap<String, AlignmentSpec> alignments();
