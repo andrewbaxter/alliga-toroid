@@ -8,7 +8,7 @@ import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.rendaw.common.ROPair;
 
 public class BrickLine extends BrickText {
-  private final VisualFieldPrimitive.Line line;
+  public final VisualFieldPrimitive.Line line;
 
   public BrickLine(
       final Context context,

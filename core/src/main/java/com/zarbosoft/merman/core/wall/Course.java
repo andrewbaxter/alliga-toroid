@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.core.wall;
 
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Debug;
 import com.zarbosoft.merman.core.IterationContext;
 import com.zarbosoft.merman.core.IterationTask;
 import com.zarbosoft.merman.core.display.Group;
@@ -420,17 +421,6 @@ public class Course {
     }
 
     private boolean expand(final Context context, final IterationContext iterationContext) {
-      // Try to unwrap any soft-wrapped primitives first
-      for (Brick child : children) {
-        VisualLeaf visual = child.getVisual();
-        if (!(visual instanceof VisualFieldPrimitive)
-            || !((VisualFieldPrimitive) visual).softWrapped()) continue;
-        int oldLines = ((VisualFieldPrimitive) visual).hardLineCount;
-        ((VisualFieldPrimitive) visual).primitiveReflow(context);
-        int newLines = ((VisualFieldPrimitive) visual).hardLineCount;
-        return oldLines != newLines;
-      }
-
       // Unwrap nodes based on priority
       final PriorityQueue<VisualAtom> priorities = new PriorityQueue<>(11, expandComparator);
 
@@ -440,63 +430,64 @@ public class Course {
         final VisualLeaf visual = brick.getVisual();
         if (visual.atomVisual().compact) priorities.add(visual.parent().atomVisual());
       }
-      if (priorities.isEmpty()) return false;
-      final VisualAtom top = priorities.poll();
-
-      // Check that it's the most precedent in all courses it has bricks (preserve: all higher
-      // precedent atoms are
-      // expanded)
-      {
-        TSList<Brick> bricks = new TSList<>();
-        top.getLeafBricks(context, bricks);
-        for (Brick brick : bricks) {
-          if (brick.parent.index == index) continue;
-          for (Brick otherCourseBrick : parent.children.get(brick.parent.index).children) {
-            VisualAtom otherAtom = otherCourseBrick.getVisual().atomVisual();
-            if (otherAtom == top) continue;
-            if (!otherAtom.compact) continue;
-            if (isOrdered(expandComparator, top, otherAtom)) return false;
-          }
-        }
+      if (priorities.isEmpty()) {
+        return false;
       }
+      final VisualAtom top = priorities.poll();
 
       // Check that all parents are either expanded or have lower expand priority
       {
         VisualAtom parentAtom = top;
         while (parentAtom.parent() != null) {
           parentAtom = parentAtom.parent().atomVisual();
-          if (isOrdered(expandComparator, parentAtom, top) && parentAtom.compact) return false;
-        }
-      }
-
-      // Check that all children are either expanded or have lower expand priority
-      {
-        final Brick first = top.getFirstBrick(context);
-        final Brick last = top.getLastBrick(context);
-        for (int courseI = first.parent.index; courseI <= last.parent.index; ++courseI) {
-          Course course = parent.children.get(courseI);
-          for (int brickI = courseI == first.parent.index ? first.index : 0;
-              courseI == last.parent.index ? brickI <= last.index : brickI < course.children.size();
-              ++brickI) {
-            Brick brick = course.children.get(brickI);
-            final VisualLeaf visual = brick.getVisual();
-            final VisualAtom atom = visual.atomVisual();
-            if (!atom.compact) continue;
-            if (atom == top) continue;
-            if (isOrdered(expandComparator, top, atom)) continue;
+          if (isOrdered(expandComparator, parentAtom, top) && parentAtom.compact) {
+            parentAtom.type();
             return false;
           }
         }
       }
 
+      // 1. Check that this is has the highest priority on all shared courses + courses with child
+      // bricks
+      // 2. Make sure any soft-wrapped own/child bricks are un-soft-wrapped before we do deeper
+      // expanding
+      {
+        final Brick first = top.getFirstBrick(context);
+        final Brick last = top.getLastBrick(context);
+        for (int courseI = first.parent.index; courseI <= last.parent.index; ++courseI) {
+          for (Brick brick : parent.children.get(courseI).children) {
+            final VisualLeaf visual = brick.getVisual();
+
+            // Make sure not soft wrapped
+            if ((visual instanceof VisualFieldPrimitive)
+                && ((VisualFieldPrimitive) visual).softWrapped()) {
+              int oldLines = ((VisualFieldPrimitive) visual).lines.size();
+              ((VisualFieldPrimitive) visual).primitiveReflow(context);
+              int newLines = ((VisualFieldPrimitive) visual).lines.size();
+              Debug.formatBrick(brick);
+              return oldLines != newLines;
+            }
+
+            // Make sure priority
+            final VisualAtom atom = visual.atomVisual();
+            if (!atom.compact) continue;
+            if (atom == top) continue;
+            if (isOrdered(expandComparator, top, atom)) continue;
+            atom.type();
+            return false;
+          }
+        }
+      }
+
+      final TSList<Brick> leafBricks = new TSList<>();
+
       // Check if we actually can expand
       {
-        final TSList<Brick> brickProperties = new TSList<>();
-        top.getLeafBricks(context, brickProperties);
+        top.getLeafBricks(context, leafBricks);
         Course course = null;
         int courseLastBrick = 0;
         CalculateCourseConverseContext courseCalc = null;
-        for (final Brick brick : brickProperties) {
+        for (final Brick brick : leafBricks) {
 
           // Line changed (or first brick)
           if (brick.parent != course) {
@@ -519,7 +510,9 @@ public class Course {
               for (; courseLastBrick < course.children.size(); ++courseLastBrick) {
                 Brick brick1 = course.children.get(courseLastBrick);
                 calculateNextBrickAdvance(courseCalc, brick1);
-                if (courseCalc.converse > context.edge) return false;
+                if (courseCalc.converse > context.edge) {
+                  return false;
+                }
               }
             }
 
@@ -534,12 +527,16 @@ public class Course {
           for (; courseLastBrick < brick.index; ++courseLastBrick) {
             Brick brick1 = course.children.get(courseLastBrick);
             calculateNextBrickAdvance(courseCalc, brick1);
-            if (courseCalc.converse > context.edge) return false;
+            if (courseCalc.converse > context.edge) {
+              return false;
+            }
           }
 
           // Sum modified brick
           calculateNextBrickAdvance(courseCalc, brick);
-          if (courseCalc.converse > context.edge) return false;
+          if (courseCalc.converse > context.edge) {
+            return false;
+          }
           courseLastBrick += 1;
         }
 
@@ -548,12 +545,16 @@ public class Course {
           for (; courseLastBrick < course.children.size(); ++courseLastBrick) {
             Brick brick1 = course.children.get(courseLastBrick);
             calculateNextBrickAdvance(courseCalc, brick1);
-            if (courseCalc.converse > context.edge) return false;
+            if (courseCalc.converse > context.edge) {
+              return false;
+            }
           }
       }
 
       // Avoid bouncing
-      if (iterationContext.expanded.contains(top)) return false;
+      if (iterationContext.expanded.contains(top)) {
+        return false;
+      }
       iterationContext.expanded.add(top);
 
       // Expand
