@@ -57,7 +57,6 @@ import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
-import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
@@ -488,7 +487,8 @@ public class NotMain extends Application {
                                   if (moduleTraceStringFields != null) {
                                     for (Map.Entry<Location, ROSetRef<String>> access :
                                         moduleTraceStringFields) {
-                                      editor.autocomplete.put(access.getKey().id, access.getValue());
+                                      editor.autocomplete.put(
+                                          access.getKey().id, access.getValue());
                                     }
                                   }
                                 }
@@ -687,7 +687,7 @@ public class NotMain extends Application {
           new Display.ScrollListener() {
             @Override
             public void changed(double converse, double transverse) {
-              editor.context.scroll = editor.context.scroll + transverse;
+              editor.context.scroll = editor.context.scroll - transverse;
               editor.context.applyScroll();
             }
           });
