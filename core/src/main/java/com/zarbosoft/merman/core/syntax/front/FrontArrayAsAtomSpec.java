@@ -11,18 +11,21 @@ import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomFromArray;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public class FrontArrayAsAtomSpec extends FrontSpec {
   public final String fieldId;
   private final Symbol ellipsis;
   private final ROMap<String, Object> ellipsisMeta;
+  private final ROSetRef<String> forwardAlignments;
   private BaseBackArraySpec field;
 
   public FrontArrayAsAtomSpec(Config config) {
     this.fieldId = config.field;
     ellipsis = config.ellipsis;
     ellipsisMeta = config.ellipsisMeta;
+    forwardAlignments = config.forwardAlignments;
   }
 
   @Override
@@ -39,7 +42,7 @@ public class FrontArrayAsAtomSpec extends FrontSpec {
         visualDepth,
         depthScore,
         ellipsis,
-        ellipsisMeta);
+        ellipsisMeta,forwardAlignments);
   }
 
   @Override
@@ -63,7 +66,12 @@ public class FrontArrayAsAtomSpec extends FrontSpec {
     public final String field;
     public final Symbol ellipsis;
     public ROMap<String, Object> ellipsisMeta = ROMap.empty;
+    private ROSetRef<String> forwardAlignments;
 
+    public Config forwardAlignments(ROSetRef<String> forward) {
+      this.forwardAlignments = forward;
+      return this;
+    }
     public Config(String field, Symbol ellipsis) {
       this.field = field;
       this.ellipsis = ellipsis;

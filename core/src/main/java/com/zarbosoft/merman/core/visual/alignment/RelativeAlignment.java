@@ -34,7 +34,7 @@ public class RelativeAlignment extends Alignment {
     if (base != null) {
       base.removeDerived(this);
     }
-    base = atom.findParentAlignment(baseKey);
+    base = atom.parent().findAlignment(baseKey);
     if (base == this) throw new AssertionError("Alignment parented to self");
     if (base != null) base.addDerived(this);
     changed(context);

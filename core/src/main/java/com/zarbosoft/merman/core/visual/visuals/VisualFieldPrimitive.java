@@ -310,7 +310,7 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
                 ? spec.firstAlignmentId
                 : j == i ? spec.hardSplitAlignmentId : spec.softSplitAlignmentId;
         font = j == 0 ? firstFont : j == i ? hardFont : softFont;
-        final Alignment alignment = atom.findAlignment(alignmentName);
+        final Alignment alignment = atom.findAlignment(alignmentName, null);
         if (alignment == null) converse = 0;
         else converse = alignment.converse;
       } else {
@@ -340,7 +340,7 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
         Font font = softFont;
         if (font == null) font = hardFont;
         if (font == null) font = firstFont;
-        final Alignment alignment = atom.findAlignment(spec.softSplitAlignmentId);
+        final Alignment alignment = atom.findAlignment(spec.softSplitAlignmentId, null);
         final double converse;
         if (alignment == null) converse = 0;
         else converse = alignment.converse;
@@ -941,7 +941,7 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public Alignment findAlignment(String alignment) {
-      return visual.parent.atomVisual().findAlignment(alignment);
+      return visual.atomVisual().findAlignment(alignment, null);
     }
 
     @Override

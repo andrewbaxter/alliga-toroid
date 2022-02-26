@@ -2,12 +2,21 @@ package com.zarbosoft.merman.core.visual;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Hoverable;
+import com.zarbosoft.merman.core.visual.alignment.Alignment;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.rendaw.common.ROPair;
 
 public abstract class VisualParent {
   public abstract Visual visual();
+
+  /**
+   * Only used at atom boundary.
+   *
+   * @param key
+   * @return
+   */
+  public abstract Alignment findAlignment(String key);
 
   public abstract VisualAtom atomVisual();
 

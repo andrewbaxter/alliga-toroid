@@ -17,6 +17,8 @@ import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.function.Consumer;
@@ -25,6 +27,7 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
   public final FieldArray value;
   private final FieldArray.Listener dataListener;
   private final FrontArraySpecBase front;
+  private final ROSetRef<String> forwardAlignments;
   public CursorFieldArray cursor;
   public HoverableFieldArrayBase hoverable;
   private Brick ellipsis = null;
@@ -34,8 +37,10 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
       final FrontArraySpecBase front,
       final VisualParent parent,
       final Atom atom,
-      final int visualDepth) {
+      final int visualDepth,
+      ROSetRef<String> forwardAlignments) {
     super(visualDepth);
+    this.forwardAlignments = forwardAlignments;
     this.front = front;
     this.value = front.field.get(atom.namedFields);
     dataListener = new DataListener(value, parent);
@@ -98,6 +103,11 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
                 atom.ensureVisual(
                     context,
                     new Parent(elementGroup, groupIndex++) {
+                      @Override
+                      public Alignment findAlignment(String key) {
+                        return atomVisual().findAlignment(key, forwardAlignments);
+                      }
+
                       @Override
                       public void notifyLastBrickCreated(Context context, Brick brick) {
                         if (cursor != null
@@ -242,7 +252,7 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
 
               @Override
               public Alignment findAlignment(String alignment) {
-                return parent.atomVisual().findAlignment(alignment);
+                return atomVisual().findAlignment(alignment, null);
               }
 
               @Override
@@ -385,7 +395,7 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
 
               @Override
               public Alignment findAlignment(String alignment) {
-                return parent.atomVisual().findAlignment(alignment);
+                return parent.atomVisual().findAlignment(alignment, ROSet.empty);
               }
 
               @Override

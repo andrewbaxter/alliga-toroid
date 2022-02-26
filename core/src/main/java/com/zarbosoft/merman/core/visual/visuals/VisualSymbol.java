@@ -156,7 +156,7 @@ public class VisualSymbol extends Visual
 
   @Override
   public Alignment findAlignment(String alignment) {
-    return parent.atomVisual().findAlignment(alignment);
+    return atomVisual().findAlignment(alignment, null);
   }
 
   @Override

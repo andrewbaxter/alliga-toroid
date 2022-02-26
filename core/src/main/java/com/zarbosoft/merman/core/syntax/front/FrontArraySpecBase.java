@@ -15,6 +15,7 @@ import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public abstract class FrontArraySpecBase extends FrontSpec {
@@ -25,6 +26,7 @@ public abstract class FrontArraySpecBase extends FrontSpec {
   public final Symbol empty;
   public final ROMap<String, Object> ellipsisMeta;
   public final ROMap<String, Object> emptyMeta;
+  private final ROSetRef<String> forwardAlignments;
   public BaseBackArraySpec field;
 
   public FrontArraySpecBase(Config config) {
@@ -35,6 +37,7 @@ public abstract class FrontArraySpecBase extends FrontSpec {
     ellipsisMeta = config.ellipsisMeta;
     empty = config.empty;
     emptyMeta = config.emptyMeta;
+    forwardAlignments = config.forwardAlignments;
   }
 
   public BaseBackArraySpec field() {
@@ -48,7 +51,7 @@ public abstract class FrontArraySpecBase extends FrontSpec {
       final Atom atom,
       final int visualDepth,
       final int depthScore) {
-    VisualFieldArray out = new VisualFieldArray(this, parent, atom, visualDepth);
+    VisualFieldArray out = new VisualFieldArray(this, parent, atom, visualDepth, forwardAlignments);
     out.root(context, parent, depthScore, depthScore);
     return out;
   }
@@ -74,8 +77,14 @@ public abstract class FrontArraySpecBase extends FrontSpec {
     public ROMap<String, Object> ellipsisMeta = ROMap.empty;
     public Symbol empty = new SymbolSpaceSpec(new SymbolSpaceSpec.Config());
     public ROMap<String, Object> emptyMeta = ROMap.empty;
+    public ROSetRef<String> forwardAlignments = ROSet.empty;
 
     public Config() {}
+
+    public Config forwardAlignments(ROSetRef<String> forward) {
+      this.forwardAlignments = forward;
+      return this;
+    }
 
     public Config prefix(ROList<FrontSymbolSpec> prefix) {
       this.prefix = prefix;

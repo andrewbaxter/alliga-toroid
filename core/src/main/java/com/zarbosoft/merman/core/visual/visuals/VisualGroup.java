@@ -5,6 +5,7 @@ import com.zarbosoft.merman.core.Hoverable;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
+import com.zarbosoft.merman.core.visual.alignment.Alignment;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
@@ -227,6 +228,11 @@ public class VisualGroup extends Visual {
     @Override
     public Visual visual() {
       return group;
+    }
+
+    @Override
+    public Alignment findAlignment(String key) {
+      throw new Assertion();
     }
 
     @Override

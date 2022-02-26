@@ -16,20 +16,26 @@ import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
 
 public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
   private final Symbol ellipsisSpec;
   private final ROMap<String, Object> ellipsisMeta;
+  private final ROSetRef<String> forwardAlignments;
   protected VisualAtom body;
   VisualParent parent;
   private Brick ellipsis = null;
 
   public VisualFieldAtomBase(
-      final int visualDepth, Symbol ellipsis, ROMap<String, Object> ellipsisMeta) {
+      final int visualDepth,
+      Symbol ellipsis,
+      ROMap<String, Object> ellipsisMeta,
+      ROSetRef<String> forwardAlignments) {
     super(visualDepth);
     ellipsisSpec = ellipsis;
     this.ellipsisMeta = ellipsisMeta;
+    this.forwardAlignments = forwardAlignments;
   }
 
   @Override
@@ -156,7 +162,7 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
 
               @Override
               public Alignment findAlignment(String alignment) {
-                return parent.atomVisual().findAlignment(alignment);
+                return atomVisual().findAlignment(alignment, null);
               }
 
               @Override
@@ -273,6 +279,11 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
     @Override
     public Visual visual() {
       return VisualFieldAtomBase.this;
+    }
+
+    @Override
+    public Alignment findAlignment(String key) {
+      return atomVisual().findAlignment(key, forwardAlignments);
     }
 
     @Override

@@ -14,6 +14,7 @@ import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.EnumerateIterable;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -86,10 +87,13 @@ public class VisualAtom extends Visual {
     return parent;
   }
 
-  public Alignment findAlignment(final String alignment) {
-    Alignment found = localAlignments.getOpt(alignment);
-    if (found != null) return found;
-    return findParentAlignment(alignment);
+  public Alignment findAlignment(final String alignment, ROSetRef<String> allow) {
+    if (allow == null || allow.contains(alignment)) {
+      Alignment found = localAlignments.getOpt(alignment);
+      if (found != null) return found;
+    }
+    if (parent != null) return parent.findAlignment(alignment);
+    return null;
   }
 
   @Override
@@ -242,20 +246,6 @@ public class VisualAtom extends Visual {
     return atom.type;
   }
 
-  public Alignment findParentAlignment(String key) {
-    if (this.parent == null) return null;
-    VisualAtom at = this.parent.atomVisual();
-    while (true) {
-      Alignment found = at.localAlignments.getOpt(key);
-      if (found != null) {
-        return found;
-      }
-      if (at.parent == null) break;
-      at = at.parent.atomVisual();
-    }
-    return null;
-  }
-
   public void select(Context context, int index) {
     if (hoverable != null) hoverable.notifySelected(context, index);
     if (cursor == null) {
@@ -281,6 +271,11 @@ public class VisualAtom extends Visual {
 
     public ChildParent(final int index) {
       this.index = index;
+    }
+
+    @Override
+    public Alignment findAlignment(String key) {
+      throw new Assertion();
     }
 
     @Override

@@ -12,18 +12,21 @@ import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtom;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public class FrontAtomSpec extends FrontSpec {
   private final String fieldId;
   private final Symbol ellipsis;
   private final ROMap<String, Object> ellipsisMeta;
+  private final ROSetRef<String> forwardAlignments;
   private BackAtomSpec field;
 
   public FrontAtomSpec(Config config) {
     fieldId = config.fieldId;
     ellipsis = config.ellipsis;
     ellipsisMeta = config.ellipsisMeta;
+    forwardAlignments = config.forwardAlignments;
   }
 
   public BackAtomSpec field() {
@@ -44,7 +47,7 @@ public class FrontAtomSpec extends FrontSpec {
         visualDepth,
         depthScore,
         ellipsis,
-        ellipsisMeta);
+        ellipsisMeta, forwardAlignments);
   }
 
   @Override
@@ -66,6 +69,12 @@ public class FrontAtomSpec extends FrontSpec {
     public final String fieldId;
     public Symbol ellipsis = new SymbolTextSpec(new SymbolTextSpec.Config("..."));
     public ROMap<String, Object> ellipsisMeta = ROMap.empty;
+    private ROSetRef<String> forwardAlignments;
+
+    public Config forwardAlignments(ROSetRef<String> forward) {
+      this.forwardAlignments = forward;
+      return this;
+    }
 
     public Config(String fieldId) {
       this.fieldId = fieldId;

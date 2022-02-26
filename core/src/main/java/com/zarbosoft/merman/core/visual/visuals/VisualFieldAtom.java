@@ -9,20 +9,21 @@ import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSetRef;
 
 public class VisualFieldAtom extends VisualFieldAtomBase {
   public final FieldAtom value;
   private final FieldAtom.Listener dataListener;
 
   public VisualFieldAtom(
-      final Context context,
-      final VisualParent parent,
-      final FieldAtom value,
-      final int visualDepth,
-      final int depthScore,
-      Symbol ellipsis,
-      ROMap<String, Object> ellipsisMeta) {
-    super(visualDepth, ellipsis, ellipsisMeta);
+          final Context context,
+          final VisualParent parent,
+          final FieldAtom value,
+          final int visualDepth,
+          final int depthScore,
+          Symbol ellipsis,
+          ROMap<String, Object> ellipsisMeta, ROSetRef<String> forwardAlignments) {
+    super(visualDepth, ellipsis, ellipsisMeta, forwardAlignments);
     this.value = value;
     dataListener =
         new FieldAtom.Listener() {

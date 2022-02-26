@@ -60,6 +60,7 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -166,6 +167,15 @@ public class AlligatorusSyntax {
                       .splitMode(SplitMode.COMPACT)
                       .splitAlignmentId(ALIGN_INDENT))));
   private static final String ALIGN_BASE = "base";
+  public static final TSMap<String, AlignmentSpec> ALIGN_SPECS =
+      new TSMap<String, AlignmentSpec>()
+          .put(
+              ALIGN_BASE,
+              new RelativeAlignmentSpec(new RelativeAlignmentSpec.Config(ALIGN_INDENT, 0, false)))
+          .put(
+              ALIGN_INDENT,
+              new RelativeAlignmentSpec(
+                  new RelativeAlignmentSpec.Config(ALIGN_INDENT, indent, true)));
   public static final FrontSymbolSpec baseCompactSplit =
       new FrontSymbolSpec(
           new FrontSymbolSpec.Config(
@@ -296,38 +306,42 @@ public class AlligatorusSyntax {
     types.add(
         new FreeAtomType(
             new FreeAtomType.Config(
-                "Local Module",
-                new AtomType.Config(
-                    TYPE_MODULE_LOCAL,
-                    backBuiltinFunc(
-                        "modLocal", new BackAtomSpec(new BackAtomSpec.Config("path", GROUP_EXPR))),
-                    new AFrontBuilder()
-                        .fixed("mod", COLOR_KEYWORD)
-                        .space()
-                        .compactSplit()
-                        .atom("path")
-                        .build()))));
+                    "Local Module",
+                    new AtomType.Config(
+                        TYPE_MODULE_LOCAL,
+                        backBuiltinFunc(
+                            "modLocal",
+                            new BackAtomSpec(new BackAtomSpec.Config("path", GROUP_EXPR))),
+                        new AFrontBuilder()
+                            .fixed("mod", COLOR_KEYWORD)
+                            .space()
+                            .compactSplit()
+                            .atom("path")
+                            .build()))
+                .alignments(ALIGN_SPECS)));
     types.add(
         new FreeAtomType(
             new FreeAtomType.Config(
-                "Remote Module",
-                new AtomType.Config(
-                    TYPE_MODULE_REMOTE,
-                    backBuiltinFunc(
-                        "modRemote",
-                        backTuple(
-                            new BackAtomSpec(new BackAtomSpec.Config("url", GROUP_EXPR)),
-                            new BackAtomSpec(
-                                new BackAtomSpec.Config(FIELD_MODULE_REMOTE_HASH, GROUP_EXPR)))),
-                    new AFrontBuilder()
-                        .fixed("mod", COLOR_KEYWORD)
-                        .space()
-                        .compactSplit()
-                        .atom("url")
-                        .space()
-                        .compactSplit()
-                        .atom(FIELD_MODULE_REMOTE_HASH)
-                        .build()))),
+                    "Remote Module",
+                    new AtomType.Config(
+                        TYPE_MODULE_REMOTE,
+                        backBuiltinFunc(
+                            "modRemote",
+                            backTuple(
+                                new BackAtomSpec(new BackAtomSpec.Config("url", GROUP_EXPR)),
+                                new BackAtomSpec(
+                                    new BackAtomSpec.Config(
+                                        FIELD_MODULE_REMOTE_HASH, GROUP_EXPR)))),
+                        new AFrontBuilder()
+                            .fixed("mod", COLOR_KEYWORD)
+                            .space()
+                            .compactSplit()
+                            .atom("url")
+                            .space()
+                            .compactSplit()
+                            .atom(FIELD_MODULE_REMOTE_HASH)
+                            .build()))
+                .alignments(ALIGN_SPECS)),
         GROUP_EXPR);
 
     // Variables, fields
@@ -400,6 +414,7 @@ public class AlligatorusSyntax {
     types.add(
         new ATypeBuilder(TYPE_CALL, "Call")
             .precedence(PRECEDENCE_CALL)
+            .associateForward()
             .atom(CALL_BACK_FIELD_TARGET, GROUP_EXPR)
             .text(" ", COLOR_OTHER)
             .atom(CALL_BACK_FIELD_ARGUMENT, GROUP_EXPR)
@@ -872,6 +887,7 @@ public class AlligatorusSyntax {
     private final TSList<FrontSpec> front = new TSList<>();
     private boolean createdFirstDisplayed = false;
     private boolean needsParens;
+    private boolean postIndent = false;
 
     public TSMap<String, Object> markMeta(TSMap<String, Object> meta) {
       if (!createdFirstDisplayed) {
@@ -926,26 +942,23 @@ public class AlligatorusSyntax {
 
     public AFrontBuilder atom(String id) {
       if (front.isEmpty()) needsParens = true;
-      front.add(new FrontAtomSpec(new FrontAtomSpec.Config(id)));
+      front.add(
+          new FrontAtomSpec(
+              new FrontAtomSpec.Config(id)
+                  .forwardAlignments(postIndent ? TSSet.of(ALIGN_INDENT) : ROSet.empty)));
       return this;
     }
 
     public AFrontBuilder compactSplit() {
       front.add(compactSplit);
+      postIndent = true;
       return this;
     }
 
     public AFrontBuilder compactBaseSplit() {
       front.add(baseCompactSplit);
+      postIndent = false;
       return this;
-    }
-
-    public void zeroSplit() {
-      front.add(zeroSplit);
-    }
-
-    public void compactZeroSplit() {
-      front.add(compactZeroSplit);
     }
 
     public AFrontBuilder arraySuffix(String id, String suffix) {
@@ -964,7 +977,8 @@ public class AlligatorusSyntax {
                                           new SymbolTextSpec.Config(suffix)
                                               .meta(
                                                   DirectStylist.meta(
-                                                      baseCodeStyle().color(COLOR_OTHER)))))))))));
+                                                      baseCodeStyle().color(COLOR_OTHER))))))))
+                      .forwardAlignments(postIndent ? TSSet.of(ALIGN_INDENT) : ROSet.empty))));
       return this;
     }
 
@@ -984,7 +998,8 @@ public class AlligatorusSyntax {
                                           new SymbolTextSpec.Config(separator)
                                               .meta(
                                                   DirectStylist.meta(
-                                                      baseCodeStyle().color(COLOR_OTHER)))))))))));
+                                                      baseCodeStyle().color(COLOR_OTHER))))))))
+                      .forwardAlignments(postIndent ? TSSet.of(ALIGN_INDENT) : ROSet.empty))));
       return this;
     }
 
@@ -992,8 +1007,8 @@ public class AlligatorusSyntax {
       front.add(
           new FrontPrimitiveSpec(
               new FrontPrimitiveSpec.Config(id)
-                  .hardSplitAlignmentId(ALIGN_BASE)
-                  .softSplitAlignmentId(ALIGN_BASE)
+                  .hardSplitAlignmentId(postIndent ? ALIGN_INDENT : ALIGN_BASE)
+                  .softSplitAlignmentId(postIndent ? ALIGN_INDENT : ALIGN_BASE)
                   .meta(markMeta(DirectStylist.meta(baseCodeStyle().color(color))))));
       return this;
     }
@@ -1155,6 +1170,7 @@ public class AlligatorusSyntax {
     private final String description;
     private int precedence;
     private String defaultSelection;
+    private boolean associateForward;
 
     public ATypeBuilder(String id, String description) {
       this.id = id;
@@ -1173,17 +1189,9 @@ public class AlligatorusSyntax {
                   description,
                   new AtomType.Config(id, back.build(), front.build())
                       .defaultSelection(defaultSelection))
-              .alignments(
-                  new TSMap<String, AlignmentSpec>()
-                      .put(
-                          ALIGN_BASE,
-                          new RelativeAlignmentSpec(
-                              new RelativeAlignmentSpec.Config(ALIGN_INDENT, 0, false)))
-                      .put(
-                          ALIGN_INDENT,
-                          new RelativeAlignmentSpec(
-                              new RelativeAlignmentSpec.Config(ALIGN_INDENT, indent, true))))
-              .precedence(this.precedence));
+              .alignments(ALIGN_SPECS)
+              .precedence(this.precedence)
+              .associateForward(associateForward));
     }
 
     public AtomType build(Function<TSList<BackSpec>, BackSpec> wrap) {
@@ -1215,16 +1223,6 @@ public class AlligatorusSyntax {
     public ATypeBuilder atom(String id, String elementType) {
       back.atom(id, elementType);
       front.atom(id);
-      return this;
-    }
-
-    public ATypeBuilder zeroSplit() {
-      front.zeroSplit();
-      return this;
-    }
-
-    public ATypeBuilder compactZeroSplit() {
-      front.compactZeroSplit();
       return this;
     }
 
@@ -1311,6 +1309,11 @@ public class AlligatorusSyntax {
 
     public ATypeBuilder fixedPrimitive(String key, String value) {
       back.fixedPrimitive(key, value);
+      return this;
+    }
+
+    public ATypeBuilder associateForward() {
+      associateForward = true;
       return this;
     }
   }
