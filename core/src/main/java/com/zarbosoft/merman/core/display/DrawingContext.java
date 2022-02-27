@@ -21,6 +21,8 @@ public interface DrawingContext {
 
   void lineTo(double c, double t);
 
+  void splineTo(double h1c, double h1t, double h2c, double h2t, double c, double t);
+
   void closePath();
 
   void arcTo(double c, double t, double c2, double t2, double radius);

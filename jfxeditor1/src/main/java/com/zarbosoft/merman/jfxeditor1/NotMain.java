@@ -14,6 +14,7 @@ import com.zarbosoft.merman.core.Stylist;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.display.Blank;
 import com.zarbosoft.merman.core.display.Display;
+import com.zarbosoft.merman.core.display.Drawing;
 import com.zarbosoft.merman.core.display.Text;
 import com.zarbosoft.merman.core.display.TextStylable;
 import com.zarbosoft.merman.core.display.derived.CourseGroup;
@@ -101,6 +102,9 @@ public class NotMain extends Application {
   private Editor editor;
   private Thread compileThread;
   private Delay delayFlush = new Delay(500, () -> flush(false));
+  private Drawing iconFloppy;
+  private Drawing iconGear;
+  private Drawing iconError;
 
   public static void main(String[] args) {
     NotMain.launch(args);
@@ -355,153 +359,169 @@ public class NotMain extends Application {
               compileThread =
                   new Thread(
                       () -> {
-                        Exception e0mut = null;
-                        Alligatorus.Result modules0 = null;
                         try {
-                          modules0 =
-                              Alligatorus.compile(
-                                  Alligatorus.defaultCachePath(),
-                                  new StderrLogger(),
-                                  rootModuleSpec);
-                        } catch (Exception e1) {
-                          if (e1 instanceof Common.UncheckedException
-                              && e1.getCause().getClass() == InterruptedException.class) {
-                            return;
+                          Exception e0mut = null;
+                          Alligatorus.Result modules0 = null;
+                          try {
+                            modules0 =
+                                Alligatorus.compile(
+                                    Alligatorus.defaultCachePath(),
+                                    new StderrLogger(),
+                                    rootModuleSpec);
+                          } catch (Exception e1) {
+                            if (e1 instanceof Common.UncheckedException
+                                && e1.getCause().getClass() == InterruptedException.class) {
+                              return;
+                            }
+                            e0mut = e1;
                           }
-                          e0mut = e1;
+                          Exception e0 = e0mut;
+                          Alligatorus.Result modules = modules0;
+                          Platform.runLater(
+                              () -> {
+                                try {
+                                  layout.getChildren().remove(messages);
+                                  messages.setText("");
+
+                                  /// Errors
+                                  // Clear existing errors
+                                  TSSet<Atom> changedAtoms = new TSSet<>();
+                                  for (Atom atom : errorAtoms) {
+                                    atom.metaRemove(editor.context, META_KEY_ERROR);
+                                    changedAtoms.add(atom);
+                                  }
+                                  errorAtoms.clear();
+
+                                  // Attach new errors
+                                  if (e0 != null) {
+                                    if (!layout.getChildren().contains(messages))
+                                      layout.getChildren().add(messages);
+                                    messages.setText(messages.getText() + "\n" + e0.toString());
+                                  } else {
+                                    TSMap<Atom, TSList<Object>> errorMessages = new TSMap<>();
+                                    for (Map.Entry<ImportId, ROList<Error>> module :
+                                        modules.errors.entrySet()) {
+                                      for (Error error : module.getValue()) {
+                                        error.dispatch(
+                                            new Error.Dispatcher<Object>() {
+                                              @Override
+                                              public Object handle(Error.LocationError e) {
+                                                final Location location = e.location;
+                                                if (!rootModuleSpec.moduleId.equal1(
+                                                    location.module)) return null;
+                                                Atom atom = editor.fileIdMap.getOpt(location.id);
+                                                if (atom == null) {
+                                                  if (!layout.getChildren().contains(messages))
+                                                    layout.getChildren().add(messages);
+                                                  System.out.format(
+                                                      "unlocatable location error %s: %s\n",
+                                                      e.location, e);
+                                                  messages.setText(
+                                                      messages.getText()
+                                                          + Format.format(
+                                                              "\nLocation error at [%s]: %s",
+                                                              e.location, e));
+                                                  return null;
+                                                }
+                                                errorAtoms.add(atom);
+                                                errorMessages
+                                                    .getCreate(atom, () -> new TSList<>())
+                                                    .add(error);
+                                                changedAtoms.add(atom);
+                                                return null;
+                                              }
+
+                                              @Override
+                                              public Object handle(Error.DeserializeError e) {
+                                                if (!rootModuleSpec.moduleId.equals(
+                                                    module.getKey().moduleId)) return null;
+                                                TSList<BackPath.Element> backPath = new TSList<>();
+                                                for (LuxemPath.Element element : e.backPath.data) {
+                                                  backPath.add(
+                                                      new BackPath.Element(
+                                                          element.index,
+                                                          element.key,
+                                                          element.typeCount));
+                                                }
+                                                Atom atom =
+                                                    editor.context.backLocate(
+                                                        new BackPath(backPath));
+                                                if (atom == null) {
+                                                  if (!layout.getChildren().contains(messages))
+                                                    layout.getChildren().add(messages);
+                                                  System.out.format(
+                                                      "unlocatable deserialize error %s: %s\n",
+                                                      e.backPath, e);
+                                                  messages.setText(
+                                                      messages.getText()
+                                                          + Format.format(
+                                                              "\nDeserialize error at [%s]: %s",
+                                                              e.backPath, e));
+                                                  return null;
+                                                }
+                                                errorAtoms.add(atom);
+                                                errorMessages
+                                                    .getCreate(atom, () -> new TSList<>())
+                                                    .add(error);
+                                                changedAtoms.add(atom);
+                                                return null;
+                                              }
+                                            });
+                                      }
+                                    }
+
+                                    if (errorAtoms.some()) {
+                                      editor.statusIcons.set(editor.context, iconError);
+                                    } else {
+                                      editor.statusIcons.unset(editor.context, iconError);
+                                    }
+
+                                    for (Map.Entry<Atom, TSList<Object>> e : errorMessages) {
+                                      e.getKey()
+                                          .metaPut(editor.context, META_KEY_ERROR, e.getValue());
+                                    }
+
+                                    for (Atom atom : changedAtoms) {
+                                      MarkerBox display = null;
+                                      WeakReference<MarkerBox> ref = markDisplays.getOpt(atom);
+                                      if (ref != null) display = ref.get();
+                                      if (display != null) {
+                                        display.update(editor.context);
+                                      }
+                                    }
+                                  }
+
+                                  /// Autocomplete
+                                  editor.autocomplete.clear();
+                                  if (modules != null) {
+                                    final ROMap<Location, ROSetRef<String>>
+                                        moduleTraceStringFields =
+                                            modules.traceStringFields.get(rootModuleSpec.moduleId);
+                                    if (moduleTraceStringFields != null) {
+                                      for (Map.Entry<Location, ROSetRef<String>> access :
+                                          moduleTraceStringFields) {
+                                        editor.autocomplete.put(
+                                            access.getKey().id, access.getValue());
+                                      }
+                                    }
+                                  }
+                                  if (editor.context.cursor instanceof CursorFieldPrimitive) {
+                                    ((CursorFieldPrimitive) editor.context.cursor)
+                                        .updateAutocomplete(editor);
+                                  }
+
+                                } catch (Exception e1) {
+                                  System.out.format("Error processing compile results: %s\n", e1);
+                                }
+                              });
+                        } finally {
+                          Platform.runLater(
+                              () -> {
+                                editor.statusIcons.unset(editor.context, iconGear);
+                              });
                         }
-                        Exception e0 = e0mut;
-                        Alligatorus.Result modules = modules0;
-                        Platform.runLater(
-                            () -> {
-                              try {
-                                layout.getChildren().remove(messages);
-                                messages.setText("");
-
-                                /// Errors
-                                // Clear existing errors
-                                TSSet<Atom> changedAtoms = new TSSet<>();
-                                for (Atom atom : errorAtoms) {
-                                  atom.metaRemove(editor.context, META_KEY_ERROR);
-                                  changedAtoms.add(atom);
-                                }
-                                errorAtoms.clear();
-
-                                // Attach new errors
-                                if (e0 != null) {
-                                  if (!layout.getChildren().contains(messages))
-                                    layout.getChildren().add(messages);
-                                  messages.setText(messages.getText() + "\n" + e0.toString());
-                                } else {
-                                  TSMap<Atom, TSList<Object>> errorMessages = new TSMap<>();
-                                  for (Map.Entry<ImportId, ROList<Error>> module :
-                                      modules.errors.entrySet()) {
-                                    for (Error error : module.getValue()) {
-                                      error.dispatch(
-                                          new Error.Dispatcher<Object>() {
-                                            @Override
-                                            public Object handle(Error.LocationError e) {
-                                              final Location location = e.location;
-                                              if (!rootModuleSpec.moduleId.equal1(location.module))
-                                                return null;
-                                              Atom atom = editor.fileIdMap.getOpt(location.id);
-                                              if (atom == null) {
-                                                if (!layout.getChildren().contains(messages))
-                                                  layout.getChildren().add(messages);
-                                                System.out.format(
-                                                    "unlocatable location error %s: %s\n",
-                                                    e.location, e);
-                                                messages.setText(
-                                                    messages.getText()
-                                                        + Format.format(
-                                                            "\nLocation error at [%s]: %s",
-                                                            e.location, e));
-                                                return null;
-                                              }
-                                              errorAtoms.add(atom);
-                                              errorMessages
-                                                  .getCreate(atom, () -> new TSList<>())
-                                                  .add(error);
-                                              changedAtoms.add(atom);
-                                              return null;
-                                            }
-
-                                            @Override
-                                            public Object handle(Error.DeserializeError e) {
-                                              if (!rootModuleSpec.moduleId.equals(
-                                                  module.getKey().moduleId)) return null;
-                                              TSList<BackPath.Element> backPath = new TSList<>();
-                                              for (LuxemPath.Element element : e.backPath.data) {
-                                                backPath.add(
-                                                    new BackPath.Element(
-                                                        element.index,
-                                                        element.key,
-                                                        element.typeCount));
-                                              }
-                                              Atom atom =
-                                                  editor.context.backLocate(new BackPath(backPath));
-                                              if (atom == null) {
-                                                if (!layout.getChildren().contains(messages))
-                                                  layout.getChildren().add(messages);
-                                                System.out.format(
-                                                    "unlocatable deserialize error %s: %s\n",
-                                                    e.backPath, e);
-                                                messages.setText(
-                                                    messages.getText()
-                                                        + Format.format(
-                                                            "\nDeserialize error at [%s]: %s",
-                                                            e.backPath, e));
-                                                return null;
-                                              }
-                                              errorAtoms.add(atom);
-                                              errorMessages
-                                                  .getCreate(atom, () -> new TSList<>())
-                                                  .add(error);
-                                              changedAtoms.add(atom);
-                                              return null;
-                                            }
-                                          });
-                                    }
-                                  }
-
-                                  for (Map.Entry<Atom, TSList<Object>> e : errorMessages) {
-                                    e.getKey()
-                                        .metaPut(editor.context, META_KEY_ERROR, e.getValue());
-                                  }
-
-                                  for (Atom atom : changedAtoms) {
-                                    MarkerBox display = null;
-                                    WeakReference<MarkerBox> ref = markDisplays.getOpt(atom);
-                                    if (ref != null) display = ref.get();
-                                    if (display != null) {
-                                      display.update(editor.context);
-                                    }
-                                  }
-                                }
-
-                                /// Autocomplete
-                                editor.autocomplete.clear();
-                                if (modules != null) {
-                                  final ROMap<Location, ROSetRef<String>> moduleTraceStringFields =
-                                      modules.traceStringFields.get(rootModuleSpec.moduleId);
-                                  if (moduleTraceStringFields != null) {
-                                    for (Map.Entry<Location, ROSetRef<String>> access :
-                                        moduleTraceStringFields) {
-                                      editor.autocomplete.put(
-                                          access.getKey().id, access.getValue());
-                                    }
-                                  }
-                                }
-                                if (editor.context.cursor instanceof CursorFieldPrimitive) {
-                                  ((CursorFieldPrimitive) editor.context.cursor)
-                                      .updateAutocomplete(editor);
-                                }
-
-                              } catch (Exception e1) {
-                                System.out.format("Error processing compile results: %s\n", e1);
-                              }
-                            });
                       });
+              editor.statusIcons.set(editor.context, iconGear);
               compileThread.start();
             };
       }
@@ -590,14 +610,23 @@ public class NotMain extends Application {
                                       new DirectStylist.TextStyle()
                                           .fontSize(5)
                                           .padding(Padding.ct(1, 0))
-                                          .color(syntaxOut.choiceCursor))))));
+                                          .color(syntaxOut.choiceCursorColor))))));
+      iconFloppy = Icons.floppy(editor.context, 8, 0.2, syntaxOut.colorInfo);
+      iconGear = Icons.gear(editor.context, 8, 0.2, syntaxOut.colorInfo);
+      iconError = Icons.error(editor.context, 8, 0.2, syntaxOut.colorError);
+
       editor.context.document.root.visual.selectIntoAnyChild(editor.context);
 
       editor.history.addModifiedStateListener(
           new ModifiedStateListener() {
             @Override
             public void changed(boolean modified) {
-              if (modified) delayFlush.trigger(editor.context);
+              if (modified) {
+                editor.statusIcons.set(editor.context, iconFloppy);
+                delayFlush.trigger(editor.context);
+              } else {
+                editor.statusIcons.unset(editor.context, iconFloppy);
+              }
             }
           });
       editor.context.addHoverListener(

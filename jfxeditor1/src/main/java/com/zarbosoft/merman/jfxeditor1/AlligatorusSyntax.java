@@ -774,6 +774,8 @@ public class AlligatorusSyntax {
                         .roundOuterEdges(true)
                         .lineColor(COLOR_COMMENT))),
             COLOR_CHOICE,
+            COLOR_INCOMPLETE,
+            COLOR_CHOICE,
             new Syntax(
                 env,
                 new Syntax.Config(

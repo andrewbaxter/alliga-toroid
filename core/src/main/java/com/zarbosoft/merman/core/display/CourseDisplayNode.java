@@ -31,6 +31,6 @@ public interface CourseDisplayNode extends FreeDisplayNode {
   }
 
   default void setPosition(Vector vector, boolean animate) {
-    setBaselinePosition(new Vector(vector.converse, vector.transverse - ascent()), animate);
+    setBaselinePosition(new Vector(vector.converse, vector.transverse + ascent()), animate);
   }
 }

@@ -75,6 +75,8 @@ public class Context {
   public final Group midground;
   /** Contains source borders. Scrolls. */
   public final Group background;
+  /** Contains status icons and low priority stuff. Doesn't scroll. */
+  public final Group superBackground;
 
   public final Stylist stylist;
   public int ellipsizeThreshold;
@@ -131,6 +133,7 @@ public class Context {
     edge = display.edge();
     transverseEdge = display.transverseEdge();
     background = display.group();
+    superBackground = display.group();
     midground = display.group();
     this.wall = new Wall(this);
     this.overlay = display.group();
@@ -140,6 +143,7 @@ public class Context {
             (config.pad == null ? 0 : config.pad.converseEnd) + syntax.pad.converseEnd,
             (config.pad == null ? 0 : config.pad.transverseStart) + syntax.pad.transverseStart,
             (config.pad == null ? 0 : config.pad.transverseEnd) + syntax.pad.transverseEnd);
+    display.add(superBackground);
     display.add(background);
     display.add(midground);
     display.add(wall.visual);

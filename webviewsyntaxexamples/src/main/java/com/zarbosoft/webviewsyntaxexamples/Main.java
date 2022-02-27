@@ -916,7 +916,7 @@ public class Main {
             null,
             null),
         null,
-        new Syntax(env, syntaxConfig),
+            colorError, colorInfo, new Syntax(env, syntaxConfig),
         null,
         fontSize * 0.7);
   }

@@ -35,9 +35,7 @@ import com.zarbosoft.merman.editorcore.history.changes.ChangeAtom;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeId;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
-import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
@@ -61,11 +59,11 @@ public class Editor {
   public final FileIds fileIds;
   public final ROList<Refactor> refactors;
   public final TSMap<Integer, Atom> fileIdMap;
-  public Banner banner;
-  public Details details;
+  public final Banner banner;
+  public final Details details;
+  public final StatusIcons statusIcons;
   // (location) id -> autocomplete options
-  public TSMap<Integer, ROSetRef<String>> autocomplete =
-      new TSMap<>();
+  public TSMap<Integer, ROSetRef<String>> autocomplete = new TSMap<>();
 
   public Editor(
       final Syntax syntax,
@@ -109,6 +107,7 @@ public class Editor {
     this.detailSpan = config.detailSpan;
     this.refactors = refactors;
     this.details = new Details(this, stylist.tabStyle());
+    this.statusIcons = new StatusIcons(context, 2, 8, 8, 2);
     history.record(
         this,
         null,

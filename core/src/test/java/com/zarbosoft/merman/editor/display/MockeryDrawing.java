@@ -63,6 +63,9 @@ public class MockeryDrawing extends MockFreeDisplayNode implements Drawing {
       public void lineTo(final double i, final double i1) {}
 
       @Override
+      public void splineTo(double h1c, double h1t, double h2c, double h2t, double c, double t) {}
+
+      @Override
       public void closePath() {}
 
       @Override

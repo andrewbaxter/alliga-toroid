@@ -45,6 +45,7 @@ import com.zarbosoft.rendaw.common.TSOrderedMap;
 import java.util.function.Supplier;
 
 public class JsonSyntax {
+  public static final ModelColor.RGB COLOR_INCOMPLETE = ModelColor.RGB.hex("d64a62");
   private static final String DEFAULT_ID = "default";
   private static final String GROUP_ANY = "any";
   private static final String TYPE_NULL = "null";
@@ -70,7 +71,7 @@ public class JsonSyntax {
     final DirectStylist.TextStyle symbolStyle =
         new DirectStylist.TextStyle().fontSize(fontSize).color(ModelColor.RGB.hex("CACACA"));
     Supplier<DirectStylist.TextStyle> baseGapStyle =
-        () -> new DirectStylist.TextStyle().fontSize(fontSize).color(ModelColor.RGB.hex("d64a62"));
+        () -> new DirectStylist.TextStyle().fontSize(fontSize).color(COLOR_INCOMPLETE);
     final DirectStylist.TextStyle gapStyle = baseGapStyle.get();
     DirectStylist.TextStyle gapEmptySymbolStyle = baseGapStyle.get().padding(Padding.ct(1, 0));
     final DirectStylist.TextStyle baseAlignSymbolStyle =
@@ -275,6 +276,8 @@ public class JsonSyntax {
     }
     return new SyntaxOut(
         new DirectStylist(cursorStyle, hoverStyle, null, null, null, null, null, null, null),
+        ModelColor.RGB.hex("938f8d"),
+        COLOR_INCOMPLETE,
         ModelColor.RGB.hex("938f8d"),
         new Syntax(
             env,

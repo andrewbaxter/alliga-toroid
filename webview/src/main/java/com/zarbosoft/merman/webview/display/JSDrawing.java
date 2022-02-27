@@ -116,6 +116,21 @@ public class JSDrawing extends JSFreeDisplayNode implements Drawing {
       }
 
       @Override
+      public void splineTo(double h1c, double h1t, double h2c, double h2t, double c, double t) {
+        if (stroke) {
+          Display.UnconvertVector h1 = display.convert.unconvert(h1c, h1t, 1, 1);
+          Display.UnconvertVector h2 = display.convert.unconvert(h2c, h2t, 1, 1);
+          Display.UnconvertVector v = display.convert.unconvert(c, t, 1, 1);
+          ctx.bezierCurveTo(h1.x + 0.5, h1.y + 0.5, h2.x + 0.5, h2.y + 0.5, v.x + 0.5, v.y + 0.5);
+        } else {
+          Display.UnconvertVector h1 = display.convert.unconvert(h1c, h1t, 0, 0);
+          Display.UnconvertVector h2 = display.convert.unconvert(h2c, h2t, 0, 0);
+          Display.UnconvertVector v = display.convert.unconvert(c, t, 0, 0);
+          ctx.bezierCurveTo(h1.x, h1.y, h2.x, h2.y, v.x, v.y);
+        }
+      }
+
+      @Override
       public void closePath() {
         if (stroke) ctx.stroke();
         else ctx.fill();
