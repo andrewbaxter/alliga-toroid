@@ -1,20 +1,21 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.error.ImportOutsideOwningBundleModule;
-import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.luxem.write.Writer;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public final class RemoteModuleId implements ModuleId, AutoBuiltinExportable, Exportable {
+public final class RemoteModuleId implements ModuleId, AutoBuiltinExportable {
   public static final String GRAPH_KEY_URL = "url";
   public static final String GRAPH_KEY_HASH = "hash";
-  @Param public String url;
-  @Param public String hash;
+  @AutoBuiltinExportableType.Param
+  public String url;
+  @AutoBuiltinExportableType.Param
+  public String hash;
 
   public static RemoteModuleId create(String url, String hash) {
     final RemoteModuleId out = new RemoteModuleId();

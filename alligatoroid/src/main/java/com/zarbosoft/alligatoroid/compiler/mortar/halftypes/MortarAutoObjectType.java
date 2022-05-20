@@ -3,13 +3,14 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarCarry;
+import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinExportable;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -23,23 +24,21 @@ import java.util.function.Function;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstKey;
 
-public class MortarAutoObjectType extends MortarObjectType implements SingletonBuiltinExportable {
-  public final JVMSharedJVMName jvmName;
-  public final boolean isValue;
+public class MortarAutoObjectType extends MortarBaseObjectType implements SingletonBuiltinExportable {
+  public final JavaInternalName jvmName;
   private final Class klass;
-  public ROMap<Object, MortarFieldType> fields;
+  public ROMap<Object, MortarObjectFieldType> fields;
   public ROList<MortarDataType> inherits;
 
-  public MortarAutoObjectType(Class klass, boolean isValue) {
+  public MortarAutoObjectType(Class klass) {
     this.klass = klass;
-    this.jvmName = JVMSharedJVMName.fromClass(klass);
-    this.isValue = isValue;
+    this.jvmName = JavaBytecodeUtils.internalNameFromClass(klass);
   }
 
   @Override
   public ROList<String> traceFields(EvaluationContext context, Location location, Object inner) {
     final TSList<String> out = new TSList<>();
-    for (Map.Entry<Object, MortarFieldType> field : fields) {
+    for (Map.Entry<Object, MortarObjectFieldType> field : fields) {
       if (!(field.getKey() instanceof String)) continue;
       out.add((String) field.getKey());
     }
@@ -80,36 +79,35 @@ public class MortarAutoObjectType extends MortarObjectType implements SingletonB
     return true;
   }
 
-  public ROPair<Object, MortarFieldType> assertField(
+  public ROPair<Object, MortarObjectFieldType> assertField(
       EvaluationContext context, Location location, Value field0) {
     final Object fieldKey = assertConstKey(context, location, field0);
     if (fieldKey == null) return null;
-    final MortarFieldType field = fields.getOpt(fieldKey);
+    final MortarObjectFieldType field = fields.getOpt(fieldKey);
     if (field == null) {
-      context.moduleContext.errors.add(new NoField(location, fieldKey));
+      context.errors.add(new NoField(location, fieldKey));
       return null;
     }
     return new ROPair<>(fieldKey, field);
   }
 
   @Override
-  public EvaluateResult variableValueAccess(
-      EvaluationContext context, Location location, MortarCarry targetCarry, Value field0) {
-    final ROPair<Object, MortarFieldType> field = assertField(context, location, field0);
+  public EvaluateResult variableValueAccess(EvaluationContext context, Location location, MortarDeferredCode base, Value field0) {
+    final ROPair<Object, MortarObjectFieldType> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
-    return field.second.variableFieldAsValue(context, location, targetCarry, this);
+    return field.second.variableObjectFieldAsValue(context, location, targetCarry, this);
   }
 
   @Override
   public EvaluateResult constValueAccess(
       EvaluationContext context, Location location, Object value, Value field0) {
-    final ROPair<Object, MortarFieldType> field = assertField(context, location, field0);
+    final ROPair<Object, MortarObjectFieldType> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
-    return field.second.constFieldAsValue(context, location, value);
+    return field.second.constObjectFieldAsValue(context, location, value, field.second.internalName);
   }
 
   @Override
-  public JVMSharedDataDescriptor jvmDesc() {
-    return JVMSharedDataDescriptor.fromJVMName(jvmName);
+  public JavaDataDescriptor jvmDesc() {
+    return JavaDataDescriptor.fromJVMName(jvmName);
   }
 }

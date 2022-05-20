@@ -5,7 +5,8 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalueRef;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.SimpleBinding;
@@ -14,7 +15,7 @@ import com.zarbosoft.rendaw.common.ROPair;
 
 import java.util.concurrent.Future;
 
-public class FutureValue implements Value, NoExportValue {
+public class FutureValue implements Value {
   public final Future<Value> future;
 
   public FutureValue(Future<Value> future) {
@@ -42,11 +43,6 @@ public class FutureValue implements Value, NoExportValue {
   }
 
   @Override
-  public EvaluateResult vary(EvaluationContext context, Location location) {
-    return get().vary(context, location);
-  }
-
-  @Override
   public EvaluateResult access(EvaluationContext context, Location location, Value field) {
     return get().access(context, location, field);
   }
@@ -56,7 +52,11 @@ public class FutureValue implements Value, NoExportValue {
   }
 
   @Override
-  public ExportableType graphType() {
-    return get().graphType();
+  public SemiserialSubvalueRef graphSemiserialize(
+      long importCacheId,
+      Semiserializer semiserializer,
+      ROList<Exportable> path,
+      ROList<String> accessPath) {
+    return get().graphSemiserialize(importCacheId, semiserializer, path, accessPath);
   }
 }

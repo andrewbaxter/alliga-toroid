@@ -36,11 +36,6 @@ public final class ErrorValue implements Value, NoExportValue {
   }
 
   @Override
-  public EvaluateResult vary(EvaluationContext context, Location location) {
-    return EvaluateResult.error;
-  }
-
-  @Override
   public EvaluateResult set(EvaluationContext context, Location location, Value value) {
     return EvaluateResult.error;
   }

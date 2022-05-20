@@ -5,11 +5,9 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarAutoObjectType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarFieldType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstMethodFieldValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableMethodFieldValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectFieldType;
 
-public class MortarMethodFieldType implements MortarFieldType {
+public class MortarMethodFieldType implements MortarObjectFieldType {
   public final Meta.FuncInfo funcInfo;
 
   public MortarMethodFieldType(Meta.FuncInfo funcInfo) {
@@ -17,7 +15,7 @@ public class MortarMethodFieldType implements MortarFieldType {
   }
 
   @Override
-  public EvaluateResult constFieldAsValue(EvaluationContext context, Location location, Object base) {
+  public EvaluateResult constObjectFieldAsValue(EvaluationContext context, Location location, Object base, String name) {
   return EvaluateResult.pure(new ConstMethodFieldValue(this, base));
   }
 

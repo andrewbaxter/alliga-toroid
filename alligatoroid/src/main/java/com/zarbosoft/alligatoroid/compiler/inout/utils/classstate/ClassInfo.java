@@ -1,6 +1,5 @@
 package com.zarbosoft.alligatoroid.compiler.inout.utils.classstate;
 
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateRecordBody;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.DefaultStateArrayBody;
@@ -11,6 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateArray;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateInt;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateRecord;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateString;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto.TypeInfo;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
@@ -23,7 +23,6 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -43,7 +42,7 @@ public class ClassInfo {
     TSMap<String, Prototype> fields = new TSMap<>();
     for (Field field0 : klass.getFields()) {
       if (Modifier.isStatic(field0.getModifiers())) continue;
-      if (field0.getAnnotation(Exportable.Param.class) == null) continue;
+      if (field0.getAnnotation(AutoBuiltinExportableType.Param.class) == null) continue;
       final TypeInfo field = TypeInfo.fromField(field0);
       Prototype prototype;
       if (field.klass == int.class) {

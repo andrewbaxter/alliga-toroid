@@ -2,11 +2,13 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.model.error.LowerTooDeep;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
+import com.zarbosoft.alligatoroid.compiler.modules.modulecompiler.ModuleCompiler;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 
 public final class Lower extends LanguageElement {
-  @Param public LanguageElement child;
+  @AutoBuiltinExportableType.Param
+  public LanguageElement child;
 
   @Override
   protected boolean innerHasLowerInSubtree() {
@@ -15,7 +17,6 @@ public final class Lower extends LanguageElement {
 
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
-    context.moduleContext.errors.add(new LowerTooDeep(id));
-    return EvaluateResult.error;
+    return EvaluateResult.pure(ModuleCompiler.rootEvaluate(context.moduleContext, child));
   }
 }

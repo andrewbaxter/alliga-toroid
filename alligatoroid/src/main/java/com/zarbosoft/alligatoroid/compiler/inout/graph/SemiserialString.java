@@ -1,9 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
+
 import java.util.Objects;
 
 public final class SemiserialString implements SemiserialSubvalue {
-  @Exportable.Param public String value;
+  @AutoBuiltinExportableType.Param
+  public String value;
 
   public static SemiserialString create(String value) {
     final SemiserialString out = new SemiserialString();

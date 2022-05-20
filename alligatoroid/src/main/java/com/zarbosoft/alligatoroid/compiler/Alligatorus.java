@@ -7,6 +7,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
+import com.zarbosoft.alligatoroid.compiler.modules.CacheImportIdRes;
 import com.zarbosoft.alligatoroid.compiler.modules.Logger;
 import com.zarbosoft.appdirsj.AppDirs;
 import com.zarbosoft.rendaw.common.ROList;
@@ -44,11 +45,13 @@ public class Alligatorus {
     final ImportId rootImportId = ImportId.create(rootModuleId);
     final Location rootLocation = Location.create(rootModuleId, 0);
     CompileContext context = new CompileContext(cachePath, logger, spec);
-    ModuleCompileContext moduleContext = new ModuleCompileContext(rootImportId, context, null);
-    context.moduleErrors.put(rootImportId, moduleContext.errors);
+    final CacheImportIdRes cacheId = context.modules.getCacheId(spec);
+    ModuleCompileContext moduleContext =
+        new ModuleCompileContext(rootImportId, cacheId.cacheId, context, null);
+    context.moduleErrors.put(rootImportId, moduleContext.getErrors());
     try {
       try {
-        moduleContext.getModule(spec).get();
+        moduleContext.getModule(cacheId).get();
       } catch (ExecutionException e) {
         throw e.getCause();
       }

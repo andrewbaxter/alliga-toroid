@@ -6,9 +6,9 @@ public interface TargetModuleContext {
   public TargetCode merge(
       EvaluationContext context, Location location, Iterable<TargetCode> values);
 
-  boolean codeEmpty(TargetCode code);
-
   Id id();
+
+  EvaluateResult vary(EvaluationContext context, Location id, Value value);
 
   public abstract static class Id {
     @Override

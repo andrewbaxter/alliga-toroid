@@ -1,30 +1,18 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
+import com.zarbosoft.alligatoroid.compiler.builtin.Builtin;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialBool;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialInt;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.PrimitiveExportType;
-import com.zarbosoft.alligatoroid.compiler.jvm.JVMUtils;
-import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMClassInstanceType;
-import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMExternClassInstanceType;
-import com.zarbosoft.alligatoroid.compiler.jvm.halftypes.JVMNullType;
-import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMConstructor;
-import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMExternClassBuilder;
-import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMSoftType;
-import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMSoftTypeArray;
-import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMSoftTypeDeferred;
-import com.zarbosoft.alligatoroid.compiler.jvm.modelother.JVMSoftTypeType;
-import com.zarbosoft.alligatoroid.compiler.jvm.mortartypes.JVMClassType;
-import com.zarbosoft.alligatoroid.compiler.jvm.mortartypes.JVMConstructorType;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedFuncDescriptor;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedJVMName;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedNormalName;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaQualifiedName;
 import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
@@ -35,7 +23,6 @@ import com.zarbosoft.alligatoroid.compiler.model.language.Access;
 import com.zarbosoft.alligatoroid.compiler.model.language.Bind;
 import com.zarbosoft.alligatoroid.compiler.model.language.Block;
 import com.zarbosoft.alligatoroid.compiler.model.language.Call;
-import com.zarbosoft.alligatoroid.compiler.model.language.Import;
 import com.zarbosoft.alligatoroid.compiler.model.language.LiteralBool;
 import com.zarbosoft.alligatoroid.compiler.model.language.LiteralString;
 import com.zarbosoft.alligatoroid.compiler.model.language.Local;
@@ -45,28 +32,23 @@ import com.zarbosoft.alligatoroid.compiler.model.language.RecordElement;
 import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
 import com.zarbosoft.alligatoroid.compiler.model.language.Wrap;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarBuiltin;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
-import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.StaticMethodMeta;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.graph.ConstExportType;
 import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinExportable;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarArrayType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarAutoObjectType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarBoolType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarByteType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarBytesType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarFieldType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarImmutableType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarIntType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarNullType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStaticMethodType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStringType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NoExportValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataStackValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataValue;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -80,34 +62,34 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.util.Map;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.MortarBuiltin.nullType;
+import static com.zarbosoft.alligatoroid.compiler.builtin.Builtin.nullType;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Meta {
-  public static final ROMap<Exportable, String> builtinToSemiKey;
-  public static final ROMap<String, Exportable> semiKeyToBuiltin;
-  public static final ROMap<Class, ExportableType> autoBuiltinExportTypes;
-  public static final ROMap<MortarDataType, PrimitiveExportType> primitiveMortarTypeToExportType;
-  public static final ROMap<Class, PrimitiveExportType> primitiveTypeToExportType;
-  public static final ROMap<String, PrimitiveExportType> primitiveKeyToExportType;
-  public static ROMap<Class, MortarDataType> autoMortarHalfDataTypes;
+  public static final ROMap<Object, ExportableType> singletonBuiltinExportableTypes;
+  public static final ROMap<Object, String> builtinToSemiKey;
+  public static final ROMap<String, Object> semiKeyToBuiltin;
+  public static final ROMap<Class, ExportableType> builtinExportTypes;
+  public static ROMap<Class, MortarSimpleDataType> autoMortarHalfDataTypes;
   public static LooseRecord builtin;
 
   static {
+    final WorkingMeta working = new WorkingMeta();
+
     //// Graph id/primitive type conversions
     // =============================
     /// Prepare type converters for non-value, non-collection types
-    TSMap<MortarDataType, PrimitiveExportType> primitiveMortarTypeToExportType0 = new TSMap<>();
-    TSMap<Class, PrimitiveExportType> primitiveTypeToExportType0 = new TSMap<>();
-    TSMap<String, PrimitiveExportType> primitiveKeyToExportType0 = new TSMap<>();
-
-    PrimitiveExportType intConverter =
-        new PrimitiveExportType() {
+    ExportableType intConverter =
+        new ExportableType() {
           @Override
-          public String key() {
-            return "int";
+          public SemiserialSubvalue graphSemiserializeValue(
+              long importCacheId,
+              Semiserializer semiserializer,
+              ROList<Object> path,
+              ROList<String> accessPath,
+              Object value) {
+            return SemiserialInt.create((Integer) value);
           }
 
           @Override
@@ -120,24 +102,12 @@ public class Meta {
                   }
                 });
           }
-
-          @Override
-          public SemiserialSubvalue semiserialize(Object data) {
-            return SemiserialInt.create((Integer) data);
-          }
         };
-    primitiveMortarTypeToExportType0.put(MortarIntType.type, intConverter);
-    primitiveMortarTypeToExportType0.put(MortarImmutableType.intType, intConverter);
-    primitiveTypeToExportType0.put(Integer.class, intConverter);
-    primitiveTypeToExportType0.put(int.class, intConverter);
+    working.autoBuiltinExportTypes.put(int.class, intConverter);
+    working.autoBuiltinExportTypes.put(Integer.class, intConverter);
 
-    PrimitiveExportType boolConverter =
-        new PrimitiveExportType() {
-          @Override
-          public String key() {
-            return "bool";
-          }
-
+    ExportableType boolConverter =
+        new ExportableType() {
           @Override
           public Object desemiserialize(SemiserialSubvalue data) {
             return data.dispatch(
@@ -154,18 +124,11 @@ public class Meta {
             return SemiserialBool.create((Boolean) data);
           }
         };
-    primitiveMortarTypeToExportType0.put(MortarBoolType.type, boolConverter);
-    primitiveMortarTypeToExportType0.put(MortarImmutableType.boolType, boolConverter);
-    primitiveTypeToExportType0.put(Boolean.class, boolConverter);
-    primitiveTypeToExportType0.put(boolean.class, boolConverter);
+    working.autoBuiltinExportTypes.put(boolean.class, boolConverter);
+    working.autoBuiltinExportTypes.put(Boolean.class, boolConverter);
 
-    PrimitiveExportType stringConverter =
-        new PrimitiveExportType() {
-          @Override
-          public String key() {
-            return "string";
-          }
-
+    ExportableType stringConverter =
+        new ExportableType() {
           @Override
           public Object desemiserialize(SemiserialSubvalue data) {
             return data.dispatch(
@@ -182,69 +145,21 @@ public class Meta {
             return SemiserialString.create((String) data);
           }
         };
-    primitiveMortarTypeToExportType0.put(MortarStringType.type, stringConverter);
-    primitiveMortarTypeToExportType0.put(MortarImmutableType.stringType, stringConverter);
-    primitiveTypeToExportType0.put(String.class, stringConverter);
+    working.autoBuiltinExportTypes.put(String.class, stringConverter);
 
-    PrimitiveExportType nullConverter =
-        new PrimitiveExportType() {
-          @Override
-          public String key() {
-            return "null";
-          }
-
-          @Override
-          public Object desemiserialize(SemiserialSubvalue data) {
-            return data.dispatch(
-                new SemiserialSubvalue.DefaultDispatcher<>() {
-                  @Override
-                  public Object handleString(SemiserialString s) {
-                    return null;
-                  }
-                });
-          }
-
-          @Override
-          public SemiserialSubvalue semiserialize(Object data) {
-            return SemiserialString.create("");
-          }
-        };
-    primitiveMortarTypeToExportType0.put(MortarNullType.type, nullConverter);
-    primitiveMortarTypeToExportType0.put(MortarImmutableType.nullType, nullConverter);
-
-    for (Map.Entry<Class, PrimitiveExportType> e : primitiveTypeToExportType0) {
-      primitiveKeyToExportType0.putReplace(e.getValue().key(), e.getValue());
-    }
-    primitiveTypeToExportType = primitiveTypeToExportType0;
-    primitiveKeyToExportType = primitiveKeyToExportType0;
-    primitiveMortarTypeToExportType = primitiveMortarTypeToExportType0;
-
-    // Non-primitives
-    final WorkingMeta working = new WorkingMeta();
-
-    for (ROPair<Class[], MortarDataType> pair :
-        new ROPair[] {
-          new ROPair<>(new Class[] {JVMConstructor.class}, JVMConstructorType.type),
-          new ROPair<>(
-              new Class[] {JVMClassInstanceType.class, JVMExternClassInstanceType.class},
-              JVMClassType.type),
-          new ROPair<>(new Class[] {StaticMethodMeta.class}, MortarStaticMethodType.type),
-        }) {
+    for (ROPair<Class[], MortarSimpleDataType> pair : new ROPair[] {}) {
       for (Class klass : pair.first) {
         working.mortarType(klass, pair.second);
       }
       working.singletonExportable((SingletonBuiltinExportable) pair.second);
     }
     working.generateMortarType(ModuleId.class);
-    working.generateMortarType(JVMSoftType.class);
-    working.generateMortarType(JVMExternClassBuilder.class);
     {
       // working.singletonExportable(nullValue);
       // working.mortarType(nullValue.getClass(), nullValue.type);
       // working.singletonExportable(nullValue.type);
     }
     working.singletonExportable(ConstExportType.exportType);
-    working.singletonExportable(JVMNullType.type);
     for (Class<AutoBuiltinExportable> languageElement :
         new Class[] {
           Access.class,
@@ -260,7 +175,6 @@ public class Meta {
           Tuple.class,
           Stage.class,
           Lower.class,
-          Import.class,
           Wrap.class,
         }) {
       working.nonSingletonExportable(languageElement);
@@ -268,24 +182,14 @@ public class Meta {
     }
     for (Class klass :
         new Class[] {
-          JVMExternClassInstanceType.class,
           BundleValue.class,
           Location.class,
           LocalModuleId.class,
           RemoteModuleId.class,
           BundleModuleSubId.class,
           ImportId.class,
-          JVMSharedNormalName.class,
-          JVMSharedJVMName.class,
-          JVMUtils.MethodSpecDetailsAttributes.class,
-          JVMUtils.DataSpecDetailsAttributes.class,
-          JVMExternClassInstanceType.SoftConstructor.class,
-          JVMExternClassInstanceType.SoftMethodField.class,
-          JVMExternClassInstanceType.SoftDataField.class,
-          JVMExternClassInstanceType.SoftField.class,
-          JVMSoftTypeDeferred.class,
-          JVMSoftTypeArray.class,
-          JVMSoftTypeType.class,
+          JavaQualifiedName.class,
+          JavaInternalName.class,
         }) {
       if (NoExportValue.class.isAssignableFrom(klass)) throw new Assertion();
       if (!AutoBuiltinExportable.class.isAssignableFrom(klass)) throw new Assertion();
@@ -293,12 +197,12 @@ public class Meta {
       working.generateMortarType(klass);
     }
 
-    Meta.builtin = Meta.aggregateBuiltinForGraph(working, MortarBuiltin.class, "");
+    Meta.builtin = Meta.aggregateBuiltinForGraph(working, Builtin.class, "");
 
     // Done
     builtinToSemiKey = working.builtinToSemiKey;
     semiKeyToBuiltin = working.semiKeyToBuiltin;
-    autoBuiltinExportTypes = working.autoBuiltinExportTypes;
+    builtinExportTypes = working.autoBuiltinExportTypes;
     autoMortarHalfDataTypes = working.autoMortarHalfDataTypes;
   }
 
@@ -312,27 +216,25 @@ public class Meta {
    * @return
    */
   public static FuncInfo funcDescriptor(WorkingMeta working, Method method) {
-    boolean needsModule = false;
-    JVMSharedDataDescriptor[] argDescriptor =
-        new JVMSharedDataDescriptor[method.getParameters().length];
+    boolean needsLocation = false;
+    TSList<ROPair<Object, MortarDataType>> argTypes = new TSList<>();
     for (int i = 0; i < method.getParameters().length; ++i) {
       Parameter parameter = method.getParameters()[i];
-      if (i == 0 && parameter.getType() == ModuleCompileContext.class) {
-        needsModule = true;
+      if (i == 0 && parameter.getType() == Location.class) {
+        needsLocation = true;
       }
-      ROPair<JVMSharedDataDescriptor, MortarDataType> paramDesc =
-          dataDescriptor(working, parameter.getType());
-      argDescriptor[i] = paramDesc.first;
+      MortarDataType paramType = dataDescriptor(working, parameter.getType());
+      argTypes.add(new ROPair<>(parameter.getName(), paramType));
     }
 
-    ROPair<JVMSharedDataDescriptor, MortarDataType> retDesc =
-        dataDescriptor(working, method.getReturnType());
+    MortarDataType retType = dataDescriptor(working, method.getReturnType());
 
     return new FuncInfo(
-        method,
-        JVMSharedFuncDescriptor.fromParts(retDesc.first, argDescriptor),
-        retDesc.second,
-        needsModule);
+        method.getName(),
+        JavaBytecodeUtils.qualifiedNameFromClass(method.getDeclaringClass()),
+        argTypes,
+        retType,
+        needsLocation);
   }
 
   /*
@@ -382,18 +284,15 @@ public class Meta {
    * @param builtinSingletons0
    * @return
    */
-  public static ROPair<JVMSharedDataDescriptor, MortarDataType> dataDescriptor(
-      WorkingMeta working, Class klass) {
+  public static MortarSimpleDataType dataDescriptor(WorkingMeta working, Class klass) {
     if (klass == void.class) {
-      return new ROPair<>(JVMSharedDataDescriptor.VOID, nullType);
+      return nullType;
     } else if (klass == String.class) {
-      return new ROPair<>(JVMSharedDataDescriptor.STRING, MortarStringType.type);
+      return MortarStringType.type;
     } else if (klass == byte[].class) {
-      return new ROPair<>(
-          JVMSharedDataDescriptor.BYTE_ARRAY, new MortarArrayType(MortarByteType.type));
+      return MortarBytesType.type;
     } else {
-      return new ROPair<>(
-          JVMSharedDataDescriptor.fromObjectClass(klass), working.generateMortarType(klass));
+      return working.generateMortarType(klass);
     }
   }
 
@@ -407,8 +306,7 @@ public class Meta {
     }
     if (method == null)
       throw Assertion.format("builtin wrap [%s] function [%s] missing", klass.getName(), name);
-    return MortarStaticMethodType.type.constAsValue(
-        new StaticMethodMeta(funcDescriptor(working, method)));
+    return MortarStaticMethodType.type.constAsValue(funcDescriptor(working, method));
   }
 
   private static LooseRecord aggregateBuiltinForGraph(
@@ -421,7 +319,7 @@ public class Meta {
         name = name.substring(1);
       }
       Object data = uncheck(() -> f.get(null));
-      if (data.getClass().isAnnotationPresent(Aggregate.class)) {
+      if (data.getClass().isAnnotationPresent(BuiltinAggregate.class)) {
         final String key = path + "/" + name;
         final LooseRecord value = aggregateBuiltinForGraph(working, data.getClass(), key);
         values.put(name, EvaluateResult.pure(value));
@@ -429,14 +327,11 @@ public class Meta {
         working.semiKeyToBuiltin.put(key, value);
       } else {
         working.singletonExportable((SingletonBuiltinExportable) data);
-        working.generateMortarType(data.getClass());
-        if (data instanceof VariableDataStackValue) {
-          values.put(name, EvaluateResult.pure((VariableDataStackValue) data));
+        if (data instanceof Value) {
+          values.put(name, EvaluateResult.pure((ConstDataValue) data));
         } else {
-          values.put(
-              name,
-              EvaluateResult.pure(
-                  working.generateMortarType(data.getClass()).constBuiltinSingletonAsValue(data)));
+          final MortarDataType type = working.generateMortarType(data.getClass());
+          values.put(name, EvaluateResult.pure(type.constAsValue(data)));
         }
       }
     }
@@ -456,16 +351,26 @@ public class Meta {
   public @interface WrapExpose {}
 
   @Retention(RetentionPolicy.RUNTIME)
-  public @interface Aggregate {}
+  public @interface BuiltinAggregate {}
+
+  public static class BuiltinContext {
+    public final ModuleCompileContext context;
+    public final Location location;
+
+    public BuiltinContext(ModuleCompileContext context, Location location) {
+      this.context = context;
+      this.location = location;
+    }
+  }
 
   private static class WorkingMeta {
-    public final TSMap<Class, MortarDataType> autoMortarHalfDataTypes = new TSMap<>();
+    public final TSMap<Class, MortarSimpleDataType> autoMortarHalfDataTypes = new TSMap<>();
     public final TSMap<Class, ExportableType> autoBuiltinExportTypes = new TSMap<>();
-    public final TSMap<Exportable, String> builtinToSemiKey = new TSMap<>();
-    public final TSMap<String, Exportable> semiKeyToBuiltin = new TSMap<>();
+    public final TSMap<Object, String> builtinToSemiKey = new TSMap<>();
+    public final TSMap<String, Object> semiKeyToBuiltin = new TSMap<>();
     public int singletonCount;
 
-    public void mortarType(Class klass, MortarDataType type) {
+    public void mortarType(Class klass, MortarSimpleDataType type) {
       autoMortarHalfDataTypes.put(klass, type);
     }
 
@@ -495,15 +400,15 @@ public class Meta {
       singletonExportable(klass.getCanonicalName(), type);
     }
 
-    public MortarDataType generateMortarType(Class klass) {
-      MortarDataType out = autoMortarHalfDataTypes.getOpt(klass);
+    public MortarSimpleDataType generateMortarType(Class klass) {
+      MortarSimpleDataType out = autoMortarHalfDataTypes.getOpt(klass);
       if (out == null) {
-        MortarAutoObjectType out1 =
-            new MortarAutoObjectType(klass, VariableDataStackValue.class.isAssignableFrom(klass));
+        TSMap<Object, MortarObjectFieldType> fields = new TSMap<>();
+        TSList<MortarDataType> inherits = new TSList<>();
+        MortarObjectType out1 =
+            new MortarObjectType(JavaBytecodeUtils.qualifiedNameFromClass(klass), fields, inherits);
         autoMortarHalfDataTypes.put(klass, out1);
-        singletonExportable(out1);
-        TSMap<Object, MortarFieldType> fields = new TSMap<>();
-        if (klass != VariableDataStackValue.class)
+        if (klass != VariableDataValue.class)
           for (Method method : klass.getDeclaredMethods()) {
             if (!Modifier.isPublic(method.getModifiers())) continue;
             if (!method.isAnnotationPresent(WrapExpose.class)) continue;
@@ -511,21 +416,16 @@ public class Meta {
                 method.getName(), new MortarMethodFieldType(funcDescriptor(this, method)));
           }
         for (Field field : klass.getDeclaredFields()) {
-          ROPair<JVMSharedDataDescriptor, MortarDataType> desc =
-              dataDescriptor(this, field.getType());
-          MortarDataType dataType = desc.second;
+          MortarDataType dataType = dataDescriptor(this, field.getType());
           String fieldName = field.getName();
-          fields.putNew(fieldName, new MortarDataFieldType(field, dataType));
+          fields.putNew(fieldName, new MortarSimpleDataType(field, dataType));
         }
-        out1.fields = fields;
-        TSList<MortarDataType> inherits = new TSList<>();
         if (klass.getSuperclass() != null && klass.getSuperclass() != Object.class) {
           inherits.add(generateMortarType(klass.getSuperclass()));
         }
         for (Class iface : klass.getInterfaces()) {
           inherits.add(generateMortarType(iface));
         }
-        out1.inherits = inherits;
         out = out1;
       }
       return out;
@@ -533,20 +433,31 @@ public class Meta {
   }
 
   public static class FuncInfo {
-    public final Method method;
-    public final JVMSharedFuncDescriptor descriptor;
+    public final String name;
+    public final JavaQualifiedName base;
+    public final ROList<ROPair<Object, MortarDataType>> arguments;
     public final MortarDataType returnType;
-    public final boolean needsModule;
+    public final boolean needsLocation;
 
     public FuncInfo(
-        Method method,
-        JVMSharedFuncDescriptor descriptor,
+        String name,
+        JavaQualifiedName base,
+        ROList<ROPair<Object, MortarDataType>> arguments,
         MortarDataType returnType,
-        boolean needsModule) {
-      this.method = method;
-      this.descriptor = descriptor;
+        boolean needsLocation) {
+      this.name = name;
+      this.base = base;
+      this.arguments = arguments;
       this.returnType = returnType;
-      this.needsModule = needsModule;
+      this.needsLocation = needsLocation;
+    }
+
+    public ROList<JavaDataDescriptor> argDescriptor() {
+      TSList<JavaDataDescriptor> out = new TSList<>();
+      for (ROPair<Object, MortarDataType> argumentType : arguments) {
+        out.add(argumentType.second.jvmDesc());
+      }
+      return out;
     }
   }
 }

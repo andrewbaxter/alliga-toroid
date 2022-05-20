@@ -4,8 +4,8 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
@@ -14,7 +14,6 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.alligatoroid.compiler.modules.Source;
-import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -30,11 +29,13 @@ import java.util.concurrent.CompletableFuture;
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstString;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class BundleValue implements Value, AutoBuiltinExportable, Exportable {
+public class BundleValue implements Value, AutoBuiltinExportable {
   private static final String GRAPH_KEY_ROOT = "root";
   private static final String GRAPH_KEY_ID = "id";
-  @Param public String root;
-  @Param public ImportId id;
+  @AutoBuiltinExportableType.Param
+  public String root;
+  @AutoBuiltinExportableType.Param
+  public ImportId id;
 
   public static BundleValue graphDeserialize(Record data) {
     return create((ImportId) data.data.get(GRAPH_KEY_ID), (String) data.data.get(GRAPH_KEY_ROOT));
@@ -106,8 +107,10 @@ public class BundleValue implements Value, AutoBuiltinExportable, Exportable {
     if (key == null) return EvaluateResult.error;
     CompletableFuture<Value> importResult =
         context.moduleContext.getModule(
-            ImportId.create(
-                BundleModuleSubId.create(id.moduleId, Paths.get(root).resolve(key).toString())));
+            context.moduleContext.compileContext.modules.getCacheId(
+                ImportId.create(
+                    BundleModuleSubId.create(
+                        id.moduleId, Paths.get(root).resolve(key).toString()))));
     return EvaluateResult.pure(new FutureValue(importResult));
   }
 }

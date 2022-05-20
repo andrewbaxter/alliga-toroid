@@ -6,7 +6,6 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -71,7 +70,7 @@ public class LooseRecord implements Value, NoExportValue {
       }
     }
     if (out == null) {
-      context.moduleContext.errors.add(new NoField(location, key));
+      com.zarbosoft.alligatoroid.compiler.ThreadEvaluationContext.addError(new NoField(location, key));
       return EvaluateResult.error;
     }
     return new EvaluateResult(

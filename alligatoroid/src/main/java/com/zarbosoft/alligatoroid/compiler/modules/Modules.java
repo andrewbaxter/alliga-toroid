@@ -8,24 +8,39 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public class Modules {
-  private final Asyncer<ImportId, Module> modules;
+  private final Asyncer<CacheImportIdRes, Module> modules;
+  private final ConcurrentHashMap<ImportId, CacheImportIdRes> cacheIds;
   private final ModuleResolver inner;
 
   public Modules(ModuleResolver inner) {
     this.inner = inner;
     modules = new Asyncer<>();
+    cacheIds = new ConcurrentHashMap<>();
+  }
+
+  public CacheImportIdRes getCacheId(ImportId importId) {
+    return cacheIds.computeIfAbsent(
+        importId,
+        new Function<ImportId, CacheImportIdRes>() {
+          @Override
+          public CacheImportIdRes apply(ImportId importId) {
+            return inner.getCacheId(importId);
+          }
+        });
   }
 
   public CompletableFuture<Module> getModule(
-      CompileContext context, ImportPath fromImportPath, ImportId importId) {
+      CompileContext context, ImportPath fromImportPath, CacheImportIdRes cacheId) {
     return modules.get(
         context.threads,
-        importId,
+        cacheId,
         () -> {
-          final Source source = context.sources.get(context, importId.moduleId);
-          importId.moduleId.dispatch(
+          final Source source = context.sources.get(context, cacheId.importId.moduleId);
+          cacheId.importId.moduleId.dispatch(
               new ModuleId.DefaultDispatcher<Object>(null) {
                 @Override
                 public Object handleLocal(LocalModuleId id) {
@@ -42,7 +57,7 @@ public class Modules {
                   return null;
                 }
               });
-          return inner.get(context, fromImportPath, importId, source);
+          return inner.get(context, fromImportPath, cacheId, source);
         });
   }
 }

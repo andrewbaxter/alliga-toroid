@@ -1,11 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.builtinother;
 
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.rendaw.common.ROList;
 
 public class Tuple implements AutoBuiltinExportable {
-  @Exportable.Param public ROList<Object> data;
+  @AutoBuiltinExportableType.Param
+  public ROList<Object> data;
 
   public Tuple() {}
 

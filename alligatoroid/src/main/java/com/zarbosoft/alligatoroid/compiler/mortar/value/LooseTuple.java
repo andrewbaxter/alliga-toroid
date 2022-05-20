@@ -62,7 +62,7 @@ public class LooseTuple implements Value, NoExportValue {
       }
     }
     if (out == null) {
-      context.moduleContext.errors.add(new NoField(location, key));
+      com.zarbosoft.alligatoroid.compiler.ThreadEvaluationContext.addError(new NoField(location, key));
       return EvaluateResult.error;
     }
     return new EvaluateResult(

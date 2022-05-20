@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.error.NotRecordPair;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
@@ -12,7 +13,8 @@ import com.zarbosoft.rendaw.common.TSOrderedMap;
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstKey;
 
 public class Record extends LanguageElement {
-  @Param public ROList<LanguageElement> elements;
+  @AutoBuiltinExportableType.Param
+  public ROList<LanguageElement> elements;
 
   @Override
   protected boolean innerHasLowerInSubtree() {
@@ -25,9 +27,8 @@ public class Record extends LanguageElement {
     boolean badKeys = false;
     for (LanguageElement element : elements) {
       if (!(element instanceof RecordElement)) {
-        context.moduleContext.errors.add(
-            new NotRecordPair(
-                ((LanguageElement) element).id, element.getClass().getSimpleName()));
+        context.errors.add(
+            new NotRecordPair(((LanguageElement) element).id, element.getClass().getSimpleName()));
         continue;
       }
       EvaluateResult keyRes = ((RecordElement) element).key.evaluate(context);
@@ -40,8 +41,7 @@ public class Record extends LanguageElement {
       data.put(
           key,
           new EvaluateResult(
-              context.target.merge(
-                  context, id, new TSList<>(keyRes.preEffect, valueRes.preEffect)),
+              context.target.merge(context, id, new TSList<>(keyRes.preEffect, valueRes.preEffect)),
               valueRes.postEffect,
               valueRes.value));
     }

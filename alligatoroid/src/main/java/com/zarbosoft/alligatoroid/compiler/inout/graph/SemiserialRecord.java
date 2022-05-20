@@ -1,9 +1,11 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 
 public class SemiserialRecord implements SemiserialSubvalue {
-  @Exportable.Param public ROOrderedMap<SemiserialSubvalue, SemiserialSubvalue> data;
+  @AutoBuiltinExportableType.Param
+  public ROOrderedMap<SemiserialSubvalue, SemiserialSubvalue> data;
 
   public static SemiserialRecord create(ROOrderedMap<SemiserialSubvalue, SemiserialSubvalue> data) {
     final SemiserialRecord out = new SemiserialRecord();

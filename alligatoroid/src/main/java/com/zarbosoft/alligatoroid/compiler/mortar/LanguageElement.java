@@ -4,15 +4,14 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Scope;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.language.Access;
 import com.zarbosoft.alligatoroid.compiler.model.language.Bind;
 import com.zarbosoft.alligatoroid.compiler.model.language.Block;
 import com.zarbosoft.alligatoroid.compiler.model.language.Builtin;
 import com.zarbosoft.alligatoroid.compiler.model.language.Call;
-import com.zarbosoft.alligatoroid.compiler.model.language.Import;
 import com.zarbosoft.alligatoroid.compiler.model.language.LiteralBool;
 import com.zarbosoft.alligatoroid.compiler.model.language.LiteralString;
 import com.zarbosoft.alligatoroid.compiler.model.language.Local;
@@ -23,7 +22,7 @@ import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
 import com.zarbosoft.rendaw.common.ROList;
 
-public abstract class LanguageElement implements AutoBuiltinExportable, Exportable {
+public abstract class LanguageElement implements AutoBuiltinExportable {
   public static final Class[] SERIAL_UNION =
       new Class[] {
         Access.class,
@@ -31,7 +30,6 @@ public abstract class LanguageElement implements AutoBuiltinExportable, Exportab
         Block.class,
         Builtin.class,
         Call.class,
-        Import.class,
         LiteralBool.class,
         LiteralString.class,
         Local.class,
@@ -42,7 +40,8 @@ public abstract class LanguageElement implements AutoBuiltinExportable, Exportab
         Stage.class,
         Tuple.class,
       };
-  @Param public Location id;
+  @AutoBuiltinExportableType.Param
+  public Location id;
   private Boolean hasLowerInSubtree;
 
   protected static boolean hasLowerInSubtreeList(ROList<?> elements) {

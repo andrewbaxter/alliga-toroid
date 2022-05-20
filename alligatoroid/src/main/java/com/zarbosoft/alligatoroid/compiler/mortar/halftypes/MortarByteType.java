@@ -1,38 +1,27 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
+import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCodeElement;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedDataDescriptor;
+import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialInt;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinExportable;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.IRETURN;
-import static org.objectweb.asm.Opcodes.ISTORE;
-
-public class MortarByteType implements MortarDataType, SingletonBuiltinExportable {
+public class MortarByteType implements MortarSimpleDataType, SingletonBuiltinExportable {
   public static final MortarByteType type = new MortarByteType();
 
   private MortarByteType() {}
-
-  @Override
-  public int storeOpcode() {
-    return ISTORE;
-  }
-
-  @Override
-  public int loadOpcode() {
-    return ILOAD;
-  }
-
-  @Override
-  public int returnOpcode() {
-    return IRETURN;
-  }
 
   @Override
   public boolean checkAssignableFrom(
@@ -46,12 +35,58 @@ public class MortarByteType implements MortarDataType, SingletonBuiltinExportabl
   }
 
   @Override
-  public JVMSharedDataDescriptor jvmDesc() {
-    return JVMSharedDataDescriptor.BYTE;
+  public SemiserialSubvalue graphSemiserializeValue(
+      Object inner,
+      long importCacheId,
+      Semiserializer semiserializer,
+      ROList<Exportable> path,
+      ROList<String> accessPath) {
+    return SemiserialInt.create((Byte) inner);
   }
 
   @Override
-  public JVMSharedCodeElement constValueVary(EvaluationContext context, Object value) {
-    return JVMSharedCode.int_((Byte) value);
+  public Object graphDesemiserializeValue(ModuleCompileContext context, SemiserialSubvalue data) {
+    return data.dispatch(
+        new SemiserialSubvalue.DefaultDispatcher<>() {
+          @Override
+          public Object handleInt(SemiserialInt s) {
+            return (byte) s.value;
+          }
+        });
+  }
+
+  @Override
+  public EvaluateResult valueVary(EvaluationContext context, Location id, Object data) {
+    return EvaluateResult.pure(stackAsValue(JavaBytecodeUtils.literalIntShortByte((Byte) data)));
+  }
+
+  @Override
+  public JavaDataDescriptor jvmDesc() {
+    return JavaDataDescriptor.BYTE;
+  }
+
+  @Override
+  public JavaBytecode returnBytecode() {
+    return JavaBytecodeUtils.returnIntShortByteBool;
+  }
+
+  @Override
+  public JavaBytecode storeBytecode(JavaBytecodeBindingKey key) {
+    return JavaBytecodeUtils.storeIntShortByteBool(key);
+  }
+
+  @Override
+  public JavaBytecode loadBytecode(JavaBytecodeBindingKey key) {
+    return JavaBytecodeUtils.loadIntShortByteBool(key);
+  }
+
+  @Override
+  public JavaBytecode arrayStoreBytecode() {
+    return JavaBytecodeUtils.arrayStoreByteBool;
+  }
+
+  @Override
+  public JavaBytecode arrayLoadBytecode() {
+    return JavaBytecodeUtils.arrayLoadByteBool;
   }
 }

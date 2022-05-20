@@ -3,11 +3,14 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 
 public class Set extends LanguageElement {
-  @Param public LanguageElement target;
-  @Param public LanguageElement value;
+  @AutoBuiltinExportableType.Param
+  public LanguageElement target;
+  @AutoBuiltinExportableType.Param
+  public LanguageElement value;
 
   @Override
   protected boolean innerHasLowerInSubtree() {

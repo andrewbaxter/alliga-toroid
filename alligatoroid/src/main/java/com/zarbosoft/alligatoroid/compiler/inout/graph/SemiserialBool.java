@@ -1,9 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
+
 import java.util.Objects;
 
 public final class SemiserialBool implements SemiserialSubvalue {
-  @Exportable.Param public boolean value;
+  @AutoBuiltinExportableType.Param
+  public boolean value;
 
   public static SemiserialBool create(boolean value) {
     final SemiserialBool out = new SemiserialBool();

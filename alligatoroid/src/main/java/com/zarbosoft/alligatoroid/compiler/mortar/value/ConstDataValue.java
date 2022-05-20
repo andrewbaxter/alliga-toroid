@@ -4,41 +4,60 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.IdentityExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.IdentityExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRecord;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
-import com.zarbosoft.alligatoroid.compiler.model.error.ValueNotWhole;
+import com.zarbosoft.alligatoroid.compiler.model.error.CantSetStackValue;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.ConstBinding;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.graph.ConstExportType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarNullType;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSOrderedMap;
 
-import java.util.function.Consumer;
+public class ConstDataValue implements DataValue, IdentityExportable {
+  public static final ConstDataValue nullValue = create(MortarNullType.type, null);
+  public MortarDataType type;
+  public Object value;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue.nullValue;
-
-public abstract class ConstDataValue implements DataValue {
-  static EvaluateResult setHelper(
-      ConstDataValue self,
-      EvaluationContext context,
-      Location location,
-      Value value,
-      Consumer<Object> setInner) {
-    if (!self.mortarType().assertAssignableFrom(context, location, value))
-      return EvaluateResult.error;
-    if (value instanceof VariableDataValue) {
-      context.moduleContext.errors.add(new ValueNotWhole(location));
-      return EvaluateResult.error;
-    }
-    setInner.accept(((ConstDataValue) value).getInner());
-    return EvaluateResult.pure(nullValue);
+  public static ConstDataValue create(MortarDataType type, Object value) {
+    final ConstDataValue out = new ConstDataValue();
+    out.type = type;
+    out.value = value;
+    out.postInit();
+    return out;
   }
 
   @Override
-  public ExportableType graphType() {
+  public IdentityExportableType exportableType() {
     return ConstExportType.exportType;
+  }
+
+  @Override
+  public SemiserialSubvalue graphSemiserializeBody(
+      long importCacheId,
+      Semiserializer semiserializer,
+      ROList<Exportable> path,
+      ROList<String> accessPath) {
+    final MortarDataType mortarType = mortarType();
+    return SemiserialRecord.create(
+        new TSOrderedMap<SemiserialSubvalue, SemiserialSubvalue>(
+            s ->
+                s.putNew(
+                        SemiserialString.create(ConstExportType.KEY_TYPE),
+                        mortarType.graphSemiserialize(
+                            importCacheId, semiserializer, path, accessPath))
+                    .putNew(
+                        SemiserialString.create(ConstExportType.KEY_VALUE),
+                        mortarType.graphSemiserializeValue(
+                            getInner(), importCacheId, semiserializer, path, accessPath))));
   }
 
   @Override
@@ -47,20 +66,13 @@ public abstract class ConstDataValue implements DataValue {
   }
 
   @Override
-  public final TargetCode drop(EvaluationContext context, Location location) {
+  public MortarTargetCode consume(EvaluationContext context, Location location) {
     return null;
   }
 
-  public abstract Object getInner();
-
   @Override
-  public abstract MortarDataType mortarType();
-
-  @Override
-  public final EvaluateResult vary(EvaluationContext context, Location location) {
-    if (!MortarTargetModuleContext.assertTarget(context, location)) return EvaluateResult.error;
-    return EvaluateResult.pure(
-        mortarType().stackAsValue(mortarType().constValueVary(context, getInner())));
+  public final TargetCode drop(EvaluationContext context, Location location) {
+    return null;
   }
 
   @Override
@@ -81,5 +93,19 @@ public abstract class ConstDataValue implements DataValue {
   @Override
   public final ROPair<TargetCode, Binding> bind(EvaluationContext context, Location location) {
     return new ROPair<>(null, new ConstBinding(mortarType(), getInner()));
+  }
+
+  @Override
+  public EvaluateResult set(EvaluationContext context, Location location, Value value) {
+    context.errors.add(new CantSetStackValue(location));
+    return EvaluateResult.error;
+  }
+
+  public Object getInner() {
+    return value;
+  }
+
+  public MortarDataType mortarType() {
+    return type;
   }
 }

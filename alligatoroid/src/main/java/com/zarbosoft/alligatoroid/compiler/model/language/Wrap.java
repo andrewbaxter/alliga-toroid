@@ -3,16 +3,16 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 
 public class Wrap extends LanguageElement {
-  @Param public Value value;
+  @AutoBuiltinExportableType.Param
+  public Value value;
 
-  public static Wrap create(Location id, Value value) {
+  public static Wrap create(Value value) {
     final Wrap wrap = new Wrap();
-    wrap.id = id;
+    wrap.id = null;
     wrap.value = value;
     wrap.postInit();
     return wrap;
