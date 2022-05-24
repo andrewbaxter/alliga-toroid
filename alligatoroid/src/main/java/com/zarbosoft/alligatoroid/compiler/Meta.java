@@ -1,14 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.builtin.Builtin;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialBool;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialInt;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifactType;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.PrimitiveExportType;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
@@ -32,13 +32,17 @@ import com.zarbosoft.alligatoroid.compiler.model.language.RecordElement;
 import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
 import com.zarbosoft.alligatoroid.compiler.model.language.Wrap;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.graph.ConstExportType;
-import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinArtifact;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarBoolType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarBytesType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarImmutableType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarIntType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarNullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStaticMethodType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStringType;
@@ -62,34 +66,34 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
 import static com.zarbosoft.alligatoroid.compiler.builtin.Builtin.nullType;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Meta {
-  public static final ROMap<Object, ExportableType> singletonBuiltinExportableTypes;
-  public static final ROMap<Object, String> builtinToSemiKey;
-  public static final ROMap<String, Object> semiKeyToBuiltin;
-  public static final ROMap<Class, ExportableType> builtinExportTypes;
+  public static final ROMap<Artifact, String> builtinToSemiKey;
+  public static final ROMap<String, Artifact> semiKeyToBuiltin;
+  public static final ROMap<Class, AutoBuiltinArtifactType> autoBuiltinExportTypes;
+  public static final ROMap<MortarDataType, PrimitiveExportType> primitiveMortarTypeToExportType;
+  public static final ROMap<Class, PrimitiveExportType> primitiveTypeToExportType;
+  public static final ROMap<String, PrimitiveExportType> primitiveKeyToExportType;
   public static ROMap<Class, MortarSimpleDataType> autoMortarHalfDataTypes;
   public static LooseRecord builtin;
 
   static {
-    final WorkingMeta working = new WorkingMeta();
-
     //// Graph id/primitive type conversions
     // =============================
     /// Prepare type converters for non-value, non-collection types
-    ExportableType intConverter =
-        new ExportableType() {
+    TSMap<MortarDataType, PrimitiveExportType> primitiveMortarTypeToExportType0 = new TSMap<>();
+    TSMap<Class, PrimitiveExportType> primitiveTypeToExportType0 = new TSMap<>();
+    TSMap<String, PrimitiveExportType> primitiveKeyToExportType0 = new TSMap<>();
+
+    PrimitiveExportType intConverter =
+        new PrimitiveExportType() {
           @Override
-          public SemiserialSubvalue graphSemiserializeValue(
-              long importCacheId,
-              Semiserializer semiserializer,
-              ROList<Object> path,
-              ROList<String> accessPath,
-              Object value) {
-            return SemiserialInt.create((Integer) value);
+          public String key() {
+            return "int";
           }
 
           @Override
@@ -102,12 +106,24 @@ public class Meta {
                   }
                 });
           }
-        };
-    working.autoBuiltinExportTypes.put(int.class, intConverter);
-    working.autoBuiltinExportTypes.put(Integer.class, intConverter);
 
-    ExportableType boolConverter =
-        new ExportableType() {
+          @Override
+          public SemiserialSubvalue semiserialize(Object data) {
+            return SemiserialInt.create((Integer) data);
+          }
+        };
+    primitiveMortarTypeToExportType0.put(MortarIntType.type, intConverter);
+    primitiveMortarTypeToExportType0.put(MortarImmutableType.intType, intConverter);
+    primitiveTypeToExportType0.put(Integer.class, intConverter);
+    primitiveTypeToExportType0.put(int.class, intConverter);
+
+    PrimitiveExportType boolConverter =
+        new PrimitiveExportType() {
+          @Override
+          public String key() {
+            return "bool";
+          }
+
           @Override
           public Object desemiserialize(SemiserialSubvalue data) {
             return data.dispatch(
@@ -124,11 +140,18 @@ public class Meta {
             return SemiserialBool.create((Boolean) data);
           }
         };
-    working.autoBuiltinExportTypes.put(boolean.class, boolConverter);
-    working.autoBuiltinExportTypes.put(Boolean.class, boolConverter);
+    primitiveMortarTypeToExportType0.put(MortarBoolType.type, boolConverter);
+    primitiveMortarTypeToExportType0.put(MortarImmutableType.boolType, boolConverter);
+    primitiveTypeToExportType0.put(Boolean.class, boolConverter);
+    primitiveTypeToExportType0.put(boolean.class, boolConverter);
 
-    ExportableType stringConverter =
-        new ExportableType() {
+    PrimitiveExportType stringConverter =
+        new PrimitiveExportType() {
+          @Override
+          public String key() {
+            return "string";
+          }
+
           @Override
           public Object desemiserialize(SemiserialSubvalue data) {
             return data.dispatch(
@@ -145,13 +168,51 @@ public class Meta {
             return SemiserialString.create((String) data);
           }
         };
-    working.autoBuiltinExportTypes.put(String.class, stringConverter);
+    primitiveMortarTypeToExportType0.put(MortarStringType.type, stringConverter);
+    primitiveMortarTypeToExportType0.put(MortarImmutableType.stringType, stringConverter);
+    primitiveTypeToExportType0.put(String.class, stringConverter);
+
+    PrimitiveExportType nullConverter =
+        new PrimitiveExportType() {
+          @Override
+          public String key() {
+            return "null";
+          }
+
+          @Override
+          public Object desemiserialize(SemiserialSubvalue data) {
+            return data.dispatch(
+                new SemiserialSubvalue.DefaultDispatcher<>() {
+                  @Override
+                  public Object handleString(SemiserialString s) {
+                    return null;
+                  }
+                });
+          }
+
+          @Override
+          public SemiserialSubvalue semiserialize(Object data) {
+            return SemiserialString.create("");
+          }
+        };
+    primitiveMortarTypeToExportType0.put(MortarNullType.type, nullConverter);
+    primitiveMortarTypeToExportType0.put(MortarImmutableType.nullType, nullConverter);
+
+    for (Map.Entry<Class, PrimitiveExportType> e : primitiveTypeToExportType0) {
+      primitiveKeyToExportType0.putReplace(e.getValue().key(), e.getValue());
+    }
+    primitiveTypeToExportType = primitiveTypeToExportType0;
+    primitiveKeyToExportType = primitiveKeyToExportType0;
+    primitiveMortarTypeToExportType = primitiveMortarTypeToExportType0;
+
+    // Non-primitives
+    final WorkingMeta working = new WorkingMeta();
 
     for (ROPair<Class[], MortarSimpleDataType> pair : new ROPair[] {}) {
       for (Class klass : pair.first) {
         working.mortarType(klass, pair.second);
       }
-      working.singletonExportable((SingletonBuiltinExportable) pair.second);
+      working.singletonExportable((SingletonBuiltinArtifact) pair.second);
     }
     working.generateMortarType(ModuleId.class);
     {
@@ -160,7 +221,7 @@ public class Meta {
       // working.singletonExportable(nullValue.type);
     }
     working.singletonExportable(ConstExportType.exportType);
-    for (Class<AutoBuiltinExportable> languageElement :
+    for (Class<AutoBuiltinArtifact> languageElement :
         new Class[] {
           Access.class,
           Bind.class,
@@ -192,7 +253,7 @@ public class Meta {
           JavaInternalName.class,
         }) {
       if (NoExportValue.class.isAssignableFrom(klass)) throw new Assertion();
-      if (!AutoBuiltinExportable.class.isAssignableFrom(klass)) throw new Assertion();
+      if (!AutoBuiltinArtifact.class.isAssignableFrom(klass)) throw new Assertion();
       working.nonSingletonExportable(klass);
       working.generateMortarType(klass);
     }
@@ -202,7 +263,7 @@ public class Meta {
     // Done
     builtinToSemiKey = working.builtinToSemiKey;
     semiKeyToBuiltin = working.semiKeyToBuiltin;
-    builtinExportTypes = working.autoBuiltinExportTypes;
+    autoBuiltinExportTypes = working.autoBuiltinExportTypes;
     autoMortarHalfDataTypes = working.autoMortarHalfDataTypes;
   }
 
@@ -326,7 +387,7 @@ public class Meta {
         working.builtinToSemiKey.put(value, key);
         working.semiKeyToBuiltin.put(key, value);
       } else {
-        working.singletonExportable((SingletonBuiltinExportable) data);
+        working.singletonExportable((SingletonBuiltinArtifact) data);
         if (data instanceof Value) {
           values.put(name, EvaluateResult.pure((ConstDataValue) data));
         } else {
@@ -365,27 +426,27 @@ public class Meta {
 
   private static class WorkingMeta {
     public final TSMap<Class, MortarSimpleDataType> autoMortarHalfDataTypes = new TSMap<>();
-    public final TSMap<Class, ExportableType> autoBuiltinExportTypes = new TSMap<>();
-    public final TSMap<Object, String> builtinToSemiKey = new TSMap<>();
-    public final TSMap<String, Object> semiKeyToBuiltin = new TSMap<>();
+    public final TSMap<Class, AutoBuiltinArtifactType> autoBuiltinExportTypes = new TSMap<>();
+    public final TSMap<Artifact, String> builtinToSemiKey = new TSMap<>();
+    public final TSMap<String, Artifact> semiKeyToBuiltin = new TSMap<>();
     public int singletonCount;
 
     public void mortarType(Class klass, MortarSimpleDataType type) {
       autoMortarHalfDataTypes.put(klass, type);
     }
 
-    private void singletonExportable(SingletonBuiltinExportable e) {
+    private void singletonExportable(SingletonBuiltinArtifact e) {
       final String key = "_singleton_" + singletonCount++;
       singletonExportable(key, e);
     }
 
-    private void singletonExportable(String key, SingletonBuiltinExportable e) {
+    private void singletonExportable(String key, SingletonBuiltinArtifact e) {
       builtinToSemiKey.put(e, key);
       semiKeyToBuiltin.put(key, e);
     }
 
     private void nonSingletonExportable(Class klass) {
-      final AutoBuiltinExportableType type = new AutoBuiltinExportableType(klass);
+      final AutoBuiltinArtifactType type = new AutoBuiltinArtifactType(klass);
       autoBuiltinExportTypes.put(klass, type);
       {
         final Constructor[] constructors = klass.getConstructors();

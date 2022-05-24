@@ -4,8 +4,9 @@ import com.zarbosoft.alligatoroid.compiler.CompileContext;
 import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.GraphDeferred;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.UniqueId;
@@ -21,7 +22,7 @@ import java.util.Map;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class DefinitionSet implements AutoBuiltinExportable {
+public class DefinitionSet implements AutoBuiltinArtifact {
   public Location location;
   public long moduleId;
   public long definitionSetId;
@@ -83,7 +84,7 @@ public class DefinitionSet implements AutoBuiltinExportable {
     return true;
   }
 
-  public static class Definition implements CompileContext.Definition, AutoBuiltinExportable {
+  public static class Definition implements CompileContext.Definition, AutoBuiltinArtifact {
     public byte[] bytecode;
     public ROList<Transfer> transfers;
 
@@ -110,11 +111,11 @@ public class DefinitionSet implements AutoBuiltinExportable {
     }
   }
 
-  public static class Transfer implements AutoBuiltinExportable {
-    public Exportable data;
+  public static class Transfer implements AutoBuiltinArtifact {
+    public Artifact data;
     public String name;
 
-    public static Transfer create(Exportable data, String name) {
+    public static Transfer create(Artifact data, String name) {
       final Transfer out = new Transfer();
       out.data = data;
       out.name = name;

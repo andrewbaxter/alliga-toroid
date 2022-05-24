@@ -3,9 +3,10 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
@@ -15,7 +16,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-public final class MortarImmutableType implements MortarDataType, AutoBuiltinExportable {
+public final class MortarImmutableType implements MortarDataType, AutoBuiltinArtifact {
   public static final MortarImmutableType nullType = new MortarImmutableType(MortarNullType.type);
   public static final MortarImmutableType intType = new MortarImmutableType(MortarIntType.type);
   public static final MortarImmutableType boolType = new MortarImmutableType(MortarBoolType.type);
@@ -67,7 +68,7 @@ public final class MortarImmutableType implements MortarDataType, AutoBuiltinExp
   }
 
   @Override
-  public SemiserialSubvalue graphSemiserializeValue(Object inner, long importCacheId, Semiserializer semiserializer, ROList<Exportable> path, ROList<String> accessPath) {
+  public SemiserialSubvalue graphSemiserializeValue(Object inner, long importCacheId, Semiserializer semiserializer, ROList<Artifact> path, ROList<String> accessPath) {
     throw new Assertion();
   }
 

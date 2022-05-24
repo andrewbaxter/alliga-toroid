@@ -4,8 +4,8 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Scope;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.language.Access;
 import com.zarbosoft.alligatoroid.compiler.model.language.Bind;
@@ -22,7 +22,7 @@ import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
 import com.zarbosoft.rendaw.common.ROList;
 
-public abstract class LanguageElement implements AutoBuiltinExportable {
+public abstract class LanguageElement implements AutoBuiltinArtifact, Artifact {
   public static final Class[] SERIAL_UNION =
       new Class[] {
         Access.class,
@@ -40,8 +40,7 @@ public abstract class LanguageElement implements AutoBuiltinExportable {
         Stage.class,
         Tuple.class,
       };
-  @AutoBuiltinExportableType.Param
-  public Location id;
+  @Param public Location id;
   private Boolean hasLowerInSubtree;
 
   protected static boolean hasLowerInSubtreeList(ROList<?> elements) {

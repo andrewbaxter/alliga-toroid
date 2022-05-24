@@ -1,11 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.rendaw.common.ROList;
 
 public class SemiserialTuple implements SemiserialSubvalue {
-  @AutoBuiltinExportableType.Param
-  public ROList<SemiserialSubvalue> values;
+  @Artifact.Param public ROList<SemiserialSubvalue> values;
 
   public static SemiserialTuple create(ROList<SemiserialSubvalue> values) {
     final SemiserialTuple out = new SemiserialTuple();

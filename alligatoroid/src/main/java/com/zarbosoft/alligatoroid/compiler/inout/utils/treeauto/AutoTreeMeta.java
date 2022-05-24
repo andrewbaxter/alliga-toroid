@@ -1,6 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.Prototype;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeBool;
@@ -9,7 +10,6 @@ import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeROL
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeROMap;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeROOrderedMap;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeString;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.luxem.write.Writer;
@@ -158,7 +158,7 @@ public class AutoTreeMeta {
       TSMap<String, Prototype> fields = new TSMap<>();
       for (Field field : klass.getFields()) {
         if (Modifier.isStatic(field.getModifiers())) continue;
-        if (field.getAnnotation(AutoBuiltinExportableType.Param.class) == null) continue;
+        if (field.getAnnotation(Artifact.Param.class) == null) continue;
         TypeInfo fieldInfo = TypeInfo.fromField(field);
         Prototype prototype;
         if (ROList.class.isAssignableFrom(fieldInfo.klass)) {

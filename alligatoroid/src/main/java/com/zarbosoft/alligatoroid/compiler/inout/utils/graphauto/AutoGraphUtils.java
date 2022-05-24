@@ -2,11 +2,11 @@ package com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto;
 
 import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRecord;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalueRef;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalueExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialTuple;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto.TypeInfo;
@@ -27,12 +27,15 @@ public class AutoGraphUtils {
       long importCacheId,
       TypeInfo type,
       Object data,
-      ROList<Object> path,
+      ROList<Artifact> path,
       ROList<String> accessPath) {
-    ExportableType primitiveExportType;
-    if ((primitiveExportType = Meta.builtinExportTypes.getOpt(type.klass)) != null) {
-      return primitiveExportType.graphSemiserializeValue(
-          importCacheId, semiserializer, path, accessPath, data);
+    PrimitiveExportType primitiveExportType;
+    if ((primitiveExportType = Meta.primitiveTypeToExportType.getOpt(type.klass)) != null) {
+      return primitiveExportType.semiserialize(data);
+    } else if (Artifact.class.isAssignableFrom(type.klass)) {
+      if (data == null) return SemiserialString.create("null");
+      return ((Artifact) data)
+          .graphSemiserialize(importCacheId, semiserializer, path, accessPath);
     } else if (ROList.class.isAssignableFrom(type.klass)) {
       TSList<SemiserialSubvalue> elementData = new TSList<>();
       for (int i = 0; i < ((ROList) data).size(); i++) {
@@ -77,24 +80,10 @@ public class AutoGraphUtils {
 
   public static Object autoDesemiAnyViaReflect(
       ModuleCompileContext context, TypeInfo type, SemiserialSubvalue data) {
-    ROPair<Boolean, Object> desemiRef =
-        data.dispatch(
-            new SemiserialSubvalue.DefaultDispatcher<>() {
-              @Override
-              public ROPair<Boolean, Object> handleDefault(SemiserialSubvalue s) {
-                return new ROPair<>(false, null);
-              }
-
-              @Override
-              public ROPair<Boolean, Object> handleRef(SemiserialSubvalueRef s) {
-                return new ROPair<>(true, context.lookupRef(s));
-              }
-            });
-    if (desemiRef.first) return desemiRef.second;
     PrimitiveExportType primitiveExportType;
     if ((primitiveExportType = Meta.primitiveTypeToExportType.getOpt(type.klass)) != null) {
       return primitiveExportType.desemiserialize(data);
-    } else if (Exportable.class.isAssignableFrom(type.klass)) {
+    } else if (Artifact.class.isAssignableFrom(type.klass)) {
       return data.dispatch(
           new SemiserialSubvalue.DefaultDispatcher<>() {
             @Override
@@ -104,7 +93,7 @@ public class AutoGraphUtils {
             }
 
             @Override
-            public Object handleRef(SemiserialSubvalueRef s) {
+            public Object handleExportable(SemiserialSubvalueExportable s) {
               return context.lookupRef(s);
             }
           });

@@ -2,13 +2,11 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.modules.modulecompiler.ModuleCompiler;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 
 public final class Lower extends LanguageElement {
-  @AutoBuiltinExportableType.Param
-  public LanguageElement child;
+  @Param public LanguageElement child;
 
   @Override
   protected boolean innerHasLowerInSubtree() {

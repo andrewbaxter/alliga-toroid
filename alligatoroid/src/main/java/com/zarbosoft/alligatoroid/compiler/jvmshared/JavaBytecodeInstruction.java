@@ -1,8 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
 
-public class JavaBytecodeInstruction implements JavaBytecode, AutoBuiltinExportable {
+public class JavaBytecodeInstruction implements JavaBytecode, AutoBuiltinArtifact {
   public final int code;
 
   public JavaBytecodeInstruction(int code) {

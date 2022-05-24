@@ -4,8 +4,9 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.IdentityExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.IdentityExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.IdentityArtifact;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.IdentityArtifactType;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRecord;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
@@ -22,7 +23,7 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
-public class ConstDataValue implements DataValue, IdentityExportable {
+public class ConstDataValue implements DataValue, IdentityArtifact {
   public static final ConstDataValue nullValue = create(MortarNullType.type, null);
   public MortarDataType type;
   public Object value;
@@ -36,7 +37,7 @@ public class ConstDataValue implements DataValue, IdentityExportable {
   }
 
   @Override
-  public IdentityExportableType exportableType() {
+  public IdentityArtifactType exportableType() {
     return ConstExportType.exportType;
   }
 
@@ -44,7 +45,7 @@ public class ConstDataValue implements DataValue, IdentityExportable {
   public SemiserialSubvalue graphSemiserializeBody(
       long importCacheId,
       Semiserializer semiserializer,
-      ROList<Exportable> path,
+      ROList<Artifact> path,
       ROList<String> accessPath) {
     final MortarDataType mortarType = mortarType();
     return SemiserialRecord.create(

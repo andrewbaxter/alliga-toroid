@@ -5,7 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
@@ -33,7 +33,7 @@ import com.zarbosoft.rendaw.common.TSList;
 
 import static org.objectweb.asm.Opcodes.POP;
 
-public interface MortarDataType extends ExportableType {
+public interface MortarDataType extends Artifact {
   public static boolean assertAssignableFromUnion(
       EvaluationContext context,
       Location location,
@@ -137,7 +137,7 @@ public interface MortarDataType extends ExportableType {
       Object inner,
       long importCacheId,
       Semiserializer semiserializer,
-      ROList<Exportable> path,
+      ROList<Artifact> path,
       ROList<String> accessPath);
 
   Object graphDesemiserializeValue(ModuleCompileContext context, SemiserialSubvalue data);

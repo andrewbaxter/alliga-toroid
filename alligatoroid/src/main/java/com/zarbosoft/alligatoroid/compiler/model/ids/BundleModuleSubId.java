@@ -1,8 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
 import com.zarbosoft.alligatoroid.compiler.model.error.ImportOutsideOwningBundleModule;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Format;
@@ -10,13 +10,11 @@ import com.zarbosoft.rendaw.common.Format;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public final class BundleModuleSubId implements ModuleId, AutoBuiltinExportable {
+public final class BundleModuleSubId implements ModuleId, AutoBuiltinArtifact, Artifact {
   public static final String GRAPH_KEY_MODULE = "module";
   public static final String GRAPH_KEY_PATH = "path";
-  @AutoBuiltinExportableType.Param
-  public String path;
-  @AutoBuiltinExportableType.Param
-  public ModuleId module;
+  @Param public String path;
+  @Param public ModuleId module;
 
   public static BundleModuleSubId create(ModuleId module, String path) {
     final BundleModuleSubId out = new BundleModuleSubId();

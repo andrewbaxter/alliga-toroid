@@ -1,7 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
 import com.zarbosoft.alligatoroid.compiler.Meta;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -18,7 +18,7 @@ import static org.objectweb.asm.Opcodes.FSTORE;
 import static org.objectweb.asm.Opcodes.ISTORE;
 import static org.objectweb.asm.Opcodes.LSTORE;
 
-public class JavaBytecodeSequence implements JavaBytecode, AutoBuiltinExportable {
+public class JavaBytecodeSequence implements JavaBytecode, AutoBuiltinArtifact {
   public TSList<JavaBytecode> children = new TSList<>();
 
   public void render(MethodVisitor out, TSList<JavaBytecodeBindingKey> initialIndexes) {

@@ -1,6 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
@@ -8,14 +9,14 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinArtifact;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public class MortarBytesType extends MortarBaseObjectType implements SingletonBuiltinExportable {
+public class MortarBytesType extends MortarBaseObjectType implements SingletonBuiltinArtifact {
   public static final MortarBytesType type = new MortarBytesType();
 
   @Override
@@ -39,7 +40,7 @@ public class MortarBytesType extends MortarBaseObjectType implements SingletonBu
       Object inner,
       long importCacheId,
       Semiserializer semiserializer,
-      ROList<Exportable> path,
+      ROList<Artifact> path,
       ROList<String> accessPath) {
     return SemiserialString.create(
         new String(Base64.getEncoder().encode((byte[]) inner), StandardCharsets.UTF_8));

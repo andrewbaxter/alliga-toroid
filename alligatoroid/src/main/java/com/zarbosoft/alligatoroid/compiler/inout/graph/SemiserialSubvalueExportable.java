@@ -1,32 +1,32 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-public interface SemiserialSubvalueRef extends SemiserialSubvalue {
+public interface SemiserialSubvalueExportable extends SemiserialSubvalue {
   public static final Class<? extends SemiserialSubvalue>[] SERIAL_UNION =
       new Class[] {
-        SemiserialSubvalueRefIdentity.class, SemiserialSubvalueRefBuiltin.class,
+        SemiserialSubvalueExportableIdentityRef.class, SemiserialSubvalueExportableBuiltin.class,
       };
 
   public <T> T dispatchExportable(Dispatcher<T> dispatcher);
 
   @Override
   default <T> T dispatch(SemiserialSubvalue.Dispatcher<T> dispatcher) {
-    return dispatcher.handleRef(this);
+    return dispatcher.handleExportable(this);
   }
 
   public interface Dispatcher<T> {
-    T handleArtifact(SemiserialSubvalueRefIdentity s);
+    T handleArtifact(SemiserialSubvalueExportableIdentityRef s);
 
-    T handleBuiltin(SemiserialSubvalueRefBuiltin s);
+    T handleBuiltin(SemiserialSubvalueExportableBuiltin s);
   }
 
   public interface DefaultDispatcher<T> extends Dispatcher<T> {
     @Override
-    default T handleArtifact(SemiserialSubvalueRefIdentity s) {
+    default T handleArtifact(SemiserialSubvalueExportableIdentityRef s) {
       throw new RuntimeException("got unexpected semiserial exp ref");
     }
 
     @Override
-    default T handleBuiltin(SemiserialSubvalueRefBuiltin s) {
+    default T handleBuiltin(SemiserialSubvalueExportableBuiltin s) {
       throw new RuntimeException("got unexpected semiserial exp builtin");
     }
   }

@@ -3,7 +3,6 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
@@ -11,8 +10,7 @@ import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class Scope extends LanguageElement {
-  @AutoBuiltinExportableType.Param
-  public LanguageElement inner;
+  @Param public LanguageElement inner;
 
   public static Scope create(Location id, LanguageElement inner) {
     final Scope scope = new Scope();

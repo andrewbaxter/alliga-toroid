@@ -11,7 +11,7 @@ import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinArtifact;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -24,7 +24,7 @@ import java.util.function.Function;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstKey;
 
-public class MortarAutoObjectType extends MortarBaseObjectType implements SingletonBuiltinExportable {
+public class MortarAutoObjectType extends MortarBaseObjectType implements SingletonBuiltinArtifact {
   public final JavaInternalName jvmName;
   private final Class klass;
   public ROMap<Object, MortarObjectFieldType> fields;

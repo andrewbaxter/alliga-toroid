@@ -14,14 +14,14 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.StaticMethodMeta;
-import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinArtifact;
 import com.zarbosoft.rendaw.common.TSList;
 
 import static com.zarbosoft.alligatoroid.compiler.builtin.Builtin.nullType;
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext.convertFunctionArgumentRoot;
 import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue.nullValue;
 
-public class MortarStaticMethodType extends MortarBaseObjectType implements SingletonBuiltinExportable {
+public class MortarStaticMethodType extends MortarBaseObjectType implements SingletonBuiltinArtifact {
   // TODO move method type info into the type, check during type check
   public static final MortarStaticMethodType type = new MortarStaticMethodType();
   public static final JavaDataDescriptor DESC =

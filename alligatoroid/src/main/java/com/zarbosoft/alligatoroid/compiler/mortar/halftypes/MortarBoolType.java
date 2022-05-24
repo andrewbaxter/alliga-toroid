@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialBool;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
@@ -14,11 +15,11 @@ import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinArtifact;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class MortarBoolType implements MortarSimpleDataType, SingletonBuiltinExportable {
+public class MortarBoolType implements MortarSimpleDataType, SingletonBuiltinArtifact {
   public static final MortarBoolType type = new MortarBoolType();
 
   private MortarBoolType() {}
@@ -39,7 +40,7 @@ public class MortarBoolType implements MortarSimpleDataType, SingletonBuiltinExp
       Object inner,
       long importCacheId,
       Semiserializer semiserializer,
-      ROList<Exportable> path,
+      ROList<Artifact> path,
       ROList<String> accessPath) {
     return SemiserialBool.create((Boolean) inner);
   }

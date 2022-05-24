@@ -3,7 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
@@ -28,8 +28,7 @@ import static com.zarbosoft.alligatoroid.compiler.Meta.autoMortarHalfDataTypes;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Stage extends LanguageElement {
-  @AutoBuiltinExportableType.Param
-  public LanguageElement child;
+  @Param public LanguageElement child;
 
   /**
    * @param context
@@ -103,7 +102,7 @@ public class Stage extends LanguageElement {
       boolean bad = false;
       for (Field field : klass.getFields()) {
         if (Modifier.isStatic(field.getModifiers())) continue;
-        if (field.getAnnotation(AutoBuiltinExportableType.Param.class) == null) continue;
+        if (field.getAnnotation(Param.class) == null) continue;
         JavaDataDescriptor fieldDesc;
         code.add(JavaBytecodeUtils.dup);
 
@@ -184,7 +183,7 @@ public class Stage extends LanguageElement {
                   .add(
                       JavaBytecodeUtils.callInterfaceMthod(
                           -1,
-                          JavaBytecodeUtils.internalNameFromClass(Exportable.class),
+                          JavaBytecodeUtils.internalNameFromClass(Artifact.class),
                           "postInit",
                           JavaMethodDescriptor.fromParts(JavaDataDescriptor.VOID, ROList.empty)))));
     }

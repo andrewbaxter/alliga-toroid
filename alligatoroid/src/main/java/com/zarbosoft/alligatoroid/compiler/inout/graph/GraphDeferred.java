@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.model.ids.UniqueId;
-import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinArtifact;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
@@ -14,15 +14,15 @@ import java.util.Objects;
  * @param <K>
  * @param <T>
  */
-public class GraphDeferred<T> implements IdentityExportable {
+public class GraphDeferred<T extends Artifact> implements IdentityArtifact {
   public static final String SEMIKEY_REF = "ref";
   public static final String SEMIKEY_ID = "id";
   public static final ExportType exportType = new ExportType();
-  public SemiserialSubvalueRef ref;
+  public SemiserialSubvalueExportable ref;
   public UniqueId id;
   public T artifact;
 
-  public static <T> GraphDeferred<T> create(UniqueId uniqueId, T artifact) {
+  public static <T extends Artifact> GraphDeferred<T> create(UniqueId uniqueId, T artifact) {
     final GraphDeferred<T> out = new GraphDeferred<>();
     out.id = uniqueId;
     out.artifact = artifact;
@@ -43,7 +43,7 @@ public class GraphDeferred<T> implements IdentityExportable {
   }
 
   @Override
-  public IdentityExportableType exportableType() {
+  public IdentityArtifactType exportableType() {
     return exportType;
   }
 
@@ -51,7 +51,7 @@ public class GraphDeferred<T> implements IdentityExportable {
   public SemiserialSubvalue graphSemiserializeBody(
       long importCacheId,
       Semiserializer semiserializer,
-      ROList<Exportable> path,
+      ROList<Artifact> path,
       ROList<String> accessPath) {
     return SemiserialRecord.create(
         new TSOrderedMap<>(
@@ -66,26 +66,26 @@ public class GraphDeferred<T> implements IdentityExportable {
                             accessPath.mut().add("id")))));
   }
 
-  public static class ExportType implements SingletonBuiltinExportable, IdentityExportableType {
+  public static class ExportType implements SingletonBuiltinArtifact, IdentityArtifactType {
     @Override
-    public IdentityExportable graphDesemiserializeBody(
+    public IdentityArtifact graphDesemiserializeBody(
         ModuleCompileContext context,
         Desemiserializer typeDesemiserializer,
         SemiserialSubvalue data) {
       return data.dispatch(
           new SemiserialSubvalue.DefaultDispatcher<>() {
             @Override
-            public IdentityExportable handleRecord(SemiserialRecord s) {
-              final GraphDeferred<Exportable> out = new GraphDeferred<>();
+            public IdentityArtifact handleRecord(SemiserialRecord s) {
+              final GraphDeferred<Artifact> out = new GraphDeferred<>();
               out.ref =
-                  (SemiserialSubvalueRef)
+                  (SemiserialSubvalueExportable)
                       context.lookupRef(
-                          (SemiserialSubvalueRef)
+                          (SemiserialSubvalueExportable)
                               s.data.get(SemiserialString.create(SEMIKEY_REF)));
               out.id =
                   (UniqueId)
                       context.lookupRef(
-                          (SemiserialSubvalueRef)
+                          (SemiserialSubvalueExportable)
                               s.data.get(SemiserialString.create(SEMIKEY_ID)));
               return out;
             }

@@ -3,7 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaQualifiedName;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
@@ -130,7 +130,7 @@ public class MortarObjectType extends MortarBaseObjectType {
     return JavaDataDescriptor.fromJVMName(name.asInternalName());
   }
 
-  public static class Field implements AutoBuiltinExportable {
+  public static class Field implements AutoBuiltinArtifact {
     public String internalName;
     public MortarObjectFieldType type;
 

@@ -1,12 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinExportableType;
-
 import java.util.Objects;
 
 public final class SemiserialInt implements SemiserialSubvalue {
-  @AutoBuiltinExportableType.Param
-  public int value;
+  @Artifact.Param public int value;
 
   public static SemiserialInt create(int value) {
     final SemiserialInt out = new SemiserialInt();

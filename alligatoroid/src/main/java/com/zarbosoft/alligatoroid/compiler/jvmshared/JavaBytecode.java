@@ -1,6 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
-public interface JavaBytecode {
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
+
+public interface JavaBytecode extends Artifact {
   <T> T dispatch(Dispatcher<T> dispatcher);
 
   public interface Dispatcher<T> {

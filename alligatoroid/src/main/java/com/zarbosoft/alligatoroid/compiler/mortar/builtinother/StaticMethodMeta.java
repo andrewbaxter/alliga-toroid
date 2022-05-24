@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.builtinother;
 
 import com.zarbosoft.alligatoroid.compiler.Evaluator;
 import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.GraphDeferred;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeInstruction;
@@ -67,7 +68,7 @@ public class StaticMethodMeta {
 
     // Render bytecode
     JavaClass preClass = new JavaClass(jvmClassName);
-    for (ROPair<Exportable, String> e : Common.iterable(targetContext.transfers.iterator())) {
+    for (ROPair<Artifact, String> e : Common.iterable(targetContext.transfers.iterator())) {
       preClass.defineStaticField(
           e.second, Meta.autoMortarHalfDataTypes.get(e.first.getClass()).jvmDesc());
     }
@@ -82,7 +83,7 @@ public class StaticMethodMeta {
 
     // Register definition in set
     final TSList<DefinitionSet.Transfer> transfers = new TSList<>();
-    for (ROPair<Exportable, String> transfer : targetContext.transfers) {
+    for (ROPair<Artifact, String> transfer : targetContext.transfers) {
       transfers.add(DefinitionSet.Transfer.create(transfer.first, transfer.second));
     }
     definitionSet.definitions.put(
