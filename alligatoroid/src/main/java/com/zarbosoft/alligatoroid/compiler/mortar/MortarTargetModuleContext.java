@@ -3,10 +3,10 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.ObjId;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.TargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeInstruction;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
@@ -77,7 +77,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     tsListAddCode = javaBytecodeSequence;
   }
 
-  public final TSOrderedMap<Artifact, String> transfers = new TSOrderedMap<>();
+  public final TSOrderedMap<ObjId<Object>, String> transfers = new TSOrderedMap<>();
   public final String moduleInternalName;
   public TSSet<DefinitionSet> dependencies = new TSSet<>();
 
@@ -148,7 +148,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     return Meta.autoMortarHalfDataTypes.get(Value.class).valueVary(context, id, value);
   }
 
-  public JavaBytecodeSequence transfer(Artifact object) {
+  public JavaBytecodeSequence transfer(Object object) {
     String name = transfers.getOpt(object);
     if (name == null) {
       name = TRANSFER_PREFIX + transfers.size();

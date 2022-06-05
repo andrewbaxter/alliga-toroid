@@ -1,6 +1,5 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.AccessNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.BindNotSupported;
@@ -12,7 +11,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public interface Value extends Artifact {
+public interface Value {
   public default TargetCode drop(EvaluationContext context, Location location) {
     return null;
   }

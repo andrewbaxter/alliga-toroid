@@ -5,8 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalueExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialUnknown;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
@@ -53,10 +52,10 @@ public class FutureValue implements Value {
   }
 
   @Override
-  public SemiserialSubvalueExportable graphSemiserialize(
+  public SemiserialUnknown graphSemiserialize(
       long importCacheId,
       Semiserializer semiserializer,
-      ROList<Artifact> path,
+      ROList<Exportable> path,
       ROList<String> accessPath) {
     return get().graphSemiserialize(importCacheId, semiserializer, path, accessPath);
   }

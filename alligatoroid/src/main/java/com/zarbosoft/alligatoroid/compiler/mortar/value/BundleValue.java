@@ -4,8 +4,8 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
@@ -29,11 +29,13 @@ import java.util.concurrent.CompletableFuture;
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstString;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class BundleValue implements Value, AutoBuiltinArtifact, Artifact {
+public class BundleValue implements Value, BuiltinAutoExportable {
   private static final String GRAPH_KEY_ROOT = "root";
   private static final String GRAPH_KEY_ID = "id";
-  @Param public String root;
-  @Param public ImportId id;
+  @BuiltinAutoExportableType.Param
+  public String root;
+  @BuiltinAutoExportableType.Param
+  public ImportId id;
 
   public static BundleValue graphDeserialize(Record data) {
     return create((ImportId) data.data.get(GRAPH_KEY_ID), (String) data.data.get(GRAPH_KEY_ROOT));

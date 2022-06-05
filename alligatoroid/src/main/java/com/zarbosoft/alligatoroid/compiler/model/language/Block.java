@@ -4,6 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.rendaw.common.ROList;
@@ -12,7 +13,8 @@ import com.zarbosoft.rendaw.common.TSList;
 import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue.nullValue;
 
 public class Block extends LanguageElement {
-  @Param public ROList<LanguageElement> statements;
+  @BuiltinAutoExportableType.Param
+  public ROList<LanguageElement> statements;
 
   public static Block create(Location id, ROList<LanguageElement> statements) {
     final Block block = new Block();

@@ -4,26 +4,18 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.IdentityArtifact;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.IdentityArtifactType;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRecord;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.CantSetStackValue;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.ConstBinding;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.graph.ConstExportType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarNullType;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
-import com.zarbosoft.rendaw.common.TSOrderedMap;
 
-public class ConstDataValue implements DataValue, IdentityArtifact {
+public class ConstDataValue implements DataValue, BuiltinAutoExportable {
   public static final ConstDataValue nullValue = create(MortarNullType.type, null);
   public MortarDataType type;
   public Object value;
@@ -34,31 +26,6 @@ public class ConstDataValue implements DataValue, IdentityArtifact {
     out.value = value;
     out.postInit();
     return out;
-  }
-
-  @Override
-  public IdentityArtifactType exportableType() {
-    return ConstExportType.exportType;
-  }
-
-  @Override
-  public SemiserialSubvalue graphSemiserializeBody(
-      long importCacheId,
-      Semiserializer semiserializer,
-      ROList<Artifact> path,
-      ROList<String> accessPath) {
-    final MortarDataType mortarType = mortarType();
-    return SemiserialRecord.create(
-        new TSOrderedMap<SemiserialSubvalue, SemiserialSubvalue>(
-            s ->
-                s.putNew(
-                        SemiserialString.create(ConstExportType.KEY_TYPE),
-                        mortarType.graphSemiserialize(
-                            importCacheId, semiserializer, path, accessPath))
-                    .putNew(
-                        SemiserialString.create(ConstExportType.KEY_VALUE),
-                        mortarType.graphSemiserializeValue(
-                            getInner(), importCacheId, semiserializer, path, accessPath))));
   }
 
   @Override

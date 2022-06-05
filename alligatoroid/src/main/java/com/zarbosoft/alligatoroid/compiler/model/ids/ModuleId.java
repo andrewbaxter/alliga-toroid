@@ -1,9 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeDumpable;
 
-public interface ModuleId extends TreeDumpable, Artifact {
+public interface ModuleId extends TreeDumpable {
   public static final Class<? extends ModuleId>[] SERIAL_UNION =
       new Class[] {
         LocalModuleId.class, RemoteModuleId.class, BundleModuleSubId.class,

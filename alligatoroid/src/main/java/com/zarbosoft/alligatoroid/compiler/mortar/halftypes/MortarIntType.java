@@ -3,7 +3,6 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialInt;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
@@ -14,11 +13,11 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinArtifact;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinSingletonExportable;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class MortarIntType implements MortarDataType, SingletonBuiltinArtifact {
+public class MortarIntType implements MortarDataType, BuiltinSingletonExportable {
   public static final MortarIntType type = new MortarIntType();
 
   private MortarIntType() {}
@@ -69,7 +68,7 @@ public class MortarIntType implements MortarDataType, SingletonBuiltinArtifact {
       Object inner,
       long importCacheId,
       Semiserializer semiserializer,
-      ROList<Artifact> path,
+      ROList<Exportable> path,
       ROList<String> accessPath) {
     return SemiserialInt.create((Integer) inner);
   }

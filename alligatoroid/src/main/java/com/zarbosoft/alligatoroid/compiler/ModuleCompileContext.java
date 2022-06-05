@@ -1,14 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.IdentityArtifact;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.IdentityArtifactType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialBuiltinRef;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialExportableRef;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalueExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalueExportableIdentityRef;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalueExportableBuiltin;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialExportableIdentityBody;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialUnknown;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
@@ -32,12 +30,12 @@ public class ModuleCompileContext {
 
   public final ImportPath importPath;
   /** Already desemiserialized artifacts generated via imports. */
-  public final TSMap<ArtifactId, Artifact> artifactLookup = new TSMap<>();
+  public final TSMap<ArtifactId, Object> artifactLookup = new TSMap<>();
   /**
    * A mapping of artifacts imported, used while semiserializing output after compilation to prevent
    * re-semiserializing artifacts from other modules.
    */
-  public final TSMap<ObjId<IdentityArtifact>, ArtifactId> backArtifactLookup = new TSMap<>();
+  public final TSMap<ObjId<Object>, ArtifactId> backArtifactLookup = new TSMap<>();
 
   public final TSList<ROPair<Location, CompletableFuture>> deferredErrors = new TSList<>();
   public final TSList<Error> errors = new TSList<>();
@@ -45,50 +43,51 @@ public class ModuleCompileContext {
   private final TSMap<Long, CompletableFuture<Value>> modules = new TSMap<>();
 
   public ModuleCompileContext(
-          ImportId importId, long importCacheId, CompileContext compileContext, ImportPath importPath) {
+      ImportId importId, long importCacheId, CompileContext compileContext, ImportPath importPath) {
     this.importId = importId;
     this.importCacheId = importCacheId;
     this.compileContext = compileContext;
     this.importPath = importPath;
   }
 
-  public Object lookupRef(SemiserialSubvalueExportable ref) {
+  public Object lookupRef(SemiserialUnknown ref) {
     return ref.dispatchExportable(
-        new SemiserialSubvalueExportable.Dispatcher<Object>() {
+        new SemiserialUnknown.Dispatcher<Object>() {
           @Override
-          public Object handleArtifact(SemiserialSubvalueExportableIdentityRef s) {
+          public Object handleExportableRef(SemiserialExportableRef s) {
             return artifactLookup.get(s.id);
           }
 
           @Override
-          public Object handleBuiltin(SemiserialSubvalueExportableBuiltin s) {
-            return Meta.semiKeyToBuiltin.get(s.key);
+          public Object handleBuiltinRef(SemiserialBuiltinRef s) {
+            return Meta.singletonExportableLookup.get(s.key);
           }
         });
   }
 
   public Value desemiserialize(SemiserialModule semi, CacheImportIdRes cacheImportId) {
-    TSList<ROPair<ArtifactId, SemiserialExportableIdentityBody>> remaining =
-        new TSList<ROPair<ArtifactId, SemiserialExportableIdentityBody>>();
+    TSList<ROPair<ArtifactId, SemiserialExportable>> remaining =
+        new TSList<ROPair<ArtifactId, SemiserialExportable>>();
     for (int i = 0; i < semi.artifacts.size(); ++i) {
-      final SemiserialExportableIdentityBody semiValue = semi.artifacts.get(i);
+      final SemiserialExportable semiValue = semi.artifacts.get(i);
       final ArtifactId artifactId = ArtifactId.create(cacheImportId.cacheId, i);
       remaining.add(new ROPair<>(artifactId, semiValue));
     }
     // type, (id, semivalue)
-    // Only identity exportables get flattened into artifacts - all others are either builtin (no artifact)
+    // Only identity exportables get flattened into artifacts - all others are either builtin (no
+    // artifact)
     // or inline.
-    TSList<ROPair<IdentityArtifactType, ROPair<ArtifactId, SemiserialExportableIdentityBody>>> stratum =
+    TSList<ROPair<ExportableType, ROPair<ArtifactId, SemiserialExportable>>> stratum =
         new TSList<>();
     do {
       stratum.clear();
-      final Iterator<ROPair<ArtifactId, SemiserialExportableIdentityBody>> iter = remaining.iterator();
+      final Iterator<ROPair<ArtifactId, SemiserialExportable>> iter = remaining.iterator();
 
       // Find next subset of artifacts whose types are all resolved
       while (iter.hasNext()) {
-        final ROPair<ArtifactId, SemiserialExportableIdentityBody> pair = iter.next();
-        final SemiserialExportableIdentityBody semiValue = pair.second;
-        IdentityArtifactType type = (IdentityArtifactType) lookupRef(semiValue.type);
+        final ROPair<ArtifactId, SemiserialExportable> pair = iter.next();
+        final SemiserialExportable semiValue = pair.second;
+        ExportableType type = (ExportableType) lookupRef(semiValue.type);
         if (type != null) {
           stratum.add(new ROPair<>(type, pair));
           iter.remove();
@@ -97,11 +96,10 @@ public class ModuleCompileContext {
 
       // Desemiserialize this stratum
       Desemiserializer typeDesemiserializer = new Desemiserializer();
-      for (ROPair<IdentityArtifactType, ROPair<ArtifactId, SemiserialExportableIdentityBody>> candidate :
-          stratum) {
-        final IdentityArtifact value =
-                candidate.first.graphDesemiserializeBody(
-                    this, typeDesemiserializer, candidate.second.second.data);
+      for (ROPair<ExportableType, ROPair<ArtifactId, SemiserialExportable>> candidate : stratum) {
+        final Object value =
+            candidate.first.graphDesemiserializeBody(
+                this, typeDesemiserializer, candidate.second.second.value);
         artifactLookup.put(candidate.second.first, value);
         backArtifactLookup.put(new ObjId<>(value), candidate.second.first);
       }

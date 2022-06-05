@@ -2,12 +2,8 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
@@ -33,7 +29,7 @@ import com.zarbosoft.rendaw.common.TSList;
 
 import static org.objectweb.asm.Opcodes.POP;
 
-public interface MortarDataType extends Artifact {
+public interface MortarDataType {
   public static boolean assertAssignableFromUnion(
       EvaluationContext context,
       Location location,
@@ -48,7 +44,7 @@ public interface MortarDataType extends Artifact {
   }
 
   default EvaluateResult variableValueAccess(
-          EvaluationContext context, Location location, MortarDeferredCode base, Value field) {
+      EvaluationContext context, Location location, MortarDeferredCode base, Value field) {
     context.errors.add(new AccessNotSupported(location));
     return EvaluateResult.error;
   }
@@ -132,15 +128,6 @@ public interface MortarDataType extends Artifact {
   default ROList<String> traceFields(EvaluationContext context, Location location, Object inner) {
     return ROList.empty;
   }
-
-  SemiserialSubvalue graphSemiserializeValue(
-      Object inner,
-      long importCacheId,
-      Semiserializer semiserializer,
-      ROList<Artifact> path,
-      ROList<String> accessPath);
-
-  Object graphDesemiserializeValue(ModuleCompileContext context, SemiserialSubvalue data);
 
   EvaluateResult valueVary(EvaluationContext context, Location id, Object data);
 }

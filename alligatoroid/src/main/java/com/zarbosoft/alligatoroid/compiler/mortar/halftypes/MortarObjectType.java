@@ -3,13 +3,13 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaQualifiedName;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.Field;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -43,10 +43,7 @@ public class MortarObjectType extends MortarBaseObjectType {
   public MortarDataType fork() {
     TSMap<Object, Field> forkedFields = new TSMap<>();
     for (Map.Entry<Object, Field> fieldType : fields) {
-      forkedFields.put(
-          fieldType.getKey(),
-          Field.create(
-              fieldType.getValue().internalName, fieldType.getValue().type.objectFieldFork()));
+      forkedFields.put(fieldType.getKey(), fieldType.getValue().objectFieldFork());
     }
     return MortarObjectType.create(name, forkedFields, implements_);
   }
@@ -112,8 +109,7 @@ public class MortarObjectType extends MortarBaseObjectType {
       EvaluationContext context, Location location, MortarDeferredCode base, Value field0) {
     final ROPair<Object, Field> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
-    return field.second.type.variableObjectFieldAsValue(
-        context, location, base, name.asInternalName(), field.second.internalName);
+    return field.second.variableObjectFieldAsValue(context, location, base, name.asInternalName());
   }
 
   @Override
@@ -121,25 +117,11 @@ public class MortarObjectType extends MortarBaseObjectType {
       EvaluationContext context, Location location, Object base, Value field0) {
     final ROPair<Object, Field> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
-    return field.second.type.constObjectFieldAsValue(
-        context, location, base, field.second.internalName);
+    return field.second.constObjectFieldAsValue(context, location, base);
   }
 
   @Override
   public JavaDataDescriptor jvmDesc() {
     return JavaDataDescriptor.fromJVMName(name.asInternalName());
-  }
-
-  public static class Field implements AutoBuiltinArtifact {
-    public String internalName;
-    public MortarObjectFieldType type;
-
-    public static Field create(String internalName, MortarObjectFieldType type) {
-      final Field out = new Field();
-      out.internalName = internalName;
-      out.type = type;
-      out.postInit();
-      return out;
-    }
   }
 }

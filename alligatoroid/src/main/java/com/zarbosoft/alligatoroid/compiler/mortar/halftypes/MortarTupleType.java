@@ -4,11 +4,10 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialTuple;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
@@ -26,7 +25,7 @@ import com.zarbosoft.rendaw.common.TSList;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstIntlike;
 
-public class MortarTupleType extends MortarBaseObjectType implements AutoBuiltinArtifact {
+public class MortarTupleType extends MortarBaseObjectType implements BuiltinAutoExportable {
   public static final JavaInternalName JVMNAME =
       JavaBytecodeUtils.internalNameFromClass(Tuple.class);
   public static final JavaDataDescriptor DESC = JavaDataDescriptor.fromJVMName(JVMNAME);
@@ -46,12 +45,13 @@ public class MortarTupleType extends MortarBaseObjectType implements AutoBuiltin
   }
 
   @Override
-  public SemiserialSubvalue graphSemiserializeValue(Object inner, long importCacheId, Semiserializer semiserializer, ROList<Artifact> path, ROList<String> accessPath) {
+  public SemiserialSubvalue graphSemiserializeValue(Object inner, long importCacheId, Semiserializer semiserializer, ROList<Exportable> path, ROList<String> accessPath) {
   }
 
   @Override
   public Object graphDesemiserializeValue(ModuleCompileContext context, SemiserialSubvalue data) {
  // tuple should be identityexportable
+ // store type in tuple?
 
 
     return data.dispatch(

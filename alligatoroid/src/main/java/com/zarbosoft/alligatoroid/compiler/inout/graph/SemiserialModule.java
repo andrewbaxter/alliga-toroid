@@ -3,11 +3,11 @@ package com.zarbosoft.alligatoroid.compiler.inout.graph;
 import com.zarbosoft.rendaw.common.ROList;
 
 public class SemiserialModule {
-  @Artifact.Param public SemiserialSubvalueExportable root;
-  @Artifact.Param public ROList<SemiserialExportableIdentityBody> artifacts;
+  @BuiltinAutoExportableType.Param public SemiserialUnknown root;
+  @BuiltinAutoExportableType.Param public ROList<SemiserialExportable> artifacts;
 
   public static SemiserialModule create(
-          SemiserialSubvalueExportable root, ROList<SemiserialExportableIdentityBody> artifacts) {
+      SemiserialUnknown root, ROList<SemiserialExportable> artifacts) {
     final SemiserialModule out = new SemiserialModule();
     out.root = root;
     out.artifacts = artifacts;

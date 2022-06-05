@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
@@ -41,6 +41,6 @@ public abstract class MortarBaseObjectType implements MortarSimpleDataType {
   @Override
   public EvaluateResult valueVary(EvaluationContext context, Location id, Object data) {
     return EvaluateResult.pure(
-        stackAsValue(((MortarTargetModuleContext) context.target).transfer((Artifact) data)));
+        stackAsValue(((MortarTargetModuleContext) context.target).transfer((Exportable) data)));
   }
 }

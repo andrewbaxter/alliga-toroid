@@ -1,14 +1,16 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
 import com.zarbosoft.luxem.write.Writer;
 
 import java.nio.file.Paths;
 
-public final class LocalModuleId implements ModuleId, AutoBuiltinArtifact {
+public final class LocalModuleId implements ModuleId, BuiltinAutoExportable {
   public static final String GRAPH_KEY_PATH = "path";
-  @Param public String path;
+  @BuiltinAutoExportableType.Param
+  public String path;
 
   public static LocalModuleId graphDeserialize(Record data) {
     return create((String) data.data.get(GRAPH_KEY_PATH));

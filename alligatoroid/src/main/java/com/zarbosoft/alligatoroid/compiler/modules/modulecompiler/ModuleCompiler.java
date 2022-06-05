@@ -6,7 +6,6 @@ import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.languageinout.LanguageDeserializer;
@@ -105,7 +104,7 @@ public class ModuleCompiler implements ModuleResolver {
 
     // Do 2nd pass jvm evaluation
     JavaClass preClass = new JavaClass(jvmClassName);
-    for (ROPair<Artifact, String> e : Common.iterable(targetContext.transfers.iterator())) {
+    for (ROPair<Exportable, String> e : Common.iterable(targetContext.transfers.iterator())) {
       preClass.defineStaticField(
               e.second, Meta.autoMortarHalfDataTypes.get(e.first.getClass()).jvmDesc());
     }
@@ -117,7 +116,7 @@ public class ModuleCompiler implements ModuleResolver {
                     .add(resultType.returnBytecode()),
             new TSList<>(ectxKey));
     Class klass = moduleContext.compileContext.loadRootClass(className, preClass.render());
-    for (ROPair<Artifact, String> e : Common.iterable(targetContext.transfers.iterator())) {
+    for (ROPair<Exportable, String> e : Common.iterable(targetContext.transfers.iterator())) {
       uncheck(() -> klass.getDeclaredField(e.second).set(null, e.first));
     }
     Object resultVariable;

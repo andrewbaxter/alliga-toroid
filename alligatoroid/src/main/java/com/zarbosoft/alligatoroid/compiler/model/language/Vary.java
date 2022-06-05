@@ -3,10 +3,12 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 
 public class Vary extends LanguageElement {
-  @Param public LanguageElement child;
+  @BuiltinAutoExportableType.Param
+  public LanguageElement child;
 
   @Override
   protected boolean innerHasLowerInSubtree() {

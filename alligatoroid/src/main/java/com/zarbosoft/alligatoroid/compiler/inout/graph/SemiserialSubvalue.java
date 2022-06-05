@@ -5,8 +5,9 @@ public interface SemiserialSubvalue {
       new Class[] {
         SemiserialInt.class,
         SemiserialString.class,
-        SemiserialSubvalueExportableIdentityRef.class,
-        SemiserialSubvalueExportableBuiltin.class,
+        SemiserialExportableRef.class,
+        SemiserialBuiltinRef.class,
+        SemiserialExportable.class,
         SemiserialRecord.class,
         SemiserialTuple.class,
         SemiserialBool.class,
@@ -29,43 +30,47 @@ public interface SemiserialSubvalue {
 
     T handleType(SemiserialType s);
 
-    T handleExportable(SemiserialSubvalueExportable s);
+    T handleUnknown(SemiserialUnknown s);
   }
 
-  public static class DefaultDispatcher<T> implements Dispatcher<T> {
-    @Override
-    public T handleInt(SemiserialInt s) {
-      throw new RuntimeException("got unexpected semiserial int");
-    }
-
-    @Override
-    public T handleBool(SemiserialBool s) {
-      throw new RuntimeException("got unexpected semiserial bool");
-    }
-
-    @Override
-    public T handleType(SemiserialType s) {
+  public interface DefaultDispatcher<T> extends Dispatcher<T> {
+    default T handleDefault(SemiserialSubvalue s) {
       throw new RuntimeException("got unexpected semiserial type");
     }
 
     @Override
-    public T handleExportable(SemiserialSubvalueExportable s) {
-      throw new RuntimeException("got unexpected semiserial exportable");
+    default T handleInt(SemiserialInt s) {
+      return handleDefault(s);
     }
 
     @Override
-    public T handleString(SemiserialString s) {
-      throw new RuntimeException("got unexpected semiserial string");
+    default T handleBool(SemiserialBool s) {
+      return handleDefault(s);
     }
 
     @Override
-    public T handleRecord(SemiserialRecord s) {
-      throw new RuntimeException("got unexpected semiserial record");
+    default T handleType(SemiserialType s) {
+      return handleDefault(s);
     }
 
     @Override
-    public T handleTuple(SemiserialTuple s) {
-      throw new RuntimeException("got unexpected semiserial tuple");
+    default T handleUnknown(SemiserialUnknown s) {
+      return handleDefault(s);
+    }
+
+    @Override
+    default T handleString(SemiserialString s) {
+      return handleDefault(s);
+    }
+
+    @Override
+    default T handleRecord(SemiserialRecord s) {
+      return handleDefault(s);
+    }
+
+    @Override
+    default T handleTuple(SemiserialTuple s) {
+      return handleDefault(s);
     }
   }
 }

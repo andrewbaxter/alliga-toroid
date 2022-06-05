@@ -5,10 +5,9 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRecord;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.ExtraField;
@@ -29,7 +28,7 @@ import com.zarbosoft.rendaw.common.TSOrderedMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public class MortarRecordType extends MortarBaseObjectType
-    implements AutoBuiltinArtifact, Artifact {
+    implements BuiltinAutoExportable {
   public final TSOrderedMap<Object, ROPair<Integer, MortarTupleFieldType>> fields;
 
   public MortarRecordType(TSOrderedMap<Object, ROPair<Integer, MortarTupleFieldType>> fields) {

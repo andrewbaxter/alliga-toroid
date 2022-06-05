@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.error.NotRecordPair;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
@@ -12,7 +13,8 @@ import com.zarbosoft.rendaw.common.TSOrderedMap;
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstKey;
 
 public class Record extends LanguageElement {
-  @Param public ROList<LanguageElement> elements;
+  @BuiltinAutoExportableType.Param
+  public ROList<LanguageElement> elements;
 
   @Override
   protected boolean innerHasLowerInSubtree() {

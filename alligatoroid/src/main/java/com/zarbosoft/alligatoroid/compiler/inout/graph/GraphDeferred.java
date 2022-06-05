@@ -2,7 +2,6 @@ package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.model.ids.UniqueId;
-import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinArtifact;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
@@ -14,15 +13,15 @@ import java.util.Objects;
  * @param <K>
  * @param <T>
  */
-public class GraphDeferred<T extends Artifact> implements IdentityArtifact {
+public class GraphDeferred<T> implements Exportable {
   public static final String SEMIKEY_REF = "ref";
   public static final String SEMIKEY_ID = "id";
-  public static final ExportType exportType = new ExportType();
-  public SemiserialSubvalueExportable ref;
+  public static final ExportableType exportType = new ExportableType();
+  public SemiserialUnknown ref;
   public UniqueId id;
   public T artifact;
 
-  public static <T extends Artifact> GraphDeferred<T> create(UniqueId uniqueId, T artifact) {
+  public static <T> GraphDeferred<T> create(UniqueId uniqueId, T artifact) {
     final GraphDeferred<T> out = new GraphDeferred<>();
     out.id = uniqueId;
     out.artifact = artifact;
@@ -43,7 +42,7 @@ public class GraphDeferred<T extends Artifact> implements IdentityArtifact {
   }
 
   @Override
-  public IdentityArtifactType exportableType() {
+  public com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType exportableType() {
     return exportType;
   }
 
@@ -51,7 +50,7 @@ public class GraphDeferred<T extends Artifact> implements IdentityArtifact {
   public SemiserialSubvalue graphSemiserializeBody(
       long importCacheId,
       Semiserializer semiserializer,
-      ROList<Artifact> path,
+      ROList<Semiserializable> path,
       ROList<String> accessPath) {
     return SemiserialRecord.create(
         new TSOrderedMap<>(
@@ -66,26 +65,26 @@ public class GraphDeferred<T extends Artifact> implements IdentityArtifact {
                             accessPath.mut().add("id")))));
   }
 
-  public static class ExportType implements SingletonBuiltinArtifact, IdentityArtifactType {
+  public static class ExportableType implements BuiltinSingletonExportable, com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType {
     @Override
-    public IdentityArtifact graphDesemiserializeBody(
+    public Object graphDesemiserializeBody(
         ModuleCompileContext context,
         Desemiserializer typeDesemiserializer,
         SemiserialSubvalue data) {
       return data.dispatch(
           new SemiserialSubvalue.DefaultDispatcher<>() {
             @Override
-            public IdentityArtifact handleRecord(SemiserialRecord s) {
-              final GraphDeferred<Artifact> out = new GraphDeferred<>();
+            public Exportable handleRecord(SemiserialRecord s) {
+              final GraphDeferred<Semiserializable> out = new GraphDeferred<>();
               out.ref =
-                  (SemiserialSubvalueExportable)
+                  (SemiserialUnknown)
                       context.lookupRef(
-                          (SemiserialSubvalueExportable)
+                          (SemiserialUnknown)
                               s.data.get(SemiserialString.create(SEMIKEY_REF)));
               out.id =
                   (UniqueId)
                       context.lookupRef(
-                          (SemiserialSubvalueExportable)
+                          (SemiserialUnknown)
                               s.data.get(SemiserialString.create(SEMIKEY_ID)));
               return out;
             }

@@ -3,7 +3,8 @@ package com.zarbosoft.alligatoroid.compiler.inout.graph;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 
 public class SemiserialRecord implements SemiserialSubvalue {
-  @Artifact.Param public ROOrderedMap<SemiserialSubvalue, SemiserialSubvalue> data;
+  @BuiltinAutoExportableType.Param
+  public ROOrderedMap<SemiserialSubvalue, SemiserialSubvalue> data;
 
   public static SemiserialRecord create(ROOrderedMap<SemiserialSubvalue, SemiserialSubvalue> data) {
     final SemiserialRecord out = new SemiserialRecord();

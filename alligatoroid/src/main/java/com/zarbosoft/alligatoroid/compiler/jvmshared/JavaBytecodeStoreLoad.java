@@ -1,9 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.rendaw.common.Assertion;
 
-public class JavaBytecodeStoreLoad implements JavaBytecode, AutoBuiltinArtifact {
+public class JavaBytecodeStoreLoad implements JavaBytecode, BuiltinAutoExportable {
   public int code;
   public JavaBytecodeBindingKey key;
 

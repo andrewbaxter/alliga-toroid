@@ -1,8 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
-import com.zarbosoft.alligatoroid.compiler.inout.utils.graphauto.AutoBuiltinArtifact;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 
-public class JavaBytecodeLineNumber implements JavaBytecode, AutoBuiltinArtifact {
+public class JavaBytecodeLineNumber implements JavaBytecode, BuiltinAutoExportable {
   public int lineNumber;
 
   public static JavaBytecodeLineNumber create(int number) {

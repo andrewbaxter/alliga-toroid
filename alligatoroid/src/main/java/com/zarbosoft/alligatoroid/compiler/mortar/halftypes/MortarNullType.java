@@ -3,7 +3,6 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Artifact;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
@@ -14,12 +13,12 @@ import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.graph.SingletonBuiltinArtifact;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinSingletonExportable;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class MortarNullType implements MortarSimpleDataType, SingletonBuiltinArtifact {
+public class MortarNullType implements MortarSimpleDataType, BuiltinSingletonExportable {
   public static final MortarNullType type = new MortarNullType();
 
   private MortarNullType() {}
@@ -66,7 +65,7 @@ public class MortarNullType implements MortarSimpleDataType, SingletonBuiltinArt
   }
 
   @Override
-  public SemiserialSubvalue graphSemiserializeValue(Object inner, long importCacheId, Semiserializer semiserializer, ROList<Artifact> path, ROList<String> accessPath) {
+  public SemiserialSubvalue graphSemiserializeValue(Object inner, long importCacheId, Semiserializer semiserializer, ROList<Exportable> path, ROList<String> accessPath) {
     throw new Assertion();
   }
 
