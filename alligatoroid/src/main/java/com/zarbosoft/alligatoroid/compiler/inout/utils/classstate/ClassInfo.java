@@ -3,7 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.inout.utils.classstate;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateRecordBody;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.DefaultStateArrayBody;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.Prototype;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.ProtoType;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeInt;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeString;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateArray;
@@ -31,7 +31,7 @@ public class ClassInfo {
   // TODO move into derivation
   public final String luxemType;
   public Class klass;
-  public ROMap<String, Prototype> fields;
+  public ROMap<String, ProtoType> fields;
   public Object fallback;
 
   public ClassInfo(String luxemType) {
@@ -39,19 +39,19 @@ public class ClassInfo {
   }
 
   public void fill(Class klass) {
-    TSMap<String, Prototype> fields = new TSMap<>();
+    TSMap<String, ProtoType> fields = new TSMap<>();
     for (Field field0 : klass.getFields()) {
       if (Modifier.isStatic(field0.getModifiers())) continue;
       if (field0.getAnnotation(BuiltinAutoExportableType.Param.class) == null) continue;
       final TypeInfo field = TypeInfo.fromField(field0);
-      Prototype prototype;
+      ProtoType prototype;
       if (field.klass == int.class) {
         prototype = PrototypeInt.instance;
       } else if (field.klass == String.class) {
         prototype = PrototypeString.instance;
       } else if (ROList.class.isAssignableFrom(field.klass)) {
         prototype =
-            new Prototype() {
+            new ProtoType() {
               @Override
               public BaseStateSingle create(TSList<Error> errors, LuxemPathBuilder luxemPath) {
                 return new StateArray(
@@ -79,7 +79,7 @@ public class ClassInfo {
             };
       } else if (ROSetRef.class.isAssignableFrom(field.klass)) {
         prototype =
-            new Prototype() {
+            new ProtoType() {
               @Override
               public BaseStateSingle create(TSList<Error> errors, LuxemPathBuilder luxemPath) {
                 return new StateArray(
@@ -107,7 +107,7 @@ public class ClassInfo {
             };
       } else if (ROMap.class.isAssignableFrom(field.klass)) {
         prototype =
-            new Prototype() {
+            new ProtoType() {
               @Override
               public BaseStateSingle create(TSList<Error> errors, LuxemPathBuilder luxemPath) {
                 return new StateRecord(

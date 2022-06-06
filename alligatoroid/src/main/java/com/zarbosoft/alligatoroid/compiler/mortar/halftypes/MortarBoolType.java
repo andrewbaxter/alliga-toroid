@@ -18,7 +18,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinSingletonExportabl
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class MortarBoolType implements MortarSimpleDataType, BuiltinSingletonExportable {
+public class MortarBoolType implements MortarSimpleDataType {
   public static final MortarBoolType type = new MortarBoolType();
 
   private MortarBoolType() {}

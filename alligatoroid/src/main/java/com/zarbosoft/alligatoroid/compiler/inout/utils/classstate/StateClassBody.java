@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.inout.utils.classstate;
 
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateRecordBody;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.Prototype;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.ProtoType;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.State;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateErrorSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateString;
@@ -42,7 +42,7 @@ public class StateClassBody<C, T> extends BaseStateRecordBody<C, T> {
       ok = false;
       return StateErrorSingle.state;
     }
-    Prototype proto = info.fields.getOpt(key);
+    ProtoType proto = info.fields.getOpt(key);
     if (proto == null) {
       errors.add(
           new DeserializeUnknownField(
@@ -59,7 +59,7 @@ public class StateClassBody<C, T> extends BaseStateRecordBody<C, T> {
   public T build(C context, TSList<Error> errors) {
     if (!ok) return (T) info.fallback;
     T out = (T) uncheck(() -> info.klass.getConstructors()[0].newInstance());
-    for (Map.Entry<String, Prototype> field : info.fields) {
+    for (Map.Entry<String, ProtoType> field : info.fields) {
       State fieldState = fields.getOpt(field.getKey());
       if (fieldState == null) {
         ok = false;

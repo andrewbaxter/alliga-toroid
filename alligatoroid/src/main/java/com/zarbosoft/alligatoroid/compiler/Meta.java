@@ -1,6 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.builtin.Builtin;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinSingletonExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.InlineType;
@@ -11,8 +14,6 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialTuple;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto.TypeInfo;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
@@ -39,13 +40,12 @@ import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
 import com.zarbosoft.alligatoroid.compiler.model.language.Wrap;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinSingletonExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarBytesType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStaticMethodType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStringType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.ProtoType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
@@ -370,7 +370,7 @@ public class Meta {
       argTypes.add(new ROPair<>(parameter.getName(), paramType));
     }
 
-    MortarDataType retType = dataDescriptor(working, method.getReturnType());
+    ProtoType retType = dataDescriptor(working, method.getReturnType());
 
     return new FuncInfo(
         method.getName(),
@@ -427,7 +427,7 @@ public class Meta {
    * @param builtinSingletons0
    * @return
    */
-  public static MortarSimpleDataType dataDescriptor(WorkingMeta working, Class klass) {
+  public static ProtoType dataDescriptor(WorkingMeta working, Class klass) {
     if (klass == void.class) {
       return nullType;
     } else if (klass == String.class) {
@@ -544,7 +544,7 @@ public class Meta {
     public MortarSimpleDataType generateMortarType(Class klass) {
       MortarSimpleDataType out = autoMortarHalfDataTypes.getOpt(klass);
       if (out == null) {
-        TSMap<Object, MortarObjectFieldType> fields = new TSMap<>();
+        TSMap<Object, com.zarbosoft.alligatoroid.compiler.mortar.Field> fields = new TSMap<>();
         TSList<MortarDataType> inherits = new TSList<>();
         MortarObjectType out1 =
             MortarObjectType.create(JavaBytecodeUtils.qualifiedNameFromClass(klass), fields, inherits);
@@ -613,14 +613,14 @@ public class Meta {
     public final String name;
     public final JavaQualifiedName base;
     public final ROList<ROPair<Object, MortarDataType>> arguments;
-    public final MortarDataType returnType;
+    public final ProtoType returnType;
     public final boolean needsLocation;
 
     public FuncInfo(
         String name,
         JavaQualifiedName base,
         ROList<ROPair<Object, MortarDataType>> arguments,
-        MortarDataType returnType,
+        ProtoType returnType,
         boolean needsLocation) {
       this.name = name;
       this.base = base;

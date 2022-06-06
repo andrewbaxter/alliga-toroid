@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
-import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.Prototype;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.ProtoType;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeBool;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeInt;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeROList;
@@ -155,12 +155,12 @@ public class AutoTreeMeta {
     } else {
       final AutoInfoClass info = new AutoInfoClass(this, klass);
       infos.put(klass, info);
-      TSMap<String, Prototype> fields = new TSMap<>();
+      TSMap<String, ProtoType> fields = new TSMap<>();
       for (Field field : klass.getFields()) {
         if (Modifier.isStatic(field.getModifiers())) continue;
         if (field.getAnnotation(BuiltinAutoExportableType.Param.class) == null) continue;
         TypeInfo fieldInfo = TypeInfo.fromField(field);
-        Prototype prototype;
+        ProtoType prototype;
         if (ROList.class.isAssignableFrom(fieldInfo.klass)) {
           final Class genericArg = fieldInfo.genericArgs[0].klass;
           scan(genericArg);

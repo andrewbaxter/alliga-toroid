@@ -6,11 +6,11 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
-public class PrototypeROOrderedMap implements Prototype {
-  private final Prototype key;
-  private final Prototype value;
+public class PrototypeROOrderedMap implements ProtoType {
+  private final ProtoType key;
+  private final ProtoType value;
 
-  public PrototypeROOrderedMap(Prototype key, Prototype value) {
+  public PrototypeROOrderedMap(ProtoType key, ProtoType value) {
     this.key = key;
     this.value = value;
   }

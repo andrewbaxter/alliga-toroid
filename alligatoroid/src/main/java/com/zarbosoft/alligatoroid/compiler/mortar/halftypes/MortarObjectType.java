@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaQualifiedName;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
@@ -24,7 +25,7 @@ import java.util.function.Function;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstKey;
 
-public class MortarObjectType extends MortarBaseObjectType {
+public class MortarObjectType extends MortarBaseObjectType implements BuiltinAutoExportable {
   public JavaQualifiedName name;
   public ROMap<Object, Field> fields;
   public ROList<MortarDataType> implements_;

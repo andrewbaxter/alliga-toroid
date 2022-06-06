@@ -4,7 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class PrototypeInt implements Prototype {
+public class PrototypeInt implements ProtoType {
   public static final PrototypeInt instance = new PrototypeInt();
 
   private PrototypeInt() {}

@@ -5,10 +5,10 @@ import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
-public class PrototypeROSetRef implements Prototype {
-  private final Prototype inner;
+public class PrototypeROSetRef implements ProtoType {
+  private final ProtoType inner;
 
-  public PrototypeROSetRef(Prototype inner) {
+  public PrototypeROSetRef(ProtoType inner) {
     this.inner = inner;
   }
 

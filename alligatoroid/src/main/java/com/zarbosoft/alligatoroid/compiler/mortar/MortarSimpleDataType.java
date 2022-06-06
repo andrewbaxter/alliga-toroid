@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinSingletonExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
@@ -13,6 +14,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCod
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarTupleFieldType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.ProtoType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataValue;
 import com.zarbosoft.rendaw.common.TSList;
@@ -20,7 +22,7 @@ import com.zarbosoft.rendaw.common.TSList;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public interface MortarSimpleDataType
-    extends MortarObjectFieldType, MortarTupleFieldType, MortarDataType {
+    extends MortarObjectFieldType, MortarTupleFieldType, MortarDataType, ProtoType, BuiltinSingletonExportable {
   @Override
   default EvaluateResult variableObjectFieldAsValue(
       EvaluationContext context,

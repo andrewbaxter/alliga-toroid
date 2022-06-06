@@ -18,7 +18,7 @@ import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class MortarNullType implements MortarSimpleDataType, BuiltinSingletonExportable {
+public class MortarNullType implements MortarSimpleDataType {
   public static final MortarNullType type = new MortarNullType();
 
   private MortarNullType() {}
