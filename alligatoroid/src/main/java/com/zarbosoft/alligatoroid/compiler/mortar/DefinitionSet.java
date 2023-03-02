@@ -4,16 +4,18 @@ import com.zarbosoft.alligatoroid.compiler.CompileContext;
 import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.GraphDeferred;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.GraphDeferred;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.UniqueId;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.StaticMethodMeta;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataProtoType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStaticMethodType;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
@@ -40,7 +42,7 @@ public class DefinitionSet implements BuiltinAutoExportable {
   }
 
   @Meta.WrapExpose
-  public FunctionRet function(ROList<MortarDataType> arguments, MortarDataType ret) {
+  public FunctionRet function(TSList<ROPair<Object, MortarDataProtoType>> arguments, MortarDataProtoType ret) {
     String className =
         Format.format(
             "com.zarbosoft.alligatoroidmortar.ModuleClass%s_%s_%s",
@@ -111,10 +113,10 @@ public class DefinitionSet implements BuiltinAutoExportable {
   }
 
   public static class Transfer implements BuiltinAutoExportable {
-    public Exportable data;
+    public Object data;
     public String name;
 
-    public static Transfer create(Exportable data, String name) {
+    public static Transfer create(Object data, String name) {
       final Transfer out = new Transfer();
       out.data = data;
       out.name = name;

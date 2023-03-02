@@ -68,7 +68,7 @@ public class MortarStaticMethodType extends MortarBaseObjectType implements Buil
       return new EvaluateResult(
           new MortarTargetCode(pre),
           new MortarTargetCode(post),
-          funcInfo.returnType.stackAsValue(code));
+          funcInfo.returnType.protoTypeStackAsValue(code));
   }
 
   @Override

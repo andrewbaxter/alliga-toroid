@@ -35,27 +35,6 @@ public class MortarBoolType implements MortarSimpleDataType {
   }
 
   @Override
-  public SemiserialSubvalue graphSemiserializeValue(
-      Object inner,
-      long importCacheId,
-      Semiserializer semiserializer,
-      ROList<Exportable> path,
-      ROList<String> accessPath) {
-    return SemiserialBool.create((Boolean) inner);
-  }
-
-  @Override
-  public Object graphDesemiserializeValue(ModuleCompileContext context, SemiserialSubvalue data) {
-    return data.dispatch(
-        new SemiserialSubvalue.DefaultDispatcher<>() {
-          @Override
-          public Object handleBool(SemiserialBool s) {
-            return s.value;
-          }
-        });
-  }
-
-  @Override
   public EvaluateResult valueVary(EvaluationContext context, Location id, Object data) {
     return EvaluateResult.pure(stackAsValue(JavaBytecodeUtils.literalBool((Boolean) data)));
   }

@@ -13,7 +13,7 @@ import com.zarbosoft.rendaw.common.TSList;
  * level array of artifacts. Multiple referrers will refer to the same artifact (it only gets
  * semiserialized once)
  */
-public interface ExportableType {
+public interface ExportableType extends Exportable {
   Object graphDesemiserializeBody(
       ModuleCompileContext context, Desemiserializer typeDesemiserializer, SemiserialSubvalue data);
 
@@ -68,8 +68,6 @@ public interface ExportableType {
                 importCacheId, semiserializer, newPath, accessPath, exportable)));
     return SemiserialExportableRef.create(id);
   }
-
-  ExportableType exportableType();
 
   SemiserialSubvalue graphSemiserializeBody(
       long importCacheId,

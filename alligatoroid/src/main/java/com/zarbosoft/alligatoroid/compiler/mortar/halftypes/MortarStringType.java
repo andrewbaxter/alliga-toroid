@@ -12,10 +12,11 @@ import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinSingletonExportable;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class MortarStringType extends MortarBaseObjectType implements BuiltinSingletonExportable {
+public class MortarStringType extends MortarBaseObjectType implements MortarSimpleDataType {
   public static final MortarStringType type = new MortarStringType();
 
   private MortarStringType() {}
@@ -29,27 +30,6 @@ public class MortarStringType extends MortarBaseObjectType implements BuiltinSin
       return false;
     }
     return true;
-  }
-
-  @Override
-  public SemiserialSubvalue graphSemiserializeValue(
-      Object inner,
-      long importCacheId,
-      Semiserializer semiserializer,
-      ROList<Exportable> path,
-      ROList<String> accessPath) {
-    return SemiserialString.create((String) inner);
-  }
-
-  @Override
-  public Object graphDesemiserializeValue(ModuleCompileContext context, SemiserialSubvalue data) {
-    return data.dispatch(
-        new SemiserialSubvalue.DefaultDispatcher<>() {
-          @Override
-          public Object handleString(SemiserialString s) {
-            return s.value;
-          }
-        });
   }
 
   @Override

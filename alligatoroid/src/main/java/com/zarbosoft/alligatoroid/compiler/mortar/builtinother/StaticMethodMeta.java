@@ -3,11 +3,10 @@ package com.zarbosoft.alligatoroid.compiler.mortar.builtinother;
 import com.zarbosoft.alligatoroid.compiler.Evaluator;
 import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.GraphDeferred;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeInstruction;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaClass;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
@@ -17,12 +16,11 @@ import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataBinding;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataProtoType;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
-import org.objectweb.asm.tree.InsnNode;
 
 public class StaticMethodMeta {
   public final Meta.FuncInfo funcInfo;
@@ -44,10 +42,11 @@ public class StaticMethodMeta {
 
     TSList<JavaBytecodeBindingKey> initialIndexes = new TSList<>();
     final TSOrderedMap<Object, Binding> initialBindings = new TSOrderedMap<>();
-    for (ROPair<Object, MortarDataType> argument : funcInfo.arguments) {
+    for (ROPair<Object, MortarDataProtoType> argument : funcInfo.arguments) {
       final JavaBytecodeBindingKey key = new JavaBytecodeBindingKey();
       initialIndexes.add(key);
-      initialBindings.putNew(argument.first, new MortarDataBinding(key, argument.second));
+      initialBindings.putNew(
+          argument.first, new MortarDataBinding(key, argument.second.protoTypeNewType()));
     }
 
     // Do evaluation
@@ -59,7 +58,7 @@ public class StaticMethodMeta {
     if (firstPass.errors.some()) {
       throw new RuntimeException("Couldn't implement function, see body for specific errors.");
     }
-    if (!funcInfo.returnType.assertAssignableFrom(
+    if (!funcInfo.returnType.protoTypeAssertAssignableFrom(
         context.moduleContext.errors, tree.id, firstPass.value)) {
       throw new RuntimeException("Couldn't implement function, see body for specific errors.");
     }
@@ -78,14 +77,14 @@ public class StaticMethodMeta {
         JavaMethodDescriptor.fromParts(funcInfo.returnType.jvmDesc(), funcInfo.argDescriptor()),
         new JavaBytecodeSequence()
             .add(((MortarTargetCode) firstPass.code).e)
-            .add(funcInfo.returnType.assignFrom(firstPass.value))
-            .add(new JavaBytecodeInstruction(new InsnNode(funcInfo.returnType.returnBytecode()))),
+            .add(funcInfo.returnType.protoTypeAssignFrom(firstPass.value))
+            .add(funcInfo.returnType.protoTypeReturnBytecode()),
         initialIndexes);
 
     // Register definition in set
     final TSList<DefinitionSet.Transfer> transfers = new TSList<>();
     for (ROPair<ObjId<Object>, String> transfer : targetContext.transfers) {
-      transfers.add(DefinitionSet.Transfer.create(transfer.first, transfer.second));
+      transfers.add(DefinitionSet.Transfer.create(transfer.first.obj, transfer.second));
     }
     definitionSet.definitions.put(
         funcInfo.base.toString(), DefinitionSet.Definition.create(preClass.render(), transfers));

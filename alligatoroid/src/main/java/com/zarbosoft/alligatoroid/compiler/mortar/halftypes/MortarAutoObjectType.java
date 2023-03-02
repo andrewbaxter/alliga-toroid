@@ -95,7 +95,7 @@ public class MortarAutoObjectType extends MortarBaseObjectType implements Builti
   public EvaluateResult variableValueAccess(EvaluationContext context, Location location, MortarDeferredCode base, Value field0) {
     final ROPair<Object, MortarObjectFieldType> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
-    return field.second.variableObjectFieldAsValue(context, location, targetCarry, this);
+    return field.second.variableObjectFieldAsValue(context, location, base);
   }
 
   @Override
@@ -103,7 +103,7 @@ public class MortarAutoObjectType extends MortarBaseObjectType implements Builti
       EvaluationContext context, Location location, Object value, Value field0) {
     final ROPair<Object, MortarObjectFieldType> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
-    return field.second.constObjectFieldAsValue(context, location, value, field.second.internalName);
+    return field.second.constObjectFieldAsValue(context, location, value);
   }
 
   @Override

@@ -10,7 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 
-public abstract class MortarBaseObjectType implements MortarSimpleDataType {
+public abstract class MortarBaseObjectType implements MortarDataType {
   protected MortarBaseObjectType() {}
 
   @Override

@@ -2,8 +2,10 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinSingletonExportable;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
@@ -11,10 +13,10 @@ import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Tuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeAccessObjectField;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeAccessTupleField;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataProtoType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectFieldType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarTupleFieldType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.ProtoType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataValue;
 import com.zarbosoft.rendaw.common.TSList;
@@ -22,14 +24,36 @@ import com.zarbosoft.rendaw.common.TSList;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public interface MortarSimpleDataType
-    extends MortarObjectFieldType, MortarTupleFieldType, MortarDataType, ProtoType, BuiltinSingletonExportable {
+    extends
+        MortarTupleFieldType,
+        MortarDataType,
+        MortarDataProtoType,
+        BuiltinSingletonExportable {
+  @Override
+  default boolean protoTypeAssertAssignableFrom(TSList<Error> errors, Location id, Value value) {
+    return assertAssignableFrom(errors, id, value);
+  }
+
+  @Override
+  default Value protoTypeStackAsValue(JavaBytecodeSequence code) {
+    return stackAsValue(code);
+  }
+
+  @Override
+  default JavaBytecode protoTypeReturnBytecode() {
+    return returnBytecode();
+  }
+
+  @Override
+  default MortarDataType protoTypeNewType() {
+    return this;
+  }
+
   @Override
   default EvaluateResult variableObjectFieldAsValue(
-      EvaluationContext context,
-      Location location,
-      MortarDeferredCode baseCode,
-      JavaInternalName baseName,
-      String fieldName) {
+          EvaluationContext context,
+          Location location,
+          MortarDeferredCode baseCode) {
     return EvaluateResult.pure(
         new VariableDataValue(
             this,
@@ -65,7 +89,7 @@ public interface MortarSimpleDataType
 
   @Override
   default EvaluateResult constObjectFieldAsValue(
-      EvaluationContext context, Location location, Object base, String name) {
+          EvaluationContext context, Location location, Object base) {
     return EvaluateResult.pure(
         ConstDataValue.create(this, uncheck(() -> base.getClass().getField(name).get(base))));
   }
