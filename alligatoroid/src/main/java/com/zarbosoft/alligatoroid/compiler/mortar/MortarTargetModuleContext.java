@@ -2,13 +2,13 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.TargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeInstruction;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeInstructionObj;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
@@ -16,21 +16,19 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongTarget;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.DataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataConstValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 import com.zarbosoft.rendaw.common.TSSet;
 import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
-import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.NEW;
@@ -50,9 +48,9 @@ public class MortarTargetModuleContext implements TargetModuleContext {
   static {
     JavaBytecodeSequence javaBytecodeSequence = new JavaBytecodeSequence();
     javaBytecodeSequence.add(
-        new JavaBytecodeInstruction(
+        new JavaBytecodeInstructionObj(
             new TypeInsnNode(NEW, JavaBytecodeUtils.internalNameFromClass(TSList.class).value)));
-    javaBytecodeSequence.add(new JavaBytecodeInstruction(new InsnNode(DUP)));
+    javaBytecodeSequence.add(JavaBytecodeUtils.dup);
     newTSListCode =
         javaBytecodeSequence.add(
             JavaBytecodeUtils.callConstructor(
@@ -64,7 +62,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
   static {
     JavaBytecodeSequence javaBytecodeSequence = new JavaBytecodeSequence();
     javaBytecodeSequence.add(
-        new JavaBytecodeInstruction(
+        new JavaBytecodeInstructionObj(
             new MethodInsnNode(
                 INVOKEVIRTUAL,
                 JavaBytecodeUtils.internalNameFromClass(TSList.class).value,
@@ -141,15 +139,15 @@ public class MortarTargetModuleContext implements TargetModuleContext {
   @Override
   public EvaluateResult vary(EvaluationContext context, Location id, Value value) {
     if (value instanceof VariableDataValue) return EvaluateResult.pure(value);
-    if (value instanceof ConstDataValue)
-      return ((ConstDataValue) value)
+    if (value instanceof MortarDataConstValue)
+      return ((MortarDataConstValue) value)
           .mortarType()
-          .valueVary(context, id, ((ConstDataValue) value).getInner());
-    return Meta.autoMortarHalfDataTypes.get(Value.class).valueVary(context, id, value);
+          .type_valueVary(context, id, ((MortarDataConstValue) value).getInner());
+    return StaticAutogen.autoMortarHalfObjectTypes.get(Value.class).valueVary(context, id, value);
   }
 
   public JavaBytecodeSequence transfer(Object object) {
-    String name = transfers.getOpt(object);
+    String name = transfers.getOpt(new ObjId(object));
     if (name == null) {
       name = TRANSFER_PREFIX + transfers.size();
       transfers.put(object, name);

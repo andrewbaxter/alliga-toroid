@@ -30,7 +30,7 @@ public interface SemiserialSubvalue {
 
     T handleType(SemiserialType s);
 
-    T handleUnknown(SemiserialUnknown s);
+    T handleUnknown(SemiserialRef s);
   }
 
   public interface DefaultDispatcher<T> extends Dispatcher<T> {
@@ -54,7 +54,7 @@ public interface SemiserialSubvalue {
     }
 
     @Override
-    default T handleUnknown(SemiserialUnknown s) {
+    default T handleUnknown(SemiserialRef s) {
       return handleDefault(s);
     }
 

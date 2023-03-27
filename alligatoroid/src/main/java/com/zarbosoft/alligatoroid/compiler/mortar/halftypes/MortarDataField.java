@@ -8,8 +8,8 @@ import com.zarbosoft.alligatoroid.compiler.mortar.Field;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.ObjectMeta;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeAccessObjectField;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataConstValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataVariableValue;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
@@ -28,7 +28,7 @@ public class MortarDataField implements Field {
   public EvaluateResult constObjectFieldAsValue(
       EvaluationContext context, Location location, Object base) {
     return EvaluateResult.pure(
-        ConstDataValue.create(
+        MortarDataConstValue.create(
             mortarDataType, uncheck(() -> base.getClass().getField(name).get(base))));
   }
 
@@ -39,14 +39,14 @@ public class MortarDataField implements Field {
 
   @Override
   public JavaDataDescriptor jvmDesc() {
-    return mortarDataType.jvmDesc();
+    return mortarDataType.type_jvmDesc();
   }
 
   @Override
   public EvaluateResult variableObjectFieldAsValue(
       EvaluationContext context, Location location, MortarDeferredCode baseCode) {
     return EvaluateResult.pure(
-        new VariableDataValue(
+        new MortarDataVariableValue(
             mortarDataType,
             new MortarDeferredCodeAccessObjectField(
                 baseCode, baseMeta.name.asInternalName(), name, jvmDesc())));

@@ -27,6 +27,14 @@ public interface Value {
     return null;
   }
 
+  /**
+   * Prepare a serializable form of the current value - for mutable values, to finalize into an
+   * immutable value for instance.
+   *
+   * @param context
+   * @param location
+   * @return
+   */
   public default EvaluateResult export(EvaluationContext context, Location location) {
     context.errors.add(new ExportNotSupported(location));
     return EvaluateResult.error;
@@ -59,7 +67,16 @@ public interface Value {
     return EvaluateResult.error;
   }
 
+  /**
+   * For autocompletion, returns a list of field names (for values with plain text fields).
+   *
+   * @param context
+   * @param location
+   * @return
+   */
   default ROList<String> traceFields(EvaluationContext context, Location location) {
     return ROList.empty;
   }
+
+  EvaluateResult vary(EvaluationContext context, Location id);
 }

@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.builtin;
 
-import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaClass;
@@ -10,7 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaQualifiedName;
 import com.zarbosoft.rendaw.common.ROList;
 
-@Meta.BuiltinAggregate
+@StaticAutogen.BuiltinAggregate
 public class BuiltinJavaBytecode {
   public static final BuiltinJavaBytecodeCode code = null;
   public static final BuiltinJavaBytecodeDescriptors desc = null;

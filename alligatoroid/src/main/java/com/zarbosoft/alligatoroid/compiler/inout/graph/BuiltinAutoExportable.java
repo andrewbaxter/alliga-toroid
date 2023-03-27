@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 
 /** Mixin to automatically semiserialize value based on (single) constructor arguments. */
 public interface BuiltinAutoExportable extends Exportable {
@@ -9,6 +9,6 @@ public interface BuiltinAutoExportable extends Exportable {
 
   @Override
   default ExportableType exportableType() {
-    return Meta.autoExportableTypeLookup.get(getClass());
+    return StaticAutogen.autoExportableTypeLookup.get(getClass());
   }
 }

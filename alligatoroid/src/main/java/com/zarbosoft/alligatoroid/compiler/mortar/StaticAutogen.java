@@ -1,5 +1,8 @@
-package com.zarbosoft.alligatoroid.compiler;
+package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
+import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
+import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.builtin.Builtin;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
@@ -38,22 +41,16 @@ import com.zarbosoft.alligatoroid.compiler.model.language.RecordElement;
 import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
 import com.zarbosoft.alligatoroid.compiler.model.language.Wrap;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarMethodFieldType;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.ObjectMeta;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarBytesType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataProtoType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarFieldProtoType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectProtoType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataPrototype;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectPrototype;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarPrimitivePrototype;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarProtofield;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStaticMethodType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStringType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataConstValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataVariableValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NoExportValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.VariableDataValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -71,19 +68,22 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Map;
 
-import static com.zarbosoft.alligatoroid.compiler.builtin.Builtin.nullType;
 import static com.zarbosoft.alligatoroid.compiler.inout.graph.AutoSemiUtils.autoDesemiAnyViaReflect;
 import static com.zarbosoft.alligatoroid.compiler.inout.graph.AutoSemiUtils.autoSemiAnyViaReflect;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class Meta {
-  public static final ROMap<Class, InlineType> inlineTypeLookup;
+public class StaticAutogen {
+  public static final ROMap<Class, InlineType> graphInlineTypeLookup;
   public static final ROMap<Class, ExportableType> autoExportableTypeLookup;
   public static final ROMap<Object, String> singletonExportableKeyLookup;
   public static final ROMap<String, Object> singletonExportableLookup;
   public static final ROMap<Class, ExportableType> detachedExportableTypeLookup;
-  public static TSMap<Class, MortarObjectProtoType> autoMortarHalfDataTypes;
-  public static LooseRecord builtin;
+  public static final ROMap<Class, MortarObjectPrototype> autoMortarHalfObjectTypes;
+  public static final ROMap<Class, MortarDataPrototype> primitivePrototypeLookup;
+  public static final LooseRecord builtin;
+  public static final MortarDataPrototype prototypeLanguageElement;
+  public static final MortarObjectPrototype prototypeValue;
+  public static final MortarObjectPrototype prototypeLocation;
 
   static {
     final WorkingMeta working = new WorkingMeta();
@@ -233,6 +233,7 @@ public class Meta {
     working.inlineTypeLookup.put(Integer.class, intConverter);
     working.detachedExportType(int.class, intConverter);
     working.detachedExportType(Integer.class, intConverter);
+    working.primitivePrototypeLookup.put(int.class, MortarPrimitivePrototype.intPrototype);
 
     InlineType boolConverter =
         new InlineType() {
@@ -266,6 +267,7 @@ public class Meta {
     working.inlineTypeLookup.put(Boolean.class, boolConverter);
     working.detachedExportType(boolean.class, boolConverter);
     working.detachedExportType(Boolean.class, boolConverter);
+    working.primitivePrototypeLookup.put(boolean.class, MortarPrimitivePrototype.boolPrototype);
 
     InlineType stringConverter =
         new InlineType() {
@@ -297,6 +299,10 @@ public class Meta {
         };
     working.inlineTypeLookup.put(String.class, stringConverter);
     working.detachedExportType(String.class, stringConverter);
+    working.primitivePrototypeLookup.put(String.class, MortarPrimitivePrototype.stringPrototype);
+
+    working.primitivePrototypeLookup.put(byte.class, MortarPrimitivePrototype.bytePrototype);
+    working.primitivePrototypeLookup.put(byte[].class, MortarPrimitivePrototype.bytesPrototype);
 
     working.generateMortarType(ModuleId.class);
     {
@@ -341,15 +347,20 @@ public class Meta {
       working.generateMortarType(klass);
     }
 
-    Meta.builtin = Meta.aggregateBuiltinForGraph(working, Builtin.class, "");
+    builtin = StaticAutogen.aggregateBuiltinForGraph(working, Builtin.class, "");
 
     // Done
-    inlineTypeLookup = working.inlineTypeLookup;
+    graphInlineTypeLookup = working.inlineTypeLookup;
     autoExportableTypeLookup = working.autoExportableTypeLookup;
     detachedExportableTypeLookup = working.detachedExportableTypeLookup;
     singletonExportableKeyLookup = working.singletonBuiltinKeyLookup;
     singletonExportableLookup = working.singletonBuiltinLookup;
-    autoMortarHalfDataTypes = working.autoMortarHalfDataTypes;
+    autoMortarHalfObjectTypes = working.autoMortarHalfDataTypes;
+    primitivePrototypeLookup =
+        working.primitivePrototypeLookup;
+        prototypeLanguageElement = autoMortarHalfObjectTypes.get(LanguageElement.class);
+    prototypeValue = autoMortarHalfObjectTypes.get(Value.class);
+    prototypeLocation = autoMortarHalfObjectTypes.get(Location.class);
   }
 
   /**
@@ -363,17 +374,17 @@ public class Meta {
    */
   public static FuncInfo funcDescriptor(WorkingMeta working, Method method) {
     boolean needsLocation = false;
-    TSList<ROPair<Object, MortarDataProtoType>> argTypes = new TSList<>();
+    TSList<ROPair<Object, MortarDataPrototype>> argTypes = new TSList<>();
     for (int i = 0; i < method.getParameters().length; ++i) {
       Parameter parameter = method.getParameters()[i];
       if (i == 0 && parameter.getType() == Location.class) {
         needsLocation = true;
       }
-      MortarDataProtoType paramType = dataDescriptor(working, parameter.getType());
+      MortarDataPrototype paramType = dataDescriptor(working, parameter.getType());
       argTypes.add(new ROPair<>(parameter.getName(), paramType));
     }
 
-    MortarDataProtoType retType = dataDescriptor(working, method.getReturnType());
+    MortarDataPrototype retType = dataDescriptor(working, method.getReturnType());
 
     return new FuncInfo(
         method.getName(),
@@ -382,44 +393,6 @@ public class Meta {
         retType,
         needsLocation);
   }
-
-  /*
-  public static <T> T parseCheckArgument(TSList<Error> errors, TSList<String> path, Class<T> type, Object object) {
-    if (type.isAssignableFrom(object.getClass())) {
-      return (T)object;
-    } else {
-      Record record = (Record)object;
-      TSSet<Object> consumed = new TSSet<>();
-      Constructor<?> constructor = type.getConstructors()[0];
-      Object[] args = new Object[constructor.getParameters().length];
-      for (int i = 0; i < constructor.getParameters().length; i++) {
-        Parameter parameter = constructor.getParameters()[i];
-        Object value = record.data.getOpt(parameter.getName());
-        if (value == null) {
-          errors.add(Error.recordMissingField(path, parameter.getName()));
-          continue;
-        }
-        consumed.add(parameter.getName());
-        args[i] = parseCheckArgument(errors,path.mut().add(parameter.getName()), parameter.getType(), value);
-      }
-      for (Object key : record.data.keys()) {
-        if (consumed.contains(key)) continue;
-        errors.add(Error.recordExtraField( path, key));
-      }
-      if (errors.none()) {
-        return (T) uncheck(() -> constructor.newInstance(args));
-      } else {
-        return null;
-      }
-    }
-  }
-  public static <T> T parseCheckArgument(Class<T> type, Object object) {
-    TSList<Error> errors = new TSList<>();
-    T out = parseCheckArgument(errors,new TSList<>(),type,object);
-    if (errors.some()) throw new MultiError(errors);
-    return out;
-  }
-   */
 
   /**
    * Must be called during initialization (single thread)!
@@ -430,13 +403,13 @@ public class Meta {
    * @param builtinSingletons0
    * @return
    */
-  public static MortarDataProtoType dataDescriptor(WorkingMeta working, Class klass) {
+  public static MortarDataPrototype dataDescriptor(WorkingMeta working, Class klass) {
     if (klass == void.class) {
-      return nullType;
+      return MortarNullType;
     } else if (klass == String.class) {
-      return MortarStringType.type;
+      return MortarPrimitivePrototype.prototype_string;
     } else if (klass == byte[].class) {
-      return MortarBytesType.type;
+      return MortarPrimitivePrototype.prototype_bytes;
     } else {
       return working.generateMortarType(klass);
     }
@@ -452,7 +425,7 @@ public class Meta {
     }
     if (method == null)
       throw Assertion.format("builtin wrap [%s] function [%s] missing", klass.getName(), name);
-    return MortarStaticMethodType.type.constAsValue(funcDescriptor(working, method));
+    return MortarStaticMethodType.type.type_constAsValue(funcDescriptor(working, method));
   }
 
   private static LooseRecord aggregateBuiltinForGraph(
@@ -474,10 +447,10 @@ public class Meta {
       } else {
         working.registerSingletonBuiltinExportable((BuiltinSingletonExportable) data);
         if (data instanceof Value) {
-          values.put(name, EvaluateResult.pure((ConstDataValue) data));
+          values.put(name, EvaluateResult.pure((MortarDataConstValue) data));
         } else {
-          final MortarObjectProtoType type = working.generateMortarType(data.getClass());
-          values.put(name, EvaluateResult.pure(type.protoTypeConstAsValue(data)));
+          final MortarObjectPrototype type = working.generateMortarType(data.getClass());
+          values.put(name, EvaluateResult.pure(type.prototype_constAsValue(data)));
         }
       }
     }
@@ -511,11 +484,12 @@ public class Meta {
 
   private static class WorkingMeta {
     public final TSMap<Class, ExportableType> detachedExportableTypeLookup = new TSMap<>();
-    public final TSMap<Class, MortarObjectProtoType> autoMortarHalfDataTypes = new TSMap<>();
+    public final TSMap<Class, MortarObjectPrototype> autoMortarHalfDataTypes = new TSMap<>();
     public final TSMap<Class, ExportableType> autoExportableTypeLookup = new TSMap<>();
     public final TSMap<Class, InlineType> inlineTypeLookup = new TSMap<>();
     public final TSMap<Object, String> singletonBuiltinKeyLookup = new TSMap<>();
     public final TSMap<String, Object> singletonBuiltinLookup = new TSMap<>();
+    public final TSMap<Class, MortarDataPrototype> primitivePrototypeLookup = new TSMap<>();
     public int singletonCount;
 
     private void registerSingletonBuiltinExportable(BuiltinSingletonExportable e) {
@@ -544,26 +518,26 @@ public class Meta {
       registerSingletonBuiltinExportable(klass.getCanonicalName(), type);
     }
 
-    public MortarObjectProtoType generateMortarType(Class klass) {
-      MortarObjectProtoType out = autoMortarHalfDataTypes.getOpt(klass);
+    public MortarObjectPrototype generateMortarType(Class klass) {
+      MortarObjectPrototype out = autoMortarHalfDataTypes.getOpt(klass);
       if (out == null) {
-        TSMap<Object, MortarFieldProtoType> fields = new TSMap<>();
-        TSList<ObjectMeta> inherits = new TSList<>();
-        final ObjectMeta meta = new ObjectMeta(JavaBytecodeUtils.qualifiedNameFromClass(klass), inherits);
-        MortarObjectProtoType out1 =
-            new MortarObjectProtoType(meta,fields);
+        TSMap<Object, MortarProtofield> fields = new TSMap<>();
+        TSList<MortarObjectMeta> inherits = new TSList<>();
+        final MortarObjectMeta meta = new MortarObjectMeta(JavaBytecodeUtils.qualifiedNameFromClass(klass), inherits);
+        MortarObjectPrototype out1 =
+            new MortarObjectPrototype(meta,fields);
         autoMortarHalfDataTypes.put(klass, out1);
-        if (klass != VariableDataValue.class)
+        if (klass != MortarDataVariableValue.class)
           for (Method method : klass.getDeclaredMethods()) {
             if (!Modifier.isPublic(method.getModifiers())) continue;
             if (!method.isAnnotationPresent(WrapExpose.class)) continue;
             fields.putNew(
-                method.getName(), new MortarMethodFieldType(funcDescriptor(this, method)));
+                method.getName(), new MortarMethodFieldtype(funcDescriptor(this, method)));
           }
         for (Field field : klass.getDeclaredFields()) {
-          MortarDataProtoType dataType = dataDescriptor(this, field.getType());
+          MortarDataPrototype dataType = dataDescriptor(this, field.getType());
           String fieldName = field.getName();
-          fields.putNew(fieldName, dataType.protoTypeNewProtoField(meta, field.getName()));
+          fields.putNew(fieldName, dataType.prototype_protofieldNew(meta, field.getName()));
         }
         if (klass.getSuperclass() != null && klass.getSuperclass() != Object.class) {
           inherits.add(generateMortarType(klass.getSuperclass()).meta);
@@ -616,15 +590,15 @@ public class Meta {
   public static class FuncInfo {
     public final String name;
     public final JavaQualifiedName base;
-    public final ROList<ROPair<Object, MortarDataProtoType>> arguments;
-    public final MortarDataProtoType returnType;
+    public final ROList<ROPair<Object, MortarDataPrototype>> arguments;
+    public final MortarDataPrototype returnType;
     public final boolean needsLocation;
 
     public FuncInfo(
             String name,
             JavaQualifiedName base,
-            TSList<ROPair<Object, MortarDataProtoType>> arguments,
-            MortarDataProtoType returnType,
+            TSList<ROPair<Object, MortarDataPrototype>> arguments,
+            MortarDataPrototype returnType,
             boolean needsLocation) {
       this.name = name;
       this.base = base;
@@ -635,8 +609,8 @@ public class Meta {
 
     public ROList<JavaDataDescriptor> argDescriptor() {
       TSList<JavaDataDescriptor> out = new TSList<>();
-      for (ROPair<Object, MortarDataProtoType> argumentType : arguments) {
-        out.add(argumentType.second.jvmDesc());
+      for (ROPair<Object, MortarDataPrototype> argumentType : arguments) {
+        out.add(argumentType.second.prototype_jvmDesc());
       }
       return out;
     }

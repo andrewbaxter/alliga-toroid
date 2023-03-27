@@ -6,13 +6,14 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialBuiltinRef;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialExportableRef;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialUnknown;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRef;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.modules.CacheImportIdRes;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -50,9 +51,9 @@ public class ModuleCompileContext {
     this.importPath = importPath;
   }
 
-  public Object lookupRef(SemiserialUnknown ref) {
+  public Object lookupRef(SemiserialRef ref) {
     return ref.dispatchExportable(
-        new SemiserialUnknown.Dispatcher<Object>() {
+        new SemiserialRef.Dispatcher<Object>() {
           @Override
           public Object handleExportableRef(SemiserialExportableRef s) {
             return artifactLookup.get(s.id);
@@ -60,7 +61,7 @@ public class ModuleCompileContext {
 
           @Override
           public Object handleBuiltinRef(SemiserialBuiltinRef s) {
-            return Meta.singletonExportableLookup.get(s.key);
+            return StaticAutogen.singletonExportableLookup.get(s.key);
           }
         });
   }

@@ -6,9 +6,12 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
 import com.zarbosoft.luxem.write.Writer;
 
+/**
+ * A reference to an import that will deterministically produce an output. This means it includes
+ * the override state.
+ */
 public final class ImportId implements TreeDumpable, BuiltinAutoExportable {
-  @BuiltinAutoExportableType.Param
-  public ModuleId moduleId;
+  @BuiltinAutoExportableType.Param public ModuleId moduleId;
 
   public static ImportId create(ModuleId moduleId) {
     final ImportId importId = new ImportId();

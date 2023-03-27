@@ -1,7 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
-import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
@@ -10,7 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.UniqueId;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.StaticMethodMeta;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataProtoType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataPrototype;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStaticMethodType;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
@@ -41,18 +40,18 @@ public class DefinitionSet implements BuiltinAutoExportable {
     return out;
   }
 
-  @Meta.WrapExpose
-  public FunctionRet function(TSList<ROPair<Object, MortarDataProtoType>> arguments, MortarDataProtoType ret) {
+  @StaticAutogen.WrapExpose
+  public FunctionRet function(TSList<ROPair<Object, MortarDataPrototype>> arguments, MortarDataPrototype ret) {
     String className =
         Format.format(
             "com.zarbosoft.alligatoroidmortar.ModuleClass%s_%s_%s",
             moduleId, definitionSetId, ++nextId);
     final StaticMethodMeta meta =
         new StaticMethodMeta(
-            new Meta.FuncInfo(
+            new StaticAutogen.FuncInfo(
                 "call", JavaBytecodeUtils.qualifiedName(className), arguments, ret, false),
             this);
-    return new FunctionRet(MortarStaticMethodType.type.constAsValue(meta), meta);
+    return new FunctionRet(MortarStaticMethodType.type.type_constAsValue(meta), meta);
   }
 
   public boolean isResolved() {

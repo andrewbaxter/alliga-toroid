@@ -2,19 +2,17 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.Meta;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarAutoObjectType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarFieldProtoType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectFieldType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MethodValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarProtofield;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectFieldtype;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarMethodValue;
 import com.zarbosoft.rendaw.common.Assertion;
 
-public class MortarMethodFieldType implements MortarObjectFieldType, MortarFieldProtoType {
-  public final Meta.FuncInfo funcInfo;
+public class MortarMethodFieldtype implements MortarObjectFieldtype, MortarProtofield {
+  public final StaticAutogen.FuncInfo funcInfo;
 
-  public MortarMethodFieldType(Meta.FuncInfo funcInfo) {
+  public MortarMethodFieldtype(StaticAutogen.FuncInfo funcInfo) {
     this.funcInfo = funcInfo;
   }
 
@@ -28,6 +26,6 @@ public class MortarMethodFieldType implements MortarObjectFieldType, MortarField
       Location location,
       MortarCarry targetCarry,
       MortarAutoObjectType baseType) {
-    return EvaluateResult.pure(new MethodValue(funcInfo, targetCarry));
+    return EvaluateResult.pure(new MortarMethodValue(funcInfo, targetCarry));
   }
 }

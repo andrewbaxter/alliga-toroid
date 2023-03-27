@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRecord;
@@ -18,7 +18,7 @@ import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataConstValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.DataValue;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -40,17 +40,17 @@ public class MortarRecordType extends MortarBaseObjectType
       context.errors.add(new WrongType(location, new TSList<>(), value.toString(), "data value"));
       return null;
     }
-    if (!MortarDataType.assertAssignableFromUnion(
+    if (!MortarDataType.type_assertAssignableFromUnion(
         context,
         location,
         ((DataValue) value).mortarType(),
         MortarStringType.type,
         MortarIntType.type)) return null;
-    if (!(value instanceof ConstDataValue)) {
+    if (!(value instanceof MortarDataConstValue)) {
       context.errors.add(new ValueNotWhole(location));
       return null;
     }
-    return ((ConstDataValue) value).getInner();
+    return ((MortarDataConstValue) value).getInner();
   }
 
   public static ImportId assertConstImportId(
@@ -59,27 +59,27 @@ public class MortarRecordType extends MortarBaseObjectType
       context.errors.add(new WrongType(location, new TSList<>(), value.toString(), "data value"));
       return null;
     }
-    if (!Meta.autoMortarHalfDataTypes
+    if (!StaticAutogen.autoMortarHalfObjectTypes
         .get(ImportId.class)
         .assertAssignableFrom(context.errors, location, value)) return null;
-    if (!(value instanceof ConstDataValue)) {
+    if (!(value instanceof MortarDataConstValue)) {
       context.errors.add(new ValueNotWhole(location));
       return null;
     }
-    return (ImportId) ((ConstDataValue) value).getInner();
+    return (ImportId) ((MortarDataConstValue) value).getInner();
   }
 
   public static Integer assertConstIntlike(
       EvaluationContext context, Location location, Value value) {
-    if (!(value instanceof ConstDataValue)) {
+    if (!(value instanceof MortarDataConstValue)) {
       context.errors.add(new ValueNotWhole(location));
       return null;
     }
-    if (MortarIntType.type.checkAssignableFrom(location, value)) {
-      return (Integer) ((ConstDataValue) value).getInner();
-    } else if (MortarStringType.type.checkAssignableFrom(location, value)) {
+    if (MortarIntType.type.type_checkAssignableFrom(location, value)) {
+      return (Integer) ((MortarDataConstValue) value).getInner();
+    } else if (MortarStringType.type.type_checkAssignableFrom(location, value)) {
       try {
-        return Integer.parseInt((String) ((ConstDataValue) value).getInner());
+        return Integer.parseInt((String) ((MortarDataConstValue) value).getInner());
       } catch (Exception ignored) {
       }
     }
@@ -93,16 +93,16 @@ public class MortarRecordType extends MortarBaseObjectType
       context.errors.add(new WrongType(location, new TSList<>(), value.toString(), "data value"));
       return null;
     }
-    if (!MortarStringType.type.assertAssignableFrom(context.errors, location, value)) return null;
-    if (!(value instanceof ConstDataValue)) {
+    if (!MortarStringType.type.type_assertAssignableFrom(context.errors, location, value)) return null;
+    if (!(value instanceof MortarDataConstValue)) {
       context.errors.add(new ValueNotWhole(location));
       return null;
     }
-    return (String) ((ConstDataValue) value).getInner();
+    return (String) ((MortarDataConstValue) value).getInner();
   }
 
   @Override
-  public ROList<String> traceFields(EvaluationContext context, Location location, Object inner) {
+  public ROList<String> type_traceFields(EvaluationContext context, Location location, Object inner) {
     final TSList<String> out = new TSList<>();
     for (ROPair<Object, ROPair<Integer, MortarTupleFieldType>> field : fields) {
       if (!(field.first instanceof String)) continue;
@@ -127,7 +127,7 @@ public class MortarRecordType extends MortarBaseObjectType
   }
 
   @Override
-  public JavaDataDescriptor jvmDesc() {
+  public JavaDataDescriptor type_jvmDesc() {
     return MortarTupleType.DESC;
   }
 
@@ -143,17 +143,17 @@ public class MortarRecordType extends MortarBaseObjectType
   }
 
   @Override
-  public EvaluateResult constValueAccess(
+  public EvaluateResult type_constValueAccess(
       EvaluationContext context, Location location, Object value, Value field0) {
     final ROPair<Integer, MortarTupleFieldType> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
-    return field.second.constTupleFieldAsValue(context,location,value, field.first);
+    return field.second.tuple_fieldtype_constAsValue(context,location,value, field.first);
   }
 
   @Override
-  public boolean checkAssignableFrom(
+  public boolean type_checkAssignableFrom(
       TSList<Error> errors, Location location, MortarDataType type, TSList<Object> path) {
-    if (type instanceof MortarImmutableType) type = ((MortarImmutableType) type).innerType;
+    if (type instanceof ImmutableType) type = ((ImmutableType) type).innerType;
     if (!(type instanceof MortarRecordType)) {
       errors.add(new WrongType(location, path, type.toString(), "record"));
       return false;
@@ -171,7 +171,7 @@ public class MortarRecordType extends MortarBaseObjectType
         continue;
       }
       otherKeys.remove(field.first);
-      if (!field.second.second.tupleAssignmentCheckFieldAssignableFrom(
+      if (!field.second.second.tuple_fieldtype_assignmentCheckFieldAssignableFrom(
           errors, location, otherField.second, path.mut().add(field.first))) bad = true;
     }
     for (Object otherKey : otherKeys) {
@@ -182,9 +182,9 @@ public class MortarRecordType extends MortarBaseObjectType
   }
 
   @Override
-  public EvaluateResult variableValueAccess(EvaluationContext context, Location location, MortarDeferredCode base, Value field0) {
+  public EvaluateResult type_variableValueAccess(EvaluationContext context, Location location, MortarDeferredCode base, Value field0) {
     final ROPair<Integer, MortarTupleFieldType> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
-    return field.second.variableTupleFieldAsValue(context,location,base, field.first);
+    return field.second.tuple_fieldtype_variableAsValue(context,location,base, field.first);
   }
 }

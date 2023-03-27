@@ -24,9 +24,9 @@ public interface ExportableType extends Exportable {
     return data.dispatch(
         new SemiserialSubvalue.DefaultDispatcher<Object>() {
           @Override
-          public Object handleUnknown(SemiserialUnknown s) {
+          public Object handleUnknown(SemiserialRef s) {
             return s.dispatchExportable(
-                new SemiserialUnknown.DefaultDispatcher<Object>() {
+                new SemiserialRef.DefaultDispatcher<Object>() {
                   @Override
                   public Object handleExportableRef(SemiserialExportableRef s) {
                     return context.lookupRef(s);
@@ -36,7 +36,7 @@ public interface ExportableType extends Exportable {
         });
   }
 
-  default SemiserialUnknown semiserializeValue(
+  default SemiserialRef semiserializeValue(
       long importCacheId,
       Semiserializer semiserializer,
       ROList<Object> path,

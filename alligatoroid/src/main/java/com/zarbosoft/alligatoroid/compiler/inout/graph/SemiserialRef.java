@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-public interface SemiserialUnknown extends SemiserialSubvalue {
+public interface SemiserialRef extends SemiserialSubvalue {
   public static final Class<? extends SemiserialSubvalue>[] SERIAL_UNION =
       new Class[] {SemiserialExportableRef.class, SemiserialBuiltinRef.class};
 

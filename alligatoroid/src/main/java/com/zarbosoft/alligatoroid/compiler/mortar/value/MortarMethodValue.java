@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
@@ -13,13 +13,13 @@ import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCod
 
 import static com.zarbosoft.alligatoroid.compiler.builtin.Builtin.nullType;
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext.convertFunctionArgumentRoot;
-import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue.nullValue;
+import static com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataConstValue.nullValue;
 
-public class MethodValue implements Value {
-  public final Meta.FuncInfo funcInfo;
+public class MortarMethodValue implements Value {
+  public final StaticAutogen.FuncInfo funcInfo;
   public final MortarDeferredCode code;
 
-  public MethodValue(Meta.FuncInfo funcInfo, MortarDeferredCode code) {
+  public MortarMethodValue(StaticAutogen.FuncInfo funcInfo, MortarDeferredCode code) {
     this.funcInfo = funcInfo;
     this.code = code;
   }
@@ -39,7 +39,7 @@ public class MethodValue implements Value {
             funcInfo.base.asInternalName(),
             funcInfo.name,
             JavaMethodDescriptor.fromParts(
-                funcInfo.returnType.jvmDesc(), funcInfo.argDescriptor())));
+                funcInfo.returnType.prototype_jvmDesc(), funcInfo.argDescriptor())));
     if (funcInfo.returnType == nullType)
       return new EvaluateResult(
           new MortarTargetCode(pre.add(code)), new MortarTargetCode(post), nullValue);
@@ -47,6 +47,6 @@ public class MethodValue implements Value {
       return new EvaluateResult(
           new MortarTargetCode(pre),
           new MortarTargetCode(post),
-          funcInfo.returnType.protoTypeStackAsValue(code));
+          funcInfo.returnType.prototype_stackAsValue(code));
   }
 }

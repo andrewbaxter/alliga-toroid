@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.builtin;
 
-import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
@@ -9,7 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectPrototype;
 
 import static com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils.arrayLoadInt;
 import static com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils.arrayStoreInt;
@@ -20,9 +20,9 @@ import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.ISTORE;
 
-@Meta.BuiltinAggregate
+@StaticAutogen.BuiltinAggregate
 public class BuiltinJavaBytecodeCode {
-  public static final MortarDataType type = Meta.autoMortarHalfDataTypes.get(JavaBytecode.class);
+  public static final MortarObjectPrototype type = StaticAutogen.autoMortarHalfObjectTypes.get(JavaBytecode.class);
 
   public static JavaBytecode nop() {
     return null;
@@ -45,11 +45,11 @@ public class BuiltinJavaBytecodeCode {
   }
 
   public static JavaBytecode loadObject(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(ALOAD, key);
+    return JavaBytecodeStoreLoad.create(ALOAD, key);
   }
 
   public static JavaBytecode storeObject(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(ASTORE, key);
+    return JavaBytecodeStoreLoad.create(ASTORE, key);
   }
 
   public static JavaBytecode loadArrayObject() {
@@ -61,11 +61,11 @@ public class BuiltinJavaBytecodeCode {
   }
 
   public static JavaBytecode loadInt(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(ILOAD, key);
+    return JavaBytecodeStoreLoad.create(ILOAD, key);
   }
 
   public static JavaBytecode storeInt(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(ISTORE, key);
+    return JavaBytecodeStoreLoad.create(ISTORE, key);
   }
 
   public static JavaBytecode loadArrayInt() {

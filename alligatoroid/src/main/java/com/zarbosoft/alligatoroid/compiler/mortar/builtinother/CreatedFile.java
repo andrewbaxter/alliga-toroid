@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.builtinother;
 
-import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -19,7 +19,7 @@ public class CreatedFile {
     outputStream = uncheck(() -> Files.newOutputStream(path, CREATE));
   }
 
-  @Meta.WrapExpose
+  @StaticAutogen.WrapExpose
   public void write(byte[] data) {
     uncheck(() -> outputStream.write(data));
   }

@@ -11,28 +11,9 @@ import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class Evaluator {
-  /**
-   * Evaluates a tree, producing target code + result value
-   *
-   * @param moduleContext
-   * @param targetContext
-   * @param isModuleRoot
-   * @param language
-   * @param initialScope
-   * @return
-   */
-  public static RootEvaluateResult evaluate(
-      ModuleCompileContext moduleContext,
-      TargetModuleContext targetContext,
-      boolean isModuleRoot,
-      LanguageElement language,
-      ROOrderedMap<Object, Binding> initialScope) {
-    EvaluationContext context =
-        new EvaluationContext(moduleContext, targetContext, isModuleRoot, new Scope(null));
+  /** Evaluates a tree, producing target code + result value */
+  public static RootEvaluateResult evaluate(EvaluationContext context, LanguageElement language) {
     Location rootLocation = null;
-    for (ROPair<Object, Binding> local : initialScope) {
-      context.scope.put(local.first, local.second);
-    }
     TSList<TargetCode> code = new TSList<>();
     final EvaluateResult res = language.evaluate(context);
     if (res == EvaluateResult.error) {
@@ -44,32 +25,16 @@ public class Evaluator {
       code.add(binding.dropCode(context, rootLocation));
     }
     code.add(res.postEffect);
-    return new RootEvaluateResult(
-        targetContext.merge(context, null, code),
-        res.value,
-        context.errors,
-        context.sourceMapReverse,
-        context.log);
+    return new RootEvaluateResult(context.target.merge(context, null, code), res.value);
   }
 
   public static class RootEvaluateResult {
     public final TargetCode code;
     public final Value value;
-    public final TSList<Location> sourceMap;
-    public final ROList<Error> errors;
-    public final ROList<String> log;
 
-    public RootEvaluateResult(
-        TargetCode code,
-        Value value,
-        ROList<Error> errors,
-        TSList<Location> sourceMap,
-        ROList<String> log) {
+    public RootEvaluateResult(TargetCode code, Value value) {
       this.code = code;
       this.value = value;
-      this.errors = errors;
-      this.sourceMap = sourceMap;
-      this.log = log;
     }
   }
 }

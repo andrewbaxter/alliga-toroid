@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
-import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
 import com.zarbosoft.rendaw.common.TSList;
@@ -24,7 +24,7 @@ public class JavaQualifiedName implements BuiltinAutoExportable {
   @Override
   public void postInit() {}
 
-  @Meta.WrapExpose
+  @StaticAutogen.WrapExpose
   public JavaInternalName asInternalName() {
     final StringBuilder out = new StringBuilder();
     boolean first = true;

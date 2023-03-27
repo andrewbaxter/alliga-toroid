@@ -19,7 +19,7 @@ public class MortarDataBinding implements Binding {
 
   @Override
   public EvaluateResult fork(EvaluationContext context, Location location) {
-    return EvaluateResult.pure(type.forkBinding(this));
+    return EvaluateResult.pure(type.type_forkBinding(this));
   }
 
   @Override

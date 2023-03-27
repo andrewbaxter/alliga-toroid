@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
-import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 import org.objectweb.asm.ClassWriter;
@@ -20,13 +20,13 @@ public class JavaClass {
     cw.visit(52, ACC_PUBLIC + ACC_SUPER, jvmName.value, null, "java/lang/Object", null);
   }
 
-  @Meta.WrapExpose
+  @StaticAutogen.WrapExpose
   public JavaClass setMetaSource(String address) {
     cw.visitSource(address, null);
     return this;
   }
 
-  @Meta.WrapExpose
+  @StaticAutogen.WrapExpose
   public JavaClass defineConstructor(
       JavaMethodDescriptor desc,
       JavaBytecodeSequence code,
@@ -42,7 +42,7 @@ public class JavaClass {
     return this;
   }
 
-  @Meta.WrapExpose
+  @StaticAutogen.WrapExpose
   public JavaClass defineFunction(
       String methodId,
       JavaMethodDescriptor desc,
@@ -76,13 +76,13 @@ public class JavaClass {
     return cw.toByteArray();
   }
 
-  @Meta.WrapExpose
+  @StaticAutogen.WrapExpose
   public JavaClass defineStaticField(String name, JavaDataDescriptor t) {
     cw.visitField(ACC_PUBLIC + ACC_STATIC, name, t.value, t.value, null);
     return this;
   }
 
-  @Meta.WrapExpose
+  @StaticAutogen.WrapExpose
   public boolean isDefined(String name) {
     return seenFunctions.contains(name);
   }

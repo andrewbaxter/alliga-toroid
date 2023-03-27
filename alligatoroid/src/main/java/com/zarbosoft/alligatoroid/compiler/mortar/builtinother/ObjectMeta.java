@@ -7,7 +7,6 @@ import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarImmutableType;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.DataValue;
 import com.zarbosoft.rendaw.common.TSList;
@@ -30,18 +29,8 @@ public class ObjectMeta {
     this.implements_ = null;
   }
 
-  public boolean checkAssignableFrom(
-      TSList<Error> errors, Location location, MortarDataType type, TSList<Object> path) {
-    if (type instanceof MortarImmutableType) type = ((MortarImmutableType) type).innerType;
-    if (!(type instanceof MortarObjectType) || !walkParents(t -> t == this)) {
-      errors.add(new WrongType(location, path, type.toString(), toString()));
-      return false;
-    }
-    return true;
-  }
-
-  boolean assertAssignableFrom(EvaluationContext context, Location location, MortarDataType type) {
-    return checkAssignableFrom(context.moduleContext.getErrors(), location, type, new TSList<>());
+  public boolean canCastTo(ObjectMeta other) {
+    return walkParents(t -> t == other);
   }
 
   private boolean walkParents(Function<ObjectMeta, Boolean> process) {
@@ -57,12 +46,5 @@ public class ObjectMeta {
       if (parents.hasNext()) stack.add(parents);
     }
     return false;
-  }
-
-  public boolean assertAssignableFrom(TSList<Error> errors, Location location, Value value) {
-    if (!(value instanceof DataValue)) {
-      errors.add(new WrongType(location, new TSList<>(), value.toString(), "data value"));
-    }
-    return checkAssignableFrom(errors, location, ((DataValue) value).mortarType(), new TSList<>());
   }
 }

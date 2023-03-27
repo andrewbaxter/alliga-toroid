@@ -4,7 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarBoolType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarPrimitivePrototype;
 
 public class LiteralBool extends LanguageElement {
   @BuiltinAutoExportableType.Param
@@ -17,6 +17,6 @@ public class LiteralBool extends LanguageElement {
 
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
-    return EvaluateResult.pure(MortarBoolType.type.constAsValue(value));
+    return EvaluateResult.pure(MortarPrimitivePrototype.bytePrototype.prototype_constAsValue(value));
   }
 }

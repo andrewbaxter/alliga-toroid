@@ -115,12 +115,12 @@ public class JavaBytecodeUtils {
   public static JavaBytecode instantiate(
       int location, JavaInternalName klass, JavaMethodDescriptor desc, JavaBytecode arguments) {
     JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.line(location);
-    code.add(new JavaBytecodeInstruction(new TypeInsnNode(NEW, klass.value)));
+    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
+    code.add(new JavaBytecodeInstructionObj(new TypeInsnNode(NEW, klass.value)));
     code.add(dup);
     code.add(arguments);
     code.add(
-        new JavaBytecodeInstruction(
+        new JavaBytecodeInstructionObj(
             new MethodInsnNode(INVOKESPECIAL, klass.value, "<init>", desc.value, false)));
     return code;
   }
@@ -128,9 +128,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode accessField(
       int location, JavaInternalName klass, String field, JavaDataDescriptor fieldDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.line(location);
+    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
     code.add(
-        new JavaBytecodeInstruction(
+        new JavaBytecodeInstructionObj(
             new FieldInsnNode(GETFIELD, klass.value, field, fieldDesc.value)));
     return code;
   }
@@ -138,9 +138,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode setField(
       int location, JavaInternalName klass, String field, JavaDataDescriptor fieldDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.line(location);
+    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
     code.add(
-        new JavaBytecodeInstruction(
+        new JavaBytecodeInstructionObj(
             new FieldInsnNode(PUTFIELD, klass.value, field, fieldDesc.value)));
     return code;
   }
@@ -148,9 +148,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode setStaticField(
       int location, JavaInternalName klass, String field, JavaDataDescriptor fieldDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.line(location);
+    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
     code.add(
-        new JavaBytecodeInstruction(
+        new JavaBytecodeInstructionObj(
             new FieldInsnNode(PUTSTATIC, klass.value, field, fieldDesc.value)));
     return code;
   }
@@ -158,9 +158,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode accessStaticField(
       int location, JavaInternalName klass, String field, JavaDataDescriptor fieldDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.line(location);
+    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
     code.add(
-        new JavaBytecodeInstruction(
+        new JavaBytecodeInstructionObj(
             new FieldInsnNode(GETSTATIC, klass.value, field, fieldDesc.value)));
     return code;
   }
@@ -168,9 +168,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode callConstructor(
       int location, JavaInternalName klass, JavaMethodDescriptor methodDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.line(location);
+    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
     code.add(
-        new JavaBytecodeInstruction(
+        new JavaBytecodeInstructionObj(
             new MethodInsnNode(INVOKESPECIAL, klass.value, "<init>", methodDesc.value, false)));
     return code;
   }
@@ -178,9 +178,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode callInterfaceMthod(
       int location, JavaInternalName klass, String method, JavaMethodDescriptor methodDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.line(location);
+    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
     code.add(
-        new JavaBytecodeInstruction(
+        new JavaBytecodeInstructionObj(
             new MethodInsnNode(INVOKEINTERFACE, klass.value, method, methodDesc.value, false)));
     return code;
   }
@@ -188,9 +188,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode callMethod(
       int location, JavaInternalName klass, String method, JavaMethodDescriptor methodDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.line(location);
+    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
     code.add(
-        new JavaBytecodeInstruction(
+        new JavaBytecodeInstructionObj(
             new MethodInsnNode(INVOKEVIRTUAL, klass.value, method, methodDesc.value, false)));
     return code;
   }
@@ -203,7 +203,7 @@ public class JavaBytecodeUtils {
       for (int i = 0; i < method1.getParameters().length; i++) {
         args[i] = JavaDataDescriptor.fromClass(method1.getParameters()[i].getType());
       }
-      return new JavaBytecodeInstruction(
+      return new JavaBytecodeInstructionObj(
           new MethodInsnNode(
               INVOKESTATIC,
               internalNameFromClass(klass).value,
@@ -217,25 +217,25 @@ public class JavaBytecodeUtils {
   public static JavaBytecode callStaticMethod(
       int location, JavaInternalName klass, String method, JavaMethodDescriptor methodDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.line(location);
+    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
     code.add(
-        new JavaBytecodeInstruction(
+        new JavaBytecodeInstructionObj(
             new MethodInsnNode(INVOKESTATIC, klass.value, method, methodDesc.value, false)));
     return code;
   }
 
   public static JavaBytecode literalString(String value) {
-    return new JavaBytecodeInstruction(new LdcInsnNode(value));
+    return new JavaBytecodeInstructionObj(new LdcInsnNode(value));
   }
 
   public static JavaBytecode inst(int opcode) {
-    return new JavaBytecodeInstruction(new InsnNode(opcode));
+    return new JavaBytecodeInstructionObj(new InsnNode(opcode));
   }
 
   public static JavaBytecode literalLong(long value) {
     if (value == 0) return literalLong0;
     if (value == 1) return literalLong1;
-    return new JavaBytecodeInstruction(new LdcInsnNode(value));
+    return new JavaBytecodeInstructionObj(new LdcInsnNode(value));
   }
 
   public static JavaBytecode literalBool(boolean value) {
@@ -259,7 +259,7 @@ public class JavaBytecodeUtils {
       case 5:
         return literalInt5;
     }
-    return new JavaBytecodeInstruction(new LdcInsnNode(value));
+    return new JavaBytecodeInstructionObj(new LdcInsnNode(value));
   }
 
   public static JavaBytecode box(JavaDataDescriptor primDescriptor, JavaInternalName box) {
@@ -272,7 +272,7 @@ public class JavaBytecodeUtils {
   }
 
   public static JavaBytecode cast(JavaDataDescriptor toClass) {
-    return new JavaBytecodeInstruction(new TypeInsnNode(CHECKCAST, toClass.value));
+    return new JavaBytecodeInstructionObj(new TypeInsnNode(CHECKCAST, toClass.value));
   }
 
   public static JavaBytecode bool_(boolean value) {
@@ -314,43 +314,43 @@ public class JavaBytecodeUtils {
   }
 
   public static JavaBytecode loadIntShortByteBool(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(ILOAD, key);
+    return JavaBytecodeStoreLoad.create(ILOAD, key);
   }
 
   public static JavaBytecode storeIntShortByteBool(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(ISTORE, key);
+    return JavaBytecodeStoreLoad.create(ISTORE, key);
   }
 
   public static JavaBytecode loadLong(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(LLOAD, key);
+    return JavaBytecodeStoreLoad.create(LLOAD, key);
   }
 
   public static JavaBytecode storeLong(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(LSTORE, key);
+    return JavaBytecodeStoreLoad.create(LSTORE, key);
   }
 
   public static JavaBytecode loadFloat(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(FLOAD, key);
+    return JavaBytecodeStoreLoad.create(FLOAD, key);
   }
 
   public static JavaBytecode storeFloat(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(FSTORE, key);
+    return JavaBytecodeStoreLoad.create(FSTORE, key);
   }
 
   public static JavaBytecode loadDouble(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(DLOAD, key);
+    return JavaBytecodeStoreLoad.create(DLOAD, key);
   }
 
   public static JavaBytecode storeDouble(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(DSTORE, key);
+    return JavaBytecodeStoreLoad.create(DSTORE, key);
   }
 
   public static JavaBytecode loadObj(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(ALOAD, key);
+    return JavaBytecodeStoreLoad.create(ALOAD, key);
   }
 
   public static JavaBytecode storeObj(JavaBytecodeBindingKey key) {
-    return new JavaBytecodeStoreLoad(ASTORE, key);
+    return JavaBytecodeStoreLoad.create(ASTORE, key);
   }
 
   public static JavaInternalName internalNameFromClass(Class klass) {

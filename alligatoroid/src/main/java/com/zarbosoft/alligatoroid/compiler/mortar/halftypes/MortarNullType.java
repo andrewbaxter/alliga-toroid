@@ -2,21 +2,16 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
-import com.zarbosoft.alligatoroid.compiler.model.error.Error;
-import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
+import com.zarbosoft.alligatoroid.compiler.model.error.VaryNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinSingletonExportable;
+import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.TSList;
+import org.jetbrains.annotations.NotNull;
 
 public class MortarNullType implements MortarSimpleDataType {
   public static final MortarNullType type = new MortarNullType();
@@ -24,59 +19,58 @@ public class MortarNullType implements MortarSimpleDataType {
   private MortarNullType() {}
 
   @Override
-  public JavaDataDescriptor jvmDesc() {
+  public JavaDataDescriptor type_jvmDesc() {
+    return jvmDesc();
+  }
+
+  @NotNull
+  private static JavaDataDescriptor jvmDesc() {
     return JavaDataDescriptor.VOID;
   }
 
   @Override
-  public JavaBytecode returnBytecode() {
-  return JavaBytecodeUtils.returnVoid;
+  public JavaBytecode type_returnBytecode() {
+    return JavaBytecodeUtils.returnVoid;
   }
 
   @Override
-  public JavaBytecode storeBytecode(JavaBytecodeBindingKey key) {
+  public JavaBytecode type_storeBytecode(JavaBytecodeBindingKey key) {
     throw new Assertion();
   }
 
   @Override
-  public JavaBytecode loadBytecode(JavaBytecodeBindingKey key) {
+  public JavaBytecode type_loadBytecode(JavaBytecodeBindingKey key) {
     throw new Assertion();
   }
 
   @Override
-  public JavaBytecode arrayStoreBytecode() {
+  public JavaBytecode type_arrayStoreBytecode() {
     throw new Assertion();
   }
 
   @Override
-  public JavaBytecode arrayLoadBytecode() {
+  public JavaBytecode type_arrayLoadBytecode() {
     throw new Assertion();
   }
 
   @Override
-  public boolean checkAssignableFrom(
-      TSList<Error> errors, Location location, MortarDataType type, TSList<Object> path) {
-    if (type instanceof MortarImmutableType) type = ((MortarImmutableType) type).innerType;
-    if (type != this.type) {
-      errors.add(new WrongType(location, path, type.toString(), toString()));
-      return false;
-    }
-    return true;
+  public EvaluateResult type_valueVary(EvaluationContext context, Location id, Object data) {
+    context.errors.add(new VaryNotSupported(id));
+    return EvaluateResult.error;
   }
 
   @Override
-  public SemiserialSubvalue graphSemiserializeValue(Object inner, long importCacheId, Semiserializer semiserializer, ROList<Exportable> path, ROList<String> accessPath) {
-    throw new Assertion();
+  public JavaBytecode type_castTo(MortarDataPrototype prototype, MortarDeferredCode code) {
+  throw new Assertion();
   }
 
   @Override
-  public Object graphDesemiserializeValue(ModuleCompileContext context, SemiserialSubvalue data) {
-    throw new Assertion();
+  public boolean type_canCastTo(MortarDataPrototype prototype) {
+  return false;
   }
 
   @Override
-  public EvaluateResult valueVary(EvaluationContext context, Location id, Object data) {
-  context.errors.add(new CantVaryNull);
-  return EvaluateResult.error;
+  public JavaDataDescriptor tuple_fieldtype_jvmDesc() {
+  return jvmDesc();
   }
 }

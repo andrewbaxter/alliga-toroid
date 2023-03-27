@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-public interface Exportable extends Semiserializable {
+public interface Exportable  {
   /** Called after deferred initialization in graph desemiserialization. */
   default void postInit() {}
 

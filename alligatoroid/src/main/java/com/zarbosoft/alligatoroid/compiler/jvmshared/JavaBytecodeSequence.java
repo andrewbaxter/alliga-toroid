@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
-import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
@@ -46,7 +46,7 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
       next.dispatch(
           new Dispatcher<Object>() {
             @Override
-            public Object handleInstruction(JavaBytecodeInstruction n) {
+            public Object handleInstruction(JavaBytecodeInstructionInt n) {
               children.add(n);
               return null;
             }
@@ -82,8 +82,8 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
       child.dispatch(
           new Dispatcher<Object>() {
             @Override
-            public Object handleInstruction(JavaBytecodeInstruction n) {
-              out.visitInsn(n.code);
+            public Object handleInstruction(JavaBytecodeInstructionInt n) {
+            n.write(out);
               return null;
             }
 
@@ -143,7 +143,7 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
     }
   }
 
-  @Meta.WrapExpose
+  @StaticAutogen.WrapExpose
   public JavaBytecodeSequence add(JavaBytecode element) {
     if (element != null) {
       element.dispatch(
@@ -164,7 +164,7 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
     return this;
   }
 
-  @Meta.WrapExpose
+  @StaticAutogen.WrapExpose
   public int size() {
     return children.size();
   }

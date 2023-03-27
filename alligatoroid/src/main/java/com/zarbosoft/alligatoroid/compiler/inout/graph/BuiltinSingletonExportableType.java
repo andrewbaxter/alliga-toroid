@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
@@ -17,7 +17,7 @@ public class BuiltinSingletonExportableType implements ExportableType {
 
   @Override
   public SemiserialSubvalue graphSemiserializeBody(long importCacheId, Semiserializer semiserializer, ROList<Object> path, ROList<String> accessPath, Object value) {
-    return SemiserialBuiltinRef.create(Meta.singletonExportableKeyLookup.get(value));
+    return SemiserialBuiltinRef.create(StaticAutogen.singletonExportableKeyLookup.get(value));
   }
 
   @Override

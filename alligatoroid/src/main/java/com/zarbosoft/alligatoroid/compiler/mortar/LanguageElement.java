@@ -40,8 +40,7 @@ public abstract class LanguageElement implements BuiltinAutoExportable {
         Stage.class,
         Tuple.class,
       };
-  @BuiltinAutoExportableType.Param
-  public Location id;
+  @BuiltinAutoExportableType.Param public Location id;
   private Boolean hasLowerInSubtree;
 
   protected static boolean hasLowerInSubtreeList(ROList<?> elements) {

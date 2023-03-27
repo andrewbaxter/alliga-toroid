@@ -15,7 +15,7 @@ import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstIntlike;
-import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue.nullValue;
+import static com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataConstValue.nullValue;
 
 /**
  * Represents consecutive stack elements - needs to be converted to an actual tuple to bind/access
@@ -35,6 +35,11 @@ public class LooseTuple implements Value, NoExportValue {
       out.add(Integer.toString(i));
     }
     return out;
+  }
+
+  @Override
+  public EvaluateResult vary(EvaluationContext context, Location id) {
+    TODO();
   }
 
   @Override
@@ -62,7 +67,7 @@ public class LooseTuple implements Value, NoExportValue {
       }
     }
     if (out == null) {
-      com.zarbosoft.alligatoroid.compiler.ThreadEvaluationContext.addError(new NoField(location, key));
+      context.errors.add(new NoField(location, key));
       return EvaluateResult.error;
     }
     return new EvaluateResult(
@@ -87,10 +92,10 @@ public class LooseTuple implements Value, NoExportValue {
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     for (int i = 0; i < this.data.size(); i++) {
       Value exported = ectx.record(ectx.record(this.data.get(i)).export(context, location));
-      if (!(exported instanceof ConstDataValue)) throw new Assertion();
-      types.add(((ConstDataValue) exported).mortarType());
-      data.add(((ConstDataValue) exported).getInner());
+      if (!(exported instanceof MortarDataConstValue)) throw new Assertion();
+      types.add(((MortarDataConstValue) exported).mortarType());
+      data.add(((MortarDataConstValue) exported).getInner());
     }
-    return ectx.build(new MortarTupleType(types).constAsValue(Tuple.create(data)));
+    return ectx.build(new MortarTupleType(types).type_constAsValue(Tuple.create(data)));
   }
 }

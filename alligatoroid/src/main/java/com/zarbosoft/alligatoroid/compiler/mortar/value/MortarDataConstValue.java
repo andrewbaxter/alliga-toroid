@@ -15,13 +15,13 @@ import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarNullType;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public class ConstDataValue implements DataValue, BuiltinAutoExportable {
-  public static final ConstDataValue nullValue = create(MortarNullType.type, null);
+public class MortarDataConstValue implements DataValue, BuiltinAutoExportable {
+  public static final MortarDataConstValue nullValue = create(MortarNullType.type, null);
   public MortarDataType type;
   public Object value;
 
-  public static ConstDataValue create(MortarDataType type, Object value) {
-    final ConstDataValue out = new ConstDataValue();
+  public static MortarDataConstValue create(MortarDataType type, Object value) {
+    final MortarDataConstValue out = new MortarDataConstValue();
     out.type = type;
     out.value = value;
     out.postInit();
@@ -45,17 +45,22 @@ public class ConstDataValue implements DataValue, BuiltinAutoExportable {
 
   @Override
   public EvaluateResult call(EvaluationContext context, Location location, Value argument) {
-    return mortarType().constCall(context, location, getInner(), argument);
+    return mortarType().type_constCall(context, location, getInner(), argument);
   }
 
   @Override
   public final EvaluateResult access(EvaluationContext context, Location location, Value field) {
-    return mortarType().constValueAccess(context, location, getInner(), field);
+    return mortarType().type_constValueAccess(context, location, getInner(), field);
   }
 
   @Override
   public ROList<String> traceFields(EvaluationContext context, Location location) {
-    return mortarType().traceFields(context, location, getInner());
+    return mortarType().type_traceFields(context, location, getInner());
+  }
+
+  @Override
+  public EvaluateResult vary(EvaluationContext context, Location id) {
+  return type.type_valueVary(context,id,value);
   }
 
   @Override

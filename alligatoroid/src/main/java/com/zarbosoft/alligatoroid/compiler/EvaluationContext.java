@@ -8,6 +8,7 @@ public class EvaluationContext {
   public final boolean isModuleRoot;
   public final ModuleCompileContext moduleContext;
   public final TargetModuleContext target;
+  // Line number -> AT location
   public final TSList<Location> sourceMapReverse = new TSList<>();
   public final TSList<String> log = new TSList<>();
   public final TSList<Error> errors = new TSList<>();
@@ -25,7 +26,7 @@ public class EvaluationContext {
   }
 
   public void pushScope() {
-    this.scope = new Scope(scope);
+    this.scope = Scope.createChild(scope);
   }
 
   public void popScope() {

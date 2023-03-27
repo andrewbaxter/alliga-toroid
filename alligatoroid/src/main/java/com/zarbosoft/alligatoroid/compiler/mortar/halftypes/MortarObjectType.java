@@ -4,8 +4,8 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
-import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.Field;
@@ -34,7 +34,7 @@ public class MortarObjectType extends MortarBaseObjectType implements BuiltinAut
   }
 
   @Override
-  public MortarDataType fork() {
+  public MortarDataType type_fork() {
     TSMap<Object, Field> forkedFields = new TSMap<>();
     for (Map.Entry<Object, Field> fieldType : fields) {
       forkedFields.put(fieldType.getKey(), fieldType.getValue().objectFieldFork());
@@ -43,7 +43,8 @@ public class MortarObjectType extends MortarBaseObjectType implements BuiltinAut
   }
 
   @Override
-  public ROList<String> traceFields(EvaluationContext context, Location location, Object inner) {
+  public ROList<String> type_traceFields(
+      EvaluationContext context, Location location, Object inner) {
     final TSList<String> out = new TSList<>();
     for (Map.Entry<Object, Field> field : fields) {
       if (!(field.getKey() instanceof String)) continue;
@@ -53,14 +54,22 @@ public class MortarObjectType extends MortarBaseObjectType implements BuiltinAut
   }
 
   @Override
-  public String toString() {
-    return meta.name.toString();
+  public JavaBytecode type_castTo(MortarDataPrototype prototype, MortarDeferredCode code) {
+    return code.consume();
   }
 
   @Override
-  public boolean checkAssignableFrom(
-      TSList<Error> errors, Location location, MortarDataType type, TSList<Object> path) {
-    return meta.checkAssignableFrom(errors, location, type, path);
+  public boolean type_canCastTo(
+      MortarDataPrototype prototype) {
+    if (!(prototype instanceof MortarObjectPrototype)) {
+      return false;
+    }
+    return meta.canCastTo(((MortarObjectPrototype) prototype).meta);
+  }
+
+  @Override
+  public String toString() {
+    return meta.name.toString();
   }
 
   public ROPair<Object, Field> assertField(
@@ -76,7 +85,7 @@ public class MortarObjectType extends MortarBaseObjectType implements BuiltinAut
   }
 
   @Override
-  public EvaluateResult variableValueAccess(
+  public EvaluateResult type_variableValueAccess(
       EvaluationContext context, Location location, MortarDeferredCode base, Value field0) {
     final ROPair<Object, Field> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
@@ -84,7 +93,7 @@ public class MortarObjectType extends MortarBaseObjectType implements BuiltinAut
   }
 
   @Override
-  public EvaluateResult constValueAccess(
+  public EvaluateResult type_constValueAccess(
       EvaluationContext context, Location location, Object base, Value field0) {
     final ROPair<Object, Field> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
@@ -92,7 +101,7 @@ public class MortarObjectType extends MortarBaseObjectType implements BuiltinAut
   }
 
   @Override
-  public JavaDataDescriptor jvmDesc() {
+  public JavaDataDescriptor type_jvmDesc() {
     return JavaDataDescriptor.fromJVMName(meta.name.asInternalName());
   }
 }

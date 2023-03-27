@@ -7,22 +7,20 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class MortarBytesType extends MortarBaseObjectType implements MortarSimpleDataType {
+public class MortarBytesType extends MortarBaseObjectType implements MortarPrimitiveType {
   public static final MortarBytesType type = new MortarBytesType();
 
   @Override
-  public JavaDataDescriptor jvmDesc() {
+  public JavaDataDescriptor type_jvmDesc() {
+    return jvmDesc();
+  }
+
+  private static JavaDataDescriptor jvmDesc() {
     return JavaDataDescriptor.BYTE_ARRAY;
   }
 
   @Override
-  public boolean checkAssignableFrom(
-      TSList<Error> errors, Location location, MortarDataType type, TSList<Object> path) {
-    if (type instanceof MortarImmutableType) type = ((MortarImmutableType) type).innerType;
-    if (type != this) {
-      errors.add(new WrongType(location, path, type.toString(), toString()));
-      return false;
-    }
-    return true;
+  public JavaDataDescriptor tuple_fieldtype_jvmDesc() {
+    return jvmDesc();
   }
 }

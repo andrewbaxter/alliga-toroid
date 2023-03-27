@@ -2,43 +2,37 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongType;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinSingletonExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
-import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
+import org.jetbrains.annotations.NotNull;
 
-public class MortarStringType extends MortarBaseObjectType implements MortarSimpleDataType {
+public class MortarStringType extends MortarBaseObjectType implements MortarPrimitiveType {
   public static final MortarStringType type = new MortarStringType();
 
   private MortarStringType() {}
 
   @Override
-  public boolean checkAssignableFrom(
-      TSList<Error> errors, Location location, MortarDataType type, TSList<Object> path) {
-    if (type instanceof MortarImmutableType) type = ((MortarImmutableType) type).innerType;
-    if (type != this.type) {
-      errors.add(new WrongType(location, path, type.toString(), toString()));
-      return false;
-    }
-    return true;
+  public EvaluateResult type_valueVary(EvaluationContext context, Location id, Object data) {
+    return EvaluateResult.pure(type_stackAsValue(JavaBytecodeUtils.literalString((String) data)));
   }
 
   @Override
-  public EvaluateResult valueVary(EvaluationContext context, Location id, Object data) {
-    return EvaluateResult.pure(stackAsValue(JavaBytecodeUtils.literalString((String) data)));
+  public JavaDataDescriptor type_jvmDesc() {
+    return jvmDesc();
   }
 
-  @Override
-  public JavaDataDescriptor jvmDesc() {
+  @NotNull
+  private static JavaDataDescriptor jvmDesc() {
     return JavaDataDescriptor.STRING;
+  }
+
+  @Override
+  public JavaDataDescriptor tuple_fieldtype_jvmDesc() {
+    return jvmDesc();
   }
 }

@@ -27,7 +27,7 @@ import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordT
 public class MortarAutoObjectType extends MortarBaseObjectType implements BuiltinSingletonExportable {
   public final JavaInternalName jvmName;
   private final Class klass;
-  public ROMap<Object, MortarObjectFieldType> fields;
+  public ROMap<Object, MortarObjectFieldtype> fields;
   public ROList<MortarDataType> inherits;
 
   public MortarAutoObjectType(Class klass) {
@@ -36,9 +36,9 @@ public class MortarAutoObjectType extends MortarBaseObjectType implements Builti
   }
 
   @Override
-  public ROList<String> traceFields(EvaluationContext context, Location location, Object inner) {
+  public ROList<String> type_traceFields(EvaluationContext context, Location location, Object inner) {
     final TSList<String> out = new TSList<>();
-    for (Map.Entry<Object, MortarObjectFieldType> field : fields) {
+    for (Map.Entry<Object, MortarObjectFieldtype> field : fields) {
       if (!(field.getKey() instanceof String)) continue;
       out.add((String) field.getKey());
     }
@@ -67,23 +67,11 @@ public class MortarAutoObjectType extends MortarBaseObjectType implements Builti
     return klass.getSimpleName();
   }
 
-  @Override
-  public boolean checkAssignableFrom(
-      TSList<Error> errors, Location location, MortarDataType type, TSList<Object> path) {
-    if (type instanceof MortarImmutableType) type = ((MortarImmutableType) type).innerType;
-    if (!(type instanceof MortarAutoObjectType)
-        || !((MortarAutoObjectType) type).walkParents(t -> t == this)) {
-      errors.add(new WrongType(location, path, type.toString(), toString()));
-      return false;
-    }
-    return true;
-  }
-
-  public ROPair<Object, MortarObjectFieldType> assertField(
+  public ROPair<Object, MortarObjectFieldtype> assertField(
       EvaluationContext context, Location location, Value field0) {
     final Object fieldKey = assertConstKey(context, location, field0);
     if (fieldKey == null) return null;
-    final MortarObjectFieldType field = fields.getOpt(fieldKey);
+    final MortarObjectFieldtype field = fields.getOpt(fieldKey);
     if (field == null) {
       context.errors.add(new NoField(location, fieldKey));
       return null;
@@ -92,22 +80,22 @@ public class MortarAutoObjectType extends MortarBaseObjectType implements Builti
   }
 
   @Override
-  public EvaluateResult variableValueAccess(EvaluationContext context, Location location, MortarDeferredCode base, Value field0) {
-    final ROPair<Object, MortarObjectFieldType> field = assertField(context, location, field0);
+  public EvaluateResult type_variableValueAccess(EvaluationContext context, Location location, MortarDeferredCode base, Value field0) {
+    final ROPair<Object, MortarObjectFieldtype> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
     return field.second.variableObjectFieldAsValue(context, location, base);
   }
 
   @Override
-  public EvaluateResult constValueAccess(
+  public EvaluateResult type_constValueAccess(
       EvaluationContext context, Location location, Object value, Value field0) {
-    final ROPair<Object, MortarObjectFieldType> field = assertField(context, location, field0);
+    final ROPair<Object, MortarObjectFieldtype> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
     return field.second.constObjectFieldAsValue(context, location, value);
   }
 
   @Override
-  public JavaDataDescriptor jvmDesc() {
+  public JavaDataDescriptor type_jvmDesc() {
     return JavaDataDescriptor.fromJVMName(jvmName);
   }
 }

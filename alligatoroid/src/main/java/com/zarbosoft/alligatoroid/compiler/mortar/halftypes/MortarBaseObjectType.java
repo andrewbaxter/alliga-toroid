@@ -7,40 +7,39 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 
 public abstract class MortarBaseObjectType implements MortarDataType {
   protected MortarBaseObjectType() {}
 
   @Override
-  public JavaBytecode arrayLoadBytecode() {
+  public JavaBytecode type_arrayLoadBytecode() {
     return JavaBytecodeUtils.arrayLoadObj;
   }
 
   @Override
-  public JavaBytecode arrayStoreBytecode() {
+  public JavaBytecode type_arrayStoreBytecode() {
     return JavaBytecodeUtils.arrayStoreObj;
   }
 
   @Override
-  public JavaBytecode loadBytecode(JavaBytecodeBindingKey key) {
+  public JavaBytecode type_loadBytecode(JavaBytecodeBindingKey key) {
     return JavaBytecodeUtils.loadObj(key);
   }
 
   @Override
-  public JavaBytecode returnBytecode() {
+  public JavaBytecode type_returnBytecode() {
     return JavaBytecodeUtils.returnObj;
   }
 
   @Override
-  public JavaBytecode storeBytecode(JavaBytecodeBindingKey key) {
+  public JavaBytecode type_storeBytecode(JavaBytecodeBindingKey key) {
     return JavaBytecodeUtils.storeObj(key);
   }
 
   @Override
-  public EvaluateResult valueVary(EvaluationContext context, Location id, Object data) {
+  public EvaluateResult type_valueVary(EvaluationContext context, Location id, Object data) {
     return EvaluateResult.pure(
-        stackAsValue(((MortarTargetModuleContext) context.target).transfer((Exportable) data)));
+        type_stackAsValue(((MortarTargetModuleContext) context.target).transfer((Exportable) data)));
   }
 }

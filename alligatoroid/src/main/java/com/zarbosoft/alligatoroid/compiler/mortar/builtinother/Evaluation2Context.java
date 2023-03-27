@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.builtinother;
 
-import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
@@ -24,23 +24,23 @@ public class Evaluation2Context {
     this.moduleContext = moduleContext;
   }
 
-  @Meta.WrapExpose
+  @StaticAutogen.WrapExpose
   public void log(String message) {
     log.add(message);
   }
 
-  @Meta.WrapExpose
+  @StaticAutogen.WrapExpose
   public DefinitionSet define(Location location) {
     return DefinitionSet.create(
         location, moduleContext.importCacheId, moduleContext.nextLocalId.incrementAndGet());
   }
 
-  @Meta.WrapExpose
-  public ImportId modLocal(Meta.BuiltinContext context, String path) {
+  @StaticAutogen.WrapExpose
+  public ImportId modLocal(StaticAutogen.BuiltinContext context, String path) {
     return ImportId.create(context.context.importId.moduleId.relative(path));
   }
 
-  @Meta.WrapExpose
+  @StaticAutogen.WrapExpose
   public FutureValue _import(Location location, ImportId importId) {
     CompletableFuture<Value> importResult =
         moduleContext.getModule(moduleContext.compileContext.modules.getCacheId(importId));

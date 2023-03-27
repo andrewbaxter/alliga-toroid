@@ -9,22 +9,16 @@ import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCod
 import com.zarbosoft.rendaw.common.TSList;
 
 public interface MortarTupleFieldType {
-  EvaluateResult constTupleFieldAsValue(
+  EvaluateResult tuple_fieldtype_constAsValue(
       EvaluationContext context, Location location, Object base, int key);
 
-  MortarTupleFieldType tupleFieldFork();
+  MortarTupleFieldType tuple_fieldtype_fork();
 
-  JavaDataDescriptor jvmDesc();
+  JavaDataDescriptor tuple_fieldtype_jvmDesc();
 
-  EvaluateResult variableTupleFieldAsValue(
+  EvaluateResult tuple_fieldtype_variableAsValue(
           EvaluationContext context,
           Location location,
           MortarDeferredCode baseCode,
           int field);
-
-  boolean tupleAssignmentCheckFieldAssignableFrom(
-      TSList<Error> errors,
-      Location location,
-      MortarTupleFieldType otherField,
-      TSList<Object> path);
 }

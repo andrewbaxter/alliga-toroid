@@ -1,17 +1,16 @@
 package com.zarbosoft.alligatoroid.compiler.builtin;
 
-import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarSimpleDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.CreatedFile;
 import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarNullType;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataValue.nullValue;
+import static com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataConstValue.nullValue;
 
 /** Fields in top level builtin -- reflected into builtin value */
-@Meta.BuiltinAggregate
+@StaticAutogen.BuiltinAggregate
 public class Builtin {
   public static final Value _null = nullValue;
   public static final MortarNullType nullType = MortarNullType.type;

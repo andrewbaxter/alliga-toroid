@@ -13,7 +13,7 @@ public class MortarDeferredCodeStack implements MortarDeferredCode {
 
   @Override
   public JavaBytecode drop() {
-    return JavaBytecodeUtils.seq().add(code).add(JavaBytecodeUtils.dup);
+    return JavaBytecodeUtils.seq().add(code).add(JavaBytecodeUtils.pop);
   }
 
   @Override

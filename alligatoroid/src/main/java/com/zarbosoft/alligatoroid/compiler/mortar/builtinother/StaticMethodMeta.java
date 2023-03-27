@@ -1,12 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.builtinother;
 
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Evaluator;
-import com.zarbosoft.alligatoroid.compiler.Meta;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
+import com.zarbosoft.alligatoroid.compiler.Scope;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.GraphDeferred;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaClass;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
@@ -16,22 +18,22 @@ import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataBinding;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataProtoType;
+import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataPrototype;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 public class StaticMethodMeta {
-  public final Meta.FuncInfo funcInfo;
+  public final StaticAutogen.FuncInfo funcInfo;
   public DefinitionSet definitionSet;
 
-  public StaticMethodMeta(Meta.FuncInfo funcInfo, DefinitionSet definitionSet) {
+  public StaticMethodMeta(StaticAutogen.FuncInfo funcInfo, DefinitionSet definitionSet) {
     this.funcInfo = funcInfo;
     this.definitionSet = definitionSet;
   }
 
-  @Meta.WrapExpose
+  @StaticAutogen.WrapExpose
   public void implement(Evaluation2Context context, LanguageElement tree) {
     if (definitionSet == null)
       throw new RuntimeException("This is a builtin function, it is already implemented.");
@@ -42,24 +44,22 @@ public class StaticMethodMeta {
 
     TSList<JavaBytecodeBindingKey> initialIndexes = new TSList<>();
     final TSOrderedMap<Object, Binding> initialBindings = new TSOrderedMap<>();
-    for (ROPair<Object, MortarDataProtoType> argument : funcInfo.arguments) {
+    for (ROPair<Object, MortarDataPrototype> argument : funcInfo.arguments) {
       final JavaBytecodeBindingKey key = new JavaBytecodeBindingKey();
       initialIndexes.add(key);
       initialBindings.putNew(
-          argument.first, new MortarDataBinding(key, argument.second.protoTypeNewType()));
+          argument.first, new MortarDataBinding(key, argument.second.prototype_newType()));
     }
 
     // Do evaluation
     MortarTargetModuleContext targetContext = new MortarTargetModuleContext(jvmClassName.value);
+    EvaluationContext evaluationContext = new EvaluationContext(context.moduleContext, targetContext, true, Scope.create(initialBindings));
     final Evaluator.RootEvaluateResult firstPass =
-        Evaluator.evaluate(context.moduleContext, targetContext, true, tree, initialBindings);
-    context.moduleContext.log.addAll(firstPass.log);
-    context.moduleContext.errors.addAll(firstPass.errors);
-    if (firstPass.errors.some()) {
-      throw new RuntimeException("Couldn't implement function, see body for specific errors.");
-    }
-    if (!funcInfo.returnType.protoTypeAssertAssignableFrom(
-        context.moduleContext.errors, tree.id, firstPass.value)) {
+        Evaluator.evaluate(evaluationContext, tree);
+        JavaBytecode resultBytecode = funcInfo.returnType.prototype_cast(evaluationContext, tree.id, firstPass.value);
+    context.moduleContext.log.addAll(evaluationContext.log);
+    context.moduleContext.errors.addAll(evaluationContext.errors);
+    if (evaluationContext.errors.some()) {
       throw new RuntimeException("Couldn't implement function, see body for specific errors.");
     }
     for (DefinitionSet dependency : targetContext.dependencies) {
@@ -70,15 +70,15 @@ public class StaticMethodMeta {
     JavaClass preClass = new JavaClass(jvmClassName);
     for (ROPair<ObjId<Object>, String> e : Common.iterable(targetContext.transfers.iterator())) {
       preClass.defineStaticField(
-          e.second, Meta.autoMortarHalfDataTypes.get(e.first.getClass()).jvmDesc());
+          e.second, StaticAutogen.autoMortarHalfObjectTypes.get(e.first.getClass()).prototype_jvmDesc());
     }
     preClass.defineFunction(
         entryMethodName,
-        JavaMethodDescriptor.fromParts(funcInfo.returnType.jvmDesc(), funcInfo.argDescriptor()),
+        JavaMethodDescriptor.fromParts(funcInfo.returnType.prototype_jvmDesc(), funcInfo.argDescriptor()),
         new JavaBytecodeSequence()
             .add(((MortarTargetCode) firstPass.code).e)
-            .add(funcInfo.returnType.protoTypeAssignFrom(firstPass.value))
-            .add(funcInfo.returnType.protoTypeReturnBytecode()),
+            .add(resultBytecode)
+            .add(funcInfo.returnType.prototype_returnBytecode()),
         initialIndexes);
 
     // Register definition in set

@@ -2,12 +2,9 @@ package com.zarbosoft.alligatoroid.compiler.mortar.halftypes;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialTuple;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
@@ -36,7 +33,7 @@ public class MortarTupleType extends MortarBaseObjectType implements BuiltinAuto
   }
 
   @Override
-  public ROList<String> traceFields(EvaluationContext context, Location location, Object inner) {
+  public ROList<String> type_traceFields(EvaluationContext context, Location location, Object inner) {
     final TSList<String> out = new TSList<>();
     for (int i = 0; i < fields.size(); i++) {
       out.add(Integer.toString(i));
@@ -45,37 +42,24 @@ public class MortarTupleType extends MortarBaseObjectType implements BuiltinAuto
   }
 
   @Override
-  public SemiserialSubvalue graphSemiserializeValue(Object inner, long importCacheId, Semiserializer semiserializer, ROList<Exportable> path, ROList<String> accessPath) {
+  public JavaBytecode type_castTo(MortarDataPrototype prototype, MortarDeferredCode code) {
+    TODO();
   }
 
   @Override
-  public Object graphDesemiserializeValue(ModuleCompileContext context, SemiserialSubvalue data) {
- // tuple should be identityexportable
- // store type in tuple?
-
-
-    return data.dispatch(
-            new SemiserialSubvalue.DefaultDispatcher<>() {
-              @Override
-              public Object handleTuple(SemiserialTuple s) {
-                TSList<Object> out = new TSList<>();
-                for (int i = 0; i < fields.size();i+=1 ) {
-                out.add(fields.get(i).graphDesemiserializeValue(context, s.values.get(i)));
-                }
-                return Tuple.;
-              }
-            });
+  public boolean type_canCastTo(MortarDataPrototype prototype) {
+    TODO();
   }
 
   @Override
-  public JavaDataDescriptor jvmDesc() {
+  public JavaDataDescriptor type_jvmDesc() {
     return DESC;
   }
 
   @Override
-  public boolean checkAssignableFrom(
+  public boolean type_checkAssignableFrom(
       TSList<Error> errors, Location location, MortarDataType type, TSList<Object> path) {
-    if (type instanceof MortarImmutableType) type = ((MortarImmutableType) type).innerType;
+    if (type instanceof ImmutableType) type = ((ImmutableType) type).innerType;
     if (!(type instanceof MortarTupleType)) {
       errors.add(new WrongType(location, path, type.toString(), "tuple"));
       return false;
@@ -89,7 +73,7 @@ public class MortarTupleType extends MortarBaseObjectType implements BuiltinAuto
         bad = true;
         continue;
       }
-      if (!field.tupleAssignmentCheckFieldAssignableFrom(
+      if (!field.tuple_fieldtype_assignmentCheckFieldAssignableFrom(
           errors, location, otherFields.get(i), path.mut().add(i))) bad = true;
     }
     for (int i = fields.size(); i < otherFields.size(); i += 1) {
@@ -111,18 +95,18 @@ public class MortarTupleType extends MortarBaseObjectType implements BuiltinAuto
   }
 
   @Override
-  public EvaluateResult variableValueAccess(
+  public EvaluateResult type_variableValueAccess(
       EvaluationContext context, Location location, MortarDeferredCode base, Value field0) {
     ROPair<Integer, MortarTupleFieldType> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
-    return field.second.variableTupleFieldAsValue(context, location, base, field.first);
+    return field.second.tuple_fieldtype_variableAsValue(context, location, base, field.first);
   }
 
   @Override
-  public EvaluateResult constValueAccess(
+  public EvaluateResult type_constValueAccess(
       EvaluationContext context, Location location, Object value, Value field0) {
     ROPair<Integer, MortarTupleFieldType> field = assertField(context, location, field0);
     if (field == null) return EvaluateResult.error;
-    return field.second.constTupleFieldAsValue(context, location, value, field.first);
+    return field.second.tuple_fieldtype_constAsValue(context, location, value, field.first);
   }
 }

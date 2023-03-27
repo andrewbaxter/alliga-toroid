@@ -17,7 +17,7 @@ public class GraphDeferred<T> implements Exportable {
   public static final String SEMIKEY_REF = "ref";
   public static final String SEMIKEY_ID = "id";
   public static final ExportableType exportType = new ExportableType();
-  public SemiserialUnknown ref;
+  public SemiserialRef ref;
   public UniqueId id;
   public T artifact;
 
@@ -77,14 +77,14 @@ public class GraphDeferred<T> implements Exportable {
             public Exportable handleRecord(SemiserialRecord s) {
               final GraphDeferred<Semiserializable> out = new GraphDeferred<>();
               out.ref =
-                  (SemiserialUnknown)
+                  (SemiserialRef)
                       context.lookupRef(
-                          (SemiserialUnknown)
+                          (SemiserialRef)
                               s.data.get(SemiserialString.create(SEMIKEY_REF)));
               out.id =
                   (UniqueId)
                       context.lookupRef(
-                          (SemiserialUnknown)
+                          (SemiserialRef)
                               s.data.get(SemiserialString.create(SEMIKEY_ID)));
               return out;
             }

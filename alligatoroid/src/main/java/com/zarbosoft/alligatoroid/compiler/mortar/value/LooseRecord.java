@@ -86,10 +86,10 @@ public class LooseRecord implements Value, NoExportValue {
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     for (ROPair<Object, EvaluateResult> e : this.data) {
       Value exported = ectx.record(ectx.record(e.second).export(context, location));
-      if (!(exported instanceof ConstDataValue)) throw new Assertion();
-      types.put(e.first, ((ConstDataValue) exported).mortarType());
-      data.put(e.first, ((ConstDataValue) exported).getInner());
+      if (!(exported instanceof MortarDataConstValue)) throw new Assertion();
+      types.put(e.first, ((MortarDataConstValue) exported).mortarType());
+      data.put(e.first, ((MortarDataConstValue) exported).getInner());
     }
-    return ectx.build(new MortarRecordType(types).constAsValue(Record.create(data)));
+    return ectx.build(new MortarRecordType(types).type_constAsValue(Record.create(data)));
   }
 }

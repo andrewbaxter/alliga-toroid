@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
-public class SemiserialBuiltinRef implements SemiserialUnknown {
+public class SemiserialBuiltinRef implements SemiserialRef {
   @BuiltinAutoExportableType.Param
   public String key;
 

@@ -6,10 +6,10 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 
-public interface MortarObjectFieldType {
+public interface MortarObjectFieldtype {
   EvaluateResult constObjectFieldAsValue(EvaluationContext context, Location location, Object base);
 
-  MortarObjectFieldType objectFieldFork();
+  MortarObjectFieldtype objectFieldFork();
 
   JavaDataDescriptor jvmDesc();
 
