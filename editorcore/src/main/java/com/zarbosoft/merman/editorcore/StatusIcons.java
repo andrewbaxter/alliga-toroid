@@ -33,7 +33,9 @@ public class StatusIcons {
     boolean slotted = false;
     for (int i = 0; i < current.size(); i++) {
       final FreeDisplayNode other = current.get(i);
-      if (other == icon) return;
+      if (other == icon) {
+          return;
+      }
       if (other == null) {
         current.set(i, icon);
         icon.setPosition(new Vector(-size, padTransStart + i * (size + padding)), false);

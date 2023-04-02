@@ -27,7 +27,9 @@ public abstract class JSONPath {
       return value();
     } else if (e instanceof JSpecialPrimitiveEvent) {
       return value();
-    } else throw new AssertionError(Format.format("Unknown JSON event type [%s]", e));
+    } else {
+        throw new AssertionError(Format.format("Unknown JSON event type [%s]", e));
+    }
   }
 
   public abstract JSONPath value();

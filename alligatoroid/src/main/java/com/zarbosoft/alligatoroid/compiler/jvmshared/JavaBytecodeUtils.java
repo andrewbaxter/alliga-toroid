@@ -96,8 +96,12 @@ public class JavaBytecodeUtils {
   public static JavaBytecode literalNull = inst(ACONST_NULL);
 
   public static boolean empty(JavaBytecode e) {
-    if (e == null) return true;
-    if (e instanceof JavaBytecodeSequence && ((JavaBytecodeSequence) e).size() == 0) return true;
+    if (e == null) {
+      return true;
+    }
+    if (e instanceof JavaBytecodeSequence && ((JavaBytecodeSequence) e).size() == 0) {
+      return true;
+    }
     return false;
   }
 
@@ -115,7 +119,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode instantiate(
       int location, JavaInternalName klass, JavaMethodDescriptor desc, JavaBytecode arguments) {
     JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
+    if (location >= 0) {
+      code.add(JavaBytecodeLineNumber.create(location));
+    }
     code.add(new JavaBytecodeInstructionObj(new TypeInsnNode(NEW, klass.value)));
     code.add(dup);
     code.add(arguments);
@@ -128,7 +134,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode accessField(
       int location, JavaInternalName klass, String field, JavaDataDescriptor fieldDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
+    if (location >= 0) {
+      code.add(JavaBytecodeLineNumber.create(location));
+    }
     code.add(
         new JavaBytecodeInstructionObj(
             new FieldInsnNode(GETFIELD, klass.value, field, fieldDesc.value)));
@@ -138,7 +146,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode setField(
       int location, JavaInternalName klass, String field, JavaDataDescriptor fieldDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
+    if (location >= 0) {
+      code.add(JavaBytecodeLineNumber.create(location));
+    }
     code.add(
         new JavaBytecodeInstructionObj(
             new FieldInsnNode(PUTFIELD, klass.value, field, fieldDesc.value)));
@@ -148,7 +158,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode setStaticField(
       int location, JavaInternalName klass, String field, JavaDataDescriptor fieldDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
+    if (location >= 0) {
+      code.add(JavaBytecodeLineNumber.create(location));
+    }
     code.add(
         new JavaBytecodeInstructionObj(
             new FieldInsnNode(PUTSTATIC, klass.value, field, fieldDesc.value)));
@@ -158,7 +170,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode accessStaticField(
       int location, JavaInternalName klass, String field, JavaDataDescriptor fieldDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
+    if (location >= 0) {
+      code.add(JavaBytecodeLineNumber.create(location));
+    }
     code.add(
         new JavaBytecodeInstructionObj(
             new FieldInsnNode(GETSTATIC, klass.value, field, fieldDesc.value)));
@@ -168,7 +182,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode callConstructor(
       int location, JavaInternalName klass, JavaMethodDescriptor methodDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
+    if (location >= 0) {
+      code.add(JavaBytecodeLineNumber.create(location));
+    }
     code.add(
         new JavaBytecodeInstructionObj(
             new MethodInsnNode(INVOKESPECIAL, klass.value, "<init>", methodDesc.value, false)));
@@ -178,7 +194,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode callInterfaceMthod(
       int location, JavaInternalName klass, String method, JavaMethodDescriptor methodDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
+    if (location >= 0) {
+      code.add(JavaBytecodeLineNumber.create(location));
+    }
     code.add(
         new JavaBytecodeInstructionObj(
             new MethodInsnNode(INVOKEINTERFACE, klass.value, method, methodDesc.value, false)));
@@ -188,7 +206,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode callMethod(
       int location, JavaInternalName klass, String method, JavaMethodDescriptor methodDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
+    if (location >= 0) {
+      code.add(JavaBytecodeLineNumber.create(location));
+    }
     code.add(
         new JavaBytecodeInstructionObj(
             new MethodInsnNode(INVOKEVIRTUAL, klass.value, method, methodDesc.value, false)));
@@ -197,7 +217,9 @@ public class JavaBytecodeUtils {
 
   public static JavaBytecode callStaticMethodReflect(Class klass, String method) {
     for (Method method1 : klass.getMethods()) {
-      if (!method.equals(method1.getName())) continue;
+      if (!method.equals(method1.getName())) {
+        continue;
+      }
       JavaDataDescriptor ret = JavaDataDescriptor.fromClass(method1.getReturnType());
       JavaDataDescriptor[] args = new JavaDataDescriptor[method1.getParameterCount()];
       for (int i = 0; i < method1.getParameters().length; i++) {
@@ -217,7 +239,9 @@ public class JavaBytecodeUtils {
   public static JavaBytecode callStaticMethod(
       int location, JavaInternalName klass, String method, JavaMethodDescriptor methodDesc) {
     final JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (location >= 0) code.add(JavaBytecodeLineNumber.create(location));
+    if (location >= 0) {
+      code.add(JavaBytecodeLineNumber.create(location));
+    }
     code.add(
         new JavaBytecodeInstructionObj(
             new MethodInsnNode(INVOKESTATIC, klass.value, method, methodDesc.value, false)));
@@ -233,8 +257,12 @@ public class JavaBytecodeUtils {
   }
 
   public static JavaBytecode literalLong(long value) {
-    if (value == 0) return literalLong0;
-    if (value == 1) return literalLong1;
+    if (value == 0) {
+      return literalLong0;
+    }
+    if (value == 1) {
+      return literalLong1;
+    }
     return new JavaBytecodeInstructionObj(new LdcInsnNode(value));
   }
 

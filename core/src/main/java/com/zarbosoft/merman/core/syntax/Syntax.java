@@ -102,7 +102,9 @@ public class Syntax {
     TSSet<AtomType> seen = new TSSet<>();
     for (Map.Entry<String, ROOrderedSetRef<AtomType>> splayedType : splayedTypes) {
       for (AtomType atomType : splayedType.getValue()) {
-        if (!seen.addNew(atomType)) continue;
+        if (!seen.addNew(atomType)) {
+            continue;
+        }
         atomType.finish(errors, this);
       }
     }
@@ -206,7 +208,9 @@ public class Syntax {
         while (!stack.isEmpty()) {
           Pair<ROList<String>, Iterator<String>> top = stack.last();
           final String childKey = top.second.next();
-          if (!top.second.hasNext()) stack.removeLast();
+          if (!top.second.hasNext()) {
+              stack.removeLast();
+          }
 
           int pathContainsChild = top.first.lastIndexOf(childKey);
           ROList<String> newPath = top.first.mut().add(childKey);

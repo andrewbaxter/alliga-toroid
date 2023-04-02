@@ -22,7 +22,9 @@ public class TestWizard {
 
   public void flushIteration() {
     context.flushIteration(1000);
-    if (!context.iterationQueue.isEmpty()) throw new Assertion();
+    if (!context.iterationQueue.isEmpty()) {
+        throw new Assertion();
+    }
   }
 
   public TestWizard displayWidth(final int size) {

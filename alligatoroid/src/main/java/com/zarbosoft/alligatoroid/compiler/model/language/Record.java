@@ -10,7 +10,7 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstKey;
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstKey;
 
 public class Record extends LanguageElement {
   @BuiltinAutoExportableType.Param
@@ -43,9 +43,11 @@ public class Record extends LanguageElement {
           new EvaluateResult(
               context.target.merge(context, id, new TSList<>(keyRes.preEffect, valueRes.preEffect)),
               valueRes.postEffect,
-              valueRes.value));
+              valueRes.value, jumpValues, jumpValues));
     }
-    if (badKeys) return EvaluateResult.error;
-    return new EvaluateResult(null, null, new LooseRecord(data));
+    if (badKeys) {
+        return EvaluateResult.error;
+    }
+    return new EvaluateResult(null, null, new LooseRecord(data), jumpValues, jumpValues);
   }
 }

@@ -102,7 +102,9 @@ public class AutoTreeMeta {
         serialize(writer, rf.genericArgs[0], e);
       }
       writer.arrayEnd();
-    } else infos.get(rf.klass).write(writer, object);
+    } else {
+        infos.get(rf.klass).write(writer, object);
+    }
   }
 
   public <C, T> BaseStateSingle<C, T> deserialize(
@@ -111,10 +113,14 @@ public class AutoTreeMeta {
   }
 
   public void scan(Class klass) {
-    if (infos.has(klass)) return;
+    if (infos.has(klass)) {
+        return;
+    }
     Object fallback = null;
     for (ROPair<Class, Object> pair : fallbacks) {
-      if (pair.first.isAssignableFrom(klass)) fallback = pair.second;
+      if (pair.first.isAssignableFrom(klass)) {
+          fallback = pair.second;
+      }
     }
     if (Modifier.isAbstract(klass.getModifiers()) || Modifier.isInterface(klass.getModifiers())) {
       Class[] elements;
@@ -157,8 +163,12 @@ public class AutoTreeMeta {
       infos.put(klass, info);
       TSMap<String, ProtoType> fields = new TSMap<>();
       for (Field field : klass.getFields()) {
-        if (Modifier.isStatic(field.getModifiers())) continue;
-        if (field.getAnnotation(BuiltinAutoExportableType.Param.class) == null) continue;
+        if (Modifier.isStatic(field.getModifiers())) {
+            continue;
+        }
+        if (field.getAnnotation(BuiltinAutoExportableType.Param.class) == null) {
+            continue;
+        }
         TypeInfo fieldInfo = TypeInfo.fromField(field);
         ProtoType prototype;
         if (ROList.class.isAssignableFrom(fieldInfo.klass)) {

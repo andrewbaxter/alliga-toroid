@@ -46,12 +46,18 @@ public abstract class JSDisplayNode implements DisplayNode {
 
   protected void setJSPositionInternal(Display.UnconvertAxis v, boolean animate) {
     if (v.x) {
-      if (animate) inner_().classList.add(CSS_ANIMATE_LEFT);
-      else inner_().classList.remove(CSS_ANIMATE_LEFT);
+      if (animate) {
+          inner_().classList.add(CSS_ANIMATE_LEFT);
+      } else {
+          inner_().classList.remove(CSS_ANIMATE_LEFT);
+      }
       inner_().style.left = Format.format("%spx", v.amount);
     } else {
-      if (animate) inner_().classList.add(CSS_ANIMATE_TOP);
-      else inner_().classList.remove(CSS_ANIMATE_TOP);
+      if (animate) {
+          inner_().classList.add(CSS_ANIMATE_TOP);
+      } else {
+          inner_().classList.remove(CSS_ANIMATE_TOP);
+      }
       inner_().style.top = Format.format("%spx", v.amount);
     }
   }

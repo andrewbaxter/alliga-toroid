@@ -15,7 +15,9 @@ public class PatternSequence extends Pattern {
   @Override
   public Node<EscapableResult<ROList<String>>> build(boolean capture) {
     final MergeEscapableSequence<String> out = new MergeEscapableSequence<String>();
-    for (final Pattern child : children) out.add(child.build(capture));
+    for (final Pattern child : children) {
+        out.add(child.build(capture));
+    }
     return out;
   }
 }

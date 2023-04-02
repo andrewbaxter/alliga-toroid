@@ -9,8 +9,9 @@ import java.util.concurrent.ExecutionException;
 public class Unexpected extends Error.LocationError {
   public Unexpected(Location location, Throwable exception) {
     super(location, new PreError(exception));
-    if (exception instanceof PreError || exception instanceof ExecutionException)
-      throw new Assertion();
+    if (exception instanceof PreError || exception instanceof ExecutionException) {
+        throw new Assertion();
+    }
   }
 
   private static class PreError extends Error.PreError {

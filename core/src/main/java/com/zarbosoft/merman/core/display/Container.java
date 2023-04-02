@@ -14,7 +14,9 @@ public interface Container extends FreeDisplayNode {
   public void setParent(Parent parent);
 
   public default void removeFromParent(Context context) {
-    if (getParent() != null) getParent().remove(context);
+    if (getParent() != null) {
+        getParent().remove(context);
+    }
   }
 
   public interface Parent {

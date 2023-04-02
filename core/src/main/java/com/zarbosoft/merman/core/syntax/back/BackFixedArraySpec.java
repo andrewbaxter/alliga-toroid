@@ -31,13 +31,19 @@ public class BackFixedArraySpec extends BackSpec {
 
   @Override
   public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<BackPath.Element> segments) {
-    if (segments.get(0).index != offset) return new ROPair<>(null, offset + 1);
+    if (segments.get(0).index != offset) {
+        return new ROPair<>(null, offset + 1);
+    }
     segments = segments.subFrom(1);
-    if (segments.none()) return new ROPair<>(at, null);
+    if (segments.none()) {
+        return new ROPair<>(at, null);
+    }
     offset = 0;
     for (BackSpec element : elements) {
       ROPair<Atom, Integer> res = element.backLocate(at, offset, segments);
-      if (res == null || res.first != null) return res;
+      if (res == null || res.first != null) {
+          return res;
+      }
       offset = res.second;
     }
     return null;

@@ -31,7 +31,9 @@ public class TextBlock implements Container, TextStylable {
   }
 
   private void rewrap(Context context) {
-    if (font == null) font = Context.getFont(context, null, null);
+    if (font == null) {
+        font = Context.getFont(context, null, null);
+    }
     Font.Measurer measurer = font.measurer();
     String[] hardLines = text.split("\n");
     double transverse = 0;
@@ -53,7 +55,9 @@ public class TextBlock implements Container, TextStylable {
         if (i >= lines.size()) {
           lines.add(line = context.display.text());
           line.setFont(context, font);
-          if (color != null) line.setColor(context, color);
+          if (color != null) {
+              line.setColor(context, color);
+          }
           group.add(line);
         } else {
           line = lines.get(i);
@@ -70,7 +74,9 @@ public class TextBlock implements Container, TextStylable {
       }
     }
     transverseSpan = transverse;
-    if (parent != null) parent.relayout(context);
+    if (parent != null) {
+        parent.relayout(context);
+    }
   }
 
   @Override

@@ -7,15 +7,15 @@ import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Tuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarTupleType;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataTypestate;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarTupleTypestate;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstIntlike;
-import static com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataConstValue.nullValue;
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstIntlike;
+import static com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst.nullValue;
 
 /**
  * Represents consecutive stack elements - needs to be converted to an actual tuple to bind/access
@@ -45,7 +45,9 @@ public class LooseTuple implements Value, NoExportValue {
   @Override
   public EvaluateResult access(EvaluationContext context, Location location, Value field) {
     final Integer key = assertConstIntlike(context, location, field);
-    if (key == null) return EvaluateResult.error;
+    if (key == null) {
+      return EvaluateResult.error;
+    }
     TSList<TargetCode> pre = new TSList<>();
     TSList<TargetCode> post = new TSList<>();
     Value out = null;
@@ -73,7 +75,7 @@ public class LooseTuple implements Value, NoExportValue {
     return new EvaluateResult(
         context.target.merge(context, location, pre),
         context.target.merge(context, location, post),
-        out);
+        out, jumpValues, jumpValues);
   }
 
   @Override
@@ -87,15 +89,17 @@ public class LooseTuple implements Value, NoExportValue {
 
   @Override
   public EvaluateResult export(EvaluationContext context, Location location) {
-    TSList<MortarDataType> types = new TSList<>();
+    TSList<MortarDataTypestate> types = new TSList<>();
     final TSList<Object> data = new TSList<>();
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     for (int i = 0; i < this.data.size(); i++) {
       Value exported = ectx.record(ectx.record(this.data.get(i)).export(context, location));
-      if (!(exported instanceof MortarDataConstValue)) throw new Assertion();
-      types.add(((MortarDataConstValue) exported).mortarType());
-      data.add(((MortarDataConstValue) exported).getInner());
+      if (!(exported instanceof MortarDataValueConst)) {
+        throw new Assertion();
+      }
+      types.add(((MortarDataValueConst) exported).type());
+      data.add(((MortarDataValueConst) exported).getInner());
     }
-    return ectx.build(new MortarTupleType(types).type_constAsValue(Tuple.create(data)));
+    return ectx.build(new MortarTupleTypestate(types).typestate_constAsValue(Tuple.create(data)));
   }
 }

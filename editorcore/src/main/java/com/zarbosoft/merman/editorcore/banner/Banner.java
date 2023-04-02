@@ -46,7 +46,9 @@ public class Banner {
   }
 
   private void idlePlace(final Context context) {
-    if (text == null) return;
+    if (text == null) {
+        return;
+    }
     if (idle == null) {
       idle = new IterationPlace(context);
       context.addIteration(idle);
@@ -54,18 +56,23 @@ public class Banner {
   }
 
   private void place(final Editor editor) {
-    if (text == null) return;
+    if (text == null) {
+        return;
+    }
     final double calculatedTransverse =
         transverse - text.descent() - editor.bannerPad.transverseEnd * editor.context.toPixels;
     text.setBaselinePosition(
         new Vector(editor.bannerPad.converseStart * editor.context.toPixels, calculatedTransverse),
         false);
-    if (background != null)
-      background.setPosition(new Vector(0, calculatedTransverse - text.ascent()), false);
+    if (background != null) {
+        background.setPosition(new Vector(0, calculatedTransverse - text.ascent()), false);
+    }
   }
 
   private void resizeBackground(final Context context) {
-    if (background == null) return;
+    if (background == null) {
+        return;
+    }
     background.setSize(context, context.edge, text.descent() + text.ascent());
   }
 
@@ -83,11 +90,15 @@ public class Banner {
   }
 
   private void updateStyle(final Editor editor) {
-    if (text == null) return;
+    if (text == null) {
+        return;
+    }
     editor.context.stylist.styleObbox(
         editor.context, background, Stylist.ObboxType.BANNER_BACKGROUND);
     editor.context.stylist.styleBannerText(editor.context, text);
-    if (bedding != null) editor.context.wall.removeBedding(editor.context, bedding);
+    if (bedding != null) {
+        editor.context.wall.removeBedding(editor.context, bedding);
+    }
     bedding =
         new Bedding(
             text.transverseSpan()
@@ -99,7 +110,9 @@ public class Banner {
   }
 
   public void removeMessage(final Context context, final BannerMessage message) {
-    if (current != message) return;
+    if (current != message) {
+        return;
+    }
     current = null;
     context.midground.removeNode(text);
     text = null;

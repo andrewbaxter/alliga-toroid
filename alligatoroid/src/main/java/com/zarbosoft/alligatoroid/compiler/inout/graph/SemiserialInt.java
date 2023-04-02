@@ -19,8 +19,12 @@ public final class SemiserialInt implements SemiserialSubvalue {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+        return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+        return false;
+    }
     SemiserialInt that = (SemiserialInt) o;
     return value == that.value;
   }

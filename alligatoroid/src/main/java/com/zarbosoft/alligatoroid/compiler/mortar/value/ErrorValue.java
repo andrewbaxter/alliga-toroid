@@ -10,8 +10,8 @@ import com.zarbosoft.alligatoroid.compiler.mortar.SimpleBinding;
 import com.zarbosoft.rendaw.common.ROPair;
 
 public final class ErrorValue implements Value, NoExportValue {
-  public static final ErrorValue error = new ErrorValue();
-  public static final Binding binding = new SimpleBinding(error);
+  public static final ErrorValue value = new ErrorValue();
+  public static final Binding binding = new SimpleBinding(value);
 
   private ErrorValue() {}
 

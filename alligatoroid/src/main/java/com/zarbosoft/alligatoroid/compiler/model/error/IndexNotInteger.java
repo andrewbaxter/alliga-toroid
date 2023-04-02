@@ -1,18 +1,18 @@
 package com.zarbosoft.alligatoroid.compiler.model.error;
 
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataVariableValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 import com.zarbosoft.rendaw.common.Format;
 
 public class IndexNotInteger extends Error.LocationError {
-  public IndexNotInteger(Location location, MortarDataVariableValue got) {
+  public IndexNotInteger(Location location, MortarDataValueVariableStack got) {
     super(location, new PreError(got));
   }
 
   private static class PreError extends Error.PreError {
-    public final MortarDataVariableValue got;
+    public final MortarDataValueVariableStack got;
 
-    public PreError(MortarDataVariableValue got) {
+    public PreError(MortarDataValueVariableStack got) {
       this.got = got;
     }
 

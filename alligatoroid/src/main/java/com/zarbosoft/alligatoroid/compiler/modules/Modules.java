@@ -45,15 +45,16 @@ public class Modules {
                 @Override
                 public Object handleLocal(LocalModuleId id) {
                   context.dependents.addHash(id.path, source.hash);
-                  if (fromImportPath != null)
-                    fromImportPath.spec.moduleId.dispatch(
-                        new ModuleId.DefaultDispatcher<Object>(null) {
-                          @Override
-                          public Object handleLocal(LocalModuleId fromId) {
-                            context.dependents.addDependency(fromId.path, id.path);
-                            return null;
-                          }
-                        });
+                  if (fromImportPath != null) {
+                      fromImportPath.spec.moduleId.dispatch(
+                          new ModuleId.DefaultDispatcher<Object>(null) {
+                            @Override
+                            public Object handleLocal(LocalModuleId fromId) {
+                              context.dependents.addDependency(fromId.path, id.path);
+                              return null;
+                            }
+                          });
+                  }
                   return null;
                 }
               });

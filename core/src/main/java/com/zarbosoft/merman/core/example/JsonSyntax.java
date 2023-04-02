@@ -300,7 +300,7 @@ public class JsonSyntax {
   }
 
   public static ROMap<String, Object> textStyleMeta(DirectStylist.TextStyle style) {
-    return new TSMap<>(m -> m.put("style", style));
+    return TSMap.createWith(m -> m.put("style", style));
   }
 
   public static FrontSymbolSpec textSym(String s, DirectStylist.TextStyle style) {

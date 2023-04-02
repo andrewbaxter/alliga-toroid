@@ -25,7 +25,9 @@ public class ConvScrollContainer implements Container {
   }
 
   private void updateScroll() {
-    if (converseSpan == 0) return;
+    if (converseSpan == 0) {
+        return;
+    }
     double newScroll = scrollAbs;
     double overMax = childMax + newScroll - converseSpan;
     if (overMax > 0) {
@@ -35,7 +37,9 @@ public class ConvScrollContainer implements Container {
     if (underMin < 0) {
       newScroll -= underMin;
     }
-    if (newScroll == scrollAbs) return;
+    if (newScroll == scrollAbs) {
+        return;
+    }
     scrollAbs = newScroll;
     inner.setConverse(baseConverse + scrollAbs, animate);
   }
@@ -81,7 +85,9 @@ public class ConvScrollContainer implements Container {
   public void setConverseSpan(Context context, double span) {
     this.converseSpan = span;
     updateScroll();
-    if (parent != null) parent.relayout(context);
+    if (parent != null) {
+        parent.relayout(context);
+    }
   }
 
   @Override

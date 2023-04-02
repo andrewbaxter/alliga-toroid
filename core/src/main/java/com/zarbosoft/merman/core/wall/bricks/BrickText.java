@@ -53,13 +53,17 @@ public class BrickText extends Brick {
 
   @Override
   public double descent() {
-    if (overrideDescent != null) return overrideDescent * toPixels;
+    if (overrideDescent != null) {
+        return overrideDescent * toPixels;
+    }
     return text.descent() + padding.transverseEnd * toPixels;
   }
 
   @Override
   public double ascent() {
-    if (overrideAscent != null) return overrideAscent * toPixels;
+    if (overrideAscent != null) {
+        return overrideAscent * toPixels;
+    }
     return text.ascent() + padding.converseStart * toPixels;
   }
 

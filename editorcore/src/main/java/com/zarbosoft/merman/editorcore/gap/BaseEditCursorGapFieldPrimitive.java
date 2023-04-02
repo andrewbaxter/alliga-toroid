@@ -96,7 +96,9 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
       if (!top.hasNext()) {
         stack.removeLast();
       }
-      if (!seen.addNew(leafType)) continue;
+      if (!seen.addNew(leafType)) {
+          continue;
+      }
 
       CandidateInfo info = CandidateInfo.inspect(context.env, leafType);
 
@@ -127,7 +129,9 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
             elementType = ((FrontAtomSpec) firstPreceding).field().type;
           } else if (firstPreceding instanceof FrontArraySpecBase) {
             elementType = ((FrontArraySpecBase) firstPreceding).field.elementAtomType();
-          } else throw new Assertion();
+          } else {
+              throw new Assertion();
+          }
           stack.add(context.syntax.splayedTypes.get(elementType).iterator());
         }
 
@@ -178,7 +182,9 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
                         };
                       }
                     });
-              } else throw new Assertion();
+              } else {
+                  throw new Assertion();
+              }
             }
           }
 
@@ -242,9 +248,13 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
           } else if (spec instanceof FrontAtomSpec) {
             stack.addLast(
                 context.syntax.splayedTypes.get(((FrontAtomSpec) spec).field().type).iterator());
-          } else throw new Assertion();
+          } else {
+              throw new Assertion();
+          }
         }
-      } else throw new Assertion();
+      } else {
+          throw new Assertion();
+      }
     }
     return new Grammar().add(GAP_ROOT_KEY, union);
   }
@@ -320,7 +330,9 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
     }
     for (Leaf leaf : out.longest.first.leaves) {
       PreGapChoice choice = (PreGapChoice) leaf.color();
-      if (!seen.addNew(choice.type)) continue;
+      if (!seen.addNew(choice.type)) {
+          continue;
+      }
       out.choices.add(
           new GapChoice(
               gap,
@@ -382,75 +394,100 @@ public class BaseEditCursorGapFieldPrimitive extends BaseEditCursorFieldPrimitiv
   @Override
   public void editExit(Editor editor) {
     Atom.Parent atomParentRef = visualPrimitive.value.atomParentRef;
-    if (atomParentRef == null) return;
+    if (atomParentRef == null) {
+        return;
+    }
     Atom gap = atomParentRef.atom();
     atomParentRef.selectParent(editor.context);
     Field inField = gap.fieldParentRef.field;
     if (gap.type == editor.context.syntax.gap)
       // Remove empty unit gaps
-      do {
-        if (!(inField instanceof FieldArray)) break;
-        if (inField.atomParentRef.atom().type instanceof RootAtomType) break;
-        FieldArray value = (FieldArray) inField;
-        TSList<Atom> data = value.data;
-        if (data.size() > 1) break;
-        Atom atom = data.get(0);
-        if (atom.type != editor.context.syntax.gap) break;
-        FieldPrimitive field = (FieldPrimitive) atom.namedFields.get(GapAtomType.PRIMITIVE_KEY);
-        if (!field.get().isEmpty()) break;
-        editor.history.record(
-            editor,
-            null,
-            recorder -> {
-              Editor.arrayChange(editor, recorder, value, 0, 1, ROList.empty);
-            });
-      } while (false);
-    else
-      do {
-        /// Remove empty syntax gaps and place lifted preceding back into parent
-        FieldPrimitive prim = visualPrimitive.value;
-        if (!prim.get().isEmpty()) break;
-        FieldArray array = (FieldArray) gap.namedFields.get(SuffixGapAtomType.PRECEDING_KEY);
-        ROOrderedSetRef<AtomType> canPlace;
-        if (array.data.size() == 0) {
-          canPlace = ROOrderedSetRef.empty;
-        } else if (array.data.size() == 1 && inField instanceof FieldAtom) {
-          canPlace = editor.context.syntax.splayedTypes.get(((FieldAtom) inField).back().type);
-        } else if (inField instanceof FieldArray) {
-          canPlace =
-              editor.context.syntax.splayedTypes.get(
-                  ((FieldArray) inField).back().elementAtomType());
-        } else break;
-        boolean canPlaceAll = true;
-        for (Atom atom : array.data) {
-          if (!canPlace.contains(atom.type)) {
-            canPlaceAll = false;
-            break;
+    {
+        do {
+          if (!(inField instanceof FieldArray)) {
+              break;
           }
-        }
-        if (!canPlaceAll) break;
-        TSList<Atom> transplant = array.data.mut();
-        editor.history.record(
-            editor,
-            null,
-            recorder -> {
-              Editor.arrayChange(editor, recorder, array, 0, array.data.size(), ROList.empty);
-              if (inField instanceof FieldAtom) {
-                Atom transplant0;
-                if (transplant.some()) transplant0 = transplant.get(0);
-                else transplant0 = editor.createEmptyGap(editor.context.syntax.gap);
-                Editor.atomSet(editor, recorder, (FieldAtom) inField, transplant0);
-              } else if (inField instanceof FieldArray) {
-                Editor.arrayChange(
-                    editor,
-                    recorder,
-                    (FieldArray) inField,
-                    ((FieldArray.Parent) gap.fieldParentRef).index,
-                    1,
-                    transplant);
-              } else throw new Assertion();
-            });
-      } while (false);
+          if (inField.atomParentRef.atom().type instanceof RootAtomType) {
+              break;
+          }
+          FieldArray value = (FieldArray) inField;
+          TSList<Atom> data = value.data;
+          if (data.size() > 1) {
+              break;
+          }
+          Atom atom = data.get(0);
+          if (atom.type != editor.context.syntax.gap) {
+              break;
+          }
+          FieldPrimitive field = (FieldPrimitive) atom.namedFields.get(GapAtomType.PRIMITIVE_KEY);
+          if (!field.get().isEmpty()) {
+              break;
+          }
+          editor.history.record(
+              editor,
+              null,
+              recorder -> {
+                Editor.arrayChange(editor, recorder, value, 0, 1, ROList.empty);
+              });
+        } while (false);
+    } else {
+        do {
+          /// Remove empty syntax gaps and place lifted preceding back into parent
+          FieldPrimitive prim = visualPrimitive.value;
+          if (!prim.get().isEmpty()) {
+              break;
+          }
+          FieldArray array = (FieldArray) gap.namedFields.get(SuffixGapAtomType.PRECEDING_KEY);
+          ROOrderedSetRef<AtomType> canPlace;
+          if (array.data.size() == 0) {
+            canPlace = ROOrderedSetRef.empty;
+          } else if (array.data.size() == 1 && inField instanceof FieldAtom) {
+            canPlace = editor.context.syntax.splayedTypes.get(((FieldAtom) inField).back().type);
+          } else if (inField instanceof FieldArray) {
+            canPlace =
+                editor.context.syntax.splayedTypes.get(
+                    ((FieldArray) inField).back().elementAtomType());
+          } else {
+              break;
+          }
+          boolean canPlaceAll = true;
+          for (Atom atom : array.data) {
+            if (!canPlace.contains(atom.type)) {
+              canPlaceAll = false;
+              break;
+            }
+          }
+          if (!canPlaceAll) {
+              break;
+          }
+          TSList<Atom> transplant = array.data.mut();
+          editor.history.record(
+              editor,
+              null,
+              recorder -> {
+                Editor.arrayChange(editor, recorder, array, 0, array.data.size(), ROList.empty);
+                if (inField instanceof FieldAtom) {
+                  Atom transplant0;
+                  if (transplant.some()) {
+                      transplant0 = transplant.get(0);
+                  } else {
+                      transplant0 = editor.createEmptyGap(editor.context.syntax.gap);
+                  }
+                  Editor.atomSet(editor, recorder, (FieldAtom) inField, transplant0);
+                } else if (inField instanceof FieldArray) {
+                  Editor.arrayChange(
+                      editor,
+                      recorder,
+                      (FieldArray) inField,
+                      ((FieldArray.Parent) gap.fieldParentRef).index,
+                      1,
+                      transplant);
+                } else {
+                    throw new Assertion();
+                }
+              });
+        } while (false);
+    }
   }
 
   @FunctionalInterface

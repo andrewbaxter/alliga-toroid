@@ -79,7 +79,9 @@ public class CompileContext {
           @Override
           public TSMap<Location, ROSetRef<String>> apply(
               ModuleId moduleId, TSMap<Location, ROSetRef<String>> entries) {
-            if (entries == null) entries = new TSMap<>();
+            if (entries == null) {
+                entries = new TSMap<>();
+            }
             entries.put(location, strings);
             return entries;
           }

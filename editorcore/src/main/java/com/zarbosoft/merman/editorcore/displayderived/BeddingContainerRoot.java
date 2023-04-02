@@ -67,12 +67,16 @@ public class BeddingContainerRoot {
   }
 
   private void updateEdge(Context context) {
-    if (current == null) return;
+    if (current == null) {
+        return;
+    }
     current.setConverseSpan(context, context.edge);
   }
 
   private void iterationPlace(final Context context, final boolean animate) {
-    if (current == null) return;
+    if (current == null) {
+        return;
+    }
     if (idle == null) {
       idle = new BeddingContainerRoot.IterationPlace(context);
       context.addIteration(idle);
@@ -99,7 +103,9 @@ public class BeddingContainerRoot {
   }
 
   public void removeInner(Editor editor, Container inner) {
-    if (inner != current) return;
+    if (inner != current) {
+        return;
+    }
     Context context = editor.context;
     if (current != null) {
       context.midground.removeNode(current);

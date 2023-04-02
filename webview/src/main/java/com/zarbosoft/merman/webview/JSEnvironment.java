@@ -40,13 +40,17 @@ public class JSEnvironment implements Environment {
 
       @Override
       public int before(int offset) {
-        if (offset == 0) return I18N_DONE;
+        if (offset == 0) {
+            return I18N_DONE;
+        }
         return inner.anyBeforeOrAt(offset - 1);
       }
 
       @Override
       public int after(int offset) {
-        if (offset == inner.length()) return I18N_DONE;
+        if (offset == inner.length()) {
+            return I18N_DONE;
+        }
         return inner.anyAtOrAfter(offset + 1);
       }
     };

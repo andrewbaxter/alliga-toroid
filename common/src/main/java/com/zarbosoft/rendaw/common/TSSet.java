@@ -113,8 +113,12 @@ public class TSSet<T> implements ROSetRef<T> {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+        return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+        return false;
+    }
     TSSet<?> tsSet = (TSSet<?>) o;
     return data.equals(tsSet.data);
   }

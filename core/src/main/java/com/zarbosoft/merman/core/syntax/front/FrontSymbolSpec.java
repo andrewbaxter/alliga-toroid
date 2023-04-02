@@ -33,8 +33,12 @@ public class FrontSymbolSpec extends FrontSpec {
   public void finish(
       MultiError errors, SyntaxPath typePath, AtomType atomType, TSSet<String> middleUsed) {
     super.finish(errors, typePath, atomType, middleUsed);
-    if (condition != null) condition.finish(errors, typePath, atomType);
-    if (type != null) type.finish(errors, typePath, atomType);
+    if (condition != null) {
+        condition.finish(errors, typePath, atomType);
+    }
+    if (type != null) {
+        type.finish(errors, typePath, atomType);
+    }
   }
 
   public Visual createVisual(

@@ -70,7 +70,9 @@ public class BaseEditCursorAtom extends CursorAtom {
           },
           Context.CopyContext.ARRAY,
           atoms -> {
-            if (atoms.isEmpty()) return;
+            if (atoms.isEmpty()) {
+                return;
+            }
             editor.history.record(
                 editor,
                 null,

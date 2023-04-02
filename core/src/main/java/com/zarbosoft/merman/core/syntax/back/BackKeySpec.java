@@ -34,8 +34,11 @@ public class BackKeySpec extends BackSpec {
   @Override
   public ROPair<Atom, Integer> backLocate(
       Atom at, int offset, ROList<BackPath.Element> segments) {
-    if (segments.get(0).key) return key.backLocate(at, offset, segments);
-    else return value.backLocate(at, offset, segments);
+    if (segments.get(0).key) {
+        return key.backLocate(at, offset, segments);
+    } else {
+        return value.backLocate(at, offset, segments);
+    }
   }
 
   @Override

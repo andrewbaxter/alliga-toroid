@@ -591,7 +591,9 @@ public class TestWindowing {
 
     public void flushIteration() {
       context.flushIteration(1000);
-      if (!context.iterationQueue.isEmpty()) throw new AssertionError("Too much idle activity");
+      if (!context.iterationQueue.isEmpty()) {
+          throw new AssertionError("Too much idle activity");
+      }
     }
 
     private Course getCourse(final int courseIndex) {
@@ -638,7 +640,9 @@ public class TestWindowing {
         ((CursorAtom) context.cursor).actionWindow(context);
       } else if (context.cursor instanceof CursorFieldArray) {
         ((CursorFieldArray) context.cursor).actionWindow(context);
-      } else throw new Assertion();
+      } else {
+          throw new Assertion();
+      }
       assertThat(context.cursor, is(notNullValue()));
       flushIteration();
       return this;
@@ -649,7 +653,9 @@ public class TestWindowing {
         ((CursorAtom) context.cursor).actionEnter(context);
       } else if (context.cursor instanceof CursorFieldArray) {
         ((CursorFieldArray) context.cursor).actionEnter(context);
-      } else throw new Assertion();
+      } else {
+          throw new Assertion();
+      }
       assertThat(context.cursor, is(notNullValue()));
       flushIteration();
       return this;
@@ -660,7 +666,9 @@ public class TestWindowing {
         ((CursorAtom) context.cursor).actionExit(context);
       } else if (context.cursor instanceof CursorFieldArray) {
         ((CursorFieldArray) context.cursor).actionExit(context);
-      } else throw new Assertion();
+      } else {
+          throw new Assertion();
+      }
       assertThat(context.cursor, is(notNullValue()));
       flushIteration();
       return this;
@@ -694,14 +702,18 @@ public class TestWindowing {
         System.out.printf(" %02d  ", i);
         for (int j = 0; j < course.children.size(); ++j) {
           Brick brick = course.children.get(j);
-          if (context.wall.cornerstone == brick) System.out.format("*");
+          if (context.wall.cornerstone == brick) {
+              System.out.format("*");
+          }
           if (brick instanceof BrickText) {
             System.out.printf("%s ", ((MockeryText) ((BrickText) brick).text).text());
           } else if (brick instanceof BrickLine) {
             System.out.printf("\\l ");
           } else if (brick instanceof BrickEmpty) {
             System.out.printf("\\w ");
-          } else throw new Assertion();
+          } else {
+              throw new Assertion();
+          }
         }
         if (context.wall.cornerstoneCourse == course) {
           System.out.format(" **");

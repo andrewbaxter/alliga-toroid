@@ -18,8 +18,11 @@ public class JSBlank extends JSCourseDisplayNode implements Blank {
   public void setConverseSpan(Context context, double converse) {
     this.converseSpan = converse;
     Display.UnconvertAxis v = display.halfConvert.unconvertConverseSpan(converse);
-    if (v.x) element.style.width = CSSProperties.WidthUnionType.of(v.amount + "px");
-    else element.style.height = CSSProperties.HeightUnionType.of(v.amount + "px");
+    if (v.x) {
+        element.style.width = CSSProperties.WidthUnionType.of(v.amount + "px");
+    } else {
+        element.style.height = CSSProperties.HeightUnionType.of(v.amount + "px");
+    }
     fixPosition();
   }
 

@@ -943,7 +943,9 @@ public class AlligatorusSyntax {
     }
 
     public AFrontBuilder atom(String id) {
-      if (front.isEmpty()) needsParens = true;
+      if (front.isEmpty()) {
+        needsParens = true;
+      }
       front.add(
           new FrontAtomSpec(
               new FrontAtomSpec.Config(id)
@@ -964,7 +966,9 @@ public class AlligatorusSyntax {
     }
 
     public AFrontBuilder arraySuffix(String id, String suffix) {
-      if (front.isEmpty()) needsParens = true;
+      if (front.isEmpty()) {
+        needsParens = true;
+      }
       front.add(
           new FrontArraySpec(
               new FrontArraySpec.Config(
@@ -985,7 +989,9 @@ public class AlligatorusSyntax {
     }
 
     public AFrontBuilder arraySep(String id, String separator) {
-      if (front.isEmpty()) needsParens = true;
+      if (front.isEmpty()) {
+        needsParens = true;
+      }
       front.add(
           new FrontArraySpec(
               new FrontArraySpec.Config(
@@ -1323,9 +1329,13 @@ public class AlligatorusSyntax {
   public static class RefactorFixRemoteHash implements Refactor {
     @Override
     public RefactorMatch check(ROList<Atom> atoms) {
-      if (atoms.size() != 1) return null;
+      if (atoms.size() != 1) {
+        return null;
+      }
       final Atom atom = atoms.get(0);
-      if (!atom.type.id.equals(TYPE_IMPORT)) return null;
+      if (!atom.type.id.equals(TYPE_IMPORT)) {
+        return null;
+      }
       TSList<Error> errors = (TSList<Error>) atom.metaGet(META_KEY_ERROR);
       if (errors == null || errors.isEmpty()) {
         return null;
@@ -1337,9 +1347,13 @@ public class AlligatorusSyntax {
           break;
         }
       }
-      if (foundHash == null) return null;
+      if (foundHash == null) {
+        return null;
+      }
       final Atom spec = ((FieldAtom) atom.namedFields.get(FIELD_IMPORT_SPEC)).data;
-      if (!spec.type.id.equals(TYPE_MODULE_REMOTE)) return null;
+      if (!spec.type.id.equals(TYPE_MODULE_REMOTE)) {
+        return null;
+      }
       FieldAtom hashAtomField = (FieldAtom) spec.namedFields.get(FIELD_MODULE_REMOTE_HASH);
       final FieldPrimitive hashField =
           (FieldPrimitive) hashAtomField.data.namedFields.get(FIELD_LITERAL_VALUE);

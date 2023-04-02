@@ -14,8 +14,11 @@ public class JavaQualifiedName implements BuiltinAutoExportable {
     final StringBuilder out = new StringBuilder();
     boolean first = true;
     for (String s : value) {
-      if (first) first = false;
-      else out.append(".");
+      if (first) {
+          first = false;
+      } else {
+          out.append(".");
+      }
       out.append(s);
     }
     return out.toString();
@@ -29,8 +32,11 @@ public class JavaQualifiedName implements BuiltinAutoExportable {
     final StringBuilder out = new StringBuilder();
     boolean first = true;
     for (String s : value) {
-      if (first) first = false;
-      else out.append("$");
+      if (first) {
+          first = false;
+      } else {
+          out.append("$");
+      }
       out.append(s.replace('.', '/'));
     }
     return JavaBytecodeUtils.internalName(out.toString());

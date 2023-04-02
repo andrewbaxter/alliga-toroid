@@ -6,7 +6,8 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType
 import com.zarbosoft.luxem.write.Writer;
 
 public final class Location implements BuiltinAutoExportable, TreeDumpable {
-  @BuiltinAutoExportableType.Param
+  public final static Location rootLocation = null;
+    @BuiltinAutoExportableType.Param
   public int id;
   @BuiltinAutoExportableType.Param
   public ModuleId module;

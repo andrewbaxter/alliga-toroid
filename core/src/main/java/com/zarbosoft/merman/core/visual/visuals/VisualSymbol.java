@@ -66,9 +66,12 @@ public class VisualSymbol extends Visual
   @Override
   public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     if (condition != null)
-      /* Cornerstones can't suddenly disappear without cursor changing */
-      return CreateBrickResult.empty();
-    if (brick != null) return CreateBrickResult.brick(brick);
+      /* Cornerstones can't suddenly disappear without cursor changing */ {
+        return CreateBrickResult.empty();
+    }
+    if (brick != null) {
+        return CreateBrickResult.brick(brick);
+    }
     brick = frontSymbol.type.createBrick(context, this);
     parent.notifyFirstBrickCreated(context, brick);
     parent.notifyLastBrickCreated(context, brick);
@@ -77,7 +80,9 @@ public class VisualSymbol extends Visual
 
   @Override
   public ExtendBrickResult createFirstBrick(final Context context) {
-    if (brick != null) return ExtendBrickResult.exists();
+    if (brick != null) {
+        return ExtendBrickResult.exists();
+    }
     if (condition != null && !condition.show()) {
       return ExtendBrickResult.empty();
     }
@@ -104,17 +109,23 @@ public class VisualSymbol extends Visual
 
   @Override
   public void compact(Context context) {
-    if (brick != null) brick.layoutPropertiesChanged(context);
+    if (brick != null) {
+        brick.layoutPropertiesChanged(context);
+    }
   }
 
   @Override
   public void expand(Context context) {
-    if (brick != null) brick.layoutPropertiesChanged(context);
+    if (brick != null) {
+        brick.layoutPropertiesChanged(context);
+    }
   }
 
   @Override
   public void getLeafBricks(final Context context, TSList<Brick> bricks) {
-    if (brick == null) return;
+    if (brick == null) {
+        return;
+    }
     bricks.add(brick);
   }
 
@@ -130,8 +141,12 @@ public class VisualSymbol extends Visual
 
   @Override
   public void uproot(final Context context, final Visual root) {
-    if (brick != null) brick.destroy(context);
-    if (condition != null) condition.destroy(context);
+    if (brick != null) {
+        brick.destroy(context);
+    }
+    if (condition != null) {
+        condition.destroy(context);
+    }
   }
 
   @Override

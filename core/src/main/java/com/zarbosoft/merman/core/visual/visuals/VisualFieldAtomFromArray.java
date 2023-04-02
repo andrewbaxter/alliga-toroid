@@ -51,7 +51,9 @@ public class VisualFieldAtomFromArray extends VisualFieldAtomBase {
 
   @Override
   public Atom atomGet() {
-    if (value.data.isEmpty()) return null;
+    if (value.data.isEmpty()) {
+        return null;
+    }
     return value.data.get(0);
   }
 

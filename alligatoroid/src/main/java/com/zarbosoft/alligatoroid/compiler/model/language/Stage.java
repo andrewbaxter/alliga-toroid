@@ -14,8 +14,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarCastable;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.DataValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
@@ -49,14 +48,14 @@ public class Stage extends LanguageElement {
           && ((MortarCastable) val).canCastTo(prototypeLanguageElement)) {
         // Lowering language value - use directly to interpret in next layer
         return ectx.build(
-            prototypeLanguageElement.prototype_stackAsValue(
+            prototypeLanguageElement.type_stackAsValue(
                 ((MortarCastable) val).castTo(prototypeLanguageElement)));
       } else {
         // Some other variable value - wrap in Wrap to embed in language tree
         return ectx.build(
             autoMortarHalfObjectTypes
                 .get(Wrap.class)
-                .prototype_stackAsValue(
+                .type_stackAsValue(
                     new JavaBytecodeSequence()
                         .add(
                             ((MortarTargetCode)
@@ -89,8 +88,12 @@ public class Stage extends LanguageElement {
 
       boolean bad = false;
       for (Field field : klass.getFields()) {
-        if (Modifier.isStatic(field.getModifiers())) continue;
-        if (field.getAnnotation(BuiltinAutoExportableType.Param.class) == null) continue;
+        if (Modifier.isStatic(field.getModifiers())) {
+          continue;
+        }
+        if (field.getAnnotation(BuiltinAutoExportableType.Param.class) == null) {
+          continue;
+        }
         JavaDataDescriptor fieldDesc;
         code.add(JavaBytecodeUtils.dup);
 
@@ -106,11 +109,11 @@ public class Stage extends LanguageElement {
                 ectx.record(
                     ectx.record(stageLower1(context, location, (LanguageElement) o))
                         .vary(context, location));
-            if (subValue == ErrorValue.error) {
+            if (subValue == ErrorValue.value) {
               listBad = true;
               continue;
             }
-            code.add(((MortarTargetCode) ((DataValue) subValue).consume(context, location)).e);
+            code.add(((MortarTargetCode) ((MortarDataValue) subValue).consume(context, location)).e);
             code.add(MortarTargetModuleContext.tsListAddCode);
           }
           if (listBad) {
@@ -136,7 +139,7 @@ public class Stage extends LanguageElement {
             // Field case 3: Location
             evaluation =
                 EvaluateResult.pure(
-                    prototypeLocation.prototype_constAsValue(
+                    prototypeLocation.type_constAsValue(
                         uncheck(() -> klass.getField("id").get(element))));
 
           } else {
@@ -145,25 +148,27 @@ public class Stage extends LanguageElement {
                 EvaluateResult.pure(
                     primitivePrototypeLookup
                         .get(field.getType())
-                        .prototype_constAsValue(uncheck(() -> field.get(element))));
+                        .type_constAsValue(uncheck(() -> field.get(element))));
           }
 
           fieldDesc = JavaDataDescriptor.fromClass(field.getType());
           final Value val =
-              ectx.record(context.target.vary(context, location, ectx.record(evaluation)));
-          if (val == ErrorValue.error) {
+              ectx.record( ectx.record(evaluation).vary(context, location));
+          if (val == ErrorValue.value) {
             bad = true;
             continue;
           }
-          code.add(((MortarTargetCode) ((DataValue) val).consume(context, location)).e);
+          code.add(((MortarTargetCode) ((MortarDataValue) val).consume(context, location)).e);
         }
 
         code.add(JavaBytecodeUtils.setField(-1, klassJvmName, field.getName(), fieldDesc));
       }
-      if (bad) return EvaluateResult.error;
+      if (bad) {
+        return EvaluateResult.error;
+      }
 
       return ectx.build(
-          prototypeLanguageElement.prototype_stackAsValue(
+          prototypeLanguageElement.type_stackAsValue(
               code.add(JavaBytecodeUtils.dup)
                   .add(
                       JavaBytecodeUtils.callInterfaceMthod(
@@ -174,7 +179,7 @@ public class Stage extends LanguageElement {
     }
 
     // 3. Subtree has no lower, transfer directly (stays constant)
-    return EvaluateResult.pure(prototypeLanguageElement.prototype_constAsValue(element));
+    return EvaluateResult.pure(prototypeLanguageElement.type_constAsValue(element));
   }
 
   @Override

@@ -43,7 +43,9 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
     return new Terminal<BackEvent, ROList<AtomType.FieldParseResult>>() {
       @Override
       protected ROPair<Boolean, ROList<AtomType.FieldParseResult>> matches(BackEvent event) {
-        if (!(event instanceof ETypeEvent)) return new ROPair<>(false, null);
+        if (!(event instanceof ETypeEvent)) {
+            return new ROPair<>(false, null);
+        }
         boolean ok = matcher == null || matcher.match(env, ((ETypeEvent) event).value);
         return new ROPair<>(
             ok,

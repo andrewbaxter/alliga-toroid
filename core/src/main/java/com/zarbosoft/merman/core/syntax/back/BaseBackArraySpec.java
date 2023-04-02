@@ -54,9 +54,12 @@ public abstract class BaseBackArraySpec extends BackSpecData {
         BackSpec.walkTypeBack(
             boilerplate,
             child -> {
-              if (!(child instanceof BackAtomSpec)) return true;
-              if (((BackAtomSpec) child).id != null)
-                errors.add(new ArrayBoilerplateAtomIdNotNull(((BackAtomSpec) child).type));
+              if (!(child instanceof BackAtomSpec)) {
+                  return true;
+              }
+              if (((BackAtomSpec) child).id != null) {
+                  errors.add(new ArrayBoilerplateAtomIdNotNull(((BackAtomSpec) child).type));
+              }
               if (boilerplateAtom[0] != null) {
                 errors.add(new ArrayMultipleAtoms(this, boilerplateAtom[0], child));
               } else {
@@ -83,14 +86,20 @@ public abstract class BaseBackArraySpec extends BackSpecData {
 
   @Override
   public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<BackPath.Element> segments) {
-    if (segments.get(0).index != offset) return new ROPair<>(null, offset + 1);
+    if (segments.get(0).index != offset) {
+        return new ROPair<>(null, offset + 1);
+    }
     segments = segments.subFrom(1);
-    if (segments.none()) return new ROPair<>(at, null);
+    if (segments.none()) {
+        return new ROPair<>(at, null);
+    }
     offset = 0;
     FieldArray data = (FieldArray) at.namedFields.get(id);
     for (Atom element : data.data) {
       ROPair<Atom, Integer> res = element.backLocate(offset, segments);
-      if (res == null || res.first != null) return res;
+      if (res == null || res.first != null) {
+          return res;
+      }
       offset = res.second;
     }
     return null;
@@ -135,8 +144,12 @@ public abstract class BaseBackArraySpec extends BackSpecData {
                                   ROList<AtomType.FieldParseResult> value) {
                                 AtomType.AtomParseResult out = null;
                                 for (AtomType.FieldParseResult field : value) {
-                                  if (WriteStateDeepDataArray.INDEX_KEY.equals(field.key)) continue;
-                                  if (out != null) throw new Assertion();
+                                  if (WriteStateDeepDataArray.INDEX_KEY.equals(field.key)) {
+                                      continue;
+                                  }
+                                  if (out != null) {
+                                      throw new Assertion();
+                                  }
                                   out = ((AtomType.AtomFieldParseResult) field).data;
                                 }
                                 return out;
@@ -178,12 +191,14 @@ public abstract class BaseBackArraySpec extends BackSpecData {
         boilerplateEl.getValue().finish(errors, syntax, boilerplatePath);
         for (AtomType leaf : syntax.splayedTypes.get(boilerplateEl.getKey())) {
           String old = overlapping.putReplace(leaf, boilerplateEl.getKey());
-          if (old == null)
-            errors.add(
-                new ArrayBoilerplateNotInBaseSet(typePath, boilerplateEl.getKey(), leaf.id()));
-          else if (!NO_BOILERPLATE_YET.equals(old))
-            errors.add(new ArrayBoilerplateOverlaps(typePath, boilerplateEl.getKey(), leaf, old));
-          else splayedBoilerplate.put(leaf.id(), boilerplateEl.getValue());
+          if (old == null) {
+              errors.add(
+                  new ArrayBoilerplateNotInBaseSet(typePath, boilerplateEl.getKey(), leaf.id()));
+          } else if (!NO_BOILERPLATE_YET.equals(old)) {
+              errors.add(new ArrayBoilerplateOverlaps(typePath, boilerplateEl.getKey(), leaf, old));
+          } else {
+              splayedBoilerplate.put(leaf.id(), boilerplateEl.getValue());
+          }
         }
       }
       this.splayedBoilerplate = splayedBoilerplate;

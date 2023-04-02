@@ -60,7 +60,9 @@ public class ColumnarTableLayout implements FreeDisplayNode {
   public void add(final ROList<CourseDisplayNode> row) {
     innerColumns = Math.max(innerColumns, row.size());
     rows.add(row);
-    for (final DisplayNode node : row) group.add(node);
+    for (final DisplayNode node : row) {
+        group.add(node);
+    }
   }
 
   public void layout() {
@@ -78,7 +80,9 @@ public class ColumnarTableLayout implements FreeDisplayNode {
       {
         double transverse = 0;
         for (int y = outerColumnRowStartIndex; y < rows.size(); ++y) {
-          if (rowStride == 0) transverse += rowPadTransverseStart;
+          if (rowStride == 0) {
+              transverse += rowPadTransverseStart;
+          }
           double ascent = 0;
           double descent = 0;
           final ROList<CourseDisplayNode> row = rows.get(y);
@@ -96,8 +100,11 @@ public class ColumnarTableLayout implements FreeDisplayNode {
             innerColumnSpans[x] = Math.max(innerColumnSpans[x], cell.converseSpan());
           }
           baselines.add(transverse + ascent);
-          if (rowStride != 0) transverse += rowStride;
-          else transverse += ascent + descent + rowPadTransverseEnd;
+          if (rowStride != 0) {
+              transverse += rowStride;
+          } else {
+              transverse += ascent + descent + rowPadTransverseEnd;
+          }
           outerColumnRowEndIndex += 1;
         }
         usedTransverse = Math.max(usedTransverse, transverse);

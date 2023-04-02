@@ -77,9 +77,13 @@ public abstract class Visual {
 
   public int depthScore() {
     final VisualParent parent = parent();
-    if (parent == null) return 0;
+    if (parent == null) {
+        return 0;
+    }
     final VisualAtom atomVisual = parent.atomVisual();
-    if (atomVisual == null) return 0;
+    if (atomVisual == null) {
+        return 0;
+    }
     return atomVisual.depthScore;
   }
 
@@ -147,7 +151,9 @@ public abstract class Visual {
     }
 
     public static ExtendBrickResult brick(Brick brick) {
-      if (brick == null) throw new Assertion();
+      if (brick == null) {
+          throw new Assertion();
+      }
       return new ExtendBrickResult(false, false, brick);
     }
   }

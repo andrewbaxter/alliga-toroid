@@ -73,7 +73,9 @@ public class Utils {
           }
           if (useRelPath == null)
             // Something's probably wrong with the hashing code if this is reached
-            throw new Assertion();
+          {
+              throw new Assertion();
+          }
 
           Files.createDirectories(useRelPath);
           Files.write(useRelPath.resolve(UNIQUE_PATH_FILENAME), id);
@@ -104,12 +106,18 @@ public class Utils {
   }
 
   public static boolean reflectEquals(Object o, Object o2) {
-    if (o == o2) return true;
-    if (o2 == null || o.getClass() != o2.getClass()) return false;
+    if (o == o2) {
+        return true;
+    }
+    if (o2 == null || o.getClass() != o2.getClass()) {
+        return false;
+    }
     return uncheck(
         () -> {
           for (Field f : o.getClass().getDeclaredFields()) {
-            if (!Objects.equals(f.get(o), f.get(o2))) return false;
+            if (!Objects.equals(f.get(o), f.get(o2))) {
+                return false;
+            }
           }
           return true;
         });

@@ -33,7 +33,9 @@ public class BuiltinAutoExportableType implements ExportableType, BuiltinSinglet
       Object value) {
     TSOrderedMap<SemiserialSubvalue, SemiserialSubvalue> rootData = new TSOrderedMap<>();
     for (Field field : getClass().getFields()) {
-      if (Modifier.isStatic(field.getModifiers())) continue;
+      if (Modifier.isStatic(field.getModifiers())) {
+          continue;
+      }
       if (Modifier.isFinal(field.getModifiers())) {
         throw Assertion.format(
             "FIX! Builtin %s field %s is exportable but final",
@@ -67,7 +69,9 @@ public class BuiltinAutoExportableType implements ExportableType, BuiltinSinglet
                 @Override
                 public Object handleRecord(SemiserialRecord s) {
                   for (Field field : klass.getFields()) {
-                    if (field.getAnnotation(Param.class) == null) continue;
+                    if (field.getAnnotation(Param.class) == null) {
+                        continue;
+                    }
                     uncheck(
                         () ->
                             field.set(

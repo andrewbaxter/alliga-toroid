@@ -46,7 +46,9 @@ public class VContainer extends MultiChildContainer {
   }
 
   private void layoutFrom(Context context, int index) {
-    if (children.isEmpty()) return;
+    if (children.isEmpty()) {
+        return;
+    }
     double transverse = 0;
     if (index > 0) {
       transverse = children.get(index - 1).transverseEdge();
@@ -57,7 +59,9 @@ public class VContainer extends MultiChildContainer {
       transverse += child.transverseSpan();
     }
     transverseSpan = transverse;
-    if (parent != null) parent.relayout(context);
+    if (parent != null) {
+        parent.relayout(context);
+    }
   }
 
   @Override

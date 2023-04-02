@@ -22,10 +22,14 @@ public class PrototypeROList implements ProtoType {
         boolean bad = false;
         for (State e : elements) {
           Object obj = ((State) e).build(context, errors);
-          if (obj == null) bad = true;
+          if (obj == null) {
+              bad = true;
+          }
           out.add(obj);
         }
-        if (bad) return null;
+        if (bad) {
+            return null;
+        }
         return out;
       }
 

@@ -48,7 +48,7 @@ public class Evaluation2Context {
     return new FutureValue(
         importResult.exceptionally(
             e -> {
-              return ErrorValue.error;
+              return ErrorValue.value;
             }));
   }
 }

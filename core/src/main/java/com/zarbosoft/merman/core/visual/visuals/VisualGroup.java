@@ -35,20 +35,26 @@ public class VisualGroup extends Visual {
 
   @Override
   public Brick getFirstBrick(final Context context) {
-    if (children.isEmpty()) return null;
+    if (children.isEmpty()) {
+        return null;
+    }
     return children.get(0).getFirstBrick(context);
   }
 
   @Override
   public Brick getLastBrick(final Context context) {
-    if (children.isEmpty()) return null;
+    if (children.isEmpty()) {
+        return null;
+    }
     return children.last().getLastBrick(context);
   }
 
   @Override
   public boolean selectIntoAnyChild(final Context context) {
     for (final Visual child : children) {
-      if (child.selectIntoAnyChild(context)) return true;
+      if (child.selectIntoAnyChild(context)) {
+          return true;
+      }
     }
     return false;
   }
@@ -65,11 +71,17 @@ public class VisualGroup extends Visual {
 
   @Override
   public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
-    if (children.isEmpty()) throw new AssertionError();
+    if (children.isEmpty()) {
+        throw new AssertionError();
+    }
     for (Visual child : children) {
       CreateBrickResult out = child.createOrGetCornerstoneCandidate(context);
-      if (out.empty) continue;
-      if (out.brick != null) return out;
+      if (out.empty) {
+          continue;
+      }
+      if (out.brick != null) {
+          return out;
+      }
       throw new Assertion();
     }
     return CreateBrickResult.empty();
@@ -77,12 +89,20 @@ public class VisualGroup extends Visual {
 
   @Override
   public ExtendBrickResult createFirstBrick(final Context context) {
-    if (children.isEmpty()) return ExtendBrickResult.empty();
+    if (children.isEmpty()) {
+        return ExtendBrickResult.empty();
+    }
     for (Visual child : children) {
       ExtendBrickResult out = child.createFirstBrick(context);
-      if (out.empty) continue;
-      if (out.exists) return out;
-      if (out.brick != null) return out;
+      if (out.empty) {
+          continue;
+      }
+      if (out.exists) {
+          return out;
+      }
+      if (out.brick != null) {
+          return out;
+      }
       throw new Assertion();
     }
     return ExtendBrickResult.empty();
@@ -90,12 +110,20 @@ public class VisualGroup extends Visual {
 
   @Override
   public ExtendBrickResult createLastBrick(final Context context) {
-    if (children.isEmpty()) return ExtendBrickResult.empty();
+    if (children.isEmpty()) {
+        return ExtendBrickResult.empty();
+    }
     for (Visual child : new ReverseIterable<>(children)) {
       ExtendBrickResult out = child.createLastBrick(context);
-      if (out.empty) continue;
-      if (out.exists) return out;
-      if (out.brick != null) return out;
+      if (out.empty) {
+          continue;
+      }
+      if (out.exists) {
+          return out;
+      }
+      if (out.brick != null) {
+          return out;
+      }
       throw new Assertion();
     }
     return ExtendBrickResult.empty();
@@ -107,9 +135,12 @@ public class VisualGroup extends Visual {
   }
 
   public void add(final Context context, final Visual node, final int index) {
-    if (index < 0) throw new AssertionError("Inserting visual atom at negative index.");
-    if (index >= this.children.size() + 1)
-      throw new AssertionError("Inserting visual atom after group end.");
+    if (index < 0) {
+        throw new AssertionError("Inserting visual atom at negative index.");
+    }
+    if (index >= this.children.size() + 1) {
+        throw new AssertionError("Inserting visual atom after group end.");
+    }
     for (int i = index; i < children.size(); ++i) {
       Visual child = children.get(i);
       ((Parent) child.parent()).index += 1;
@@ -123,8 +154,9 @@ public class VisualGroup extends Visual {
         index + 1 >= this.children.size()
             ? parent.getNextBrick(context)
             : children.get(index + 1).getFirstBrick(context);
-    if (previousBrick != null && nextBrick != null)
-      context.triggerIdleLayBricksAfterEnd(previousBrick);
+    if (previousBrick != null && nextBrick != null) {
+        context.triggerIdleLayBricksAfterEnd(previousBrick);
+    }
   }
 
   protected VisualParent createParent(final int index) {
@@ -136,9 +168,12 @@ public class VisualGroup extends Visual {
   }
 
   public void remove(final Context context, final int index) {
-    if (index < 0) throw new AssertionError("Removing visual atom at negative index.");
-    if (index >= this.children.size())
-      throw new AssertionError("Removing visual atom after group end.");
+    if (index < 0) {
+        throw new AssertionError("Removing visual atom at negative index.");
+    }
+    if (index >= this.children.size()) {
+        throw new AssertionError("Removing visual atom after group end.");
+    }
     final Visual node = children.get(index);
     node.uproot(context, null);
     this.children.remove(index);
@@ -169,12 +204,16 @@ public class VisualGroup extends Visual {
 
   @Override
   public void compact(final Context context) {
-    for (final Visual child : children) child.compact(context);
+    for (final Visual child : children) {
+        child.compact(context);
+    }
   }
 
   @Override
   public void expand(final Context context) {
-    for (final Visual child : children) child.expand(context);
+    for (final Visual child : children) {
+        child.expand(context);
+    }
   }
 
   @Override
@@ -214,14 +253,17 @@ public class VisualGroup extends Visual {
 
     @Override
     public ExtendBrickResult createNextBrick(final Context context) {
-      if (index + 1 < group.children.size())
-        return group.children.get(index + 1).createFirstBrick(context);
+      if (index + 1 < group.children.size()) {
+          return group.children.get(index + 1).createFirstBrick(context);
+      }
       return group.parent.createNextBrick(context);
     }
 
     @Override
     public ExtendBrickResult createPreviousBrick(final Context context) {
-      if (index - 1 >= 0) return group.children.get(index - 1).createLastBrick(context);
+      if (index - 1 >= 0) {
+          return group.children.get(index - 1).createLastBrick(context);
+      }
       return group.parent.createPreviousBrick(context);
     }
 
@@ -244,7 +286,9 @@ public class VisualGroup extends Visual {
     public Brick findPreviousBrick(final Context context) {
       for (int at = index - 1; at >= 0; --at) {
         final Brick test = group.children.get(at).getLastBrick(context);
-        if (test != null) return test;
+        if (test != null) {
+            return test;
+        }
       }
       return group.parent.findPreviousBrick(context);
     }
@@ -253,21 +297,29 @@ public class VisualGroup extends Visual {
     public Brick findNextBrick(final Context context) {
       for (int at = index + 1; at < group.children.size(); ++at) {
         final Brick test = group.children.get(at).getFirstBrick(context);
-        if (test != null) return test;
+        if (test != null) {
+            return test;
+        }
       }
       return group.parent.findNextBrick(context);
     }
 
     @Override
     public Brick getPreviousBrick(final Context context) {
-      if (index == 0) return group.parent.getPreviousBrick(context);
-      else return group.children.get(index - 1).getLastBrick(context);
+      if (index == 0) {
+          return group.parent.getPreviousBrick(context);
+      } else {
+          return group.children.get(index - 1).getLastBrick(context);
+      }
     }
 
     @Override
     public Brick getNextBrick(final Context context) {
-      if (index + 1 >= group.children.size()) return group.parent.getNextBrick(context);
-      else return group.children.get(index + 1).getFirstBrick(context);
+      if (index + 1 >= group.children.size()) {
+          return group.parent.getNextBrick(context);
+      } else {
+          return group.children.get(index + 1).getFirstBrick(context);
+      }
     }
 
     @Override
@@ -277,13 +329,17 @@ public class VisualGroup extends Visual {
 
     @Override
     public void notifyLastBrickCreated(Context context, Brick brick) {
-      if (index + 1 != group.children.size()) return;
+      if (index + 1 != group.children.size()) {
+          return;
+      }
       group.notifyLastBrickCreated(context, brick);
     }
 
     @Override
     public void notifyFirstBrickCreated(Context context, Brick brick) {
-      if (index != 0) return;
+      if (index != 0) {
+          return;
+      }
       group.notifyFirstBrickCreated(context, brick);
     }
 

@@ -108,10 +108,11 @@ public class WebView {
         } else if (syntax.transverseDirection == Direction.RIGHT) {
           elementInner.classList.add("merman-dir-dr");
         }
-      }*/ else
-      new MultiError()
-          .add(new UnsupportedDirections(syntax.converseDirection, syntax.transverseDirection))
-          .raise();
+      }*/ else {
+        new MultiError()
+            .add(new UnsupportedDirections(syntax.converseDirection, syntax.transverseDirection))
+            .raise();
+    }
     elementInner.appendChild(elementOrigin);
 
     /** The block element that joins the html doc flow */
@@ -131,13 +132,15 @@ public class WebView {
                       if (max.x) {
                         elementInner.style.width =
                             CSSProperties.WidthUnionType.of(max.amount + "px");
-                        if (syntax.transverseDirection == Direction.LEFT)
-                          elementOrigin.style.left = max.amount + "px";
+                        if (syntax.transverseDirection == Direction.LEFT) {
+                            elementOrigin.style.left = max.amount + "px";
+                        }
                       } else {
                         elementInner.style.height =
                             CSSProperties.HeightUnionType.of(max.amount + "px");
-                        if (syntax.transverseDirection == Direction.UP)
-                          elementOrigin.style.top = max.amount + "px";
+                        if (syntax.transverseDirection == Direction.UP) {
+                            elementOrigin.style.top = max.amount + "px";
+                        }
                       }
                     }),
             syntax,
@@ -237,7 +240,9 @@ public class WebView {
                   // If end/start paths are the same then the longest match includes the index
                   // vs if they're different, then it includes the primitive but not index
                   // Adjust so the index is the next element in both cases
-                  if (longestMatch == startPathList.size()) longestMatch -= 1;
+                  if (longestMatch == startPathList.size()) {
+                      longestMatch -= 1;
+                  }
                   int startIndex = Integer.parseInt(startPathList.get(longestMatch));
                   int endIndex = Integer.parseInt(endPathList.get(longestMatch));
                   if (endIndex < startIndex) {
@@ -247,7 +252,9 @@ public class WebView {
                   }
                 } else if (base instanceof Atom) {
                   ((Atom) base).fieldParentRef.selectField(context);
-                } else throw new Assertion();
+                } else {
+                    throw new Assertion();
+                }
               }
             }
           }
@@ -303,7 +310,9 @@ public class WebView {
           @Override
           public void handleEvent(Event evt0) {
             FocusEvent e = (FocusEvent) evt0;
-            if (e.target == elementInner) return;
+            if (e.target == elementInner) {
+                return;
+            }
             context.clearCursor();
           }
         });

@@ -14,10 +14,12 @@ public abstract class BaseTerminal extends Terminal<Object, EscapableResult<ROLi
 
   @Override
   protected final ROPair<Boolean, EscapableResult<ROList<String>>> matches(Object event) {
-    if (event instanceof ForceEndCharacterEvent)
-      return new ROPair<>(true, new EscapableResult<>(false, false, ROList.empty));
-    if (!(event instanceof CharacterEvent))
-      return new ROPair<>(false, new EscapableResult<>(false, true, ROList.empty));
+    if (event instanceof ForceEndCharacterEvent) {
+        return new ROPair<>(true, new EscapableResult<>(false, false, ROList.empty));
+    }
+    if (!(event instanceof CharacterEvent)) {
+        return new ROPair<>(false, new EscapableResult<>(false, true, ROList.empty));
+    }
     ROPair<Boolean, ROList<String>> subMatch = matches1((CharacterEvent) event);
     return new ROPair<>(
         subMatch.first,

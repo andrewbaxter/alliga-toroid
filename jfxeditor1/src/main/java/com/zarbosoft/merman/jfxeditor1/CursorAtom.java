@@ -37,7 +37,9 @@ public class CursorAtom extends BaseEditCursorAtom {
     super.setIndex(context, index);
     if (errorPage == null)
       // Because we can't initialize it before this is called via constructor
-      errorPage = new ErrorPage();
+    {
+        errorPage = new ErrorPage();
+    }
     ROPair<String, Visual> selectable = visual.selectable.get(index);
     if (selectable.second instanceof VisualFieldAtomBase) {
       errorPage.setAtom(Editor.get(context), ((VisualFieldAtomBase) selectable.second).atomGet());
@@ -48,7 +50,9 @@ public class CursorAtom extends BaseEditCursorAtom {
 
   public boolean handleKey(Context context, ButtonEvent hidEvent) {
     final Editor editor = Editor.get(context);
-    if (NotMain.handleCommonNavigation(editor, main, hidEvent)) return true;
+    if (NotMain.handleCommonNavigation(editor, main, hidEvent)) {
+        return true;
+    }
     if (hidEvent.press) {
       switch (hidEvent.key) {
         case DIR_SURFACE:

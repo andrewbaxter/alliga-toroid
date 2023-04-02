@@ -20,16 +20,24 @@ public abstract class BaseKVError extends TSMap<String, Object> {
     if (value instanceof BaseKVError) {
       out.append(((BaseKVError) value).description());
       Iterator<Map.Entry<String, Object>> nextLevel = ((BaseKVError) value).iterator();
-      if (nextLevel.hasNext()) stack.add(new Pair<>(indent + 1, nextLevel));
+      if (nextLevel.hasNext()) {
+          stack.add(new Pair<>(indent + 1, nextLevel));
+      }
     } else if (value instanceof List) {
       Iterator nextLevel = ((List<?>) value).iterator();
-      if (nextLevel.hasNext()) stack.add(new Pair<>(indent + 1, nextLevel));
+      if (nextLevel.hasNext()) {
+          stack.add(new Pair<>(indent + 1, nextLevel));
+      }
     } else if (value instanceof ROList) {
       Iterator nextLevel = ((ROList<?>) value).iterator();
-      if (nextLevel.hasNext()) stack.add(new Pair<>(indent + 1, nextLevel));
+      if (nextLevel.hasNext()) {
+          stack.add(new Pair<>(indent + 1, nextLevel));
+      }
     } else if (value instanceof MultiError) {
       Iterator nextLevel = ((MultiError) value).errors.iterator();
-      if (nextLevel.hasNext()) stack.add(new Pair<>(indent + 1, nextLevel));
+      if (nextLevel.hasNext()) {
+          stack.add(new Pair<>(indent + 1, nextLevel));
+      }
     } else {
       if (value instanceof BackSpecData) {
         out.append(
@@ -45,7 +53,9 @@ public abstract class BaseKVError extends TSMap<String, Object> {
   public String toString() {
     TSList<Pair<Integer, Iterator>> stack = new TSList<>();
     Iterator seed = iterator();
-    if (!seed.hasNext()) return "(empty)";
+    if (!seed.hasNext()) {
+        return "(empty)";
+    }
     stack.add(new Pair<>(1, seed));
     StringBuilder out = new StringBuilder();
     out.append(description());
@@ -55,9 +65,13 @@ public abstract class BaseKVError extends TSMap<String, Object> {
       int indent = pair.first;
       Iterator top = pair.second;
       Object next = top.next();
-      if (!top.hasNext()) stack.removeLast();
+      if (!top.hasNext()) {
+          stack.removeLast();
+      }
       if (indent > 0) {
-        for (int i = 0; i < indent - 1; ++i) out.append("  ");
+        for (int i = 0; i < indent - 1; ++i) {
+            out.append("  ");
+        }
         out.append("* ");
       }
       if (next instanceof Map.Entry) {

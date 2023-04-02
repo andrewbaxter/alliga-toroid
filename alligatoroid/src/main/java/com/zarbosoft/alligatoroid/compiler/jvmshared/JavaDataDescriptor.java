@@ -38,15 +38,33 @@ public class JavaDataDescriptor {
   }
 
   public static JavaDataDescriptor fromClass(Class t) {
-    if (t == int.class) return INT;
-    if (t == byte.class) return BYTE;
-    if (t == char.class) return CHAR;
-    if (t == short.class) return SHORT;
-    if (t == long.class) return LONG;
-    if (t == boolean.class) return BOOL;
-    if (t == float.class) return FLOAT;
-    if (t == double.class) return DOUBLE;
-    if (t.isPrimitive()) throw new Assertion();
+    if (t == int.class) {
+        return INT;
+    }
+    if (t == byte.class) {
+        return BYTE;
+    }
+    if (t == char.class) {
+        return CHAR;
+    }
+    if (t == short.class) {
+        return SHORT;
+    }
+    if (t == long.class) {
+        return LONG;
+    }
+    if (t == boolean.class) {
+        return BOOL;
+    }
+    if (t == float.class) {
+        return FLOAT;
+    }
+    if (t == double.class) {
+        return DOUBLE;
+    }
+    if (t.isPrimitive()) {
+        throw new Assertion();
+    }
     return fromObjectClass(t);
   }
 

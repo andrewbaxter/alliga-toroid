@@ -263,7 +263,9 @@ public class GenerateClass {
             // Instance stuff
             List<Constructor> publicConstructors = new ArrayList<>();
             for (Constructor constructor : klass.getConstructors()) {
-              if (!Modifier.isPublic(constructor.getModifiers())) continue;
+              if (!Modifier.isPublic(constructor.getModifiers())) {
+                  continue;
+              }
               publicConstructors.add(constructor);
             }
             if (publicConstructors.size() > 0) {
@@ -281,13 +283,19 @@ public class GenerateClass {
             }
 
             for (Method m : klass.getDeclaredMethods()) {
-              if (m.isBridge()) continue;
-              if (m.isSynthetic()) continue;
+              if (m.isBridge()) {
+                  continue;
+              }
+              if (m.isSynthetic()) {
+                  continue;
+              }
               boolean isPublic = Modifier.isPublic(m.getModifiers());
               boolean isProtected = Modifier.isProtected(m.getModifiers());
               boolean isFinal = Modifier.isFinal(m.getModifiers());
               boolean isStatic = Modifier.isStatic(m.getModifiers());
-              if (!(isPublic || isProtected)) continue;
+              if (!(isPublic || isProtected)) {
+                  continue;
+              }
               lCall(
                       ids,
                       lAccess(ids, accessBuilder(ids), lString(ids, "method")),
@@ -313,7 +321,9 @@ public class GenerateClass {
               boolean isProtected = Modifier.isProtected(f.getModifiers());
               boolean isFinal = Modifier.isFinal(f.getModifiers());
               boolean isStatic = Modifier.isStatic(f.getModifiers());
-              if (!(isPublic || isProtected)) continue;
+              if (!(isPublic || isProtected)) {
+                  continue;
+              }
               lCall(
                       ids,
                       lAccess(ids, accessBuilder(ids), lString(ids, "data")),

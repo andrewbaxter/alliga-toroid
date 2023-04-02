@@ -9,7 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstKey;
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstKey;
 
 public class Local extends LanguageElement {
   @BuiltinAutoExportableType.Param
@@ -24,7 +24,9 @@ public class Local extends LanguageElement {
   public EvaluateResult evaluate(EvaluationContext context) {
     TSList<String> stringFields = new TSList<>();
     for (ROPair<Object, Binding> pair : context.scope.keys()) {
-      if (!(pair.first instanceof String)) continue;
+      if (!(pair.first instanceof String)) {
+          continue;
+      }
       stringFields.add((String) pair.first);
     }
     context.moduleContext.compileContext.addTraceModuleStringFields(
@@ -32,7 +34,9 @@ public class Local extends LanguageElement {
 
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
     final Object key = assertConstKey(context, id, ectx.evaluate(this.key));
-    if (key == null) return EvaluateResult.error;
+    if (key == null) {
+        return EvaluateResult.error;
+    }
     Binding value = context.scope.get(key);
     if (value == null) {
       context.errors.add(new NoField(id, key));

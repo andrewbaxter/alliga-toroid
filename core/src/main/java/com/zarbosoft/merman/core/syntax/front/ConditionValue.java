@@ -34,12 +34,16 @@ public class ConditionValue extends ConditionType {
       return new PrimitiveCondition(invert, (FieldPrimitive) field, is);
     } else if (field instanceof FieldArray) {
       return new ArrayCondition(invert, (FieldArray) field, is);
-    } else throw new DeadCode();
+    } else {
+        throw new DeadCode();
+    }
   }
 
   @Override
   protected boolean defaultOnImplementation() {
-    if (is == ConditionValue.Is.EMPTY) return false;
+    if (is == ConditionValue.Is.EMPTY) {
+        return false;
+    }
     return true;
   }
 

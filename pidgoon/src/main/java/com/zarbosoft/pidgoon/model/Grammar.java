@@ -18,8 +18,9 @@ public class Grammar {
   }
 
   public <T> Grammar add(final Reference.Key<T> key, final Node<T> node) {
-    if (nodes.containsKey(key))
-      throw new AssertionError(Format.format("Node with name [%s] already exists.", key));
+    if (nodes.containsKey(key)) {
+        throw new AssertionError(Format.format("Node with name [%s] already exists.", key));
+    }
     nodes.put(key, node);
     return this;
   }

@@ -16,7 +16,9 @@ public class RootTypeBuilder {
   public RootTypeBuilder() {}
 
   public RootTypeBuilder back(BackSpec spec) {
-    if (back != null) throw new Assertion();
+    if (back != null) {
+        throw new Assertion();
+    }
     back = spec;
     return this;
   }

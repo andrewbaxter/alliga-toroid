@@ -123,9 +123,13 @@ public class TSList<T> implements ROList<T> {
   @Override
   public int longestMatch(ROList<T> other) {
     int end = size();
-    if (other.size() < end) end = other.size();
+    if (other.size() < end) {
+        end = other.size();
+    }
     for (int i = 0; i < end; ++i) {
-      if (!get(i).equals(other.get(i))) return i;
+      if (!get(i).equals(other.get(i))) {
+          return i;
+      }
     }
     return end;
   }
@@ -166,8 +170,12 @@ public class TSList<T> implements ROList<T> {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+        return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+        return false;
+    }
     TSList<?> tsList = (TSList<?>) o;
     return Objects.equals(values, tsList.values);
   }
@@ -199,13 +207,17 @@ public class TSList<T> implements ROList<T> {
   }
 
   public T removeLastOpt() {
-    if (values.isEmpty()) return null;
+    if (values.isEmpty()) {
+        return null;
+    }
     return removeLast();
   }
 
   @Override
   public T lastOpt() {
-    if (none()) return null;
+    if (none()) {
+        return null;
+    }
     return last();
   }
 

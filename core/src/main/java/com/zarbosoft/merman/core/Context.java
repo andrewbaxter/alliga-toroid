@@ -192,7 +192,9 @@ public class Context {
             keyHandlingInProgress = false;
             return false;
           }
-          if (text.isEmpty()) return false;
+          if (text.isEmpty()) {
+              return false;
+          }
           cursor.handleTyping(this, text);
           flushIteration(100);
           return true;
@@ -262,8 +264,11 @@ public class Context {
           }
         });
     wallUsageListener = config.wallUsageListener;
-    if (!config.startWindowed) windowClear();
-    else windowToSupertree(document.root);
+    if (!config.startWindowed) {
+        windowClear();
+    } else {
+        windowToSupertree(document.root);
+    }
     wall.setCornerstone(
         this,
         document.root.visual.createOrGetCornerstoneCandidate(this).brick,
@@ -275,7 +280,9 @@ public class Context {
   public static Font getFont(final Context context, String name, Double size0) {
     double toPt = context.toPixels * context.fromPixelsToMM * 72.0 / 25.4;
     double size = size0 == null ? 6 : size0;
-    if (name == null) return context.display.font(null, size * toPt);
+    if (name == null) {
+        return context.display.font(null, size * toPt);
+    }
     return context.display.font(name, size * toPt);
   }
 
@@ -299,8 +306,12 @@ public class Context {
         iterationContext = null;
         break;
       } else {
-        if (iterationContext == null) iterationContext = new IterationContext();
-        if (top.run(iterationContext)) addIteration(top);
+        if (iterationContext == null) {
+            iterationContext = new IterationContext();
+        }
+        if (top.run(iterationContext)) {
+            addIteration(top);
+        }
       }
     }
     while (!iterationQueue.isEmpty()) {
@@ -322,7 +333,9 @@ public class Context {
   }
 
   private void handleTimer() {
-    if (iterationPending) return;
+    if (iterationPending) {
+        return;
+    }
     iterationPending = true;
     try {
       flushIteration(1000);
@@ -434,11 +447,17 @@ public class Context {
     while (!pathQueue.atEnd()) {
       if (at instanceof Atom) {
         at = ((Atom) at).syntaxLocateStep(pathQueue);
-        if (at == null) throw new InvalidPath(pathQueue.consumed(), path.segments);
+        if (at == null) {
+            throw new InvalidPath(pathQueue.consumed(), path.segments);
+        }
       } else if (at instanceof Field) {
         at = ((Field) at).syntaxLocateStep(pathQueue);
-        if (at == null) throw new InvalidPath(pathQueue.consumed(), path.segments);
-      } else throw new Assertion();
+        if (at == null) {
+            throw new InvalidPath(pathQueue.consumed(), path.segments);
+        }
+      } else {
+          throw new Assertion();
+      }
     }
     return at;
   }
@@ -478,7 +497,9 @@ public class Context {
       final int size,
       final Function<Integer, Brick> accessFirst,
       final Function<Integer, Brick> accessLast) {
-    if (size == 0) throw new AssertionError();
+    if (size == 0) {
+        throw new AssertionError();
+    }
     if (index > 0) {
       final Brick previousBrick = accessLast.apply(index - 1);
       if (previousBrick != null) {
@@ -488,13 +509,19 @@ public class Context {
       if (index + addCount < size) {
         // Hits neither edge
         final Brick nextBrick = accessFirst.apply(index + addCount);
-        if (nextBrick == null) return;
+        if (nextBrick == null) {
+            return;
+        }
         triggerIdleLayBricksBeforeStart(nextBrick);
       } else {
         // Hits end edge
-        if (parent == null) return;
+        if (parent == null) {
+            return;
+        }
         final Brick nextBrick = parent.getNextBrick(this);
-        if (nextBrick == null) return;
+        if (nextBrick == null) {
+            return;
+        }
         triggerIdleLayBricksBeforeStart(nextBrick);
       }
     } else {
@@ -506,18 +533,24 @@ public class Context {
           return;
         }
         final Brick previousBrick = parent.getPreviousBrick(this);
-        if (previousBrick == null) return;
+        if (previousBrick == null) {
+            return;
+        }
         triggerIdleLayBricksAfterEnd(previousBrick);
       } else {
         // Hits both edges
-        if (parent == null) return;
+        if (parent == null) {
+            return;
+        }
         final Brick previousBrick = parent.getPreviousBrick(this);
         if (previousBrick != null) {
           triggerIdleLayBricksAfterEnd(previousBrick);
           return;
         }
         final Brick nextBrick = parent.getNextBrick(this);
-        if (nextBrick == null) return;
+        if (nextBrick == null) {
+            return;
+        }
         triggerIdleLayBricksBeforeStart(nextBrick);
       }
     }
@@ -551,15 +584,24 @@ public class Context {
     Atom nextWindow = atom;
     int depth = 0;
     while (true) {
-      if (nextWindow == windowAtom) return;
-      if (nextWindow.fieldParentRef == null) break;
+      if (nextWindow == windowAtom) {
+          return;
+      }
+      if (nextWindow.fieldParentRef == null) {
+          break;
+      }
       depth += nextWindow.type.depthScore();
-      if (depth >= ellipsizeThreshold) break;
+      if (depth >= ellipsizeThreshold) {
+          break;
+      }
       nextWindow = nextWindow.fieldParentRef.field.atomParentRef.atom();
     }
 
-    if (isSubtree(windowAtom, nextWindow)) windowToSupertree(nextWindow);
-    else windowToNonSupertree(nextWindow);
+    if (isSubtree(windowAtom, nextWindow)) {
+        windowToSupertree(nextWindow);
+    } else {
+        windowToNonSupertree(nextWindow);
+    }
   }
 
   public void windowAdjustMinimalTo(final Field field) {
@@ -599,8 +641,12 @@ public class Context {
   public boolean isSubtree(Atom subtree, Atom supertree) {
     Atom at = subtree;
     while (true) {
-      if (at == supertree) return true;
-      if (at.fieldParentRef == null) break;
+      if (at == supertree) {
+          return true;
+      }
+      if (at.fieldParentRef == null) {
+          break;
+      }
       at = at.fieldParentRef.field.atomParentRef.atom();
     }
     return false;
@@ -615,13 +661,17 @@ public class Context {
   }
 
   public void triggerIdleLayBricksOutward() {
-    if (wall.children.none()) return;
+    if (wall.children.none()) {
+        return;
+    }
     triggerIdleLayBricksBeforeStart(wall.children.get(0).children.get(0));
     triggerIdleLayBricksAfterEnd(wall.children.last().children.last());
   }
 
   public void clearCursor() {
-    if (cursor == null) return;
+    if (cursor == null) {
+        return;
+    }
     cursor.destroy(this);
     cursor = null;
   }
@@ -633,7 +683,9 @@ public class Context {
     if (oldCursor != null) {
       oldCursor.destroy(this);
     }
-    if (localToken != selectToken) return;
+    if (localToken != selectToken) {
+        return;
+    }
     for (CursorListener l : cursorListeners.copy()) {
       l.cursorChanged(this, cursor);
     }
@@ -645,31 +697,47 @@ public class Context {
   }
 
   public void actionClearWindow() {
-    if (!window) return;
+    if (!window) {
+        return;
+    }
     windowClear();
     triggerIdleLayBricksOutward();
   }
 
   public void actionWindowTowardsRoot() {
-    if (!window) return;
-    if (windowAtom == document.root) return;
+    if (!window) {
+        return;
+    }
+    if (windowAtom == document.root) {
+        return;
+    }
     windowToSupertree(windowAtom.fieldParentRef.field.atomParentRef.atom());
     triggerIdleLayBricksOutward();
   }
 
   public void actionWindowTowardsCursor() {
-    if (!window) return;
+    if (!window) {
+        return;
+    }
     VisualAtom windowNext = null;
     final VisualAtom stop = windowAtom.visual;
-    if (cursor.getVisual().parent() == null) return;
+    if (cursor.getVisual().parent() == null) {
+        return;
+    }
     VisualAtom at = cursor.getVisual().parent().atomVisual();
     while (at != null) {
-      if (at == stop) break;
-      if (at.parent() == null) break;
+      if (at == stop) {
+          break;
+      }
+      if (at.parent() == null) {
+          break;
+      }
       windowNext = at;
       at = at.parent().atomVisual();
     }
-    if (windowNext == null) return;
+    if (windowNext == null) {
+        return;
+    }
     windowToNonSupertree(windowNext.atom);
     triggerIdleLayBricksOutward();
     return;
@@ -919,7 +987,9 @@ public class Context {
           Context.this.hover = hover0.first;
         }
         if (hoverChanged) {
-          if (old != null) old.clear(context);
+          if (old != null) {
+              old.clear(context);
+          }
         }
         hoverBrick = at;
         return new ROPair<>(false, hoverChanged);

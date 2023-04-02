@@ -2,19 +2,21 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.TargetCode;
+import com.zarbosoft.alligatoroid.compiler.UnreachableValue;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.TSList;
-
-import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue.nullValue;
+import com.zarbosoft.rendaw.common.ROOrderedMap;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ReverseIterable;
 
 public class Block extends LanguageElement {
-  @BuiltinAutoExportableType.Param
-  public ROList<LanguageElement> statements;
+  @BuiltinAutoExportableType.Param public ROList<LanguageElement> statements;
 
   public static Block create(Location id, ROList<LanguageElement> statements) {
     final Block block = new Block();
@@ -25,29 +27,39 @@ public class Block extends LanguageElement {
   }
 
   public static EvaluateResult evaluate(
-      EvaluationContext context, Location location, ROList<LanguageElement> children) {
-    TSList<TargetCode> pre = new TSList<>();
-    EvaluateResult lastRes = null;
-    Location lastLocation = null;
+      EvaluationContext context,
+      Location location,
+      ROList<LanguageElement> children,
+      ROOrderedMap<Object, Binding> injectScope) {
+    context.pushScope();
+    for (ROPair<Object, Binding> local : injectScope) {
+      context.scope.put(local.first, local.second);
+    }
+    final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
+    boolean unreachable = false;
     for (LanguageElement child : children) {
-      if (lastRes != null) {
-        pre.add(lastRes.preEffect);
-        pre.add(lastRes.value.drop(context, lastLocation));
-        pre.add(lastRes.postEffect);
+      final EvaluateResult childRes = child.evaluate(context);
+      ectx.recordPre(childRes.preEffect);
+      if (childRes.value == UnreachableValue.value) {
+        if (!context.target.isCodeEmpty(childRes.postEffect)) {
+          throw new Assertion();
+        }
+        break;
       }
-      lastLocation = child.location();
-      lastRes = child.evaluate(context);
+      ectx.recordPre(childRes.value.drop(context, location));
+      ectx.recordPre(childRes.postEffect);
     }
-    Value last;
-    TargetCode post = null;
-    if (lastRes != null) {
-      pre.add(lastRes.preEffect);
-      last = lastRes.value;
-      post = lastRes.postEffect;
+    if (!unreachable) {
+      for (Binding binding : new ReverseIterable<>(context.scope.atLevel())) {
+        ectx.recordPre(binding.dropCode(context, location));
+      }
+    }
+    context.popScope();
+    if (unreachable) {
+      return ectx.build(UnreachableValue.value);
     } else {
-      last = nullValue;
+      return ectx.build(NullValue.value);
     }
-    return new EvaluateResult(context.target.merge(context, location, pre), post, last);
   }
 
   @Override
@@ -57,6 +69,6 @@ public class Block extends LanguageElement {
 
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
-    return evaluate(context, id, statements);
+    return evaluate(context, id, statements, ROOrderedMap.empty);
   }
 }

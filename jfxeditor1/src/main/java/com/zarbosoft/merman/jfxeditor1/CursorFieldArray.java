@@ -42,9 +42,14 @@ public class CursorFieldArray extends BaseEditCursorFieldArray {
   }
 
   private void updateErrorPage(Editor editor) {
-    if (main == null) return;
-    if (beginIndex == endIndex) main.errorPage.setAtom(editor, visual.value.data.get(beginIndex));
-    else main.errorPage.setAtom(editor, null);
+    if (main == null) {
+        return;
+    }
+    if (beginIndex == endIndex) {
+        main.errorPage.setAtom(editor, visual.value.data.get(beginIndex));
+    } else {
+        main.errorPage.setAtom(editor, null);
+    }
   }
 
   @Override
@@ -57,7 +62,9 @@ public class CursorFieldArray extends BaseEditCursorFieldArray {
 
   public boolean handleKey(Context context, ButtonEvent hidEvent) {
     final Editor editor = Editor.get(context);
-    if (NotMain.handleCommonNavigation(editor, main, hidEvent)) return true;
+    if (NotMain.handleCommonNavigation(editor, main, hidEvent)) {
+        return true;
+    }
     if (hidEvent.press) {
       switch (hidEvent.key) {
         case DIR_SURFACE:
@@ -70,8 +77,11 @@ public class CursorFieldArray extends BaseEditCursorFieldArray {
         case J:
           {
             if (hidEvent.modifiers.containsAny(shiftKeys)) {
-              if (leadFirst && beginIndex != endIndex) actionReleasePrevious(context);
-              else actionGatherNext(context);
+              if (leadFirst && beginIndex != endIndex) {
+                  actionReleasePrevious(context);
+              } else {
+                  actionGatherNext(context);
+              }
             } else {
               actionNextElement(context);
             }
@@ -81,8 +91,11 @@ public class CursorFieldArray extends BaseEditCursorFieldArray {
         case K:
           {
             if (hidEvent.modifiers.containsAny(shiftKeys)) {
-              if (!leadFirst && beginIndex != endIndex) actionReleaseNext(context);
-              else actionGatherPrevious(context);
+              if (!leadFirst && beginIndex != endIndex) {
+                  actionReleaseNext(context);
+              } else {
+                  actionGatherPrevious(context);
+              }
             } else {
               actionPreviousElement(context);
             }

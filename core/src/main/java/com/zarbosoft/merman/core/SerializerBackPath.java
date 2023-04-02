@@ -29,7 +29,9 @@ public class SerializerBackPath {
       out.append("/");
       out.append(i);
     }
-    if (out.length() == 0) out.append("/");
+    if (out.length() == 0) {
+        out.append("/");
+    }
     return out.toString();
   }
 }

@@ -26,7 +26,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarRecordType.assertConstString;
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstString;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class BundleValue implements Value, BuiltinAutoExportable {
@@ -104,7 +104,9 @@ public class BundleValue implements Value, BuiltinAutoExportable {
   @Override
   public EvaluateResult access(EvaluationContext context, Location location, Value field) {
     final String key = assertConstString(context, location, field);
-    if (key == null) return EvaluateResult.error;
+    if (key == null) {
+        return EvaluateResult.error;
+    }
     CompletableFuture<Value> importResult =
         context.moduleContext.getModule(
             context.moduleContext.compileContext.modules.getCacheId(

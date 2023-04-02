@@ -73,7 +73,9 @@ public abstract class AtomType {
     BackSpec.walkTypeBack(
         back,
         s -> {
-          if (!(s instanceof BackSpecData)) return true;
+          if (!(s instanceof BackSpecData)) {
+              return true;
+          }
           BackSpecData s1 = (BackSpecData) s;
           if (s1.id == null) {
             unnamedFields.add(s1);
@@ -82,7 +84,9 @@ public abstract class AtomType {
             if (old != null) {
               errors.add(new DuplicateBackId(s1.id));
             }
-            if (s instanceof BaseBackArraySpec) return false;
+            if (s instanceof BaseBackArraySpec) {
+                return false;
+            }
           }
           return true;
         });
@@ -92,12 +96,18 @@ public abstract class AtomType {
   }
 
   private static boolean symbolDelimits(FrontSymbolSpec s) {
-    if (s.type instanceof SymbolSpaceSpec) return false;
+    if (s.type instanceof SymbolSpaceSpec) {
+        return false;
+    }
     if (s.type instanceof SymbolTextSpec) {
       final String text = ((SymbolTextSpec) s.type).text;
-      if (text.trim().isEmpty()) return false;
+      if (text.trim().isEmpty()) {
+          return false;
+      }
     }
-    if (s.condition != null) return false;
+    if (s.condition != null) {
+        return false;
+    }
     return true;
   }
 
@@ -118,37 +128,57 @@ public abstract class AtomType {
       for (FrontSpec front : parentAtom.type.front) {
         if (front instanceof FrontSymbolSpec) {
           if (symbolDelimits((FrontSymbolSpec) front)) {
-            if (!foundField) backChild = false;
-            else foreChild = false;
+            if (!foundField) {
+                backChild = false;
+            } else {
+                foreChild = false;
+            }
           }
         } else if (front instanceof FrontPrimitiveSpec) {
-          if (!foundField) backChild = false;
-          else foreChild = false;
+          if (!foundField) {
+              backChild = false;
+          } else {
+              foreChild = false;
+          }
         } else if (front instanceof FrontArraySpecBase) {
           final FrontArraySpecBase arrayFront = (FrontArraySpecBase) front;
           if (!foundField) {
             for (FrontSymbolSpec prefix : arrayFront.prefix) {
-              if (!symbolDelimits(prefix)) continue;
+              if (!symbolDelimits(prefix)) {
+                  continue;
+              }
               backChild = false;
             }
           }
           if (id.equals(arrayFront.fieldId())) {
-            if (((FieldArray.Parent) atom.fieldParentRef).index > 0) backChild = false;
+            if (((FieldArray.Parent) atom.fieldParentRef).index > 0) {
+                backChild = false;
+            }
             foundField = true;
             if (((FieldArray.Parent) atom.fieldParentRef).index
-                < ((FieldArray) atom.fieldParentRef.field).data.size() - 1) foreChild = false;
+                < ((FieldArray) atom.fieldParentRef.field).data.size() - 1) {
+                foreChild = false;
+            }
           }
           if (foundField) {
             for (FrontSymbolSpec suffix : arrayFront.suffix) {
-              if (!symbolDelimits(suffix)) continue;
+              if (!symbolDelimits(suffix)) {
+                  continue;
+              }
               foreChild = false;
             }
           }
         } else if (front instanceof FrontAtomSpec) {
-          if (id.equals(((FrontAtomSpec) front).fieldId())) foundField = true;
-        } else throw new Assertion();
+          if (id.equals(((FrontAtomSpec) front).fieldId())) {
+              foundField = true;
+          }
+        } else {
+            throw new Assertion();
+        }
       }
-      if (!backChild && !foreChild) return true;
+      if (!backChild && !foreChild) {
+          return true;
+      }
       // thus backChild == !foreChild
     }
 
@@ -187,7 +217,9 @@ public abstract class AtomType {
       }
       TSSet<String> missing = new TSSet<>();
       for (Map.Entry<String, BackSpecData> field : namedFields) {
-        if (field.getValue() instanceof BackIdSpec) continue;
+        if (field.getValue() instanceof BackIdSpec) {
+            continue;
+        }
         missing.add(field.getKey());
       }
       missing.removeAll(fieldsUsedFront);
@@ -241,19 +273,31 @@ public abstract class AtomType {
       } else if (next instanceof BackFixedRecordSpec) {
         stack.add(((BackFixedRecordSpec) next).pairs.iterator());
       } else if (next instanceof BackArraySpec) {
-        if (((BackArraySpec) next).id.equals(id)) return next;
+        if (((BackArraySpec) next).id.equals(id)) {
+            return next;
+        }
       } else if (next instanceof BackSubArraySpec) {
-        if (((BackSubArraySpec) next).id.equals(id)) return next;
+        if (((BackSubArraySpec) next).id.equals(id)) {
+            return next;
+        }
       } else if (next instanceof BackAtomSpec) {
-        if (((BackAtomSpec) next).id.equals(id)) return next;
+        if (((BackAtomSpec) next).id.equals(id)) {
+            return next;
+        }
       } else if (next instanceof BackFixedTypeSpec) {
         stack.add(Arrays.asList(((BackFixedTypeSpec) next).value).iterator());
       } else if (next instanceof BackTypeSpec) {
-        if (((BackTypeSpec) next).type.equals(id)) return next;
+        if (((BackTypeSpec) next).type.equals(id)) {
+            return next;
+        }
       } else if (next instanceof BackPrimitiveSpec) {
-        if (((BackPrimitiveSpec) next).id.equals(id)) return next;
+        if (((BackPrimitiveSpec) next).id.equals(id)) {
+            return next;
+        }
       } else if (next instanceof BackRecordSpec) {
-        if (((BackRecordSpec) next).id.equals(id)) return next;
+        if (((BackRecordSpec) next).id.equals(id)) {
+            return next;
+        }
       }
     }
     throw new DeadCode();
@@ -415,7 +459,9 @@ public abstract class AtomType {
       TSList<Field> initialUnnamedFields = new TSList<>();
       TSMap<String, Field> initialNamedFields = new TSMap<>();
       for (FieldParseResult field : fields) {
-        if (field == null) continue;
+        if (field == null) {
+            continue;
+        }
         field.finish();
         if (field.key == null) {
           initialUnnamedFields.add(field.field());

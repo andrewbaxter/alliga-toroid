@@ -13,9 +13,11 @@ public class JSGroup extends JSFreeDisplayNode implements Group {
 
   @Override
   public void add(int index, DisplayNode node) {
-    if (index < element.childNodes.length)
-      element.insertBefore(((JSDisplayNode) node).inner_(), element.childNodes.getAt(index));
-    else element.appendChild(((JSDisplayNode) node).inner_());
+    if (index < element.childNodes.length) {
+        element.insertBefore(((JSDisplayNode) node).inner_(), element.childNodes.getAt(index));
+    } else {
+        element.appendChild(((JSDisplayNode) node).inner_());
+    }
     fixPosition();
   }
 

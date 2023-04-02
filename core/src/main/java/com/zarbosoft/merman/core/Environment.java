@@ -72,7 +72,9 @@ public interface Environment {
     while (true) {
       int start = end;
       end = walker.after(end);
-      if (end == I18N_DONE) break;
+      if (end == I18N_DONE) {
+          break;
+      }
       glyphs.add(text.substring(start, end));
     }
     return glyphs;
@@ -159,54 +161,86 @@ public interface Environment {
     protected abstract int length();
 
     public int startBeforeOrAt(int offset) {
-      if (offset < 0 || offset > length()) throw new Assertion();
+      if (offset < 0 || offset > length()) {
+          throw new Assertion();
+      }
       int out = anyBeforeOrAt(offset);
-      if (!isWhitespace(out) || out == 0) return out;
+      if (!isWhitespace(out) || out == 0) {
+          return out;
+      }
       return anyBeforeOrAt(out - 1);
     }
 
     public int startBefore(int offset) {
-      if (offset < 0 || offset > length()) throw new Assertion();
-      if (offset == 0) return I18N_DONE;
+      if (offset < 0 || offset > length()) {
+          throw new Assertion();
+      }
+      if (offset == 0) {
+          return I18N_DONE;
+      }
       return startBeforeOrAt(offset - 1);
     }
 
     public int endBeforeOrAt(int offset) {
-      if (offset < 0 || offset > length()) throw new Assertion();
+      if (offset < 0 || offset > length()) {
+          throw new Assertion();
+      }
       int out = anyBeforeOrAt(offset);
-      if (isWhitespace(out) || out == 0) return out;
+      if (isWhitespace(out) || out == 0) {
+          return out;
+      }
       return anyBeforeOrAt(out - 1);
     }
 
     public int endBefore(int offset) {
-      if (offset < 0 || offset > length()) throw new Assertion();
-      if (offset == 0) return I18N_DONE;
+      if (offset < 0 || offset > length()) {
+          throw new Assertion();
+      }
+      if (offset == 0) {
+          return I18N_DONE;
+      }
       return endBeforeOrAt(offset - 1);
     }
 
     public int startAfterOrAt(int offset) {
-      if (offset < 0 || offset > length()) throw new Assertion();
+      if (offset < 0 || offset > length()) {
+          throw new Assertion();
+      }
       int out = anyAtOrAfter(offset);
-      if (!isWhitespace(out) || out == length()) return out;
+      if (!isWhitespace(out) || out == length()) {
+          return out;
+      }
       return anyAtOrAfter(out + 1);
     }
 
     public int startAfter(int offset) {
-      if (offset < 0 || offset > length()) throw new Assertion();
-      if (offset == length()) return I18N_DONE;
+      if (offset < 0 || offset > length()) {
+          throw new Assertion();
+      }
+      if (offset == length()) {
+          return I18N_DONE;
+      }
       return startAfterOrAt(offset + 1);
     }
 
     public int endAfterOrAt(int offset) {
-      if (offset < 0 || offset > length()) throw new Assertion();
+      if (offset < 0 || offset > length()) {
+          throw new Assertion();
+      }
       int out = anyAtOrAfter(offset);
-      if (isWhitespace(out)) return out;
+      if (isWhitespace(out)) {
+          return out;
+      }
       return anyAtOrAfter(out + 1);
     }
 
     public int endAfter(int offset) {
-      if (offset < 0 || offset > length()) throw new Assertion();
-      if (offset == length()) return I18N_DONE;
+      if (offset < 0 || offset > length()) {
+          throw new Assertion();
+      }
+      if (offset == length()) {
+          return I18N_DONE;
+      }
       return endAfterOrAt(offset + 1);
     }
   }
@@ -227,9 +261,13 @@ public interface Environment {
     protected abstract int length();
 
     public int beforeOrAt(int offset) {
-      if (offset < 0 || offset > length()) throw new Assertion();
+      if (offset < 0 || offset > length()) {
+          throw new Assertion();
+      }
       int out = anyBeforeOrAt(offset);
-      while (out < offset && isWhitespace(out + 1)) out += 1;
+      while (out < offset && isWhitespace(out + 1)) {
+          out += 1;
+      }
       return out;
     }
   }

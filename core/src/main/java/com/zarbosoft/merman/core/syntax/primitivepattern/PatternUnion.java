@@ -16,7 +16,9 @@ public class PatternUnion extends Pattern {
   @Override
   public Node<EscapableResult<ROList<String>>> build(boolean capture) {
     final Union<EscapableResult<ROList<String>>> out = new Union<>();
-    for (final Pattern child : children) out.add(child.build(capture));
+    for (final Pattern child : children) {
+        out.add(child.build(capture));
+    }
     return out;
   }
 }

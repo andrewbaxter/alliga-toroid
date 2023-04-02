@@ -25,8 +25,11 @@ public class AutocompleteChoice implements DetailsPageChooser.Choice {
         recorder1 -> {
           recorder1.apply(editor, new ChangePrimitive(field, 0, field.data.length(), text));
         };
-    if (recorder != null) apply.accept(recorder);
-    else editor.history.record(editor, null, apply);
+    if (recorder != null) {
+        apply.accept(recorder);
+    } else {
+        editor.history.record(editor, null, apply);
+    }
   }
 
   @Override

@@ -112,7 +112,9 @@ public class NotMain extends Application {
 
   public static String extension(String path) {
     int dot = path.lastIndexOf(".");
-    if (dot == -1) return "";
+    if (dot == -1) {
+        return "";
+    }
     return path.substring(dot + 1);
   }
 
@@ -122,7 +124,9 @@ public class NotMain extends Application {
   }
 
   public static boolean handleCommonNavigation(Editor editor, NotMain main, ButtonEvent hidEvent) {
-    if (editor.details.handleKey(editor, hidEvent)) return true;
+    if (editor.details.handleKey(editor, hidEvent)) {
+        return true;
+    }
     if (hidEvent.press) {
       switch (hidEvent.key) {
         case F:
@@ -158,7 +162,9 @@ public class NotMain extends Application {
   public static boolean handlePrimitiveNavigation(
       Context context, NotMain main, BaseEditCursorFieldPrimitive cursor, ButtonEvent hidEvent) {
     final Editor editor = Editor.get(context);
-    if (handleCommonNavigation(editor, main, hidEvent)) return true;
+    if (handleCommonNavigation(editor, main, hidEvent)) {
+        return true;
+    }
     if (hidEvent.press) {
       switch (hidEvent.key) {
         case ESCAPE:
@@ -170,14 +176,24 @@ public class NotMain extends Application {
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
               if (hidEvent.modifiers.containsAny(shiftKeys)) {
-                if (cursor.range.leadFirst) cursor.actionReleasePreviousWord(context);
-                else cursor.actionGatherNextWord(context);
-              } else cursor.actionNextWord(context);
+                if (cursor.range.leadFirst) {
+                    cursor.actionReleasePreviousWord(context);
+                } else {
+                    cursor.actionGatherNextWord(context);
+                }
+              } else {
+                  cursor.actionNextWord(context);
+              }
             } else {
               if (hidEvent.modifiers.containsAny(shiftKeys)) {
-                if (cursor.range.leadFirst) cursor.actionReleasePreviousGlyph(context);
-                else cursor.actionGatherNextGlyph(context);
-              } else cursor.actionNextGlyph(context);
+                if (cursor.range.leadFirst) {
+                    cursor.actionReleasePreviousGlyph(context);
+                } else {
+                    cursor.actionGatherNextGlyph(context);
+                }
+              } else {
+                  cursor.actionNextGlyph(context);
+              }
             }
             return true;
           }
@@ -185,14 +201,24 @@ public class NotMain extends Application {
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
               if (hidEvent.modifiers.containsAny(shiftKeys)) {
-                if (cursor.range.leadFirst) cursor.actionGatherPreviousWord(context);
-                else cursor.actionReleaseNextWord(context);
-              } else cursor.actionPreviousWord(context);
+                if (cursor.range.leadFirst) {
+                    cursor.actionGatherPreviousWord(context);
+                } else {
+                    cursor.actionReleaseNextWord(context);
+                }
+              } else {
+                  cursor.actionPreviousWord(context);
+              }
             } else {
               if (hidEvent.modifiers.containsAny(shiftKeys)) {
-                if (cursor.range.leadFirst) cursor.actionGatherPreviousGlyph(context);
-                else cursor.actionReleaseNextGlyph(context);
-              } else cursor.actionPreviousGlyph(context);
+                if (cursor.range.leadFirst) {
+                    cursor.actionGatherPreviousGlyph(context);
+                } else {
+                    cursor.actionReleaseNextGlyph(context);
+                }
+              } else {
+                  cursor.actionPreviousGlyph(context);
+              }
             }
             return true;
           }
@@ -227,7 +253,9 @@ public class NotMain extends Application {
         case X:
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
-              if (cursor.range.beginOffset != cursor.range.endOffset) cursor.editCut(editor);
+              if (cursor.range.beginOffset != cursor.range.endOffset) {
+                  cursor.editCut(editor);
+              }
               return true;
             }
             break;
@@ -249,8 +277,9 @@ public class NotMain extends Application {
   public void start(Stage primaryStage) throws Exception {
     try {
       List<String> args = getParameters().getUnnamed();
-      if (args.isEmpty())
-        throw new RuntimeException("Need to specify one file to open on the command line");
+      if (args.isEmpty()) {
+          throw new RuntimeException("Need to specify one file to open on the command line");
+      }
 
       Environment env = new JFXEnvironment(Locale.getDefault());
 
@@ -286,12 +315,18 @@ public class NotMain extends Application {
             }
 
             private void updateMarkDisplay(Brick brick) {
-              if (editor == null) return;
-              if (!brick.meta().has("mark")) return;
+              if (editor == null) {
+                  return;
+              }
+              if (!brick.meta().has("mark")) {
+                  return;
+              }
               Atom atom = brick.getVisual().atomVisual().atom;
               MarkerBox display = null;
               WeakReference<MarkerBox> ref = markDisplays.getOpt(atom);
-              if (ref != null) display = ref.get();
+              if (ref != null) {
+                  display = ref.get();
+              }
               if (display == null) {
                 display = new MarkerBox(editor.context, atom, syntaxOut.markTransverseOffset);
                 brick.addAttachment(editor.context, display);
@@ -394,8 +429,9 @@ public class NotMain extends Application {
 
                                   // Attach new errors
                                   if (e0 != null) {
-                                    if (!layout.getChildren().contains(messages))
-                                      layout.getChildren().add(messages);
+                                    if (!layout.getChildren().contains(messages)) {
+                                        layout.getChildren().add(messages);
+                                    }
                                     messages.setText(messages.getText() + "\n" + e0.toString());
                                   } else {
                                     TSMap<Atom, TSList<Object>> errorMessages = new TSMap<>();
@@ -408,11 +444,14 @@ public class NotMain extends Application {
                                               public Object handle(Error.LocationError e) {
                                                 final Location location = e.location;
                                                 if (!rootModuleSpec.moduleId.equal1(
-                                                    location.module)) return null;
+                                                    location.module)) {
+                                                    return null;
+                                                }
                                                 Atom atom = editor.fileIdMap.getOpt(location.id);
                                                 if (atom == null) {
-                                                  if (!layout.getChildren().contains(messages))
-                                                    layout.getChildren().add(messages);
+                                                  if (!layout.getChildren().contains(messages)) {
+                                                      layout.getChildren().add(messages);
+                                                  }
                                                   System.out.format(
                                                       "unlocatable location error %s: %s\n",
                                                       e.location, e);
@@ -434,7 +473,9 @@ public class NotMain extends Application {
                                               @Override
                                               public Object handle(Error.DeserializeError e) {
                                                 if (!rootModuleSpec.moduleId.equals(
-                                                    module.getKey().moduleId)) return null;
+                                                    module.getKey().moduleId)) {
+                                                    return null;
+                                                }
                                                 TSList<BackPath.Element> backPath = new TSList<>();
                                                 for (LuxemPath.Element element : e.backPath.data) {
                                                   backPath.add(
@@ -447,8 +488,9 @@ public class NotMain extends Application {
                                                     editor.context.backLocate(
                                                         new BackPath(backPath));
                                                 if (atom == null) {
-                                                  if (!layout.getChildren().contains(messages))
-                                                    layout.getChildren().add(messages);
+                                                  if (!layout.getChildren().contains(messages)) {
+                                                      layout.getChildren().add(messages);
+                                                  }
                                                   System.out.format(
                                                       "unlocatable deserialize error %s: %s\n",
                                                       e.backPath, e);
@@ -484,7 +526,9 @@ public class NotMain extends Application {
                                     for (Atom atom : changedAtoms) {
                                       MarkerBox display = null;
                                       WeakReference<MarkerBox> ref = markDisplays.getOpt(atom);
-                                      if (ref != null) display = ref.get();
+                                      if (ref != null) {
+                                          display = ref.get();
+                                      }
                                       if (display != null) {
                                         display.update(editor.context);
                                       }
@@ -661,7 +705,9 @@ public class NotMain extends Application {
                     // If end/start paths are the same then the longest match includes the index
                     // vs if they're different, then it includes the primitive but not index
                     // Adjust so the index is the next element in both cases
-                    if (longestMatch == startPathList.size()) longestMatch -= 1;
+                    if (longestMatch == startPathList.size()) {
+                        longestMatch -= 1;
+                    }
                     int startIndex = Integer.parseInt(startPathList.get(longestMatch));
                     int endIndex = Integer.parseInt(endPathList.get(longestMatch));
                     if (endIndex < startIndex) {
@@ -671,7 +717,9 @@ public class NotMain extends Application {
                     }
                   } else if (base instanceof Atom) {
                     ((Atom) base).fieldParentRef.selectField(context);
-                  } else throw new Assertion();
+                  } else {
+                      throw new Assertion();
+                  }
                 }
               }
             }
@@ -814,13 +862,16 @@ public class NotMain extends Application {
       }
       editor.history.clearModified();
     }
-    if (clearBackup)
-      try {
-        Files.deleteIfExists(backupPath);
-      } catch (IOException e) {
-        logException(e, "Failed to clean up backup %s", backupPath);
-      }
-    if (wasModified && flushCallback != null) flushCallback.run();
+    if (clearBackup) {
+        try {
+          Files.deleteIfExists(backupPath);
+        } catch (IOException e) {
+          logException(e, "Failed to clean up backup %s", backupPath);
+        }
+    }
+    if (wasModified && flushCallback != null) {
+        flushCallback.run();
+    }
   }
 
   public static class DragSelectState {

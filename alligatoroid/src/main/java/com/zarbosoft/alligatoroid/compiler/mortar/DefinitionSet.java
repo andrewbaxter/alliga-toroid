@@ -8,9 +8,6 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.GraphDeferred;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.ids.UniqueId;
-import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.StaticMethodMeta;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataPrototype;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStaticMethodType;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -25,33 +22,31 @@ import static com.zarbosoft.rendaw.common.Common.uncheck;
 public class DefinitionSet implements BuiltinAutoExportable {
   public Location location;
   public long moduleId;
-  public long definitionSetId;
   public UniqueId id;
   public TSSet<GraphDeferred<DefinitionSet>> dependencies;
   public int nextId = 0;
   public TSMap<String, Definition> definitions = new TSMap<>();
   private boolean resolved = false;
 
-  public static DefinitionSet create(Location location, long moduleId, long definitionSetId) {
+  public static DefinitionSet create(Location location, long importCacheId, int definitionSetId) {
     final DefinitionSet out = new DefinitionSet();
     out.location = location;
-    out.moduleId = moduleId;
-    out.definitionSetId = definitionSetId;
+    out.id = UniqueId.create(importCacheId, definitionSetId);
     return out;
   }
 
   @StaticAutogen.WrapExpose
-  public FunctionRet function(TSList<ROPair<Object, MortarDataPrototype>> arguments, MortarDataPrototype ret) {
+  public FunctionRet function(TSList<ROPair<Object, MortarDataType>> arguments, MortarDataType ret) {
     String className =
         Format.format(
             "com.zarbosoft.alligatoroidmortar.ModuleClass%s_%s_%s",
-            moduleId, definitionSetId, ++nextId);
+            moduleId, id.subId, ++nextId);
     final StaticMethodMeta meta =
         new StaticMethodMeta(
             new StaticAutogen.FuncInfo(
                 "call", JavaBytecodeUtils.qualifiedName(className), arguments, ret, false),
             this);
-    return new FunctionRet(MortarStaticMethodType.type.type_constAsValue(meta), meta);
+    return new FunctionRet(MortarStaticMethodTypestate.type.typestate_constAsValue(meta), meta);
   }
 
   public boolean isResolved() {
@@ -59,7 +54,9 @@ public class DefinitionSet implements BuiltinAutoExportable {
   }
 
   public boolean resolve(ModuleCompileContext context) {
-    if (isResolved()) return true;
+    if (isResolved()) {
+        return true;
+    }
     if (context.importCacheId != id.importCacheId) {
       context.errors.add(new DefinitionNotResolved(location, context.importId));
       return false;
@@ -67,7 +64,9 @@ public class DefinitionSet implements BuiltinAutoExportable {
 
     // Ensure dependencies are resolved
     for (GraphDeferred<DefinitionSet> dependency : dependencies) {
-      if (context.compileContext.loadedDefinitionSets.contains(dependency.id)) continue;
+      if (context.compileContext.loadedDefinitionSets.contains(dependency.id)) {
+          continue;
+      }
       if (dependency.artifact == null) {
         dependency.artifact = (DefinitionSet) context.lookupRef(dependency.ref);
       }

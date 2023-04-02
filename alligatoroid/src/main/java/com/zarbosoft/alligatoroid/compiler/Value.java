@@ -10,6 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 
 public interface Value {
   public default TargetCode drop(EvaluationContext context, Location location) {
@@ -28,8 +29,7 @@ public interface Value {
   }
 
   /**
-   * Prepare a serializable form of the current value - for mutable values, to finalize into an
-   * immutable value for instance.
+   * Prepare a serializable form of the current value.  Only used in mortar target.
    *
    * @param context
    * @param location
@@ -79,4 +79,10 @@ public interface Value {
   }
 
   EvaluateResult vary(EvaluationContext context, Location id);
+
+  boolean canCastTo(AlligatorusType type);
+
+  EvaluateResult castTo(EvaluationContext context, Location location, AlligatorusType type);
+
+  EvaluateResult unfork(EvaluationContext context, Location location, TSList<Value> otherValues);
 }

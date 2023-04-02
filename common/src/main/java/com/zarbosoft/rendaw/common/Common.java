@@ -28,16 +28,27 @@ public class Common {
   }
 
   public static RuntimeException uncheck(final Throwable e) {
-    if (e instanceof RuntimeException) return (RuntimeException) e;
-    if (e instanceof InvocationTargetException)
-      return uncheck(((InvocationTargetException) e).getTargetException());
-    if (e instanceof ExecutionException) return uncheck(((ExecutionException) e).getCause());
-    if (e instanceof RuntimeException) return (RuntimeException) e;
-    if (e instanceof NoSuchFileException)
-      return new UncheckedFileNotFoundException((NoSuchFileException) e);
-    if (e instanceof FileNotFoundException)
-      return new UncheckedFileNotFoundException((FileNotFoundException) e);
-    if (e instanceof IOException) return new UncheckedIOException((IOException) e);
+    if (e instanceof RuntimeException) {
+        return (RuntimeException) e;
+    }
+    if (e instanceof InvocationTargetException) {
+        return uncheck(((InvocationTargetException) e).getTargetException());
+    }
+    if (e instanceof ExecutionException) {
+        return uncheck(((ExecutionException) e).getCause());
+    }
+    if (e instanceof RuntimeException) {
+        return (RuntimeException) e;
+    }
+    if (e instanceof NoSuchFileException) {
+        return new UncheckedFileNotFoundException((NoSuchFileException) e);
+    }
+    if (e instanceof FileNotFoundException) {
+        return new UncheckedFileNotFoundException((FileNotFoundException) e);
+    }
+    if (e instanceof IOException) {
+        return new UncheckedIOException((IOException) e);
+    }
     return new UncheckedException(e);
   }
 
@@ -97,7 +108,9 @@ public class Common {
         nextAt = text.length();
       } else {
         nextAt = text.indexOf(delim, at);
-        if (nextAt == -1) nextAt = text.length();
+        if (nextAt == -1) {
+            nextAt = text.length();
+        }
       }
       out.add(text.substring(at, nextAt));
       at = nextAt + delim.length();
@@ -110,7 +123,9 @@ public class Common {
     int at = 0;
     while (at < text.length()) {
       int nextAt = text.indexOf(delim, 0);
-      if (nextAt == -1) nextAt = text.length();
+      if (nextAt == -1) {
+          nextAt = text.length();
+      }
       out.add(text.substring(at, nextAt));
       at = nextAt + delim.length();
     }

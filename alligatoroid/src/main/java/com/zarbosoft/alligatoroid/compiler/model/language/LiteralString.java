@@ -4,12 +4,11 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarPrimitivePrototype;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStringType;
+
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarPrimitiveAll.typeString;
 
 public class LiteralString extends LanguageElement {
-  @BuiltinAutoExportableType.Param
-  public String value;
+  @BuiltinAutoExportableType.Param public String value;
 
   @Override
   protected boolean innerHasLowerInSubtree() {
@@ -18,6 +17,6 @@ public class LiteralString extends LanguageElement {
 
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
-    return EvaluateResult.pure(MortarPrimitivePrototype.stringPrototype.prototype_constAsValue(value));
+    return EvaluateResult.pure(typeString.type_constAsValue(value));
   }
 }

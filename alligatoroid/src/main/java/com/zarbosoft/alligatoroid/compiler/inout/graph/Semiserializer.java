@@ -26,7 +26,9 @@ public class Semiserializer {
     TSList<Error.PreError> errors = new TSList<>();
     Semiserializer s = new Semiserializer(errors, moduleContext.backArtifactLookup);
     ExportableType exportableType = null;
-    if (value instanceof Exportable) exportableType = ((Exportable) value).exportableType();
+    if (value instanceof Exportable) {
+        exportableType = ((Exportable) value).exportableType();
+    }
     if (exportableType == null) {
       ExportableType et0 = StaticAutogen.detachedExportableTypeLookup.get(value.getClass());
       if (et0 != null) {

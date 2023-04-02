@@ -39,9 +39,11 @@ public abstract class Reader {
 
   public void finish() {
     if (stack.size() >= 3) {
-      if (stack.size() == 3 && stack.peekLast().getClass() == Primitive.class)
-        stack.peekLast().finish(this);
-      else throw new InvalidStream(offset, "End reached mid-element.");
+      if (stack.size() == 3 && stack.peekLast().getClass() == Primitive.class) {
+          stack.peekLast().finish(this);
+      } else {
+          throw new InvalidStream(offset, "End reached mid-element.");
+      }
     }
   }
 
@@ -114,7 +116,9 @@ public abstract class Reader {
   private static class RootArray extends State {
     @Override
     public boolean eat(final Reader raw, final byte next) {
-      if (raw.eatInterstitial(next)) return true;
+      if (raw.eatInterstitial(next)) {
+          return true;
+      }
       raw.stack.addLast(new RootArrayBorder());
       raw.stack.addLast(new Value());
       return false;
@@ -124,7 +128,9 @@ public abstract class Reader {
   private static class RootArrayBorder extends State {
     @Override
     public boolean eat(final Reader raw, final byte next) {
-      if (raw.eatInterstitial(next)) return true;
+      if (raw.eatInterstitial(next)) {
+          return true;
+      }
       switch (next) {
         case (byte) ',':
           finished(raw);
@@ -159,7 +165,9 @@ public abstract class Reader {
   private static class Value extends State {
     @Override
     public boolean eat(final Reader raw, final byte next) {
-      if (raw.eatInterstitial(next)) return true;
+      if (raw.eatInterstitial(next)) {
+          return true;
+      }
       if (next == (byte) '(') {
         finished(raw);
         raw.stack.addLast(new Value());
@@ -188,7 +196,9 @@ public abstract class Reader {
   private static class Array extends State {
     @Override
     public boolean eat(final Reader raw, final byte next) {
-      if (raw.eatInterstitial(next)) return true;
+      if (raw.eatInterstitial(next)) {
+          return true;
+      }
       if (next == (byte) ']') {
         raw.eatArrayEnd();
         finished(raw);
@@ -203,7 +213,9 @@ public abstract class Reader {
   private static class ArrayBorder extends State {
     @Override
     public boolean eat(final Reader raw, final byte next) {
-      if (raw.eatInterstitial(next)) return true;
+      if (raw.eatInterstitial(next)) {
+          return true;
+      }
       switch (next) {
         case (byte) ',':
           finished(raw);
@@ -219,7 +231,9 @@ public abstract class Reader {
   private static class Record extends State {
     @Override
     public boolean eat(final Reader raw, final byte next) {
-      if (raw.eatInterstitial(next)) return true;
+      if (raw.eatInterstitial(next)) {
+          return true;
+      }
       if (next == (byte) '}') {
         raw.eatRecordEnd();
         finished(raw);
@@ -236,7 +250,9 @@ public abstract class Reader {
   private static class RecordSeparator extends State {
     @Override
     public boolean eat(final Reader raw, final byte next) {
-      if (raw.eatInterstitial(next)) return true;
+      if (raw.eatInterstitial(next)) {
+          return true;
+      }
       if (next == (byte) ':') {
         finished(raw);
         return true;
@@ -248,7 +264,9 @@ public abstract class Reader {
   private static class RecordBorder extends State {
     @Override
     public boolean eat(final Reader raw, final byte next) {
-      if (raw.eatInterstitial(next)) return true;
+      if (raw.eatInterstitial(next)) {
+          return true;
+      }
       switch (next) {
         case (byte) ',':
           finished(raw);
@@ -301,7 +319,9 @@ public abstract class Reader {
 
     @Override
     protected Resolution eatEnd(final Reader raw, final byte next) {
-      if (raw.eatInterstitial(next)) return Resolution.ATE;
+      if (raw.eatInterstitial(next)) {
+          return Resolution.ATE;
+      }
       switch (next) {
         case (byte) ']':
         case (byte) '}':
@@ -350,10 +370,15 @@ public abstract class Reader {
           return ended == Resolution.ATE ? true : false;
         }
       }
-      if (escape && next == 'n') eatMiddle(raw, (byte) '\n');
-      else if (escape && next == 'r') eatMiddle(raw, (byte) '\r');
-      else if (escape && next == 't') eatMiddle(raw, (byte) '\t');
-      else eatMiddle(raw, next);
+      if (escape && next == 'n') {
+          eatMiddle(raw, (byte) '\n');
+      } else if (escape && next == 'r') {
+          eatMiddle(raw, (byte) '\r');
+      } else if (escape && next == 't') {
+          eatMiddle(raw, (byte) '\t');
+      } else {
+          eatMiddle(raw, next);
+      }
       escape = false;
       return true;
     }

@@ -43,14 +43,15 @@ import static org.junit.Assert.assertThat;
 public class TestDocumentGap {
 
   public static void assertChoices(Editor editor, int count) {
-    if (count == 0)
-      assertThat(
-          ((BaseEditCursorGapFieldPrimitive) editor.context.cursor).choicePage, equalTo(null));
-    else
-      assertThat(
-          ((BaseEditCursorGapFieldPrimitive) editor.context.cursor)
-              .choicePage.chooser.choices.size(),
-          is(count));
+    if (count == 0) {
+        assertThat(
+            ((BaseEditCursorGapFieldPrimitive) editor.context.cursor).choicePage, equalTo(null));
+    } else {
+        assertThat(
+            ((BaseEditCursorGapFieldPrimitive) editor.context.cursor)
+                .choicePage.chooser.choices.size(),
+            is(count));
+    }
   }
 
   /** Confirm all concrete atom types are found */

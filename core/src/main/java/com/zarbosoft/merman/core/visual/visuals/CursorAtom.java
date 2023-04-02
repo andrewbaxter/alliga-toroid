@@ -35,17 +35,25 @@ public class CursorAtom extends com.zarbosoft.merman.core.Cursor {
         () -> {
           for (int at = visualIndex - 1; at >= 0; --at) {
             final Brick found = visual.children.get(at).getLastBrick(context);
-            if (found != null) return found;
+            if (found != null) {
+                return found;
+            }
           }
-          if (visual.parent() == null) return null;
+          if (visual.parent() == null) {
+              return null;
+          }
           return visual.parent().getPreviousBrick(context);
         },
         () -> {
           for (int at = visualIndex + 1; at < visual.selectable.size(); ++at) {
             final Brick found = visual.children.get(at).getFirstBrick(context);
-            if (found != null) return found;
+            if (found != null) {
+                return found;
+            }
           }
-          if (visual.parent() == null) return null;
+          if (visual.parent() == null) {
+              return null;
+          }
           return visual.parent().getNextBrick(context);
         });
     border.setFirst(context, fieldVisual.getFirstBrick(context));
@@ -101,7 +109,9 @@ public class CursorAtom extends com.zarbosoft.merman.core.Cursor {
   }
 
   public void actionExit(final Context context) {
-    if (visual.atom.fieldParentRef == null) return;
+    if (visual.atom.fieldParentRef == null) {
+        return;
+    }
     visual.atom.fieldParentRef.selectField(context);
   }
 
@@ -123,7 +133,9 @@ public class CursorAtom extends com.zarbosoft.merman.core.Cursor {
     } else if (selectable instanceof VisualFieldPrimitive) {
       ((VisualFieldPrimitive) selectable)
           .copy(context, 0, ((VisualFieldPrimitive) selectable).value.data.length());
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
   }
 
   public void actionWindow(final Context context) {
@@ -147,6 +159,8 @@ public class CursorAtom extends com.zarbosoft.merman.core.Cursor {
         || selectable instanceof VisualFieldPrimitive) {
       context.windowExact(visual.atom);
       context.triggerIdleLayBricksOutward();
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
   }
 }

@@ -67,7 +67,9 @@ public class Course {
     if (calcContext.alignment == null && brick.alignment != null) {
       calcContext.alignment = brick.alignment;
       calcContext.alignedBrick = brick;
-      if (brick.alignment.converse > out) out = brick.alignment.converse;
+      if (brick.alignment.converse > out) {
+          out = brick.alignment.converse;
+      }
     }
     calcContext.preAlignConverse += brick.converseSpan;
     calcContext.converse = out + brick.converseSpan;
@@ -115,11 +117,15 @@ public class Course {
     final Course previous = parent.children.get(this.index - 1);
     previous.add(context, previous.children.size(), children);
     destroyInner(context);
-    if (resetCornerstone) parent.setCornerstone(context, parent.cornerstone, null, null);
+    if (resetCornerstone) {
+        parent.setCornerstone(context, parent.cornerstone, null, null);
+    }
   }
 
   Course breakCourse(final Context context, final int index) {
-    if (index == 0) throw new AssertionError("Breaking course at 0.");
+    if (index == 0) {
+        throw new AssertionError("Breaking course at 0.");
+    }
     boolean resetCornerstone = false;
     final Course next = new Course(context, transverseStart + transverseSpan());
     parent.add(context, this.index + 1, TSList.of(next));
@@ -136,18 +142,24 @@ public class Course {
         idlePlace.removeMaxAscent = Math.max(idlePlace.removeMaxAscent, brick.ascent());
         idlePlace.removeMaxDescent = Math.max(idlePlace.removeMaxDescent, brick.descent());
         idlePlace.changed.remove(brick);
-        if (brick == parent.cornerstone) resetCornerstone = true;
+        if (brick == parent.cornerstone) {
+            resetCornerstone = true;
+        }
       }
       transplantRemove.clear();
       visual.removeAt(index, visual.size() - index);
       next.add(context, 0, transportAdd);
     }
-    if (resetCornerstone) parent.setCornerstone(context, parent.cornerstone, null, null);
+    if (resetCornerstone) {
+        parent.setCornerstone(context, parent.cornerstone, null, null);
+    }
     return next;
   }
 
   void add(final Context context, final int at, final ROList<Brick> bricks) {
-    if (bricks.size() == 0) throw new AssertionError("Adding no bricks");
+    if (bricks.size() == 0) {
+        throw new AssertionError("Adding no bricks");
+    }
     children.insertAll(at, bricks);
     for (int i = 0; i < bricks.size(); ++i) {
       final Brick brick = bricks.get(i);
@@ -176,14 +188,20 @@ public class Course {
       alignment = null;
       alignmentBrick = null;
     }
-    if (parent.cornerstone == brick) parent.cornerstone = null;
+    if (parent.cornerstone == brick) {
+        parent.cornerstone = null;
+    }
     if (context.hoverBrick == brick) {
       context.clearHover();
     }
     brick.setParent(null, 0);
     children.remove(at);
-    if (index - 1 >= 0) parent.children.get(index - 1).getIdleExpand(context);
-    if (index + 1 < parent.children.size()) parent.children.get(index + 1).getIdleExpand(context);
+    if (index - 1 >= 0) {
+        parent.children.get(index - 1).getIdleExpand(context);
+    }
+    if (index + 1 < parent.children.size()) {
+        parent.children.get(index + 1).getIdleExpand(context);
+    }
     if (children.isEmpty()) {
       destroyInner(context);
     } else {
@@ -201,14 +219,22 @@ public class Course {
   }
 
   private void destroyInner(final Context context) {
-    if (idlePlace != null) idlePlace.destroy();
-    if (idleCompact != null) idleCompact.destroy();
-    if (idleExpand != null) idleExpand.destroy();
+    if (idlePlace != null) {
+        idlePlace.destroy();
+    }
+    if (idleCompact != null) {
+        idleCompact.destroy();
+    }
+    if (idleExpand != null) {
+        idleExpand.destroy();
+    }
     parent.remove(context, index);
   }
 
   void destroy(final Context context) {
-    while (!children.isEmpty()) children.last().destroy(context);
+    while (!children.isEmpty()) {
+        children.last().destroy(context);
+    }
   }
 
   private void renumber(final int at) {
@@ -302,20 +328,23 @@ public class Course {
             attachment.setTransverseSpan(context, ascent, descent);
           }
         }
-      } else
-        for (Brick b : changed) {
-          b.allocateTransverse(context, ascent, descent);
-          for (Attachment a : b.getAttachments()) {
-            a.setTransverseSpan(context, ascent, descent);
+      } else {
+          for (Brick b : changed) {
+            b.allocateTransverse(context, ascent, descent);
+            for (Attachment a : b.getAttachments()) {
+              a.setTransverseSpan(context, ascent, descent);
+            }
           }
-        }
+      }
 
       /// Do converse placement
       CalculateCourseConverseContext calcContext = new CalculateCourseConverseContext();
       for (int index = 0; index < children.size(); ++index) {
         final Brick brick = children.get(index);
         if (calcContext.alignment == null && brick.alignment != null) {
-          if (alignment != null) alignment.removeBrick(context, alignmentBrick);
+          if (alignment != null) {
+              alignment.removeBrick(context, alignmentBrick);
+          }
           alignment = brick.alignment;
           alignmentBrick = brick;
           alignment.addBrick(context, alignmentBrick);
@@ -323,27 +352,36 @@ public class Course {
         }
         ROPair<Double, Double> brickPlacement = calculateNextBrickAdvance(calcContext, brick);
         brick.setConverse(context, brickPlacement.second, brickPlacement.first);
-        for (final Attachment attachment : brick.getAttachments())
-          attachment.setConverse(context, brickPlacement.first);
+        for (final Attachment attachment : brick.getAttachments()) {
+            attachment.setConverse(context, brickPlacement.first);
+        }
       }
       if (calcContext.alignment == null && alignment != null) {
         alignment.removeBrick(context, alignmentBrick);
       }
-      if (calcContext.converse > context.edge) getIdleCompact(context);
-      if (calcContext.converse * context.retryExpandFactor < lastExpandCheckConverse)
-        getIdleExpand(context);
-      if (calcContext.converse > lastExpandCheckConverse)
-        lastExpandCheckConverse = calcContext.converse;
+      if (calcContext.converse > context.edge) {
+          getIdleCompact(context);
+      }
+      if (calcContext.converse * context.retryExpandFactor < lastExpandCheckConverse) {
+          getIdleExpand(context);
+      }
+      if (calcContext.converse > lastExpandCheckConverse) {
+          lastExpandCheckConverse = calcContext.converse;
+      }
 
       // Propagate changes up
-      if (newAscent || newDescent) parent.adjust(context, index);
+      if (newAscent || newDescent) {
+          parent.adjust(context, index);
+      }
 
       return false;
     }
 
     @Override
     protected void destroyed() {
-      if (idlePlace == this) idlePlace = null;
+      if (idlePlace == this) {
+          idlePlace = null;
+      }
     }
   }
 
@@ -371,12 +409,16 @@ public class Course {
         final Brick brick = children.get(index);
         final VisualLeaf visual = brick.getVisual();
         final VisualAtom atomVisual = visual.parent().atomVisual();
-        if (visual instanceof VisualFieldPrimitive && !skipPrimitives.contains(visual))
-          lastPrimitive = (VisualFieldPrimitive) visual;
-        if ((!visual.atomVisual().compact && !skip.contains(atomVisual)))
-          priorities.add(atomVisual);
+        if (visual instanceof VisualFieldPrimitive && !skipPrimitives.contains(visual)) {
+            lastPrimitive = (VisualFieldPrimitive) visual;
+        }
+        if ((!visual.atomVisual().compact && !skip.contains(atomVisual))) {
+            priorities.add(atomVisual);
+        }
         converse = brick.converseEdge();
-        if (!priorities.isEmpty() && converse > context.edge) break;
+        if (!priorities.isEmpty() && converse > context.edge) {
+            break;
+        }
       }
       if (converse <= context.edge) {
         return false;
@@ -428,7 +470,9 @@ public class Course {
       for (int index = 0; index < children.size(); ++index) {
         final Brick brick = children.get(index);
         final VisualLeaf visual = brick.getVisual();
-        if (visual.atomVisual().compact) priorities.add(visual.parent().atomVisual());
+        if (visual.atomVisual().compact) {
+            priorities.add(visual.parent().atomVisual());
+        }
       }
       if (priorities.isEmpty()) {
         return false;
@@ -470,9 +514,15 @@ public class Course {
 
             // Make sure priority
             final VisualAtom atom = visual.atomVisual();
-            if (!atom.compact) continue;
-            if (atom == top) continue;
-            if (isOrdered(expandComparator, top, atom)) continue;
+            if (!atom.compact) {
+                continue;
+            }
+            if (atom == top) {
+                continue;
+            }
+            if (isOrdered(expandComparator, top, atom)) {
+                continue;
+            }
             atom.type();
             return false;
           }
@@ -541,14 +591,15 @@ public class Course {
         }
 
         // Finish final line
-        if (course != null)
-          for (; courseLastBrick < course.children.size(); ++courseLastBrick) {
-            Brick brick1 = course.children.get(courseLastBrick);
-            calculateNextBrickAdvance(courseCalc, brick1);
-            if (courseCalc.converse > context.edge) {
-              return false;
+        if (course != null) {
+            for (; courseLastBrick < course.children.size(); ++courseLastBrick) {
+              Brick brick1 = course.children.get(courseLastBrick);
+              calculateNextBrickAdvance(courseCalc, brick1);
+              if (courseCalc.converse > context.edge) {
+                return false;
+              }
             }
-          }
+        }
       }
 
       // Avoid bouncing

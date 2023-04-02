@@ -46,7 +46,9 @@ public class ChainComparator<T> {
     public int compare(final T o1, final T o2) {
       for (final BiFunction<T, T, Integer> step : steps) {
         int result = step.apply(o1, o2);
-        if (result != 0) return result;
+        if (result != 0) {
+            return result;
+        }
       }
       return 0;
     }

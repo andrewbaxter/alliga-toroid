@@ -10,9 +10,13 @@ public abstract class IterationTask implements Comparable<IterationTask> {
   protected abstract boolean runImplementation(IterationContext iterationContext);
 
   public boolean run(final IterationContext iterationContext) {
-    if (destroyed) return false;
+    if (destroyed) {
+        return false;
+    }
     final boolean out = runImplementation(iterationContext);
-    if (!out) destroy();
+    if (!out) {
+        destroy();
+    }
     return out;
   }
 
@@ -22,7 +26,9 @@ public abstract class IterationTask implements Comparable<IterationTask> {
   }
 
   public void destroy() {
-    if (destroyed) throw new AssertionError();
+    if (destroyed) {
+        throw new AssertionError();
+    }
     destroyed();
     destroyed = true;
   }

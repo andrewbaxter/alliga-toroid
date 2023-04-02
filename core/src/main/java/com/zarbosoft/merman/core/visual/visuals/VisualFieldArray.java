@@ -81,23 +81,28 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
                   fix.createVisual(
                       context, group.createParent(fixIndex), group.visualDepth + 1, depthScore()));
             }
-            if (atomVisual().compact) group.compact(context);
+            if (atomVisual().compact) {
+                group.compact(context);
+            }
             super.add(context, group, addAt);
           };
       for (final Atom atom : add) {
-        if (!front.separator.isEmpty() && addIndex > 0) addSeparator.accept(addIndex++);
+        if (!front.separator.isEmpty() && addIndex > 0) {
+            addSeparator.accept(addIndex++);
+        }
         final VisualGroup elementGroup =
             new VisualGroup(
                 context, new FrontArrayParent(this, addIndex, true), visualDepth + 1, depthScore());
         int groupIndex = 0;
-        for (final FrontSymbolSpec fix : front.prefix)
-          elementGroup.add(
-              context,
-              fix.createVisual(
-                  context,
-                  elementGroup.createParent(groupIndex++),
-                  elementGroup.visualDepth + 1,
-                  depthScore()));
+        for (final FrontSymbolSpec fix : front.prefix) {
+            elementGroup.add(
+                context,
+                fix.createVisual(
+                    context,
+                    elementGroup.createParent(groupIndex++),
+                    elementGroup.visualDepth + 1,
+                    depthScore()));
+        }
         final VisualAtom nodeVisual =
             (VisualAtom)
                 atom.ensureVisual(
@@ -111,26 +116,30 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
                       @Override
                       public void notifyLastBrickCreated(Context context, Brick brick) {
                         if (cursor != null
-                            && cursor.endIndex == ((FieldArray.Parent) atom.fieldParentRef).index)
-                          cursor.border.setLast(context, brick);
+                            && cursor.endIndex == ((FieldArray.Parent) atom.fieldParentRef).index) {
+                            cursor.border.setLast(context, brick);
+                        }
                         if (hoverable != null
                             && hoverable instanceof HoverableFieldArray
                             && ((HoverableFieldArray) hoverable).index
-                                == ((FieldArray.Parent) atom.fieldParentRef).index)
-                          hoverable.border.setLast(context, brick);
+                                == ((FieldArray.Parent) atom.fieldParentRef).index) {
+                            hoverable.border.setLast(context, brick);
+                        }
                         super.notifyLastBrickCreated(context, brick);
                       }
 
                       @Override
                       public void notifyFirstBrickCreated(Context context, Brick brick) {
                         if (cursor != null
-                            && cursor.beginIndex == ((FieldArray.Parent) atom.fieldParentRef).index)
-                          cursor.border.setFirst(context, brick);
+                            && cursor.beginIndex == ((FieldArray.Parent) atom.fieldParentRef).index) {
+                            cursor.border.setFirst(context, brick);
+                        }
                         if (hoverable != null
                             && hoverable instanceof HoverableFieldArray
                             && ((HoverableFieldArray) hoverable).index
-                                == ((FieldArray.Parent) atom.fieldParentRef).index)
-                          hoverable.border.setFirst(context, brick);
+                                == ((FieldArray.Parent) atom.fieldParentRef).index) {
+                            hoverable.border.setFirst(context, brick);
+                        }
                         super.notifyFirstBrickCreated(context, brick);
                       }
                     },
@@ -208,24 +217,30 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
                 throw new Assertion();
               }
             });
-        for (final FrontSymbolSpec fix : front.suffix)
-          elementGroup.add(
-              context,
-              fix.createVisual(
-                  context,
-                  elementGroup.createParent(groupIndex++),
-                  elementGroup.visualDepth + 1,
-                  depthScore()));
-        if (atomVisual().compact) elementGroup.compact(context);
+        for (final FrontSymbolSpec fix : front.suffix) {
+            elementGroup.add(
+                context,
+                fix.createVisual(
+                    context,
+                    elementGroup.createParent(groupIndex++),
+                    elementGroup.visualDepth + 1,
+                    depthScore()));
+        }
+        if (atomVisual().compact) {
+            elementGroup.compact(context);
+        }
         super.add(context, elementGroup, addIndex++);
       }
-      if (!front.separator.isEmpty() && visualIndex == 0 && value.data.size() > add.size())
-        addSeparator.accept(addIndex++);
+      if (!front.separator.isEmpty() && visualIndex == 0 && value.data.size() > add.size()) {
+          addSeparator.accept(addIndex++);
+      }
     }
   }
 
   private Brick createEmpty(final Context context) {
-    if (empty != null) return null;
+    if (empty != null) {
+        return null;
+    }
     empty =
         front.empty.createBrick(
             context,
@@ -264,18 +279,25 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
   }
 
   private boolean ellipsize(final Context context) {
-    if (!context.window) return false;
+    if (!context.window) {
+        return false;
+    }
     return parent.atomVisual().depthScore >= context.ellipsizeThreshold;
   }
 
   public int visualIndex(final int valueIndex) {
-    if (front.separator.isEmpty()) return valueIndex;
-    else return valueIndex * 2;
+    if (front.separator.isEmpty()) {
+        return valueIndex;
+    } else {
+        return valueIndex * 2;
+    }
   }
 
   public void select(
       final Context context, final boolean leadFirst, final int start, final int end) {
-    if (hoverable != null) hoverable.notifySelected(context, start, end);
+    if (hoverable != null) {
+        hoverable.notifySelected(context, start, end);
+    }
     if (cursor == null) {
       cursor = context.cursorFactory.createFieldArrayCursor(context, this, leadFirst, start, end);
       context.setCursor(cursor);
@@ -286,15 +308,23 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
 
   @Override
   public Brick getFirstBrick(final Context context) {
-    if (empty != null) return empty;
-    if (ellipsize(context)) return ellipsis;
+    if (empty != null) {
+        return empty;
+    }
+    if (ellipsize(context)) {
+        return ellipsis;
+    }
     return super.getFirstBrick(context);
   }
 
   @Override
   public Brick getLastBrick(final Context context) {
-    if (empty != null) return empty;
-    if (ellipsize(context)) return ellipsis;
+    if (empty != null) {
+        return empty;
+    }
+    if (ellipsize(context)) {
+        return ellipsis;
+    }
     return super.getLastBrick(context);
   }
 
@@ -307,22 +337,34 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
   @Override
   public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     if (value.data.isEmpty()) {
-      if (empty != null) return CreateBrickResult.brick(empty);
-      else return CreateBrickResult.brick(createEmpty(context));
+      if (empty != null) {
+          return CreateBrickResult.brick(empty);
+      } else {
+          return CreateBrickResult.brick(createEmpty(context));
+      }
     } else if (ellipsize(context)) {
-      if (ellipsis != null) return CreateBrickResult.brick(ellipsis);
-      else return CreateBrickResult.brick(createEllipsis(context));
-    } else return super.createOrGetCornerstoneCandidate(context);
+      if (ellipsis != null) {
+          return CreateBrickResult.brick(ellipsis);
+      } else {
+          return CreateBrickResult.brick(createEllipsis(context));
+      }
+    } else {
+        return super.createOrGetCornerstoneCandidate(context);
+    }
   }
 
   @Override
   public ExtendBrickResult createFirstBrick(final Context context) {
     if (value.data.isEmpty()) {
-      if (empty != null) return ExtendBrickResult.exists();
+      if (empty != null) {
+          return ExtendBrickResult.exists();
+      }
       return ExtendBrickResult.brick(createEmpty(context));
     }
     if (ellipsize(context)) {
-      if (ellipsis != null) return ExtendBrickResult.exists();
+      if (ellipsis != null) {
+          return ExtendBrickResult.exists();
+      }
       return ExtendBrickResult.brick(createEllipsis(context));
     }
     return super.createFirstBrick(context);
@@ -331,11 +373,15 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
   @Override
   public ExtendBrickResult createLastBrick(final Context context) {
     if (value.data.isEmpty()) {
-      if (empty != null) return ExtendBrickResult.exists();
+      if (empty != null) {
+          return ExtendBrickResult.exists();
+      }
       return ExtendBrickResult.brick(createEmpty(context));
     }
     if (ellipsize(context)) {
-      if (ellipsis != null) return ExtendBrickResult.exists();
+      if (ellipsis != null) {
+          return ExtendBrickResult.exists();
+      }
       return ExtendBrickResult.brick(createEllipsis(context));
     }
     return super.createLastBrick(context);
@@ -350,15 +396,21 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
     this.parent = parent;
     if (value.data.isEmpty()) {
       super.root(context, parent, visualDepth, depthScore);
-      if (empty == null) context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
+      if (empty == null) {
+          context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
+      }
     } else if (ellipsize(context)) {
       if (!children.isEmpty()) {
         remove(context, 0, children.size());
       }
       super.root(context, parent, visualDepth, depthScore);
-      if (ellipsis == null) context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
+      if (ellipsis == null) {
+          context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
+      }
     } else {
-      if (ellipsis != null) ellipsis.destroy(context);
+      if (ellipsis != null) {
+          ellipsis.destroy(context);
+      }
       super.root(context, parent, visualDepth, depthScore);
       if (children.isEmpty()) {
         coreChange(context, 0, 0, value.data);
@@ -368,7 +420,9 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
   }
 
   private Brick createEllipsis(final Context context) {
-    if (ellipsis != null) return null;
+    if (ellipsis != null) {
+        return null;
+    }
     ellipsis =
         front.ellipsis.createBrick(
             context,
@@ -412,10 +466,18 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
       // Only root array, which should never be uprooted with itself as the stop point
       throw new AssertionError();
     }
-    if (cursor != null) context.clearCursor();
-    if (hoverable != null) context.clearHover();
-    if (ellipsis != null) ellipsis.destroy(context);
-    if (empty != null) empty.destroy(context);
+    if (cursor != null) {
+        context.clearCursor();
+    }
+    if (hoverable != null) {
+        context.clearHover();
+    }
+    if (ellipsis != null) {
+        ellipsis.destroy(context);
+    }
+    if (empty != null) {
+        empty.destroy(context);
+    }
     value.removeListener(dataListener);
     value.visual = null;
     super.uproot(context, root);
@@ -430,7 +492,9 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
     } else if (ellipsis != null) {
       hoverable = new HoverableFieldArrayPlaceholder(context, ellipsis, this);
       return new ROPair<>(hoverable, true);
-    } else return super.hover(context, point);
+    } else {
+        return super.hover(context, point);
+    }
   }
 
   private static class FrontArrayParent extends Parent {
@@ -446,26 +510,34 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
     @Override
     public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
       if (!selectable) {
-        if (visual.parent != null) return visual.parent.hover(context, point);
+        if (visual.parent != null) {
+            return visual.parent.hover(context, point);
+        }
         return null;
       }
       boolean changed = false;
       int newIndex = valueIndex();
       if (visual.cursor != null
           && visual.cursor.beginIndex == visual.cursor.endIndex
-          && visual.cursor.beginIndex == newIndex) return null;
+          && visual.cursor.beginIndex == newIndex) {
+          return null;
+      }
       if (visual.hoverable == null) {
         visual.hoverable = new HoverableFieldArray(context, visual);
         changed = true;
       }
       HoverableFieldArray elementHoverable = (HoverableFieldArray) visual.hoverable;
-      if (elementHoverable.index != newIndex) changed = true;
+      if (elementHoverable.index != newIndex) {
+          changed = true;
+      }
       elementHoverable.setIndex(context, newIndex);
       return new ROPair<>(visual.hoverable, changed);
     }
 
     private int valueIndex() {
-      if (visual.front.separator.isEmpty()) return index;
+      if (visual.front.separator.isEmpty()) {
+          return index;
+      }
       return index / 2;
     }
   }
@@ -485,7 +557,9 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
       if (ellipsize(context)) {
         if (value.data.isEmpty()) {
           // Was blank, now ellipsized
-          if (empty != null) empty.destroy(context);
+          if (empty != null) {
+              empty.destroy(context);
+          }
           context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
           return;
         } else if (add.isEmpty() && remove == value.data.size()) {
@@ -532,7 +606,9 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
 
       // Lay bricks if children added/totally cleared
       if (!add.isEmpty()) {
-        if (empty != null) empty.destroy(context);
+        if (empty != null) {
+            empty.destroy(context);
+        }
         final int layIndex = visualIndex(index);
         context.triggerIdleLayBricks(
             parent,
@@ -542,7 +618,9 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
             i -> children.get(i).getFirstBrick(context),
             i -> children.get(i).getLastBrick(context));
       } else if (value.data.isEmpty()) {
-        if (ellipsis != null) ellipsis.destroy(context);
+        if (ellipsis != null) {
+            ellipsis.destroy(context);
+        }
         context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
       }
 
@@ -555,22 +633,26 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
         context.clearHover();
       }
       if (oldSelectionBeginIndex != null) {
-        if (value.data.isEmpty()) value.atomParentRef.selectParent(context);
-        else {
-          if (oldSelectionBeginIndex >= index + remove)
-            cursor.setBegin(context, oldSelectionBeginIndex - remove + add.size());
-          else if (oldSelectionBeginIndex >= index)
-            cursor.setBegin(
-                context, Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1)));
-          if (oldSelectionEndIndex >= index + remove)
-            cursor.setEnd(context, oldSelectionEndIndex - remove + add.size());
-          else if (oldSelectionEndIndex >= index)
-            cursor.setEnd(
-                context, Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1)));
+        if (value.data.isEmpty()) {
+            value.atomParentRef.selectParent(context);
+        } else {
+          if (oldSelectionBeginIndex >= index + remove) {
+              cursor.setBegin(context, oldSelectionBeginIndex - remove + add.size());
+          } else if (oldSelectionBeginIndex >= index) {
+              cursor.setBegin(
+                  context, Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1)));
+          }
+          if (oldSelectionEndIndex >= index + remove) {
+              cursor.setEnd(context, oldSelectionEndIndex - remove + add.size());
+          } else if (oldSelectionEndIndex >= index) {
+              cursor.setEnd(
+                  context, Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1)));
+          }
         }
       } else if (fixDeepSelectionIndex != null) {
-        if (value.data.isEmpty()) value.atomParentRef.selectParent(context);
-        else if (fixDeepSelectionIndex >= index && fixDeepSelectionIndex < index + remove) {
+        if (value.data.isEmpty()) {
+            value.atomParentRef.selectParent(context);
+        } else if (fixDeepSelectionIndex >= index && fixDeepSelectionIndex < index + remove) {
           final int newIndex = Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1));
           select(context, true, newIndex, newIndex);
         }

@@ -48,37 +48,50 @@ public class DirectStylist implements Stylist {
   }
 
   public static TSMap<String, Object> meta(TextStyle style) {
-    return new TSMap<>(m -> m.put("style", style));
+    return TSMap.createWith(m -> m.put("style", style));
   }
 
   public static ROMap<String, Object> meta(SpaceStyle style) {
-    return new TSMap<>(m -> m.put("style", style));
+    return TSMap.createWith(m -> m.put("style", style));
   }
 
   @Override
   public void styleEmpty(Context context, BrickEmpty brick) {
     SpaceStyle style = (SpaceStyle) brick.meta().getOpt("style");
-    if (style == null) return;
+    if (style == null) {
+        return;
+    }
     brick.setConverseSpan(context, style.space);
   }
 
   @Override
   public void styleText(Context context, BrickText brick) {
     TextStyle style = (TextStyle) brick.meta().getOpt("style");
-    if (style == null) return;
+    if (style == null) {
+        return;
+    }
     boolean invalid = brick.getVisual().atomVisual().atom.metaHas("invalid");
-    if (invalid && style.invalidColor != null) brick.setColor(context, style.invalidColor);
-    else brick.setColor(context, style.color);
+    if (invalid && style.invalidColor != null) {
+        brick.setColor(context, style.invalidColor);
+    } else {
+        brick.setColor(context, style.color);
+    }
     brick.setFont(context, style.font, style.fontSize);
     brick.setPadding(context, style.padding);
-    if (style.ascent != null) brick.setOverrideAscent(context, style.ascent);
-    if (style.descent != null) brick.setOverrideDescent(context, style.descent);
+    if (style.ascent != null) {
+        brick.setOverrideAscent(context, style.ascent);
+    }
+    if (style.descent != null) {
+        brick.setOverrideDescent(context, style.descent);
+    }
   }
 
   @Override
   public void styleTextDisplay(Context context, Text text, ROMap<String, Object> meta) {
     TextStyle style = (TextStyle) meta.getOpt("style");
-    if (style == null) return;
+    if (style == null) {
+        return;
+    }
     text.setColor(context, style.color);
     text.setFont(context, Context.getFont(context, null, style.fontSize));
   }
@@ -89,7 +102,9 @@ public class DirectStylist implements Stylist {
     text.setFont(
         context,
         Context.getFont(context, choiceDescriptionStyle.font, choiceDescriptionStyle.fontSize));
-    if (textPad != null) textPad.setPadding(context, choiceDescriptionStyle.padding);
+    if (textPad != null) {
+        textPad.setPadding(context, choiceDescriptionStyle.padding);
+    }
   }
 
   @Override

@@ -44,17 +44,19 @@ public abstract class BaseEscapableRepeat<T, K> extends Node<EscapableResult<ROL
       ROMap<Object, Reference.RefParent> seen,
       final MismatchCause cause,
       Object color) {
-    if (min == 0)
-      parent.advance(grammar, step, leaf, new EscapableResult<>(false, true, ROList.empty), cause);
-    if (max == -1 || max > 0)
-      child.context(
-          grammar,
-          step,
-          new RepParent<T, K>(this, parent, ROList.empty, color, 0),
-          leaf,
-          seen,
-          cause,
-          color);
+    if (min == 0) {
+        parent.advance(grammar, step, leaf, new EscapableResult<>(false, true, ROList.empty), cause);
+    }
+    if (max == -1 || max > 0) {
+        child.context(
+            grammar,
+            step,
+            new RepParent<T, K>(this, parent, ROList.empty, color, 0),
+            leaf,
+            seen,
+            cause,
+            color);
+    }
   }
 
   private static class RepParent<T, K> implements Parent<EscapableResult<T>> {
@@ -88,23 +90,25 @@ public abstract class BaseEscapableRepeat<T, K> extends Node<EscapableResult<ROL
       TSList<K> nextCollected = collected.mut();
       self.combine(nextCollected, value.value);
       int nextCount = this.count + 1;
-      if (!value.completed || nextCount >= self.min)
-        parent.advance(
-            grammar,
-            step,
-            leaf,
-            new EscapableResult<>(
-                value.completed || this.count > 0, value.completed, nextCollected),
-            mismatchCause);
-      if (self.max == -1 || nextCount < self.max)
-        self.child.context(
-            grammar,
-            step,
-            new RepParent(self, parent, nextCollected, color, nextCount),
-            leaf,
-            ROMap.empty,
-            mismatchCause,
-            color);
+      if (!value.completed || nextCount >= self.min) {
+          parent.advance(
+              grammar,
+              step,
+              leaf,
+              new EscapableResult<>(
+                  value.completed || this.count > 0, value.completed, nextCollected),
+              mismatchCause);
+      }
+      if (self.max == -1 || nextCount < self.max) {
+          self.child.context(
+              grammar,
+              step,
+              new RepParent(self, parent, nextCollected, color, nextCount),
+              leaf,
+              ROMap.empty,
+              mismatchCause,
+              color);
+      }
     }
 
     @Override

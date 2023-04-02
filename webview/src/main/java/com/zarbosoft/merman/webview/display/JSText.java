@@ -38,8 +38,12 @@ public class JSText extends JSCourseDisplayNode implements Text {
   }
 
   private void render() {
-    if (this.font == null) return;
-    if (this.color == null) throw new Assertion();
+    if (this.font == null) {
+        return;
+    }
+    if (this.color == null) {
+        throw new Assertion();
+    }
     HTMLCanvasElement element = (HTMLCanvasElement) this.element;
     CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) element.getContext("2d");
     ctx.clearRect(0, 0, element.width, element.height);

@@ -41,10 +41,14 @@ public class PrototypeROMap implements ProtoType {
             boolean bad = false;
             for (ROPair<Object, State> element : elements) {
               final Object value = element.second.build(context, tsList);
-              if (value == null) bad = true;
+              if (value == null) {
+                  bad = true;
+              }
               out.put(element.first, value);
             }
-            if (bad) return null;
+            if (bad) {
+                return null;
+            }
             return out;
           }
         });

@@ -76,10 +76,14 @@ public class LanguageDeserializer {
                 boolean bad = false;
                 for (State<Object, LanguageElement> element : elements) {
                   final LanguageElement val = element.build(context, tsList);
-                  if (val == null) bad = true;
+                  if (val == null) {
+                      bad = true;
+                  }
                   out.add(val);
                 }
-                if (bad) return null;
+                if (bad) {
+                    return null;
+                }
                 return out;
               }
             });

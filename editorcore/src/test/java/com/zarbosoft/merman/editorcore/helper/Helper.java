@@ -112,24 +112,27 @@ public class Helper {
   }
 
   public static void assertTreeEqual(final Atom expected, final Atom got) {
-    if (expected.type != got.type)
-      throw new AssertionError(
-          Format.format(
-              "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
-              expected.type, got.type, got.getSyntaxPath()));
+    if (expected.type != got.type) {
+        throw new AssertionError(
+            Format.format(
+                "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
+                expected.type, got.type, got.getSyntaxPath()));
+    }
     final ROSet<String> expectedKeys = expected.namedFields.keys();
     final ROSet<String> gotKeys = got.namedFields.keys();
     {
       final TSSet<String> missing = expectedKeys.difference(gotKeys);
-      if (!missing.isEmpty())
-        throw new AssertionError(
-            Format.format("Missing fields: %s\nAt: %s", missing, got.getSyntaxPath()));
+      if (!missing.isEmpty()) {
+          throw new AssertionError(
+              Format.format("Missing fields: %s\nAt: %s", missing, got.getSyntaxPath()));
+      }
     }
     {
       final TSSet<String> extra = gotKeys.difference(expectedKeys);
-      if (!extra.isEmpty())
-        throw new AssertionError(
-            Format.format("Unknown fields: %s\nAt: %s", extra, got.getSyntaxPath()));
+      if (!extra.isEmpty()) {
+          throw new AssertionError(
+              Format.format("Unknown fields: %s\nAt: %s", extra, got.getSyntaxPath()));
+      }
     }
     for (final String key : expectedKeys.intersect(gotKeys)) {
       assertTreeEqual(expected.namedFields.getOpt(key), got.namedFields.getOpt(key));
@@ -140,11 +143,12 @@ public class Helper {
     if (expected.getClass() == FieldArray.class) {
       final FieldArray expectedValue = (FieldArray) expected;
       final FieldArray gotValue = (FieldArray) got;
-      if (expectedValue.data.size() != gotValue.data.size())
-        throw new AssertionError(
-            Format.format(
-                "Array length mismatch.\nExpected: %s\nGot: %s\nAt: %s",
-                expectedValue.data.size(), gotValue.data.size(), got.getSyntaxPath()));
+      if (expectedValue.data.size() != gotValue.data.size()) {
+          throw new AssertionError(
+              Format.format(
+                  "Array length mismatch.\nExpected: %s\nGot: %s\nAt: %s",
+                  expectedValue.data.size(), gotValue.data.size(), got.getSyntaxPath()));
+      }
       for (int i = 0; i < expectedValue.data.size(); ++i) {
         assertTreeEqual(expectedValue.data.get(i), gotValue.data.get(i));
       }
@@ -155,16 +159,18 @@ public class Helper {
     } else if (expected.getClass() == FieldPrimitive.class) {
       final FieldPrimitive expectedValue = (FieldPrimitive) expected;
       final FieldPrimitive gotValue = (FieldPrimitive) got;
-      if (!expectedValue.get().equals(gotValue.get()))
-        throw new ComparisonFailure(
-            Format.format("Primitive length mismatch.\nAt: %s", got.getSyntaxPath()),
-            expectedValue.get(),
-            gotValue.get());
-    } else
-      throw new AssertionError(
-          Format.format(
-              "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
-              expected.getClass(), got.getClass(), got.getSyntaxPath()));
+      if (!expectedValue.get().equals(gotValue.get())) {
+          throw new ComparisonFailure(
+              Format.format("Primitive length mismatch.\nAt: %s", got.getSyntaxPath()),
+              expectedValue.get(),
+              gotValue.get());
+      }
+    } else {
+        throw new AssertionError(
+            Format.format(
+                "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
+                expected.getClass(), got.getClass(), got.getSyntaxPath()));
+    }
   }
 
   public static void assertTreeEqual(final Context context, final Atom expected, final Field got) {
@@ -225,7 +231,9 @@ public class Helper {
         System.out.format(
             "%sprimitive text [%s]\n",
             indentText + indentChunk, ((FieldPrimitive) field.getValue()).get());
-      } else throw new Assertion();
+      } else {
+          throw new Assertion();
+      }
     }
   }
 

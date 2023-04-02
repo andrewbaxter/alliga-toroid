@@ -9,7 +9,9 @@ public class TestEnvironment implements Environment {
   String string = null;
 
   protected static boolean isWhitespace(String s, int i) {
-    if (i < 0 || i >= s.length()) return true;
+    if (i < 0 || i >= s.length()) {
+        return true;
+    }
     return s.charAt(i) == ' ' || s.charAt(i) == '\n';
   }
 
@@ -17,7 +19,9 @@ public class TestEnvironment implements Environment {
     for (int i = offset; i > 0; --i) {
       boolean prevWs = isWhitespace(s, i - 1);
       boolean ws = isWhitespace(s, i);
-      if (prevWs && !ws || !prevWs && ws) return i;
+      if (prevWs && !ws || !prevWs && ws) {
+          return i;
+      }
     }
     return 0;
   }
@@ -26,7 +30,9 @@ public class TestEnvironment implements Environment {
     for (int i = offset; i < s.length(); ++i) {
       boolean prevWs = isWhitespace(s, i - 1);
       boolean ws = isWhitespace(s, i);
-      if (prevWs && !ws || !prevWs && ws) return i;
+      if (prevWs && !ws || !prevWs && ws) {
+          return i;
+      }
     }
     return s.length();
   }
@@ -80,12 +86,16 @@ public class TestEnvironment implements Environment {
     return new GlyphWalker() {
       @Override
       public int before(int offset) {
-        if (offset == 0) return I18N_DONE;
+        if (offset == 0) {
+            return I18N_DONE;
+        }
         return offset - 1;
       }
 
       public int after(int offset) {
-        if (offset == s.length()) return I18N_DONE;
+        if (offset == s.length()) {
+            return I18N_DONE;
+        }
         return offset + 1;
       }
     };

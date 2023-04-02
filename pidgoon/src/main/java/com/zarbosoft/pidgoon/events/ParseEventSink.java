@@ -39,7 +39,9 @@ public class ParseEventSink<O> implements EventSink<ParseEventSink<O>> {
 
   @Override
   public ParseEventSink<O> push(final Object event, final Object at) {
-    if (ended()) throw new Assertion();
+    if (ended()) {
+        throw new Assertion();
+    }
     final Step<O> nextStep;
     try {
       nextStep = Pidgoon.parallelStep(grammar, uncertaintyLimit, step, event);
@@ -58,7 +60,9 @@ public class ParseEventSink<O> implements EventSink<ParseEventSink<O>> {
   }
 
   public O result() {
-    if (step.completed.isEmpty()) throw new NoResults(step);
+    if (step.completed.isEmpty()) {
+        throw new NoResults(step);
+    }
     return step.completed.get(0);
   }
 

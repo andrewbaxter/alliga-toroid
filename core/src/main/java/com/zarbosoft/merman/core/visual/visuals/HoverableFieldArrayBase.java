@@ -19,7 +19,9 @@ abstract class HoverableFieldArrayBase extends Hoverable {
   @Override
   protected void clear(final Context context) {
     border.destroy(context);
-    if (visual.hoverable == this) visual.hoverable = null;
+    if (visual.hoverable == this) {
+        visual.hoverable = null;
+    }
   }
 
   @Override

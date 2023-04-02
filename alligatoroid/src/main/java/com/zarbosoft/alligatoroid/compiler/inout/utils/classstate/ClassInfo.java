@@ -41,8 +41,12 @@ public class ClassInfo {
   public void fill(Class klass) {
     TSMap<String, ProtoType> fields = new TSMap<>();
     for (Field field0 : klass.getFields()) {
-      if (Modifier.isStatic(field0.getModifiers())) continue;
-      if (field0.getAnnotation(BuiltinAutoExportableType.Param.class) == null) continue;
+      if (Modifier.isStatic(field0.getModifiers())) {
+          continue;
+      }
+      if (field0.getAnnotation(BuiltinAutoExportableType.Param.class) == null) {
+          continue;
+      }
       final TypeInfo field = TypeInfo.fromField(field0);
       ProtoType prototype;
       if (field.klass == int.class) {
@@ -153,6 +157,8 @@ public class ClassInfo {
       return new StateInt();
     } else if (type == String.class) {
       return new StateString();
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
   }
 }

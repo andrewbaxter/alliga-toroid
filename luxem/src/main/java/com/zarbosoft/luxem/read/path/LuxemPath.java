@@ -15,9 +15,13 @@ public final class LuxemPath {
     final StringBuilder builder = new StringBuilder();
     builder.append("/");
     for (Element p : data) {
-      if (builder.length() > 1) builder.append("/");
+      if (builder.length() > 1) {
+          builder.append("/");
+      }
       builder.append(p.index);
-      if (p.key) builder.append(" key");
+      if (p.key) {
+          builder.append(" key");
+      }
       for (int i = 0; i < p.typeCount; i += 1) {
         builder.append(" value");
       }

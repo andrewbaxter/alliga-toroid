@@ -29,9 +29,11 @@ public class EditorCursorFactory implements com.zarbosoft.merman.core.CursorFact
       int beginOffset,
       int endOffset) {
     Atom atom = visualPrimitive.value.atomParentRef.atom();
-    if (atom.type == context.syntax.gap || atom.type == context.syntax.suffixGap)
-      return createGapCursor(visualPrimitive, leadFirst, beginOffset, endOffset);
-    else return createPrimitiveCursor1(context, visualPrimitive, leadFirst, beginOffset, endOffset);
+    if (atom.type == context.syntax.gap || atom.type == context.syntax.suffixGap) {
+        return createGapCursor(visualPrimitive, leadFirst, beginOffset, endOffset);
+    } else {
+        return createPrimitiveCursor1(context, visualPrimitive, leadFirst, beginOffset, endOffset);
+    }
   }
 
   public BaseEditCursorGapFieldPrimitive createGapCursor(

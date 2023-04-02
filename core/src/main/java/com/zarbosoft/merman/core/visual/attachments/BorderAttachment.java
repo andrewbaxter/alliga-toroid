@@ -74,28 +74,44 @@ public class BorderAttachment implements ObboxStyle.Stylable {
   }
 
   public void setFirst(final Context context, final Brick first) {
-    if (this.first != null) this.first.removeAttachment(this.firstAttachment);
+    if (this.first != null) {
+        this.first.removeAttachment(this.firstAttachment);
+    }
     this.first = first;
-    if (first == null) return;
+    if (first == null) {
+        return;
+    }
     this.first.addAttachment(context, this.firstAttachment);
   }
 
   public void setLast(final Context context, final Brick last) {
-    if (this.last != null) this.last.removeAttachment(this.lastAttachment);
+    if (this.last != null) {
+        this.last.removeAttachment(this.lastAttachment);
+    }
     this.last = last;
-    if (last == null) return;
+    if (last == null) {
+        return;
+    }
     this.last.addAttachment(context, this.lastAttachment);
   }
 
   public void destroy(final Context context) {
-    if (first != null) this.first.removeAttachment(this.firstAttachment);
-    if (last != null) this.last.removeAttachment(this.lastAttachment);
+    if (first != null) {
+        this.first.removeAttachment(this.firstAttachment);
+    }
+    if (last != null) {
+        this.last.removeAttachment(this.lastAttachment);
+    }
     context.background.removeNode(border.drawing);
   }
 
   public void redraw(final Context context) {
-    if (first == null) return;
-    if (last == null) return;
+    if (first == null) {
+        return;
+    }
+    if (last == null) {
+        return;
+    }
     border.setSize(
         context,
         this.first.parent == this.last.parent,

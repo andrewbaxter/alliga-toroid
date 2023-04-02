@@ -34,7 +34,9 @@ public interface TreeDumpable {
       writer.primitive(((LuxemPath) object).toString());
     } else if (Throwable.class.isAssignableFrom(object.getClass())) {
       writer.primitive(object.toString());
-    } else throw new Assertion(object.getClass().getCanonicalName());
+    } else {
+        throw new Assertion(object.getClass().getCanonicalName());
+    }
   }
 
   public void treeDump(Writer writer);

@@ -15,7 +15,9 @@ public abstract class Operator<L, T> extends Node<T> {
 
   public Operator(final Node<L> root) {
     super();
-    if (root == null) throw new AssertionError();
+    if (root == null) {
+        throw new AssertionError();
+    }
     this.root = root;
   }
 

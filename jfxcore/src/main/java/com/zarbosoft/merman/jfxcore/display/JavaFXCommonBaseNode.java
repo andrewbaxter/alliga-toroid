@@ -41,18 +41,21 @@ public abstract class JavaFXCommonBaseNode implements DisplayNode {
     Display.UnconvertVector v =
         display.convert.unconvert(
             converseCorner(), transverseCorner(), bounds.getWidth(), bounds.getHeight());
-    if (animate)
-      transition(
-          new TransitionSmoothOut(
-              node,
-              v.x - (node.getLayoutX() + node.getTranslateX()),
-              v.y - (node.getLayoutY() + node.getTranslateY())));
+    if (animate) {
+        transition(
+            new TransitionSmoothOut(
+                node,
+                v.x - (node.getLayoutX() + node.getTranslateX()),
+                v.y - (node.getLayoutY() + node.getTranslateY())));
+    }
     node.setLayoutX(v.x);
     node.setLayoutY(v.y);
   }
 
   private void transition(Transition newTransition) {
-    if (transition != null) transition.stop();
+    if (transition != null) {
+        transition.stop();
+    }
     transition = newTransition;
     transition.setOnFinished(
         e -> {
@@ -63,16 +66,18 @@ public abstract class JavaFXCommonBaseNode implements DisplayNode {
 
   public void setJFXPositionInternal(final Display.UnconvertAxis v, final boolean animate) {
     if (v.x) {
-      if (animate)
-        transition(
-            new TransitionSmoothOut(
-                node, v.amount - (node.getLayoutX() + node.getTranslateX()), null));
+      if (animate) {
+          transition(
+              new TransitionSmoothOut(
+                  node, v.amount - (node.getLayoutX() + node.getTranslateX()), null));
+      }
       node.setLayoutX(v.amount);
     } else {
-      if (animate)
-        transition(
-            new TransitionSmoothOut(
-                node, null, v.amount - (node.getLayoutY() + node.getTranslateY())));
+      if (animate) {
+          transition(
+              new TransitionSmoothOut(
+                  node, null, v.amount - (node.getLayoutY() + node.getTranslateY())));
+      }
       node.setLayoutY(v.amount);
     }
   }

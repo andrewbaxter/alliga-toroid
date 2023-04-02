@@ -20,18 +20,28 @@ public class SyntaxPath {
 
   @Override
   public boolean equals(final Object obj) {
-    if (!(obj instanceof SyntaxPath)) return false;
-    if (((SyntaxPath) obj).segments.size() != segments.size()) return false;
+    if (!(obj instanceof SyntaxPath)) {
+        return false;
+    }
+    if (((SyntaxPath) obj).segments.size() != segments.size()) {
+        return false;
+    }
     for (int i = 0; i < segments.size(); ++i) {
-      if (!((SyntaxPath) obj).segments.get(i).equals(segments.get(i))) return false;
+      if (!((SyntaxPath) obj).segments.get(i).equals(segments.get(i))) {
+          return false;
+      }
     }
     return true;
   }
 
   public boolean contains(final SyntaxPath other) {
-    if (other.segments.size() > segments.size()) return false;
+    if (other.segments.size() > segments.size()) {
+        return false;
+    }
     for (int i = 0; i < other.segments.size(); ++i) {
-      if (!other.segments.get(i).equals(segments.get(i))) return false;
+      if (!other.segments.get(i).equals(segments.get(i))) {
+          return false;
+      }
     }
     return true;
   }

@@ -21,7 +21,9 @@ public class ChangeId extends Change {
     } catch (final ClassCastException e) {
       return false;
     }
-    if (other2.value != value) return false;
+    if (other2.value != value) {
+        return false;
+    }
     newId = other2.newId;
     return true;
   }

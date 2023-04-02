@@ -28,7 +28,9 @@ public class FieldAtom extends Field {
    */
   public void initialSet(Atom data) {
     this.data = data;
-    if (data != null) data.setFieldParentRef(new Parent(this));
+    if (data != null) {
+        data.setFieldParentRef(new Parent(this));
+    }
   }
 
   public void addListener(final Listener listener) {
@@ -50,7 +52,9 @@ public class FieldAtom extends Field {
 
   @Override
   public boolean selectInto(final Context context) {
-    if (context.window) context.windowAdjustMinimalTo(this);
+    if (context.window) {
+        context.windowAdjustMinimalTo(this);
+    }
     atomParentRef.atom().visual.selectById(context, back.id);
     return true;
   }

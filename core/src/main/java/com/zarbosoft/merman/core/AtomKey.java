@@ -14,8 +14,12 @@ public final class AtomKey extends Reference.Key<AtomType.AtomParseResult> {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+        return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+        return false;
+    }
     AtomKey atomKey = (AtomKey) o;
     return Objects.equals(type, atomKey.type);
   }

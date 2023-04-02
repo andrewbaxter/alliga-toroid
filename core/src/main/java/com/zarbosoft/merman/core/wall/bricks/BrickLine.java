@@ -23,7 +23,9 @@ public class BrickLine extends BrickText {
 
   @Override
   public boolean isSplit(boolean compact) {
-    if (line.index > 0) return true;
+    if (line.index > 0) {
+        return true;
+    }
     return super.isSplit(compact);
   }
 

@@ -18,18 +18,24 @@ public class ConcensusAlignment extends Alignment {
 
   @Override
   public void destroy(final Context context) {
-    if (iterationAlign != null) iterationAlign.destroy();
+    if (iterationAlign != null) {
+        iterationAlign.destroy();
+    }
   }
 
   @Override
   public void removeBrick(Context context, Brick brick) {
     super.removeBrick(context, brick);
-    if (brick.getPreAlignConverse() == converse) iterationAlign(context);
+    if (brick.getPreAlignConverse() == converse) {
+        iterationAlign(context);
+    }
   }
 
   @Override
   public void feedback(final Context context, final double gotConverse) {
-    if (gotConverse > converse) iterationAlign(context);
+    if (gotConverse > converse) {
+        iterationAlign(context);
+    }
   }
 
   @Override

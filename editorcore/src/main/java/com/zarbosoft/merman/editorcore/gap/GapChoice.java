@@ -112,7 +112,9 @@ public class GapChoice implements DetailsPageChooser.Choice {
           if (this.completeMatchFields != null) {
             preFields = this.completeMatchFields;
             ParsedField lastField = preFields.lastOpt();
-            if (lastField != null) nextIncompletePrimitiveField = lastField.primitive;
+            if (lastField != null) {
+                nextIncompletePrimitiveField = lastField.primitive;
+            }
           } else {
             final Step<ROPair<PreGapChoice, EscapableResult<ROList<ParsedField>>>> nextStep =
                 new Step<>();
@@ -136,8 +138,9 @@ public class GapChoice implements DetailsPageChooser.Choice {
                   // But to do that, need to find the preceding primitive if there was one
                   String finishedPrimitiveId = null;
                   for (ParsedField pair : new ReverseIterable<>(preFields)) {
-                    if (pair.primitive == null)
-                      continue; // penultimate was also a symbol (and therefore must have completed)
+                    if (pair.primitive == null) {
+                        continue; // penultimate was also a symbol (and therefore must have completed)
+                    }
                     // Preceding was primitive - since most primitives don't have a maximum length
                     // assume it was still in progress.
                     finishedPrimitiveId = pair.primitive.back.id;
@@ -168,7 +171,9 @@ public class GapChoice implements DetailsPageChooser.Choice {
 
           // Add parsed primitive fields
           for (ParsedField field : preFields) {
-            if (field.primitive == null) continue;
+            if (field.primitive == null) {
+                continue;
+            }
             namedFields.put(field.primitive.back.id, field.primitive);
           }
 
@@ -234,8 +239,11 @@ public class GapChoice implements DetailsPageChooser.Choice {
             placeWithSuffixSelect(editor, recorder1, created);
           }
         };
-    if (recorder != null) apply.accept(recorder);
-    else editor.history.record(editor, null, apply);
+    if (recorder != null) {
+        apply.accept(recorder);
+    } else {
+        editor.history.record(editor, null, apply);
+    }
   }
 
   private void deepSelectInto(Editor editor, History.Recorder recorder, Field following) {
@@ -247,7 +255,9 @@ public class GapChoice implements DetailsPageChooser.Choice {
     } else if (following instanceof FieldArray) {
       editor.arrayInsertNewDefault(recorder, (FieldArray) following, 0);
       following.selectInto(editor.context);
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
   }
 
   private void placeWithSuffixSelect(Editor editor, History.Recorder recorder, Atom created) {
@@ -319,7 +329,9 @@ public class GapChoice implements DetailsPageChooser.Choice {
         }
       } else if (part instanceof FrontPrimitiveSpec) {
         node = editor.gapPlaceholderSymbol.createDisplay(editor.context);
-      } else throw new DeadCode();
+      } else {
+          throw new DeadCode();
+      }
       for (FrontSymbolSpec space : spaces) {
         previewLayout.add(space.createDisplay(editor.context));
       }

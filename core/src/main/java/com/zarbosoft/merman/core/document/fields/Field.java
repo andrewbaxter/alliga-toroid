@@ -20,8 +20,11 @@ public abstract class Field {
   public abstract BackSpecData back();
 
   public final SyntaxPath getSyntaxPath() {
-    if (atomParentRef == null) return new SyntaxPath();
-    else return atomParentRef.getSyntaxPath();
+    if (atomParentRef == null) {
+        return new SyntaxPath();
+    } else {
+        return atomParentRef.getSyntaxPath();
+    }
   }
 
   public abstract boolean selectInto(Context context);

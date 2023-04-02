@@ -69,7 +69,9 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
 
   private int findContaining(final int offset) {
     for (Line line : lines) {
-      if (line.offset + line.text.length() < offset) continue;
+      if (line.offset + line.text.length() < offset) {
+          continue;
+      }
       return line.index;
     }
     return lines.size();
@@ -116,7 +118,9 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
   private void renumber(int index, int offset) {
     for (; index < lines.size(); ++index) {
       final Line line = lines.get(index);
-      if (line.hard) offset += 1;
+      if (line.hard) {
+          offset += 1;
+      }
       line.index = index;
       line.offset = offset;
       offset += line.text.length();
@@ -182,13 +186,16 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
     boolean allUnder = true;
     for (int i = lines.size() - 1; i >= 0; --i) {
       final Line line = lines.get(i);
-      if (line.brick == null) continue;
+      if (line.brick == null) {
+          continue;
+      }
       final double edge = line.brick.converseEdge();
       if (!anyOver && edge > context.edge) {
         anyOver = true;
       }
-      if (edge <= context.edge && edge * context.retryExpandFactor >= context.edge)
-        allUnder = false;
+      if (edge <= context.edge && edge * context.retryExpandFactor >= context.edge) {
+          allUnder = false;
+      }
       if (line.hard && (anyOver || allUnder)) {
         resplitOne(context, i);
         anyOver = false;
@@ -200,27 +207,37 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
   @Override
   public void compact(final Context context) {
     Line line = lines.get(0);
-    if (line.brick != null) line.brick.layoutPropertiesChanged(context);
+    if (line.brick != null) {
+        line.brick.layoutPropertiesChanged(context);
+    }
   }
 
   @Override
   public void expand(final Context context) {
     Line line = lines.get(0);
-    if (line.brick != null) line.brick.layoutPropertiesChanged(context);
+    if (line.brick != null) {
+        line.brick.layoutPropertiesChanged(context);
+    }
   }
 
   @Override
   public void getLeafBricks(final Context context, TSList<Brick> bricks) {
     for (Line line : lines) {
-      if (line.brick == null) continue;
+      if (line.brick == null) {
+          continue;
+      }
       bricks.add(line.brick);
     }
   }
 
   @Override
   public void uproot(final Context context, final Visual root) {
-    if (cursor != null) context.clearCursor();
-    if (hoverable != null) context.clearHover();
+    if (cursor != null) {
+        context.clearCursor();
+    }
+    if (hoverable != null) {
+        context.clearHover();
+    }
     value.removeListener(dataListener);
     value.visual = null;
     clear(context);
@@ -253,7 +270,9 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
 
   @Override
   public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
-    if (parent == null) return null;
+    if (parent == null) {
+        return null;
+    }
     return parent.hover(context, point);
   }
 
@@ -289,7 +308,9 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
       final StringBuilder sum = new StringBuilder();
       for (int j = i; j < lines.size(); ++j, ++endIndex) {
         final Line line = lines.get(j);
-        if (j > i && line.hard) break;
+        if (j > i && line.hard) {
+            break;
+        }
         sum.append(line.text);
       }
       build.text = sum.toString();
@@ -301,7 +322,9 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
     // Wrap text into existing lines
     for (; j < endIndex; ++j) {
       final Line line = lines.get(j);
-      if (!build.hasText() && j > i) break;
+      if (!build.hasText() && j > i) {
+          break;
+      }
       final Font font;
       final double converse;
       if (line.brick == null) {
@@ -311,8 +334,11 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
                 : j == i ? spec.hardSplitAlignmentId : spec.softSplitAlignmentId;
         font = j == 0 ? firstFont : j == i ? hardFont : softFont;
         final Alignment alignment = atom.findAlignment(alignmentName, null);
-        if (alignment == null) converse = 0;
-        else converse = alignment.converse;
+        if (alignment == null) {
+            converse = 0;
+        } else {
+            converse = alignment.converse;
+        }
       } else {
         font = line.brick.getFont();
         converse = line.brick.getConverse();
@@ -338,12 +364,19 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
         final Line line = new Line(this, false);
         line.setIndex(context, j);
         Font font = softFont;
-        if (font == null) font = hardFont;
-        if (font == null) font = firstFont;
+        if (font == null) {
+            font = hardFont;
+        }
+        if (font == null) {
+            font = firstFont;
+        }
         final Alignment alignment = atom.findAlignment(spec.softSplitAlignmentId, null);
         final double converse;
-        if (alignment == null) converse = 0;
-        else converse = alignment.converse;
+        if (alignment == null) {
+            converse = 0;
+        } else {
+            converse = alignment.converse;
+        }
         build.build(line, font, converse);
         lines.insert(j, line);
         ++j;
@@ -357,7 +390,9 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
       final ROList<Line> oldLines = lines.sublist(j, endIndex).mut();
       lines.sublist(j, endIndex).clear();
       for (final Line line : oldLines) {
-        if (line.hard) hardLineCount -= 1;
+        if (line.hard) {
+            hardLineCount -= 1;
+        }
         line.destroy(context);
       }
     }
@@ -420,8 +455,9 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
           final Environment.LineWalker lineIter = context.env.lineWalker(text);
           final double edgeOffset = context.edge - converse;
           final int under = measurer.getIndexAtConverse(context, text, edgeOffset);
-          if (under == text.length()) split = under;
-          else {
+          if (under == text.length()) {
+              split = under;
+          } else {
             split = lineIter.beforeOrAt(under);
             if (split == 0) {
               split = under;
@@ -439,9 +475,14 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
       }
 
       final String newText = text.substring(0, split);
-      if (!newText.equals(line.text)) line.setText(context, newText);
-      if (line.offset == offset) result.changed = false;
-      else result.changed = true;
+      if (!newText.equals(line.text)) {
+          line.setText(context, newText);
+      }
+      if (line.offset == offset) {
+          result.changed = false;
+      } else {
+          result.changed = true;
+      }
       line.offset = offset;
       text = text.substring(split);
       offset += split;
@@ -506,10 +547,15 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
         Atom atom = visualFieldPrimitive.atomVisual().atom;
         boolean oldValid = atom.metaHas("invalid");
         if (newValid != oldValid) {
-          if (!newValid) atom.metaPut(context, "invalid");
-          else atom.metaRemove(context, "invalid");
+          if (!newValid) {
+              atom.metaPut(context, "invalid");
+          } else {
+              atom.metaRemove(context, "invalid");
+          }
           for (Line line : this.visualFieldPrimitive.lines) {
-            if (line.brick == null) continue;
+            if (line.brick == null) {
+                continue;
+            }
             context.stylist.styleText(context, line.brick);
           }
         }
@@ -518,7 +564,9 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
 
     public void added(final Context context, final int offset, final String text) {
       final TSList<String> segments = TSList.of(text.split("\n", -1));
-      if (segments.isEmpty()) return;
+      if (segments.isEmpty()) {
+          return;
+      }
       segments.reverse();
       final int originalIndex = visualFieldPrimitive.findContaining(offset);
       int index = originalIndex;
@@ -544,7 +592,9 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
         index += 1;
         movingOffset += line.text.length();
         segment = segments.removeLastOpt();
-        if (segment == null) break;
+        if (segment == null) {
+            break;
+        }
         line = new Line(visualFieldPrimitive, true);
         visualFieldPrimitive.hardLineCount += 1;
         line.setText(context, segment);
@@ -554,16 +604,20 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
         visualFieldPrimitive.lines.insert(index, line);
       }
       final int lastLineCreated = index + 1;
-      if (remainder != null) line.setText(context, line.text + remainder);
+      if (remainder != null) {
+          line.setText(context, line.text + remainder);
+      }
 
       // Renumber/adjust offset of following lines
       visualFieldPrimitive.renumber(index, movingOffset);
 
       if (visualFieldPrimitive.cursor != null) {
         final int newBegin;
-        if (visualFieldPrimitive.cursor.range.beginOffset < offset)
-          newBegin = visualFieldPrimitive.cursor.range.beginOffset;
-        else newBegin = visualFieldPrimitive.cursor.range.beginOffset + text.length();
+        if (visualFieldPrimitive.cursor.range.beginOffset < offset) {
+            newBegin = visualFieldPrimitive.cursor.range.beginOffset;
+        } else {
+            newBegin = visualFieldPrimitive.cursor.range.beginOffset + text.length();
+        }
         visualFieldPrimitive.cursor.range.setOffsets(context, newBegin);
       }
 
@@ -595,14 +649,18 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
         final int exciseEnd = Math.min(remaining, line.text.length());
         base.setText(context, base.text + line.text.substring(exciseEnd));
         remaining -= exciseEnd;
-        if (line.hard) visualFieldPrimitive.hardLineCount -= 1;
+        if (line.hard) {
+            visualFieldPrimitive.hardLineCount -= 1;
+        }
         removeLines += 1;
       }
       final TSList<Line> sublist =
           visualFieldPrimitive.lines.sublist(base.index + 1, base.index + 1 + removeLines);
       final ROList<Line> oldSublist = sublist.mut();
       sublist.clear();
-      for (final Line line : oldSublist) line.destroy(context);
+      for (final Line line : oldSublist) {
+          line.destroy(context);
+      }
       for (int i = base.index + 1; i < visualFieldPrimitive.lines.size(); ++i) {
         Line line = visualFieldPrimitive.lines.get(i);
         line.index = base.index + 1 + i;
@@ -620,10 +678,16 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
       if (visualFieldPrimitive.cursor != null) {
         int newBegin = visualFieldPrimitive.cursor.range.beginOffset;
         int newEnd = visualFieldPrimitive.cursor.range.endOffset;
-        if (newBegin >= offset + count) newBegin = newBegin - count;
-        else if (newBegin >= offset) newBegin = offset;
-        if (newEnd >= offset + count) newEnd = newEnd - count;
-        else if (newEnd >= offset) newEnd = offset;
+        if (newBegin >= offset + count) {
+            newBegin = newBegin - count;
+        } else if (newBegin >= offset) {
+            newBegin = offset;
+        }
+        if (newEnd >= offset + count) {
+            newEnd = newEnd - count;
+        } else if (newEnd >= offset) {
+            newEnd = offset;
+        }
         visualFieldPrimitive.cursor.range.setOffsets(context, newBegin, newEnd);
       }
     }
@@ -690,8 +754,11 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
           newFirstBrick = beginLine.brick;
         } else {
           beginLine = visualFieldPrimitive.lines.get(beginIndex);
-          if (beginLine.brick != null) newFirstBrick = beginLine.brick;
-          else newFirstBrick = null;
+          if (beginLine.brick != null) {
+              newFirstBrick = beginLine.brick;
+          } else {
+              newFirstBrick = null;
+          }
         }
         int newFirstIndex = beginOffset - beginLine.offset;
         final int endIndex = visualFieldPrimitive.findContaining(endOffset);
@@ -699,8 +766,11 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
           newLastBrick = endLine.brick;
         } else {
           endLine = visualFieldPrimitive.lines.get(endIndex);
-          if (endLine.brick != null) newLastBrick = endLine.brick;
-          else newLastBrick = null;
+          if (endLine.brick != null) {
+              newLastBrick = endLine.brick;
+          } else {
+              newLastBrick = null;
+          }
         }
         int newLastIndex = endOffset - endLine.offset;
         if (border == null) {
@@ -708,38 +778,50 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
           border.setStyle(context, style);
         }
         if (leadFirst) {
-          if (newFirstBrick != null) setCornerstone(context, beginIndex);
+          if (newFirstBrick != null) {
+              setCornerstone(context, beginIndex);
+          }
         } else {
-          if (newLastBrick != null) setCornerstone(context, endIndex);
+          if (newLastBrick != null) {
+              setCornerstone(context, endIndex);
+          }
         }
         border.setBoth(context, newFirstBrick, newFirstIndex, newLastBrick, newLastIndex);
-        if (newFirstBrick != null)
-          for (BoundsListener l : listeners) {
-            l.firstChanged(context, beginLine.brick);
-          }
-        if (newFirstBrick != null)
-          for (BoundsListener l : listeners) {
-            l.lastChanged(context, beginLine.brick);
-          }
+        if (newFirstBrick != null) {
+            for (BoundsListener l : listeners) {
+              l.firstChanged(context, beginLine.brick);
+            }
+        }
+        if (newFirstBrick != null) {
+            for (BoundsListener l : listeners) {
+              l.lastChanged(context, beginLine.brick);
+            }
+        }
       }
     }
 
     private void setCornerstone(final Context context, final int index) {
-      if (!forSelection) return;
+      if (!forSelection) {
+          return;
+      }
       context.wall.setCornerstone(
           context,
           visualFieldPrimitive.lines.get(index).createOrGetBrick(context),
           () -> {
             for (int at = index - 1; at >= 0; --at) {
               final Brick found = visualFieldPrimitive.lines.get(at).brick;
-              if (found != null) return found;
+              if (found != null) {
+                  return found;
+              }
             }
             return visualFieldPrimitive.parent.findPreviousBrick(context);
           },
           () -> {
             for (int at = index + 1; at < visualFieldPrimitive.lines.size(); ++at) {
               final Brick found = visualFieldPrimitive.lines.get(at).brick;
-              if (found != null) return found;
+              if (found != null) {
+                  return found;
+              }
             }
             return visualFieldPrimitive.parent.findNextBrick(context);
           });
@@ -770,8 +852,12 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
     }
 
     public void destroy(final Context context) {
-      if (border != null) border.destroy(context);
-      if (cursor != null) cursor.destroy(context);
+      if (border != null) {
+          border.destroy(context);
+      }
+      if (cursor != null) {
+          cursor.destroy(context);
+      }
     }
 
     public void nudge(final Context context) {
@@ -780,9 +866,12 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
 
     public void addListener(final Context context, final BoundsListener listener) {
       listeners.add(listener);
-      if (beginLine != null && beginLine.brick != null)
-        listener.firstChanged(context, beginLine.brick);
-      if (endLine != null && endLine.brick != null) listener.lastChanged(context, endLine.brick);
+      if (beginLine != null && beginLine.brick != null) {
+          listener.firstChanged(context, beginLine.brick);
+      }
+      if (endLine != null && endLine.brick != null) {
+          listener.lastChanged(context, endLine.brick);
+      }
     }
 
     public void removeListener(final BoundsListener listener) {
@@ -791,8 +880,12 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
 
     public void setStyle(final Context context, final ObboxStyle style) {
       this.style = style;
-      if (border != null) border.setStyle(context, style);
-      if (cursor != null) cursor.setStyle(context, style);
+      if (border != null) {
+          border.setStyle(context, style);
+      }
+      if (cursor != null) {
+          cursor.setStyle(context, style);
+      }
     }
 
     public int leadIndex() {
@@ -857,18 +950,24 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
 
     public void setText(final Context context, final String text) {
       this.text = text;
-      if (brick != null) brick.setText(context, text);
+      if (brick != null) {
+          brick.setText(context, text);
+      }
     }
 
     public void setIndex(final Context context, final int index) {
-      if (this.index == 0 && brick != null) brick.layoutPropertiesChanged(context);
+      if (this.index == 0 && brick != null) {
+          brick.layoutPropertiesChanged(context);
+      }
       this.index = index;
     }
 
     public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
       if (visual.cursor == null) {
         final ROPair<Hoverable, Boolean> out = visual.hover(context, point);
-        if (out != null) return out;
+        if (out != null) {
+            return out;
+        }
       }
       boolean changed = false;
       if (visual.hoverable == null) {
@@ -876,7 +975,9 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
         changed = true;
       }
       int newIndex = offset + brick.getUnder(context, point);
-      if (visual.hoverable.range.leadIndex() != newIndex) changed = true;
+      if (visual.hoverable.range.leadIndex() != newIndex) {
+          changed = true;
+      }
       visual.hoverable.setPosition(context, newIndex);
       return new ROPair<>(visual.hoverable, changed);
     }
@@ -892,16 +993,22 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
     }
 
     public ExtendBrickResult createPreviousBrick(final Context context) {
-      if (index == 0) return visual.parent.createPreviousBrick(context);
+      if (index == 0) {
+          return visual.parent.createPreviousBrick(context);
+      }
       return visual.lines.get(index - 1).createBrick(context);
     }
 
     public ExtendBrickResult createBrick(final Context context) {
-      if (brick != null) return ExtendBrickResult.exists();
+      if (brick != null) {
+          return ExtendBrickResult.exists();
+      }
       createBrickInternal(context);
       if (visual.cursor != null
           && (visual.cursor.range.beginLine == Line.this
-              || visual.cursor.range.endLine == Line.this)) visual.cursor.range.nudge(context);
+              || visual.cursor.range.endLine == Line.this)) {
+          visual.cursor.range.nudge(context);
+      }
       return ExtendBrickResult.brick(brick);
     }
 
@@ -917,8 +1024,12 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
                   : hard ? visual.spec.hardSplitAlignmentId : visual.spec.softSplitAlignmentId);
       brick.setText(context, text);
       context.stylist.styleText(context, brick);
-      if (index == 0) visual.notifyFirstBrickCreated(context, brick);
-      if (index + 1 == visual.lines.size()) visual.notifyLastBrickCreated(context, brick);
+      if (index == 0) {
+          visual.notifyFirstBrickCreated(context, brick);
+      }
+      if (index + 1 == visual.lines.size()) {
+          visual.notifyLastBrickCreated(context, brick);
+      }
       return brick;
     }
 
@@ -950,7 +1061,9 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
     }
 
     public Brick createOrGetBrick(final Context context) {
-      if (brick != null) return brick;
+      if (brick != null) {
+          return brick;
+      }
       return createBrickInternal(context);
     }
   }

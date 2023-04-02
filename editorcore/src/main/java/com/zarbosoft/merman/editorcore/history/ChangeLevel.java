@@ -17,18 +17,24 @@ public class ChangeLevel {
     if (subchanges.isEmpty()) {
       subchanges.add(other);
     } else if (subchanges.last().merge(other)) {
-    } else subchanges.add(other);
+    } else {
+        subchanges.add(other);
+    }
     return true;
   }
 
   public ChangeLevel apply(final Editor editor) {
     final ChangeLevel out = new ChangeLevel(unique);
-    if (editor.context.cursor != null) out.select = editor.context.cursor.saveState();
+    if (editor.context.cursor != null) {
+        out.select = editor.context.cursor.saveState();
+    }
     for (int i = 0; i < subchanges.size(); ++i) {
       Change change = subchanges.getRev(i);
       out.subchanges.add(change.apply(editor));
     }
-    if (select != null) select.select(editor.context);
+    if (select != null) {
+        select.select(editor.context);
+    }
     return out;
   }
 

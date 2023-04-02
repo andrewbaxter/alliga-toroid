@@ -18,13 +18,17 @@ public class TypeInfo {
 
   public static TypeInfo fromParam(Parameter parameter) {
     Type pt = parameter.getParameterizedType();
-    if (pt == null) return new TypeInfo(parameter.getType(), null);
+    if (pt == null) {
+        return new TypeInfo(parameter.getType(), null);
+    }
     return fromType(pt, parameter.getType());
   }
 
   public static TypeInfo fromField(Field field) {
     Type pt = field.getGenericType();
-    if (pt == null) return new TypeInfo(field.getType(), null);
+    if (pt == null) {
+        return new TypeInfo(field.getType(), null);
+    }
     return fromType(pt, field.getType());
   }
 
@@ -40,7 +44,9 @@ public class TypeInfo {
       return new TypeInfo((Class) type, null);
     } else if (fallback != null) {
       return new TypeInfo(fallback, null);
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
   }
 
   public static TypeInfo fromClass(Class klass) {

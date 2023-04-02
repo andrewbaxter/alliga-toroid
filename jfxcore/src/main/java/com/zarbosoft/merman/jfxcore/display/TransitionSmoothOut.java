@@ -22,7 +22,11 @@ public class TransitionSmoothOut extends Transition {
   @Override
   protected void interpolate(final double frac) {
     final double frac2 = Math.pow(1 - frac, 3);
-    if (diffX != null) node.setTranslateX(-frac2 * diffX);
-    if (diffY != null) node.setTranslateY(-frac2 * diffY);
+    if (diffX != null) {
+        node.setTranslateX(-frac2 * diffX);
+    }
+    if (diffY != null) {
+        node.setTranslateY(-frac2 * diffY);
+    }
   }
 }

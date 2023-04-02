@@ -33,20 +33,24 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
     ArrayDeque<Iterator<JavaBytecode>> stack = new ArrayDeque<>();
     {
       Iterator<JavaBytecode> iter = this.children.iterator();
-      if (iter.hasNext()) stack.addLast(iter);
+      if (iter.hasNext()) {
+        stack.addLast(iter);
+      }
     }
     while (!stack.isEmpty()) {
       JavaBytecode next;
       {
         Iterator<JavaBytecode> iter = stack.peekLast();
         next = iter.next();
-        if (!iter.hasNext()) stack.removeLast();
+        if (!iter.hasNext()) {
+          stack.removeLast();
+        }
       }
 
       next.dispatch(
           new Dispatcher<Object>() {
             @Override
-            public Object handleInstruction(JavaBytecodeInstructionInt n) {
+            public Object handleInstruction(JavaBytecodeInstruction n) {
               children.add(n);
               return null;
             }
@@ -60,7 +64,9 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
             @Override
             public Object handleSequence(JavaBytecodeSequence code) {
               Iterator<JavaBytecode> iter = code.children.iterator();
-              if (iter.hasNext()) stack.addLast(iter);
+              if (iter.hasNext()) {
+                stack.addLast(iter);
+              }
               return null;
             }
 
@@ -82,8 +88,8 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
       child.dispatch(
           new Dispatcher<Object>() {
             @Override
-            public Object handleInstruction(JavaBytecodeInstructionInt n) {
-            n.write(out);
+            public Object handleInstruction(JavaBytecodeInstruction n) {
+              n.write(out);
               return null;
             }
 
@@ -134,7 +140,9 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
                     break;
                   }
                 }
-                if (index == -1) throw new Assertion();
+                if (index == -1) {
+                  throw new Assertion();
+                }
               }
               out.visitVarInsn(storeLoad.code, index);
               return null;

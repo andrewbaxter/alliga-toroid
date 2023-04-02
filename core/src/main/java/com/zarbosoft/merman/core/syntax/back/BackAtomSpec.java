@@ -77,7 +77,9 @@ public class BackAtomSpec extends BackSpecData {
   @Override
   public void finish(MultiError errors, Syntax syntax, SyntaxPath typePath) {
     super.finish(errors, syntax, typePath);
-    if (type == null) return; // Gaps have null type, take anything
+    if (type == null) {
+        return; // Gaps have null type, take anything
+    }
     ROOrderedSetRef<AtomType> childTypes = syntax.splayedTypes.getOpt(type);
     if (childTypes == null) {
       errors.add(new AtomTypeDoesntExist(typePath, type));

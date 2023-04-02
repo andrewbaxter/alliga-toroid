@@ -54,8 +54,9 @@ public class BaseEditCursorFieldArray extends CursorFieldArray {
   private void editDeleteInner(Editor editor, History.Recorder recorder) {
     ROList<Atom> replacement = ROList.empty;
     if (visual.value.atomParentRef.atom().type instanceof RootAtomType
-        && visual.value.data.size() == endIndex - beginIndex + 1)
-      replacement = TSList.of(editor.createEmptyGap(editor.context.syntax.gap));
+        && visual.value.data.size() == endIndex - beginIndex + 1) {
+        replacement = TSList.of(editor.createEmptyGap(editor.context.syntax.gap));
+    }
     Editor.arrayChange(
         editor, recorder, visual.value, beginIndex, endIndex - beginIndex + 1, replacement);
   }
@@ -78,7 +79,9 @@ public class BaseEditCursorFieldArray extends CursorFieldArray {
   }
 
   public void editMoveAfter(Editor editor) {
-    if (endIndex == visual.value.data.size() - 1) return;
+    if (endIndex == visual.value.data.size() - 1) {
+        return;
+    }
     editor.history.record(
         editor,
         new ROPair(visual.value, "move"),
@@ -94,7 +97,9 @@ public class BaseEditCursorFieldArray extends CursorFieldArray {
   }
 
   public void editMoveBefore(Editor editor) {
-    if (beginIndex == 0) return;
+    if (beginIndex == 0) {
+        return;
+    }
     editor.history.record(
         editor,
         new ROPair(visual.value, "move"),
@@ -116,7 +121,9 @@ public class BaseEditCursorFieldArray extends CursorFieldArray {
         .uncopy(
             editor.context,
             atoms -> {
-              if (atoms.isEmpty()) return;
+              if (atoms.isEmpty()) {
+                  return;
+              }
               editor.history.record(
                   editor,
                   null,

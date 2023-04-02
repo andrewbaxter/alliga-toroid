@@ -150,10 +150,13 @@ public class JavaSerializer implements Serializer {
       public void jsonSpecialPrimitive(final String value) {
         uncheck(
             () -> {
-              if (value.equals("true")) generator.value(true);
-              else if (value.equals("false")) generator.value(false);
-              else if (value.equals("null")) generator.nullValue();
-              else if (!value.contains(".")) {
+              if (value.equals("true")) {
+                  generator.value(true);
+              } else if (value.equals("false")) {
+                  generator.value(false);
+              } else if (value.equals("null")) {
+                  generator.nullValue();
+              } else if (!value.contains(".")) {
                 int value1;
                 try {
                   value1 = Integer.parseInt(value);
@@ -251,8 +254,12 @@ public class JavaSerializer implements Serializer {
           }
           final TSList<WriteState> stack = new TSList<>();
           document.root.write(stack);
-          while (!stack.isEmpty()) stack.removeLast().run(env, stack, writer);
-          if (backType == BackType.JSON) jsonGenerator.flush();
+          while (!stack.isEmpty()) {
+              stack.removeLast().run(env, stack, writer);
+          }
+          if (backType == BackType.JSON) {
+              jsonGenerator.flush();
+          }
           stream.write('\n');
           stream.flush();
         });
@@ -301,7 +308,9 @@ public class JavaSerializer implements Serializer {
             default:
               throw new DeadCode();
           }
-          while (!stack.isEmpty()) stack.removeLast().run(env, stack, writer);
+          while (!stack.isEmpty()) {
+              stack.removeLast().run(env, stack, writer);
+          }
           switch (backType) {
             case LUXEM:
               {

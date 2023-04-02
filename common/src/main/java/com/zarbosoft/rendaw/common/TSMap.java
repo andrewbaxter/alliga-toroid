@@ -13,7 +13,7 @@ public class TSMap<K, V> implements ROMap<K, V> {
   private static final Object missing = new Object();
   public Map<K, V> inner;
 
-  public TSMap(Consumer<TSMap<K, V>> build) {
+  private TSMap(Consumer<TSMap<K, V>> build) {
     this.inner = new HashMap<>();
     build.accept(this);
   }
@@ -26,6 +26,10 @@ public class TSMap<K, V> implements ROMap<K, V> {
     this.inner = inner;
   }
 
+  public static <K, V> TSMap<K, V> createWith(Consumer<TSMap<K, V>> build) {
+    return new TSMap<K, V>(build);
+  }
+
   @Override
   public V getOpt(K k) {
     return inner.get(k);
@@ -34,7 +38,9 @@ public class TSMap<K, V> implements ROMap<K, V> {
   @Override
   public V get(K k) {
     Object val = ((Map) inner).getOrDefault(k, missing);
-    if (val == missing) throw new Assertion();
+    if (val == missing) {
+        throw new Assertion();
+    }
     return (V) val;
   }
 
@@ -46,12 +52,16 @@ public class TSMap<K, V> implements ROMap<K, V> {
   @Override
   public V getOr(K k, Supplier<V> v) {
     Object val = ((Map) inner).getOrDefault(k, missing);
-    if (val == missing) return v.get();
+    if (val == missing) {
+        return v.get();
+    }
     return (V) val;
   }
 
   public V putReplace(K k, V v) {
-    if (k == null) throw new Assertion();
+    if (k == null) {
+        throw new Assertion();
+    }
     return putReplaceNull(k, v);
   }
 
@@ -65,14 +75,18 @@ public class TSMap<K, V> implements ROMap<K, V> {
   }
 
   public TSMap<K, V> putNew(K k, V v) {
-    if (k == null) throw new Assertion();
+    if (k == null) {
+        throw new Assertion();
+    }
     putNull(k, v);
     return this;
   }
 
   public TSMap<K, V> putNull(K k, V v) {
     V old = inner.put(k, v);
-    if (old != null) throw new Assertion();
+    if (old != null) {
+        throw new Assertion();
+    }
     return this;
   }
 

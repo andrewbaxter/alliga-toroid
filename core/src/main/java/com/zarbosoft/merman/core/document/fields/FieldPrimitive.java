@@ -21,13 +21,17 @@ public class FieldPrimitive extends Field {
 
   @Override
   public boolean selectInto(final Context context) {
-    if (context.window) context.windowAdjustMinimalTo(this);
+    if (context.window) {
+        context.windowAdjustMinimalTo(this);
+    }
     visual.select(context, true, data.length(), data.length());
     return true;
   }
 
   public boolean selectInto(final Context context, boolean leadFirst, int start, int end) {
-    if (context.window) context.windowAdjustMinimalTo(this);
+    if (context.window) {
+        context.windowAdjustMinimalTo(this);
+    }
     visual.select(context, leadFirst, start, end);
     return true;
   }

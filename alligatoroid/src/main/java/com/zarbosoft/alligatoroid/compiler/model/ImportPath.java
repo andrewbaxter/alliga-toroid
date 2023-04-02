@@ -27,9 +27,13 @@ public class ImportPath {
   }
 
   public synchronized TSList<ImportId> find(TSSet<ImportPath> seen, ImportId spec) {
-    if (seen.contains(this)) return null;
+    if (seen.contains(this)) {
+        return null;
+    }
     seen.add(this);
-    if (this.spec.equals(spec)) return new TSList<>(this.spec);
+    if (this.spec.equals(spec)) {
+        return new TSList<>(this.spec);
+    }
     TSList<ImportId> found = findBefore(seen, spec);
     if (found != null) {
       found.add(this.spec);

@@ -23,7 +23,9 @@ public class WarnUnexpected implements TreeDumpable {
     writer.type(this.getClass().getName()).recordBegin();
     writer.primitive("message").primitive(this.toString());
     for (Field field : this.getClass().getFields()) {
-      if (Modifier.isStatic(field.getModifiers())) continue;
+      if (Modifier.isStatic(field.getModifiers())) {
+          continue;
+      }
       writer.primitive(field.getName());
       TreeDumpable.treeDump(writer, uncheck(() -> field.get(this)));
     }

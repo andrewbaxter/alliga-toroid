@@ -43,7 +43,9 @@ public class SourceDiskCache implements SourceResolver {
   private final String safetenFsSegment(String segment) {
     segment = fsSafeSegmentEscape.matcher(segment).replaceAll("___");
     final Matcher matcher = fsSafeSegment.matcher(segment);
-    if (matcher.matches()) return segment;
+    if (matcher.matches()) {
+        return segment;
+    }
     String hash = new Utils.SHA256().add(segment).buildHex().substring(0, 5);
     matcher.reset();
     StringBuilder out = new StringBuilder();
@@ -116,7 +118,9 @@ public class SourceDiskCache implements SourceResolver {
                     default:
                       throw new Assertion();
                   }
-                  if (url.query() != null) downloadDir.resolve(safetenFsSegment(url.query()));
+                  if (url.query() != null) {
+                      downloadDir.resolve(safetenFsSegment(url.query()));
+                  }
                   Path downloadPath =
                       downloadDir.resolve(Paths.get(urlPath.get(urlPath.size() - 1)).getFileName());
 

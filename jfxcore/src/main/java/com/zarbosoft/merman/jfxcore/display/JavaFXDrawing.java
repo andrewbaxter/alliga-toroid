@@ -117,9 +117,14 @@ public class JavaFXDrawing extends JavaFXFreeDisplayNode implements Drawing {
       @Override
       public void closePath() {
         gc.closePath();
-        if (stroke == null) throw new AssertionError();
-        if (stroke) gc.stroke();
-        else gc.fill();
+        if (stroke == null) {
+            throw new AssertionError();
+        }
+        if (stroke) {
+            gc.stroke();
+        } else {
+            gc.fill();
+        }
         stroke = null;
       }
 

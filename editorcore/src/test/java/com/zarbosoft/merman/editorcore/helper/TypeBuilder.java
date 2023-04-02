@@ -34,7 +34,9 @@ public class TypeBuilder {
   }
 
   public TypeBuilder back(final BackSpec back) {
-    if (back != null) throw new Assertion();
+    if (back != null) {
+        throw new Assertion();
+    }
     this.back = back;
     return this;
   }

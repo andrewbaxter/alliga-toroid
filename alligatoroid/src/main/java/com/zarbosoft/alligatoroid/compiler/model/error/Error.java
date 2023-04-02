@@ -46,13 +46,19 @@ public abstract class Error implements TreeDumpable {
     writer.type(getClass().getName()).recordBegin();
     writer.primitive("message").primitive(inner.toString());
     for (Field field : getClass().getFields()) {
-      if (Modifier.isStatic(field.getModifiers())) continue;
-      if ("inner".equals(field.getName())) continue;
+      if (Modifier.isStatic(field.getModifiers())) {
+          continue;
+      }
+      if ("inner".equals(field.getName())) {
+          continue;
+      }
       writer.primitive(field.getName());
       TreeDumpable.treeDump(writer, uncheck(() -> field.get(this)));
     }
     for (Field field : inner.getClass().getFields()) {
-      if (Modifier.isStatic(field.getModifiers())) continue;
+      if (Modifier.isStatic(field.getModifiers())) {
+          continue;
+      }
       writer.primitive(field.getName());
       TreeDumpable.treeDump(writer, uncheck(() -> field.get(inner)));
     }
@@ -70,7 +76,9 @@ public abstract class Error implements TreeDumpable {
       writer.type(this.getClass().getName()).recordBegin();
       writer.primitive("message").primitive(this.toString());
       for (Field field : this.getClass().getFields()) {
-        if (Modifier.isStatic(field.getModifiers())) continue;
+        if (Modifier.isStatic(field.getModifiers())) {
+            continue;
+        }
         writer.primitive(field.getName());
         TreeDumpable.treeDump(writer, uncheck(() -> field.get(this)));
       }

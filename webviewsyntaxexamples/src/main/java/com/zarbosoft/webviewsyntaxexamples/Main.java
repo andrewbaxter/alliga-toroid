@@ -543,7 +543,9 @@ public class Main {
             new ROPair<>("prodel", new ProdelSyntaxFrontFactory())
           }) {
         Element e = DomGlobal.document.getElementById("replace-" + p.first);
-        if (e == null) continue;
+        if (e == null) {
+            continue;
+        }
         e.replaceWith(
             webView.block(
                 buildSyntax(env, p.second), env, rawDoc, TSList.of("type", "operator", "kind")));

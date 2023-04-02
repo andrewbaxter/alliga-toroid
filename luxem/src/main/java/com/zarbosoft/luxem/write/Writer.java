@@ -67,7 +67,9 @@ public class Writer {
     int lastEscape = 0;
     for (int i = 0; i < bytes.length; ++i) {
       final Byte key = escapes.getOpt(bytes[i]);
-      if (key == null) continue;
+      if (key == null) {
+          continue;
+      }
       streamWrite(bytes, lastEscape, i);
       streamWrite('\\');
       streamWrite(key);
@@ -132,7 +134,9 @@ public class Writer {
   private void valueEnd() {
     if (states.peekLast() == State.KEY) {
       streamWrite((byte) ':');
-      if (pretty) streamWrite(' ');
+      if (pretty) {
+          streamWrite(' ');
+      }
       states.removeLast();
       states.addLast(State.PREFIXED);
     } else {
@@ -145,9 +149,14 @@ public class Writer {
   }
 
   private void indent() {
-    if (!pretty) return;
-    for (int i = 0; i < indentCount; ++i)
-      for (int j = 0; j < indentMultiple; ++j) streamWrite(indentByte);
+    if (!pretty) {
+        return;
+    }
+    for (int i = 0; i < indentCount; ++i) {
+        for (int j = 0; j < indentMultiple; ++j) {
+            streamWrite(indentByte);
+        }
+    }
   }
 
   public Writer recordBegin() {
@@ -205,7 +214,9 @@ public class Writer {
 
   public Writer typeEnd() {
     streamWrite(')');
-    if (pretty) streamWrite(' ');
+    if (pretty) {
+        streamWrite(' ');
+    }
     states.addLast(State.PREFIXED);
     return this;
   }

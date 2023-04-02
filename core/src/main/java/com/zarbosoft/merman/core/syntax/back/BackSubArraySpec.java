@@ -55,8 +55,12 @@ public class BackSubArraySpec extends BaseBackArraySpec {
     final FieldArray data = (FieldArray) at.namedFields.get(id);
     for (Atom e : data.data) {
       final ROPair<Atom, Integer> res = e.backLocate(offset, segments);
-      if (res == null) return null;
-      if (res.first != null) return res;
+      if (res == null) {
+          return null;
+      }
+      if (res.first != null) {
+          return res;
+      }
       offset = res.second;
     }
     return new ROPair<>(null, offset);

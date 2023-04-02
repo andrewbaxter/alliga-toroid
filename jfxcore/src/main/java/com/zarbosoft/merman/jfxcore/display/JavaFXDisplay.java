@@ -904,13 +904,17 @@ public class JavaFXDisplay extends Display {
   @Override
   public void add(final int index, final DisplayNode node) {
     Node node1 = (Node) node.inner_();
-    if (node1 != null) this.origin.getChildren().add(index, node1);
+    if (node1 != null) {
+        this.origin.getChildren().add(index, node1);
+    }
   }
 
   @Override
   public void remove(final DisplayNode node) {
     Node node1 = (Node) node.inner_();
-    if (node1 != null) this.origin.getChildren().remove(node1);
+    if (node1 != null) {
+        this.origin.getChildren().remove(node1);
+    }
   }
 
   @Override
@@ -925,7 +929,9 @@ public class JavaFXDisplay extends Display {
 
   @Override
   public double toPixels(Syntax.DisplayUnit displayUnit) {
-    if (displayUnit == Syntax.DisplayUnit.PX) return 1;
+    if (displayUnit == Syntax.DisplayUnit.PX) {
+        return 1;
+    }
     Screen screen = Screen.getPrimary();
     double dpi = screen.getDpi();
     switch (displayUnit) {
@@ -944,8 +950,11 @@ public class JavaFXDisplay extends Display {
       case MOUSE_3:
         break;
       default:
-        if (press) modifiers.add(key);
-        else modifiers.remove(key);
+        if (press) {
+            modifiers.add(key);
+        } else {
+            modifiers.remove(key);
+        }
     }
     return out;
   }

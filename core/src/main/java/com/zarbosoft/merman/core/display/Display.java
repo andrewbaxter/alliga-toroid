@@ -520,18 +520,23 @@ public abstract class Display {
   }
 
   public final void setMouseButtonEventListener(Function<ButtonEvent, Boolean> listener) {
-    if (mouseButtonEventListener != null)
-      throw new Assertion("mouse button event listener already set");
+    if (mouseButtonEventListener != null) {
+        throw new Assertion("mouse button event listener already set");
+    }
     this.mouseButtonEventListener = listener;
   }
 
   public final void setKeyEventListener(Function<ButtonEvent, Boolean> listener) {
-    if (keyEventListener != null) throw new Assertion("key event listener already set");
+    if (keyEventListener != null) {
+        throw new Assertion("key event listener already set");
+    }
     this.keyEventListener = listener;
   }
 
   public final void setTypingListener(Function<String, Boolean> listener) {
-    if (this.typingListener != null) throw new Assertion("typing listener already set");
+    if (this.typingListener != null) {
+        throw new Assertion("typing listener already set");
+    }
     this.typingListener = listener;
   }
 
@@ -563,10 +568,16 @@ public abstract class Display {
     double oldTransverseEdge = transverseEdge;
     converseEdge = converted.converse;
     transverseEdge = converted.transverse;
-    if (converseEdge != oldConverseEdge)
-      for (DoubleListener l : converseEdgeListeners) l.changed(oldConverseEdge, converseEdge);
-    if (transverseEdge != oldTransverseEdge)
-      for (DoubleListener l : transverseEdgeListeners) l.changed(oldTransverseEdge, transverseEdge);
+    if (converseEdge != oldConverseEdge) {
+        for (DoubleListener l : converseEdgeListeners) {
+            l.changed(oldConverseEdge, converseEdge);
+        }
+    }
+    if (transverseEdge != oldTransverseEdge) {
+        for (DoubleListener l : transverseEdgeListeners) {
+            l.changed(oldTransverseEdge, transverseEdge);
+        }
+    }
   }
 
   protected void scroll(double dx, double dy) {

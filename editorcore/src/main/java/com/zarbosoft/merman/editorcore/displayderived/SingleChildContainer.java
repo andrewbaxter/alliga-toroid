@@ -25,7 +25,9 @@ public abstract class SingleChildContainer implements Container {
   }
 
   public void set(Context context, Container child) {
-    if (this.child != null) throw new Assertion();
+    if (this.child != null) {
+        throw new Assertion();
+    }
     this.child = child;
     child.setParent(new Parent(this));
     child.setConverseSpan(context, converseSpan);

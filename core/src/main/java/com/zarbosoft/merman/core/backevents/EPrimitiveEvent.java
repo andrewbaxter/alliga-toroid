@@ -14,8 +14,11 @@ public class EPrimitiveEvent implements BackEvent {
 
   @Override
   public boolean matches(final MatchingEvent event) {
-    if (value == null) return event instanceof EPrimitiveEvent;
-    else return event instanceof EPrimitiveEvent && value.equals(((EPrimitiveEvent) event).value);
+    if (value == null) {
+        return event instanceof EPrimitiveEvent;
+    } else {
+        return event instanceof EPrimitiveEvent && value.equals(((EPrimitiveEvent) event).value);
+    }
   }
 
   @Override

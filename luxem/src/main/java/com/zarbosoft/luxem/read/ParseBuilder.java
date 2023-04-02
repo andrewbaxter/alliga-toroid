@@ -24,7 +24,9 @@ public class ParseBuilder<O> extends BaseParseBuilder<O, ParseBuilder<O>> {
   }
 
   public ParseBuilder<O> eventFactory(final Reader.EventFactory factory) {
-    if (this.factory != null) throw new IllegalArgumentException("Factory already set");
+    if (this.factory != null) {
+        throw new IllegalArgumentException("Factory already set");
+    }
     final ParseBuilder<O> out = split();
     out.factory = factory;
     return out;

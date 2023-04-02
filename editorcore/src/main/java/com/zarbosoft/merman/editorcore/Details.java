@@ -125,7 +125,9 @@ public class Details {
   }
 
   public boolean handleKey(Editor editor, ButtonEvent event) {
-    if (current == null) return false;
+    if (current == null) {
+        return false;
+    }
     return current.page.handleKey(editor, event);
   }
 

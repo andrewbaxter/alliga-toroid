@@ -22,8 +22,9 @@ public class TestWizard {
 
   public void flushIteration() {
     editor.context.flushIteration(1000);
-    if (!editor.context.iterationQueue.isEmpty())
-      throw new AssertionError("Too much idle activity");
+    if (!editor.context.iterationQueue.isEmpty()) {
+        throw new AssertionError("Too much idle activity");
+    }
   }
 
   public TestWizard displayWidth(final int size) {

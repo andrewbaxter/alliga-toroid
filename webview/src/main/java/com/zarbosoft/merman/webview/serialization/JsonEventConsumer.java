@@ -61,10 +61,13 @@ public class JsonEventConsumer implements JSEventConsumer {
 
   @Override
   public void jsonSpecialPrimitive(String value) {
-    if ("true".equals(value)) stack.last().value(true);
-    else if ("false".equals(value)) stack.last().value(false);
-    else if ("null".equals(value)) stack.last().value(null);
-    else if (!value.contains(".")) {
+    if ("true".equals(value)) {
+        stack.last().value(true);
+    } else if ("false".equals(value)) {
+        stack.last().value(false);
+    } else if ("null".equals(value)) {
+        stack.last().value(null);
+    } else if (!value.contains(".")) {
       int value1;
       try {
         value1 = JsNumber.parseInt(value, 10);

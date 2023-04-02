@@ -102,8 +102,11 @@ public class Atom {
             @Override
             public SyntaxPath getSyntaxPath() {
               SyntaxPath out;
-              if (Atom.this.fieldParentRef == null) out = new SyntaxPath();
-              else out = Atom.this.fieldParentRef.getSyntaxPath();
+              if (Atom.this.fieldParentRef == null) {
+                  out = new SyntaxPath();
+              } else {
+                  out = Atom.this.fieldParentRef.getSyntaxPath();
+              }
               return out.add(SYNTAX_PATH_UNNAMED).add(strI);
             }
           });
@@ -124,7 +127,9 @@ public class Atom {
                     visual.selectById(context, entry.getKey());
                     return true;
                   } else {
-                    if (fieldParentRef == null) return false;
+                    if (fieldParentRef == null) {
+                        return false;
+                    }
                     return Atom.this.fieldParentRef.selectField(context);
                   }
                 }
@@ -132,8 +137,11 @@ public class Atom {
                 @Override
                 public SyntaxPath getSyntaxPath() {
                   SyntaxPath out;
-                  if (Atom.this.fieldParentRef == null) out = new SyntaxPath();
-                  else out = Atom.this.fieldParentRef.getSyntaxPath();
+                  if (Atom.this.fieldParentRef == null) {
+                      out = new SyntaxPath();
+                  } else {
+                      out = Atom.this.fieldParentRef.getSyntaxPath();
+                  }
                   return out.add(SYNTAX_PATH_NAMED).add(entry.getKey());
                 }
               });
@@ -141,12 +149,17 @@ public class Atom {
   }
 
   public SyntaxPath getSyntaxPath() {
-    if (fieldParentRef == null) return new SyntaxPath();
-    else return fieldParentRef.path();
+    if (fieldParentRef == null) {
+        return new SyntaxPath();
+    } else {
+        return fieldParentRef.path();
+    }
   }
 
   public boolean selectInto(final Context context) {
-    if (context.window) context.windowAdjustMinimalTo(this);
+    if (context.window) {
+        context.windowAdjustMinimalTo(this);
+    }
     return visual.selectIntoAnyChild(context);
   }
 
@@ -181,7 +194,9 @@ public class Atom {
     for (Field field : unnamedFields) {
       if (field instanceof FieldId) {
         childData.put(field.back(), ((FieldId) field).id);
-      } else throw new Assertion();
+      } else {
+          throw new Assertion();
+      }
     }
     for (Map.Entry<String, Field> entry : namedFields) {
       if (entry.getValue() instanceof FieldAtom) {
@@ -190,7 +205,9 @@ public class Atom {
         childData.put(entry.getKey(), ((FieldArray) entry.getValue()).data);
       } else if (entry.getValue() instanceof FieldPrimitive) {
         childData.put(entry.getKey(), ((FieldPrimitive) entry.getValue()).data);
-      } else throw new Assertion();
+      } else {
+          throw new Assertion();
+      }
     }
     stack.add(new WriteStateBack(childData, Arrays.asList(type.back()).iterator()));
   }

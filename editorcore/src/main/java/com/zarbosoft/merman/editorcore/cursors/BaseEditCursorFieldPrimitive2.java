@@ -59,8 +59,11 @@ public class BaseEditCursorFieldPrimitive2 extends BaseEditCursorFieldPrimitive 
               ((BaseEditCursorGapFieldPrimitive) editor.context.cursor)
                   .editHandleTyping(editor, recorder1, text + after);
             };
-        if (recorder != null) apply.accept(recorder);
-        else editor.history.record(editor, null, apply);
+        if (recorder != null) {
+            apply.accept(recorder);
+        } else {
+            editor.history.record(editor, null, apply);
+        }
         return;
       }
     }

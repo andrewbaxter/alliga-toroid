@@ -50,7 +50,9 @@ class AutoInfoEnum implements AutoInfo {
 
       @Override
       public Object build(Object context, TSList tsList) {
-        if (state == null) return fallback;
+        if (state == null) {
+            return fallback;
+        }
         return state.build(context, tsList);
       }
     };

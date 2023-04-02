@@ -10,6 +10,8 @@ public interface TargetModuleContext {
 
   EvaluateResult vary(EvaluationContext context, Location id, Value value);
 
+  boolean isCodeEmpty(TargetCode code);
+
   public abstract static class Id {
     @Override
     public abstract String toString();

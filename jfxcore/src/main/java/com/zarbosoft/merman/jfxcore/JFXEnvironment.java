@@ -27,7 +27,9 @@ public class JFXEnvironment implements Environment {
   }
 
   protected static boolean isWhitespace(String s, int i) {
-    if (i < 0 || i >= s.length()) return true;
+    if (i < 0 || i >= s.length()) {
+        return true;
+    }
     return Character.isWhitespace(s.codePointAt(i));
   }
 
@@ -44,7 +46,9 @@ public class JFXEnvironment implements Environment {
           new TimerTask() {
             @Override
             public void run() {
-              if (!alive.get()) return;
+              if (!alive.get()) {
+                  return;
+              }
               Platform.runLater(r);
             }
           },
@@ -136,13 +140,17 @@ public class JFXEnvironment implements Environment {
 
       @Override
       protected int anyBeforeOrAt(int offset) {
-        if (offset == length()) return offset;
+        if (offset == length()) {
+            return offset;
+        }
         return iter.preceding(offset + 1);
       }
 
       @Override
       protected int anyAtOrAfter(int offset) {
-        if (offset == 0) return offset;
+        if (offset == 0) {
+            return offset;
+        }
         return iter.following(offset - 1);
       }
 
@@ -170,13 +178,17 @@ public class JFXEnvironment implements Environment {
 
       @Override
       protected int anyBeforeOrAt(int offset) {
-        if (offset == length()) return offset;
+        if (offset == length()) {
+            return offset;
+        }
         return iter.preceding(offset + 1);
       }
 
       @Override
       protected int anyAtOrAfter(int offset) {
-        if (offset == 0) return offset;
+        if (offset == 0) {
+            return offset;
+        }
         return iter.following(offset);
       }
 

@@ -43,16 +43,19 @@ public abstract class BaseRepeat<T, K> extends Node<ROList<K>> {
       ROMap<Object, Reference.RefParent> seen,
       final MismatchCause cause,
       Object color) {
-    if (min == 0) parent.advance(grammar, step, leaf, ROList.empty, cause);
-    if (max == -1 || max > 0)
-      child.context(
-          grammar,
-          step,
-          new RepParent<T, K>(this, parent, ROList.empty, color),
-          leaf,
-          seen,
-          cause,
-          color);
+    if (min == 0) {
+        parent.advance(grammar, step, leaf, ROList.empty, cause);
+    }
+    if (max == -1 || max > 0) {
+        child.context(
+            grammar,
+            step,
+            new RepParent<T, K>(this, parent, ROList.empty, color),
+            leaf,
+            seen,
+            cause,
+            color);
+    }
   }
 
   private static class RepParent<T, K> implements Parent<T> {
@@ -74,17 +77,19 @@ public abstract class BaseRepeat<T, K> extends Node<ROList<K>> {
         Grammar grammar, final Step step, Leaf leaf, T value, final MismatchCause cause) {
       TSList<K> nextCollected = collected.mut();
       self.combine(nextCollected, value);
-      if (nextCollected.size() >= self.min)
-        parent.advance(grammar, step, leaf, nextCollected, cause);
-      if (self.max == -1 || nextCollected.size() < self.max)
-        self.child.context(
-            grammar,
-            step,
-            new RepParent(self, parent, nextCollected, color),
-            leaf,
-            ROMap.empty,
-            cause,
-            color);
+      if (nextCollected.size() >= self.min) {
+          parent.advance(grammar, step, leaf, nextCollected, cause);
+      }
+      if (self.max == -1 || nextCollected.size() < self.max) {
+          self.child.context(
+              grammar,
+              step,
+              new RepParent(self, parent, nextCollected, color),
+              leaf,
+              ROMap.empty,
+              cause,
+              color);
+      }
     }
 
     @Override

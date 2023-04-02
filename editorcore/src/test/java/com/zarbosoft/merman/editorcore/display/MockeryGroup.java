@@ -43,7 +43,9 @@ public class MockeryGroup extends MockFreeDisplayNode implements Group {
     double max = 0;
     for (DisplayNode node : nodes) {
       double got = node.converseEdge();
-      if (got > max) max = got;
+      if (got > max) {
+          max = got;
+      }
     }
     return max;
   }
@@ -58,7 +60,9 @@ public class MockeryGroup extends MockFreeDisplayNode implements Group {
     double max = 0;
     for (DisplayNode node : nodes) {
       double got = node.transverseEdge();
-      if (got > max) max = got;
+      if (got > max) {
+          max = got;
+      }
     }
     return max;
   }

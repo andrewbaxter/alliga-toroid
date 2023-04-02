@@ -242,14 +242,18 @@ public class JSDisplay extends Display {
           (int) (((ModelColor.RGBA) color).g * 255),
           (int) (((ModelColor.RGBA) color).b * 255),
           ((ModelColor.RGBA) color).a);
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
   }
 
   public static double canvasPixelRatio(CanvasRenderingContext2D ctx) {
     try {
       double pixelRatio = DomGlobal.window.devicePixelRatio;
       Object backingPixelRatio = ((JsPropertyMap) ctx).get("backingStorePixelRatio");
-      if (backingPixelRatio != null) pixelRatio = pixelRatio / (double) backingPixelRatio;
+      if (backingPixelRatio != null) {
+          pixelRatio = pixelRatio / (double) backingPixelRatio;
+      }
       return pixelRatio;
     } catch (Exception e) {
       return 1;
@@ -287,10 +291,18 @@ public class JSDisplay extends Display {
     }
     if (key != null) {
       TSSet<Key> modifiers = new TSSet<>();
-      if (event.altKey) modifiers.add(Key.ALT);
-      if (event.ctrlKey) modifiers.add(Key.CONTROL);
-      if (event.shiftKey) modifiers.add(Key.SHIFT);
-      if (event.metaKey) modifiers.add(Key.META);
+      if (event.altKey) {
+          modifiers.add(Key.ALT);
+      }
+      if (event.ctrlKey) {
+          modifiers.add(Key.CONTROL);
+      }
+      if (event.shiftKey) {
+          modifiers.add(Key.SHIFT);
+      }
+      if (event.metaKey) {
+          modifiers.add(Key.META);
+      }
       ButtonEvent sendEvent = new ButtonEvent(key, press, modifiers.ro());
       if (keyEventListener.apply(sendEvent)) {
         event.stopPropagation();
@@ -1214,17 +1226,27 @@ public class JSDisplay extends Display {
     }
     if (key != null) {
       TSSet<Key> modifiers = new TSSet<>();
-      if (event.altKey) modifiers.add(Key.ALT);
-      if (event.ctrlKey) modifiers.add(Key.CONTROL);
-      if (event.shiftKey) modifiers.add(Key.SHIFT);
-      if (event.metaKey) modifiers.add(Key.META);
+      if (event.altKey) {
+          modifiers.add(Key.ALT);
+      }
+      if (event.ctrlKey) {
+          modifiers.add(Key.CONTROL);
+      }
+      if (event.shiftKey) {
+          modifiers.add(Key.SHIFT);
+      }
+      if (event.metaKey) {
+          modifiers.add(Key.META);
+      }
       ButtonEvent sendEvent = new ButtonEvent(key, press, modifiers.ro());
       if (keyEventListener.apply(sendEvent)) {
         event.stopPropagation();
       }
     }
     if (isText) {
-      if (text == null) text = event.key;
+      if (text == null) {
+          text = event.key;
+      }
       if (typingListener.apply(text)) {
         event.stopPropagation();
       }
@@ -1264,9 +1286,11 @@ public class JSDisplay extends Display {
 
   @Override
   public void add(int index, DisplayNode node) {
-    if (index < origin.childNodes.length)
-      origin.insertBefore(((JSDisplayNode) node).inner_(), origin.childNodes.getAt(index));
-    else origin.appendChild(((JSDisplayNode) node).inner_());
+    if (index < origin.childNodes.length) {
+        origin.insertBefore(((JSDisplayNode) node).inner_(), origin.childNodes.getAt(index));
+    } else {
+        origin.appendChild(((JSDisplayNode) node).inner_());
+    }
   }
 
   @Override

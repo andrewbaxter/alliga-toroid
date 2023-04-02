@@ -25,7 +25,9 @@ public class TreeBuilder {
 
   public TreeBuilder(Syntax syntax, String type) {
     ROOrderedSetRef<AtomType> t = syntax.splayedTypes.get(type);
-    if (t.size() != 1) throw new Assertion();
+    if (t.size() != 1) {
+        throw new Assertion();
+    }
     this.type = t.iterator().next();
   }
 

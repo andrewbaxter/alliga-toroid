@@ -57,7 +57,9 @@ public class StateClassBody<C, T> extends BaseStateRecordBody<C, T> {
 
   @Override
   public T build(C context, TSList<Error> errors) {
-    if (!ok) return (T) info.fallback;
+    if (!ok) {
+        return (T) info.fallback;
+    }
     T out = (T) uncheck(() -> info.klass.getConstructors()[0].newInstance());
     for (Map.Entry<String, ProtoType> field : info.fields) {
       State fieldState = fields.getOpt(field.getKey());
@@ -73,7 +75,10 @@ public class StateClassBody<C, T> extends BaseStateRecordBody<C, T> {
       }
       uncheck(() -> info.klass.getField(field.getKey()).set(out, value));
     }
-    if (!ok) return (T) info.fallback;
-    else return out;
+    if (!ok) {
+        return (T) info.fallback;
+    } else {
+        return out;
+    }
   }
 }

@@ -68,7 +68,9 @@ public class ModuleDiskCache implements ModuleResolver {
                   try {
                     tables = new Tables(cachePath);
                     try (CloseableIterator<TableVersion> iter = tables.version.iterator()) {
-                      if (iter.next().version == currentVersion) return tables;
+                      if (iter.next().version == currentVersion) {
+                          return tables;
+                      }
                     }
                   } catch (Exception e) {
                     if (tables != null) {
@@ -126,7 +128,9 @@ public class ModuleDiskCache implements ModuleResolver {
             public Boolean handleLocal(LocalModuleId id) {
               return context.dependents.isDirty(id.path);
             }
-          })) break;
+          })) {
+          break;
+      }
       try {
         tableMod = uncheck(() -> db.modules.queryForId(cacheId.cacheId));
         if (Arrays.equals(source.hash.getBytes(StandardCharsets.UTF_8), tableMod.outputHash)) {
@@ -147,8 +151,9 @@ public class ModuleDiskCache implements ModuleResolver {
             }
             break;
           }
-          if (res == null)
-            throw new Assertion(); // Can this happen? no errors, no exception, but dead return
+          if (res == null) {
+              throw new Assertion(); // Can this happen? no errors, no exception, but dead return
+          }
 
           // Validate by desemiserializing once
           // new ModuleCompileContext(null, context, null).desemiserialize(res, importId);
@@ -181,17 +186,18 @@ public class ModuleDiskCache implements ModuleResolver {
     Module out = inner.get(context, fromImportPath, cacheId, source);
 
     // Cache result, source mappings, other things
-    if (tableMod != null)
-      try {
-        tableMod.outputHash = source.hash.getBytes(StandardCharsets.UTF_8);
-        final ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
-        Writer writer = new Writer(outputBytes, (byte) ' ', 4);
-        semisubMeta.serialize(writer, TypeInfo.fromClass(SemiserialModule.class), out.result());
-        tableMod.output = outputBytes.toByteArray();
-        db.modules.update(tableMod);
-      } catch (Throwable e) {
-        context.logger.warn(new WarnUnexpected(source.path.toString(), e));
-      }
+    if (tableMod != null) {
+        try {
+          tableMod.outputHash = source.hash.getBytes(StandardCharsets.UTF_8);
+          final ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
+          Writer writer = new Writer(outputBytes, (byte) ' ', 4);
+          semisubMeta.serialize(writer, TypeInfo.fromClass(SemiserialModule.class), out.result());
+          tableMod.output = outputBytes.toByteArray();
+          db.modules.update(tableMod);
+        } catch (Throwable e) {
+          context.logger.warn(new WarnUnexpected(source.path.toString(), e));
+        }
+    }
     return out;
   }
 

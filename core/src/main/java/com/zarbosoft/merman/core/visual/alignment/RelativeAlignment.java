@@ -35,21 +35,29 @@ public class RelativeAlignment extends Alignment {
       base.removeDerived(this);
     }
     base = atom.parent().findAlignment(baseKey);
-    if (base == this) throw new AssertionError("Alignment parented to self");
-    if (base != null) base.addDerived(this);
+    if (base == this) {
+        throw new AssertionError("Alignment parented to self");
+    }
+    if (base != null) {
+        base.addDerived(this);
+    }
     changed(context);
   }
 
   @Override
   public void addBrick(Context context, Brick brick) {
     super.addBrick(context, brick);
-    if (collapse && bricks.size() == 1) changed(context);
+    if (collapse && bricks.size() == 1) {
+        changed(context);
+    }
   }
 
   @Override
   public void removeBrick(Context context, Brick brick) {
     super.removeBrick(context, brick);
-    if (collapse && bricks.isEmpty()) changed(context);
+    if (collapse && bricks.isEmpty()) {
+        changed(context);
+    }
   }
 
   @Override

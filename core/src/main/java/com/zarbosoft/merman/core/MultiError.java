@@ -12,7 +12,9 @@ public class MultiError {
   }
 
   public void raise() {
-    if (errors.isEmpty()) return;
+    if (errors.isEmpty()) {
+        return;
+    }
     throw new Exception(errors);
   }
 

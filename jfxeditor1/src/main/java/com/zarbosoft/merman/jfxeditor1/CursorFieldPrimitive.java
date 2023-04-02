@@ -99,10 +99,14 @@ public class CursorFieldPrimitive extends BaseEditCursorFieldPrimitive2 {
         break;
       }
     }
-    if (id == null) return;
+    if (id == null) {
+        return;
+    }
 
     ROSetRef<String> options0 = editor.autocomplete.getOpt(id);
-    if (options0 == null || options0.none()) return;
+    if (options0 == null || options0.none()) {
+        return;
+    }
     final TSList<String> options = options0.toList();
 
     final String current = field.data.toString().toLowerCase(Locale.ROOT);
@@ -122,7 +126,9 @@ public class CursorFieldPrimitive extends BaseEditCursorFieldPrimitive2 {
 
     TSList<AutocompleteChoice> choices = new TSList<>();
     for (ROPair<String, Double> option : sorted) {
-      if (option.second > 5) break;
+      if (option.second > 5) {
+          break;
+      }
       choices.add(new AutocompleteChoice(field, option.first));
     }
 

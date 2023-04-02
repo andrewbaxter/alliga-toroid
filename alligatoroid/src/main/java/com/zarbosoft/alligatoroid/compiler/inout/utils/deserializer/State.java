@@ -7,7 +7,9 @@ import com.zarbosoft.rendaw.common.TSList;
 
 public interface State<C, T> {
   default void popSelf(TSList<State> stack) {
-    if (stack.removeLast() != this) throw new Assertion();
+    if (stack.removeLast() != this) {
+        throw new Assertion();
+    }
   }
 
   void eatArrayBegin(

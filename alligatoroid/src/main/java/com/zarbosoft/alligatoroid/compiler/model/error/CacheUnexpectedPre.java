@@ -11,7 +11,9 @@ public class CacheUnexpectedPre extends Error.PreError {
     public final Throwable exception;
 
     public CacheUnexpectedPre(String cachePath, Throwable exception) {
-        if (exception instanceof Error.PreError || exception instanceof ExecutionException) throw new Assertion();
+        if (exception instanceof Error.PreError || exception instanceof ExecutionException) {
+            throw new Assertion();
+        }
         this.cachePath = cachePath;
         this.exception = exception;
     }

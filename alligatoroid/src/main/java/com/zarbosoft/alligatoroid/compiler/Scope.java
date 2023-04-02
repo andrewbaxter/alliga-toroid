@@ -18,12 +18,8 @@ public class Scope {
     this.parent = parent;
   }
 
-  public static Scope create(ROOrderedMap<Object, Binding> initialScope) {
-    final Scope out = new Scope(null);
-    for (ROPair<Object, Binding> local : initialScope) {
-      out.put(local.first, local.second);
-    }
-    return out;
+  public static Scope create() {
+    return new Scope(null);
   }
 
   public static Scope createChild(Scope parent) {
@@ -39,11 +35,15 @@ public class Scope {
   }
 
   public Binding get(Object key) {
-    if (error) return ErrorValue.binding;
+    if (error) {
+      return ErrorValue.binding;
+    }
     Scope at = this;
     while (at != null) {
       Binding out = at.data.getOpt(key);
-      if (out != null) return out;
+      if (out != null) {
+        return out;
+      }
       at = at.parent;
     }
     return null;

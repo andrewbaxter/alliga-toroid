@@ -55,7 +55,9 @@ public class CursorAttachment implements ObboxStyle.Stylable {
   }
 
   private void place() {
-    if (offset == null) return;
+    if (offset == null) {
+        return;
+    }
     drawing.setPosition(
         new Vector(
                 startConverse + brick.getConverseOffset(index), startTransverse + transverseAscent)
@@ -66,9 +68,13 @@ public class CursorAttachment implements ObboxStyle.Stylable {
   public void setPosition(final Context context, final BrickText brick, final int index) {
     if (this.brick != brick) {
       offset = null;
-      if (this.brick != null) this.brick.removeAttachment(this.attachment);
+      if (this.brick != null) {
+          this.brick.removeAttachment(this.attachment);
+      }
       this.brick = brick;
-      if (this.brick == null) return;
+      if (this.brick == null) {
+          return;
+      }
       this.brick.addAttachment(context, this.attachment);
       redraw(context);
     }
@@ -87,8 +93,11 @@ public class CursorAttachment implements ObboxStyle.Stylable {
     drawing.resize(context, size);
     final DrawingContext gc = drawing.begin(context);
     gc.setLineThickness(styleLineThickness);
-    if (style.roundStart) gc.setLineCapRound();
-    else gc.setLineCapFlat();
+    if (style.roundStart) {
+        gc.setLineCapRound();
+    } else {
+        gc.setLineCapFlat();
+    }
     gc.setLineColor(style.lineColor);
     gc.beginStrokePath();
     gc.moveTo(halfBuffer, halfBuffer);
@@ -98,13 +107,17 @@ public class CursorAttachment implements ObboxStyle.Stylable {
   }
 
   public void destroy(final Context context) {
-    if (brick != null) brick.removeAttachment(this.attachment);
+    if (brick != null) {
+        brick.removeAttachment(this.attachment);
+    }
     context.overlay.removeNode(drawing);
   }
 
   public void setStyle(final Context context, final ObboxStyle style) {
     this.style = style;
     this.styleLineThickness = style.lineThickness * toPixels;
-    if (brick != null) redraw(context);
+    if (brick != null) {
+        redraw(context);
+    }
   }
 }

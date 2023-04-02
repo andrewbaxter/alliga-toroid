@@ -107,7 +107,9 @@ public abstract class Brick {
   public void addAfter(final Context context, final Brick brick) {
     if (brick.isSplit()) {
       parent.breakCourse(context, index + 1).add(context, 0, TSList.of(brick));
-    } else parent.add(context, index + 1, TSList.of(brick));
+    } else {
+        parent.add(context, index + 1, TSList.of(brick));
+    }
   }
 
   public void addBefore(final Context context, final Brick brick) {
@@ -129,7 +131,9 @@ public abstract class Brick {
     } else {
       if (index > 0 && brick.isSplit()) {
         parent.breakCourse(context, index).add(context, 0, TSList.of(brick));
-      } else parent.add(context, index, TSList.of(brick));
+      } else {
+          parent.add(context, index, TSList.of(brick));
+      }
     }
   }
 
@@ -160,9 +164,14 @@ public abstract class Brick {
    */
   public void layoutPropertiesChanged(final Context context) {
     String alignmentId1 = isSplit() ? splitAlignmentId : alignmentId;
-    if (alignmentId1 == null) this.alignment = null;
-    else this.alignment = inter.findAlignment(alignmentId1);
-    if (parent != null) parent.changed(context, index);
+    if (alignmentId1 == null) {
+        this.alignment = null;
+    } else {
+        this.alignment = inter.findAlignment(alignmentId1);
+    }
+    if (parent != null) {
+        parent.changed(context, index);
+    }
   }
 
   public void addAttachment(final Context context, final Attachment attachment) {
@@ -185,7 +194,9 @@ public abstract class Brick {
 
   protected void destroyed(final Context context) {
     inter.brickDestroyed(context);
-    if (alignment != null) alignment.removeBrick(context, this);
+    if (alignment != null) {
+        alignment.removeBrick(context, this);
+    }
   }
 
   public void destroy(final Context context) {

@@ -93,7 +93,9 @@ public class Main {
     }
     outWriter.recordEnd();
     System.out.flush();
-    if (hadErrors) throw new RuntimeException("Compile errors");
+    if (hadErrors) {
+        throw new RuntimeException("Compile errors");
+    }
 
     // Bundle
     uncheck(() -> Files.deleteIfExists(Paths.get("bundle.zip")));

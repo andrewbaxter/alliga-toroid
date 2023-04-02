@@ -26,10 +26,16 @@ public class Pair<T1, T2> implements Comparable<Pair> {
 
   @Override
   public boolean equals(final Object obj) {
-    if (!(obj instanceof Pair)) return false;
+    if (!(obj instanceof Pair)) {
+        return false;
+    }
     final Pair obj1 = (Pair) obj;
-    if (first == null && obj1.first != null) return false;
-    if (second == null && obj1.second != null) return false;
+    if (first == null && obj1.first != null) {
+        return false;
+    }
+    if (second == null && obj1.second != null) {
+        return false;
+    }
     return Objects.equals(first, obj1.first) && Objects.equals(second, obj1.second);
   }
 

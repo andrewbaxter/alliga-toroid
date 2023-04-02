@@ -39,8 +39,12 @@ class AutoInfoClass implements AutoInfo {
   public void write(Writer writer, Object object) {
     writer.recordBegin();
     for (Field field : info.klass.getFields()) {
-      if (field.getAnnotation(BuiltinAutoExportableType.Param.class) == null) continue;
-      if (Modifier.isStatic(field.getModifiers())) continue;
+      if (field.getAnnotation(BuiltinAutoExportableType.Param.class) == null) {
+          continue;
+      }
+      if (Modifier.isStatic(field.getModifiers())) {
+          continue;
+      }
       String fieldName = field.getName();
       writer.primitive(field.getName());
       writeParam(

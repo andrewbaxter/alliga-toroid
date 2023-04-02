@@ -9,7 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectPrototype;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarObjectImplType;
 
 import static com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils.arrayLoadInt;
 import static com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils.arrayStoreInt;
@@ -22,7 +22,7 @@ import static org.objectweb.asm.Opcodes.ISTORE;
 
 @StaticAutogen.BuiltinAggregate
 public class BuiltinJavaBytecodeCode {
-  public static final MortarObjectPrototype type = StaticAutogen.autoMortarHalfObjectTypes.get(JavaBytecode.class);
+  public static final MortarObjectImplType type = StaticAutogen.autoMortarHalfObjectTypes.get(JavaBytecode.class);
 
   public static JavaBytecode nop() {
     return null;

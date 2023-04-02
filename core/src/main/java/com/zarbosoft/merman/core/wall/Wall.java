@@ -61,10 +61,18 @@ public class Wall {
   }
 
   public void clear(final Context context) {
-    while (!children.isEmpty()) children.last().destroy(context);
-    if (idleCompact != null) idleCompact.destroy();
-    if (idleExpand != null) idleExpand.destroy();
-    if (idleAdjust != null) idleAdjust.destroy();
+    while (!children.isEmpty()) {
+        children.last().destroy(context);
+    }
+    if (idleCompact != null) {
+        idleCompact.destroy();
+    }
+    if (idleExpand != null) {
+        idleExpand.destroy();
+    }
+    if (idleAdjust != null) {
+        idleAdjust.destroy();
+    }
   }
 
   private void renumber(final int at) {
@@ -91,9 +99,12 @@ public class Wall {
     }
     ensureIdleAdjust(context);
     if (children.size() > 1) {
-      if (idleAdjust.backward >= at) idleAdjust.backward += 1;
-      if (idleAdjust.forward >= at && idleAdjust.forward < Integer.MAX_VALUE)
-        idleAdjust.forward += 1;
+      if (idleAdjust.backward >= at) {
+          idleAdjust.backward += 1;
+      }
+      if (idleAdjust.forward >= at && idleAdjust.forward < Integer.MAX_VALUE) {
+          idleAdjust.forward += 1;
+      }
       idleAdjust.at(at);
     }
   }
@@ -117,9 +128,12 @@ public class Wall {
       renumber(at);
       if (cornerstoneCourse != null) {
         ensureIdleAdjust(context);
-        if (at < idleAdjust.backward) idleAdjust.backward -= 1;
-        if (at < idleAdjust.forward && idleAdjust.forward < Integer.MAX_VALUE)
-          idleAdjust.forward -= 1;
+        if (at < idleAdjust.backward) {
+            idleAdjust.backward -= 1;
+        }
+        if (at < idleAdjust.forward && idleAdjust.forward < Integer.MAX_VALUE) {
+            idleAdjust.forward -= 1;
+        }
         idleAdjust.at(at);
       }
     }
@@ -156,7 +170,9 @@ public class Wall {
 
   public void addCornerstoneListener(final Context context, final CornerstoneListener listener) {
     cornerstoneListeners.add(listener);
-    if (cornerstone != null) listener.cornerstoneChanged(context, cornerstone);
+    if (cornerstone != null) {
+        listener.cornerstoneChanged(context, cornerstone);
+    }
   }
 
   public void removeCornerstoneListener(final CornerstoneListener listener) {
@@ -183,7 +199,9 @@ public class Wall {
     for (BeddingListener l : beddingListeners.copy()) {
       l.beddingChanged(context, beddingBefore, beddingAfter);
     }
-    if (cornerstoneCourse != null) adjust(context, cornerstoneCourse.index);
+    if (cornerstoneCourse != null) {
+        adjust(context, cornerstoneCourse.index);
+    }
   }
 
   public void setCornerstone(
@@ -297,7 +315,9 @@ public class Wall {
       if (!expandTask.run(iterationContext)) {
         expandTask = null;
       }
-      if (oldCourseCount != children.size()) at = Math.max(0, at - 2);
+      if (oldCourseCount != children.size()) {
+          at = Math.max(0, at - 2);
+      }
       return true;
     }
 
@@ -336,7 +356,9 @@ public class Wall {
         double transverse =
             preceding.transverseStart
                 - (transverseStride == 0 ? child.transverseSpan() : transverseStride);
-        if (preceding == cornerstoneCourse) transverse -= beddingBefore;
+        if (preceding == cornerstoneCourse) {
+            transverse -= beddingBefore;
+        }
         child.setTransverse(context, transverse);
         backward -= 1;
         modified = true;
@@ -347,7 +369,9 @@ public class Wall {
         double transverse =
             preceding.transverseStart
                 + (transverseStride == 0 ? preceding.transverseSpan() : transverseStride);
-        if (forward - 1 == cornerstoneCourse.index) transverse += beddingAfter;
+        if (forward - 1 == cornerstoneCourse.index) {
+            transverse += beddingAfter;
+        }
         children.get(forward).setTransverse(context, transverse);
         forward += 1;
         modified = true;
@@ -355,10 +379,11 @@ public class Wall {
       if (!modified) {
         double min = children.get(0).transverseStart;
         double max = children.last().transverseEdge();
-        if (context.wallUsageListener != null)
-          context.wallUsageListener.usageChanged(
-              context.display.halfConvert.unconvertTransverseSpan(min),
-              context.display.halfConvert.unconvertTransverseSpan(max));
+        if (context.wallUsageListener != null) {
+            context.wallUsageListener.usageChanged(
+                context.display.halfConvert.unconvertTransverseSpan(min),
+                context.display.halfConvert.unconvertTransverseSpan(max));
+        }
       }
       return modified;
     }
@@ -369,11 +394,15 @@ public class Wall {
     }
 
     public void at(final int at) {
-      if (cornerstoneCourse == null) return;
-      if (at <= cornerstoneCourse.index && at > backward)
-        backward = Math.min(cornerstoneCourse.index - 1, at);
-      if (at >= cornerstoneCourse.index && at < forward)
-        forward = Math.max(cornerstoneCourse.index + 1, at);
+      if (cornerstoneCourse == null) {
+          return;
+      }
+      if (at <= cornerstoneCourse.index && at > backward) {
+          backward = Math.min(cornerstoneCourse.index - 1, at);
+      }
+      if (at >= cornerstoneCourse.index && at < forward) {
+          forward = Math.max(cornerstoneCourse.index + 1, at);
+      }
     }
   }
 }

@@ -16,6 +16,8 @@ public class Helper {
           ((ModelColor.RGBA) color).g,
           ((ModelColor.RGBA) color).b,
           ((ModelColor.RGBA) color).a);
-    } else throw new DeadCode();
+    } else {
+        throw new DeadCode();
+    }
   }
 }

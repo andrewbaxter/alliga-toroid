@@ -97,7 +97,9 @@ public class TSOrderedMap<K, V> implements ROOrderedMap<K, V> {
   }
 
   public TSOrderedMap<K, V> putNew(K k, V v) {
-    if (unordered.containsKey(k)) throw new Assertion();
+    if (unordered.containsKey(k)) {
+        throw new Assertion();
+    }
     put(k, v);
     return this;
   }

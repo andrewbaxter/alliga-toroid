@@ -5,20 +5,19 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
 
 public class ConstBinding implements Binding {
-  public final MortarDataType type;
+  public final MortarDataTypestate type;
   public Object value;
 
-  public ConstBinding(MortarDataType type, Object value) {
+  public ConstBinding(MortarDataTypestate type, Object value) {
     this.type = type;
     this.value = value;
   }
 
   @Override
   public EvaluateResult fork(EvaluationContext context, Location location) {
-    return EvaluateResult.pure(type.type_constAsValue(value));
+    return EvaluateResult.pure(type.typestate_constAsValue(value));
   }
 
   @Override

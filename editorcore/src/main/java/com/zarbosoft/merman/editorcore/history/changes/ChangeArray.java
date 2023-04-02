@@ -30,7 +30,9 @@ public class ChangeArray extends Change {
     } catch (final ClassCastException e) {
       return false;
     }
-    if (other2.value != value) return false;
+    if (other2.value != value) {
+        return false;
+    }
     if (other2.index + other2.remove == index) {
       index = other2.index;
       remove += other2.remove;
@@ -38,7 +40,9 @@ public class ChangeArray extends Change {
     } else if (index + remove == other2.index) {
       remove += other2.remove;
       add.addAll(other2.add);
-    } else return false;
+    } else {
+        return false;
+    }
     return true;
   }
 

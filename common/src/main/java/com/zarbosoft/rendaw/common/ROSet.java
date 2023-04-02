@@ -57,8 +57,12 @@ public class ROSet<T> implements ROSetRef<T> {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof ROSetRef)) return false;
+    if (this == o) {
+        return true;
+    }
+    if (!(o instanceof ROSetRef)) {
+        return false;
+    }
     return data.equals(((ROSetRef<?>) o).inner_());
   }
 

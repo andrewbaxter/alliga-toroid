@@ -132,8 +132,11 @@ public class JSDrawing extends JSFreeDisplayNode implements Drawing {
 
       @Override
       public void closePath() {
-        if (stroke) ctx.stroke();
-        else ctx.fill();
+        if (stroke) {
+            ctx.stroke();
+        } else {
+            ctx.fill();
+        }
       }
 
       @Override

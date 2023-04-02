@@ -34,7 +34,9 @@ public class History {
   public History() {}
 
   private Closeable lock() {
-    if (locked) throw new Assertion("History callback is modifying history.");
+    if (locked) {
+        throw new Assertion("History callback is modifying history.");
+    }
     locked = true;
     return new Closeable() {
       @Override
@@ -52,9 +54,15 @@ public class History {
   public boolean undo(final Editor editor) {
     final boolean wasModified = isModified();
     try (Closeable ignored = lock()) {
-      if (past.isEmpty()) return false;
-      if (past.getLast().isEmpty()) past.removeLast();
-      if (past.isEmpty()) return false;
+      if (past.isEmpty()) {
+          return false;
+      }
+      if (past.getLast().isEmpty()) {
+          past.removeLast();
+      }
+      if (past.isEmpty()) {
+          return false;
+      }
       future.addLast(applyLevel(editor, past.removeLast()));
       past.addLast(new ChangeLevel(++nextLevelUnique));
     } catch (final IOException ignored) {
@@ -70,8 +78,12 @@ public class History {
   public boolean redo(final Editor editor) {
     final boolean wasModified = isModified();
     try (Closeable ignored = lock()) {
-      if (future.isEmpty()) return false;
-      if (past.peekLast().isEmpty()) past.removeLast();
+      if (future.isEmpty()) {
+          return false;
+      }
+      if (past.peekLast().isEmpty()) {
+          past.removeLast();
+      }
       past.addLast(applyLevel(editor, future.removeLast()));
       past.addLast(new ChangeLevel(++nextLevelUnique));
     } catch (final IOException ignored) {
@@ -92,7 +104,9 @@ public class History {
   }
 
   private void finishChangeInner() {
-    if (!past.isEmpty() && past.getLast().isEmpty()) return;
+    if (!past.isEmpty() && past.getLast().isEmpty()) {
+        return;
+    }
     past.addLast(new ChangeLevel(++nextLevelUnique));
   }
 
@@ -134,23 +148,37 @@ public class History {
    */
   private ChangeLevel fixedTop() {
     final Iterator<ChangeLevel> iter = past.descendingIterator();
-    if (!iter.hasNext()) return null;
+    if (!iter.hasNext()) {
+        return null;
+    }
     ChangeLevel next = iter.next();
-    if (next.isEmpty())
-      if (iter.hasNext()) next = iter.next();
-      else return null;
+    if (next.isEmpty()) {
+        if (iter.hasNext()) {
+            next = iter.next();
+        } else {
+            return null;
+        }
+    }
     return next;
   }
 
   public boolean isModified() {
     ChangeLevel top = fixedTop();
     if (clearLevel == null) {
-      if (top != null) return true;
+      if (top != null) {
+          return true;
+      }
     } else {
-      if (top == null) return true; // dead?
-      if (clearLevel.unique != top.unique) return true;
+      if (top == null) {
+          return true; // dead?
+      }
+      if (clearLevel.unique != top.unique) {
+          return true;
+      }
     }
-    if (!past.isEmpty() && !past.getLast().isEmpty()) return true;
+    if (!past.isEmpty() && !past.getLast().isEmpty()) {
+        return true;
+    }
     return false;
   }
 
@@ -183,8 +211,9 @@ public class History {
     }
 
     public void apply(final Editor editor, final Change change) {
-      if (partial.select == null && editor.context.cursor != null)
-        partial.select = editor.context.cursor.saveState();
+      if (partial.select == null && editor.context.cursor != null) {
+          partial.select = editor.context.cursor.saveState();
+      }
       final Change reverse = change.apply(editor);
       partial.merge(reverse);
     }

@@ -90,14 +90,18 @@ public class GeneralTestWizard {
       System.out.printf(" %02d  ", i);
       for (int j = 0; j < course.children.size(); ++j) {
         Brick brick = course.children.get(j);
-        if (inner.context.wall.cornerstone == brick) System.out.format("*");
+        if (inner.context.wall.cornerstone == brick) {
+            System.out.format("*");
+        }
         if (brick instanceof BrickText) {
           System.out.printf("%s ", ((MockeryText) ((BrickText) brick).text).text());
         } else if (brick instanceof BrickLine) {
           System.out.printf("\\l ");
         } else if (brick instanceof BrickEmpty) {
           System.out.printf("\\w ");
-        } else throw new Assertion();
+        } else {
+            throw new Assertion();
+        }
       }
       if (inner.context.wall.cornerstoneCourse == course) {
         System.out.format(" **");
@@ -140,9 +144,13 @@ public class GeneralTestWizard {
 
   public GeneralTestWizard select(String... path) {
     Object got = inner.context.syntaxLocate(new SyntaxPath(path));
-    if (got instanceof Atom) ((Atom) got).visual.selectIntoAnyChild(inner.context);
-    else if (got instanceof Field) ((Field) got).selectInto(inner.context);
-    else throw Assertion.format("Invalid path %s", (Object) path);
+    if (got instanceof Atom) {
+        ((Atom) got).visual.selectIntoAnyChild(inner.context);
+    } else if (got instanceof Field) {
+        ((Field) got).selectInto(inner.context);
+    } else {
+        throw Assertion.format("Invalid path %s", (Object) path);
+    }
     return this;
   }
 
@@ -151,7 +159,9 @@ public class GeneralTestWizard {
       ((CursorAtom) inner.context.cursor).actionWindow(inner.context);
     } else if (inner.context.cursor instanceof CursorFieldArray) {
       ((CursorFieldArray) inner.context.cursor).actionWindow(inner.context);
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
@@ -162,7 +172,9 @@ public class GeneralTestWizard {
       ((CursorFieldArray) inner.context.cursor).actionGatherNext(inner.context);
     } else if (inner.context.cursor instanceof CursorFieldPrimitive) {
       ((CursorFieldPrimitive) inner.context.cursor).actionGatherNextGlyph(inner.context);
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
@@ -180,7 +192,9 @@ public class GeneralTestWizard {
       ((CursorAtom) inner.context.cursor).actionExit(inner.context);
     } else if (inner.context.cursor instanceof CursorFieldArray) {
       ((CursorFieldArray) inner.context.cursor).actionExit(inner.context);
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
@@ -250,7 +264,9 @@ public class GeneralTestWizard {
       ((CursorAtom) inner.context.cursor).actionNextElement(inner.context);
     } else if (inner.context.cursor instanceof CursorFieldArray) {
       ((CursorFieldArray) inner.context.cursor).actionNextElement(inner.context);
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
@@ -261,7 +277,9 @@ public class GeneralTestWizard {
       ((CursorAtom) inner.context.cursor).actionPreviousElement(inner.context);
     } else if (inner.context.cursor instanceof CursorFieldArray) {
       ((CursorFieldArray) inner.context.cursor).actionPreviousElement(inner.context);
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;

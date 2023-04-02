@@ -29,11 +29,12 @@ public class ReaderTest {
   public void check(final String source, final Event... events) {
     final List<Event> got = read(source);
     final List<Event> expected = Arrays.asList(events);
-    if (got.size() != expected.size())
-      throw new AssertionError(
-          String.format(
-              "Size mismatch:\nGot %s: %s\nExpected %s: %s",
-              got.size(), got, expected.size(), expected));
+    if (got.size() != expected.size()) {
+        throw new AssertionError(
+            String.format(
+                "Size mismatch:\nGot %s: %s\nExpected %s: %s",
+                got.size(), got, expected.size(), expected));
+    }
     for (int i = 0; i < got.size(); ++i) {
       Event first = got.get(i);
       Event second = expected.get(i);

@@ -61,12 +61,16 @@ public class FieldArray extends Field {
     if (data.isEmpty() && !context.cursorFactory.prepSelectEmptyArray(context, this)) {
       return false;
     }
-    if (context.window) context.windowAdjustMinimalTo(this);
-    if (visual instanceof VisualFieldArray)
-      ((VisualFieldArray) visual).select(context, leadFirst, start, end);
-    else if (visual instanceof VisualFieldAtomFromArray) {
+    if (context.window) {
+        context.windowAdjustMinimalTo(this);
+    }
+    if (visual instanceof VisualFieldArray) {
+        ((VisualFieldArray) visual).select(context, leadFirst, start, end);
+    } else if (visual instanceof VisualFieldAtomFromArray) {
       atomParentRef.atom().visual.selectById(context, back.id);
-    } else throw new DeadCode();
+    } else {
+        throw new DeadCode();
+    }
     return true;
   }
 
@@ -78,7 +82,9 @@ public class FieldArray extends Field {
     } catch (IllegalArgumentException e) {
       return null;
     }
-    if (val < 0 || val >= data.size()) return null;
+    if (val < 0 || val >= data.size()) {
+        return null;
+    }
     return data.get(val);
   }
 
@@ -121,8 +127,11 @@ public class FieldArray extends Field {
     @Override
     public SyntaxPath getSyntaxPath() {
       SyntaxPath out;
-      if (field.atomParentRef == null) out = new SyntaxPath();
-      else out = field.atomParentRef.getSyntaxPath();
+      if (field.atomParentRef == null) {
+          out = new SyntaxPath();
+      } else {
+          out = field.atomParentRef.getSyntaxPath();
+      }
       return out.add(Integer.toString(index));
     }
 

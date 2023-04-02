@@ -79,15 +79,23 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
 
   @Override
   public Brick getFirstBrick(final Context context) {
-    if (ellipsize(context)) return ellipsis;
-    if (body == null) return parent.getNextBrick(context);
+    if (ellipsize(context)) {
+        return ellipsis;
+    }
+    if (body == null) {
+        return parent.getNextBrick(context);
+    }
     return body.getFirstBrick(context);
   }
 
   @Override
   public Brick getLastBrick(final Context context) {
-    if (ellipsize(context)) return ellipsis;
-    if (body == null) return parent.getPreviousBrick(context);
+    if (ellipsize(context)) {
+        return ellipsis;
+    }
+    if (body == null) {
+        return parent.getPreviousBrick(context);
+    }
     return body.getLastBrick(context);
   }
 
@@ -105,19 +113,25 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
         context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
       }
     } else {
-      if (ellipsis != null) ellipsis.destroy(context);
+      if (ellipsis != null) {
+          ellipsis.destroy(context);
+      }
       if (atomGet() != null) {
         if (body == null) {
           coreSet(context, atomGet());
           context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
-        } else body.root(context, new FrontAtomParent(), visualDepth + 1, depthScore);
+        } else {
+            body.root(context, new FrontAtomParent(), visualDepth + 1, depthScore);
+        }
       }
     }
   }
 
   @Override
   public void uproot(final Context context, final Visual root) {
-    if (ellipsis != null) ellipsis.destroy(context);
+    if (ellipsis != null) {
+        ellipsis.destroy(context);
+    }
     if (body != null) {
       body.uproot(context, root);
       body = null;
@@ -135,7 +149,9 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
   }
 
   private Brick createEllipsis(final Context context) {
-    if (ellipsis != null) return null;
+    if (ellipsis != null) {
+        return null;
+    }
     ellipsis =
         ellipsisSpec.createBrick(
             context,
@@ -176,23 +192,33 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
   }
 
   private boolean ellipsize(final Context context) {
-    if (!context.window) return false;
-    if (parent.atomVisual() == null) return false;
+    if (!context.window) {
+        return false;
+    }
+    if (parent.atomVisual() == null) {
+        return false;
+    }
     return parent.atomVisual().depthScore >= context.ellipsizeThreshold;
   }
 
   @Override
   public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     if (ellipsize(context)) {
-      if (ellipsis != null) return CreateBrickResult.brick(ellipsis);
+      if (ellipsis != null) {
+          return CreateBrickResult.brick(ellipsis);
+      }
       return CreateBrickResult.brick(createEllipsis(context));
-    } else return body.createOrGetCornerstoneCandidate(context);
+    } else {
+        return body.createOrGetCornerstoneCandidate(context);
+    }
   }
 
   @Override
   public ExtendBrickResult createFirstBrick(final Context context) {
     if (ellipsize(context)) {
-      if (ellipsis != null) return ExtendBrickResult.exists();
+      if (ellipsis != null) {
+          return ExtendBrickResult.exists();
+      }
       return ExtendBrickResult.brick(createEllipsis(context));
     } else {
       return body.createFirstBrick(context);
@@ -202,7 +228,9 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
   @Override
   public ExtendBrickResult createLastBrick(final Context context) {
     if (ellipsize(context)) {
-      if (ellipsis != null) return ExtendBrickResult.exists();
+      if (ellipsis != null) {
+          return ExtendBrickResult.exists();
+      }
       return ExtendBrickResult.brick(createEllipsis(context));
     } else {
       return body.createLastBrick(context);
@@ -210,7 +238,9 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
   }
 
   protected void set(final Context context, final Atom data) {
-    if (ellipsize(context)) return;
+    if (ellipsize(context)) {
+        return;
+    }
     boolean fixDeepSelection = false;
     boolean fixParentSelectionCornerstone = false;
     boolean fixDeepHover = false;
@@ -251,14 +281,20 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
       parent.atomVisual().cursor.resetCornerstone(context);
     } else {
       context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
-      if (fixDeepSelection) atomGet().fieldParentRef.selectField(context);
+      if (fixDeepSelection) {
+          atomGet().fieldParentRef.selectField(context);
+      }
     }
 
-    if (fixDeepHover) context.clearHover();
+    if (fixDeepHover) {
+        context.clearHover();
+    }
   }
 
   private void coreSet(final Context context, final Atom data) {
-    if (body != null) body.uproot(context, null);
+    if (body != null) {
+        body.uproot(context, null);
+    }
     this.body =
         (VisualAtom)
             data.ensureVisual(context, new FrontAtomParent(), visualDepth + 1, depthScore());

@@ -26,7 +26,9 @@ public class TypeBuilder {
   }
 
   public TypeBuilder back(BackSpec spec) {
-    if (back != null) throw new Assertion();
+    if (back != null) {
+        throw new Assertion();
+    }
     back = spec;
     return this;
   }

@@ -39,7 +39,9 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
 
   protected void setBeginInternal(final Context context, final int index) {
     beginIndex = index;
-    if (leadFirst) setCornerstone(context, beginIndex);
+    if (leadFirst) {
+        setCornerstone(context, beginIndex);
+    }
   }
 
   private void setCornerstone(final Context context, final int index) {
@@ -49,14 +51,18 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
         () -> {
           for (int at = visual.visualIndex(index) - 1; at >= 0; --at) {
             final Brick found = visual.children.get(at).getLastBrick(context);
-            if (found != null) return found;
+            if (found != null) {
+                return found;
+            }
           }
           return visual.parent.getPreviousBrick(context);
         },
         () -> {
           for (int at = visual.visualIndex(index) + 1; at < visual.children.size(); ++at) {
             final Brick found = visual.children.get(at).getFirstBrick(context);
-            if (found != null) return found;
+            if (found != null) {
+                return found;
+            }
           }
           return visual.parent.getNextBrick(context);
         });
@@ -64,7 +70,9 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
 
   protected void setEndInternal(final Context context, final int index) {
     endIndex = index;
-    if (!leadFirst) setCornerstone(context, endIndex);
+    if (!leadFirst) {
+        setCornerstone(context, endIndex);
+    }
   }
 
   public void setBegin(final Context context, final int index) {
@@ -140,26 +148,34 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
   public void actionNextElement(final Context context) {
     CursorFieldArray.this.leadFirst = true;
     final int newIndex = (endIndex + 1) % visual.value.data.size();
-    if (newIndex == beginIndex && newIndex == endIndex) return;
+    if (newIndex == beginIndex && newIndex == endIndex) {
+        return;
+    }
     setPosition(context, newIndex);
   }
 
   public void actionLastElement(final Context context) {
     final int newIndex = visual.value.data.size() - 1;
-    if (newIndex == beginIndex && newIndex == endIndex) return;
+    if (newIndex == beginIndex && newIndex == endIndex) {
+        return;
+    }
     setPosition(context, newIndex);
   }
 
   public void actionFirstElement(final Context context) {
     final int newIndex = 0;
-    if (newIndex == beginIndex && newIndex == endIndex) return;
+    if (newIndex == beginIndex && newIndex == endIndex) {
+        return;
+    }
     setPosition(context, newIndex);
   }
 
   public void actionPreviousElement(final Context context) {
     CursorFieldArray.this.leadFirst = true;
     final int newIndex = (beginIndex + visual.value.data.size() - 1) % visual.value.data.size();
-    if (newIndex == beginIndex && newIndex == endIndex) return;
+    if (newIndex == beginIndex && newIndex == endIndex) {
+        return;
+    }
     setPosition(context, newIndex);
   }
 
@@ -169,43 +185,60 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
 
   public void actionGatherNext(final Context context) {
     final int newIndex = Math.min(visual.value.data.size() - 1, endIndex + 1);
-    if (endIndex == newIndex) return;
+    if (endIndex == newIndex) {
+        return;
+    }
     setEnd(context, newIndex);
   }
 
   public void actionGatherLast(final Context context) {
     final int newIndex = visual.value.data.size() - 1;
-    if (endIndex == newIndex) return;
+    if (endIndex == newIndex) {
+        return;
+    }
     setEnd(context, newIndex);
   }
 
   public void actionGatherFirst(final Context context) {
     final int newIndex = 0;
-    if (endIndex == newIndex) return;
+    if (endIndex == newIndex) {
+        return;
+    }
     setBegin(context, newIndex);
   }
 
   public void actionReleaseAll(final Context context) {
-    if (beginIndex == endIndex) return;
-    if (leadFirst) setEnd(context, beginIndex);
-    else setBegin(context, endIndex);
+    if (beginIndex == endIndex) {
+        return;
+    }
+    if (leadFirst) {
+        setEnd(context, beginIndex);
+    } else {
+        setBegin(context, endIndex);
+    }
   }
 
   public void actionReleaseNext(final Context context) {
     final int newIndex = Math.max(beginIndex, endIndex - 1);
-    if (endIndex == newIndex) return;
+    if (endIndex == newIndex) {
+        return;
+    }
     setEnd(context, newIndex);
   }
 
   public void actionGatherPrevious(final Context context) {
     final int newIndex = Math.max(0, beginIndex - 1);
-    if (beginIndex == newIndex) return;
+    if (beginIndex == newIndex) {
+        return;
+    }
     setBegin(context, newIndex);
   }
 
   public void actionReleasePrevious(final Context context) {
     final int newIndex = Math.min(endIndex, beginIndex + 1);
-    if (beginIndex == newIndex) return;
+    if (beginIndex == newIndex) {
+        return;
+    }
     setBegin(context, newIndex);
   }
 

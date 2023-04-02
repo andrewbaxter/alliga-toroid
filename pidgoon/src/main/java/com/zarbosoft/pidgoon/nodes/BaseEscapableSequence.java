@@ -93,8 +93,11 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
         MismatchCause mismatchCause) {
       final int nextStep = this.step + 1;
       ROList<T> newCollected;
-      if (self.children.get(this.step).second) newCollected = self.collect(collected, result.value);
-      else newCollected = collected;
+      if (self.children.get(this.step).second) {
+          newCollected = self.collect(collected, result.value);
+      } else {
+          newCollected = collected;
+      }
       if (!result.completed || nextStep >= self.children.size()) {
         parent.advance(
             grammar,

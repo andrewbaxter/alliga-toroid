@@ -28,8 +28,12 @@ public abstract class BaseParseBuilder<O, P extends BaseParseBuilder<O, P>> {
   }
 
   public P grammar(final Grammar grammar) {
-    if (this.grammar != null) throw new IllegalArgumentException("Grammar already specified");
-    if (grammar == null) throw new IllegalArgumentException("Argument is null.");
+    if (this.grammar != null) {
+        throw new IllegalArgumentException("Grammar already specified");
+    }
+    if (grammar == null) {
+        throw new IllegalArgumentException("Argument is null.");
+    }
     final P out = split();
     out.grammar = grammar;
     return out;
@@ -38,8 +42,9 @@ public abstract class BaseParseBuilder<O, P extends BaseParseBuilder<O, P>> {
   protected abstract P split();
 
   public P uncertainty(final int limit) {
-    if (this.uncertaintyLimit != 1000)
-      throw new IllegalArgumentException("Uncertainty limit already specified");
+    if (this.uncertaintyLimit != 1000) {
+        throw new IllegalArgumentException("Uncertainty limit already specified");
+    }
     final P out = split();
     out.uncertaintyLimit = limit;
     return out;
@@ -85,7 +90,9 @@ public abstract class BaseParseBuilder<O, P extends BaseParseBuilder<O, P>> {
       int sourceIndex = source.first;
 
       if (sourceIndex >= data.size()) {
-        if (sourceStep.completed.some()) return sourceStep.completed.get(0);
+        if (sourceStep.completed.some()) {
+            return sourceStep.completed.get(0);
+        }
         stack.removeLast();
         continue;
       }

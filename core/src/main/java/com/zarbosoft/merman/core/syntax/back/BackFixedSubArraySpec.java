@@ -29,7 +29,9 @@ public class BackFixedSubArraySpec extends BackSpec {
   public ROPair<Atom, Integer> backLocate(Atom at, int offset, ROList<BackPath.Element> segments) {
     for (BackSpec element : elements) {
       ROPair<Atom, Integer> res = element.backLocate(at, offset, segments);
-      if (res == null || res.first != null) return res;
+      if (res == null || res.first != null) {
+          return res;
+      }
       offset = res.second;
     }
     return null;

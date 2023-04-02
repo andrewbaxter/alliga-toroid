@@ -1,12 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler.modules.modulecompiler;
 
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
+import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.Evaluator;
-import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
-import com.zarbosoft.alligatoroid.compiler.Scope;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
@@ -39,15 +37,14 @@ import com.zarbosoft.alligatoroid.compiler.modules.Source;
 import com.zarbosoft.alligatoroid.compiler.mortar.ContinueError;
 import com.zarbosoft.alligatoroid.compiler.mortar.DefinitionSet;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataBinding;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
+import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Evaluation2Context;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataPrototype;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarNullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.DataValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -76,32 +73,29 @@ public class ModuleCompiler implements ModuleResolver {
     String className = "com.zarbosoft.alligatoroidmortar.ModuleRoot";
     JavaInternalName jvmClassName = JavaBytecodeUtils.qualifiedName(className).asInternalName();
 
-    // Do first pass flat evaluation + prep for 2nd pass
+    /// Do first pass evaluation, and get type of result (or const result).
     MortarTargetModuleContext targetContext = new MortarTargetModuleContext(jvmClassName.value);
     JavaBytecodeBindingKey ectxKey = new JavaBytecodeBindingKey();
-    final MortarDataPrototype ectxType = StaticAutogen.autoMortarHalfObjectTypes.get(Evaluation2Context.class);
-    final EvaluationContext ectx =
-        new EvaluationContext(
-            moduleContext,
-            targetContext,
-            true,
-            Scope.create(
-                new TSOrderedMap<>(
-                    m ->
-                        m.put(
-                            "ectx",
-                            new MortarDataBinding(ectxKey, ectxType.prototype_typeNew())))));
-    final Evaluator.RootEvaluateResult firstPass = Evaluator.evaluate(ectx, rootStatement);
-    moduleContext.log.addAll(ectx.log);
-    moduleContext.errors.addAll(ectx.errors);
-    if (ectx.errors.some()) {
+    final MortarDataType ectxType =
+        StaticAutogen.autoMortarHalfObjectTypes.get(Evaluation2Context.class);
+    final EvaluationContext context = EvaluationContext.create(moduleContext, targetContext, true);
+    EvaluateResult firstPass =
+        Block.evaluate(
+            context,
+            null,
+            TSList.of(rootStatement),
+            new TSOrderedMap<>(m -> m.put("ectx", ectxType.type_newInitialBinding(ectxKey))));
+    moduleContext.log.addAll(context.log);
+    moduleContext.errors.addAll(context.errors);
+    if (context.errors.some()) {
       return null;
     }
+    // TODO handle like returns from a block (merge all returns)
     MortarDataType resultType;
-    if (firstPass.value instanceof DataValue) {
-      resultType = ((DataValue) firstPass.value).mortarType();
+    if (firstPass.value instanceof MortarDataValue) {
+      resultType = ((MortarDataValue) firstPass.value).type();
     } else {
-      resultType = MortarNullType.type;
+      resultType = NullType.type;
     }
 
     boolean noDepErrors = true;
@@ -110,21 +104,24 @@ public class ModuleCompiler implements ModuleResolver {
         noDepErrors = false;
       }
     }
-    if (!noDepErrors) return null;
+    if (!noDepErrors) {
+      return null;
+    }
 
-    // Do 2nd pass jvm evaluation
+    /// Do 2nd pass jvm evaluation, which should evaluate to identified result type.
     JavaClass preClass = new JavaClass(jvmClassName);
     for (ROPair<ObjId<Object>, String> e : Common.iterable(targetContext.transfers.iterator())) {
       preClass.defineStaticField(
-          e.second, StaticAutogen.autoMortarHalfObjectTypes.get(e.first.getClass()).prototype_jvmDesc());
+          e.second, StaticAutogen.autoMortarHalfObjectTypes.get(e.first.getClass()).type_jvmDesc());
     }
     preClass.defineFunction(
         entryMethodName,
         JavaMethodDescriptor.fromParts(
-            resultType.type_jvmDesc(), new TSList<>(ectxType.prototype_jvmDesc())),
+            resultType.type_jvmDesc(), new TSList<>(ectxType.type_jvmDesc())),
         new JavaBytecodeSequence()
-            .add(((MortarTargetCode) firstPass.code).e)
-            .add(resultType.type_bytecodeReturn()),
+            .add(((MortarTargetCode) firstPass.preEffect).e)
+            .add(((MortarTargetCode) firstPass.postEffect).e)
+            .add(resultType.type_returnBytecode()),
         new TSList<>(ectxKey));
     Class klass = moduleContext.compileContext.loadRootClass(className, preClass.render());
     for (ROPair<ObjId<Object>, String> e : Common.iterable(targetContext.transfers.iterator())) {
@@ -146,7 +143,7 @@ public class ModuleCompiler implements ModuleResolver {
         Location location = null; // TODO convert whole stack?
         for (StackTraceElement t : new ReverseIterable<>(Arrays.asList(e.getStackTrace()))) {
           if (t.getClassName().equals(className)) {
-            location = ectx.sourceMapReverse.get(t.getLineNumber());
+            location = context.sourceMapReverse.get(t.getLineNumber());
             break;
           }
         }
@@ -171,7 +168,11 @@ public class ModuleCompiler implements ModuleResolver {
         moduleContext.errors.add(new Unexpected(d.first, e));
       }
     }
-    if (moduleContext.errors.some()) return null;
+    if (moduleContext.errors.some()) {
+      return null;
+    }
+
+    /// Turn the result jvm obj into a const value
     return resultType.type_constAsValue(resultVariable);
   }
 
@@ -203,7 +204,9 @@ public class ModuleCompiler implements ModuleResolver {
     }
 
     ImportPath importPath = new ImportPath(importId);
-    if (fromImportPath != null) importPath.add(fromImportPath);
+    if (fromImportPath != null) {
+      importPath.add(fromImportPath);
+    }
 
     ModuleCompileContext moduleContext =
         new ModuleCompileContext(importId, cacheId.cacheId, context, importPath);
@@ -276,7 +279,9 @@ public class ModuleCompiler implements ModuleResolver {
                 throw new Assertion();
               }
             });
-    if (res == null) throw Error.moduleError;
+    if (res == null) {
+      throw Error.moduleError;
+    }
     return new Module() {
       @Override
       public long cacheId() {

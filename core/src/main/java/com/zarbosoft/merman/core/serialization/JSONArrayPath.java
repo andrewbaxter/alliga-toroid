@@ -19,8 +19,11 @@ public class JSONArrayPath extends JSONPath {
 
   @Override
   public JSONPath value() {
-    if (this.type) return new JSONArrayPath(parent, false, index);
-    else return new JSONArrayPath(parent, false, index + 1);
+    if (this.type) {
+        return new JSONArrayPath(parent, false, index);
+    } else {
+        return new JSONArrayPath(parent, false, index + 1);
+    }
   }
 
   @Override

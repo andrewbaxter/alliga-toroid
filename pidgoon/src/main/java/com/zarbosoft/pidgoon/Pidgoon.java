@@ -51,15 +51,22 @@ public class Pidgoon {
    */
   public static <E, R> Step<R> parallelStep(
       Grammar grammar, int uncertaintyLimit, Step<R> step, E event) {
-    if (step.leaves.isEmpty()) return null;
+    if (step.leaves.isEmpty()) {
+        return null;
+    }
 
     final Step<R> nextStep = new Step<R>();
 
-    for (final Leaf<E> leaf : step.leaves) leaf.parse(grammar, nextStep, event);
+    for (final Leaf<E> leaf : step.leaves) {
+        leaf.parse(grammar, nextStep, event);
+    }
 
-    if (nextStep.leaves.size() > uncertaintyLimit) throw new GrammarTooUncertain(nextStep);
-    if (nextStep.leaves.isEmpty() && nextStep.errors.size() == step.leaves.size())
-      throw new InvalidStream(nextStep);
+    if (nextStep.leaves.size() > uncertaintyLimit) {
+        throw new GrammarTooUncertain(nextStep);
+    }
+    if (nextStep.leaves.isEmpty() && nextStep.errors.size() == step.leaves.size()) {
+        throw new InvalidStream(nextStep);
+    }
 
     return nextStep;
   }

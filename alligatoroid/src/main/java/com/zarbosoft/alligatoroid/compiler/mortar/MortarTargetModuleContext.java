@@ -15,11 +15,9 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongTarget;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.DataValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataConstValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
@@ -115,8 +113,10 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       Value argument) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     final Value variable = ectx.record(argument.vary(context, location));
-    if (variable == ErrorValue.error) return false;
-    code.add(((MortarTargetCode) ((DataValue) variable).consume(context, location)).e);
+    if (variable == ErrorValue.value) {
+      return false;
+    }
+    code.add(((MortarTargetCode) ((MortarDataValue) variable).consume(context, location)).e);
     final EvaluateResult prePost = ectx.build(null);
     pre.add((JavaBytecodeSequence) prePost.preEffect);
     post.add((JavaBytecode) prePost.postEffect);
@@ -134,16 +134,6 @@ public class MortarTargetModuleContext implements TargetModuleContext {
   @Override
   public Id id() {
     return ID;
-  }
-
-  @Override
-  public EvaluateResult vary(EvaluationContext context, Location id, Value value) {
-    if (value instanceof VariableDataValue) return EvaluateResult.pure(value);
-    if (value instanceof MortarDataConstValue)
-      return ((MortarDataConstValue) value)
-          .mortarType()
-          .type_valueVary(context, id, ((MortarDataConstValue) value).getInner());
-    return StaticAutogen.autoMortarHalfObjectTypes.get(Value.class).valueVary(context, id, value);
   }
 
   public JavaBytecodeSequence transfer(Object object) {
@@ -168,7 +158,9 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       EvaluationContext context, Location location, Iterable<TargetCode> chunks) {
     JavaBytecodeSequence code = new JavaBytecodeSequence();
     for (TargetCode chunk : chunks) {
-      if (chunk == null) continue;
+      if (chunk == null) {
+        continue;
+      }
       if (!(chunk instanceof JavaBytecode)) {
         throw new Assertion();
       }
@@ -178,10 +170,10 @@ public class MortarTargetModuleContext implements TargetModuleContext {
   }
 
   public static class HalfLowerResult {
-    public final MortarDataType dataType;
+    public final MortarDataTypestate dataType;
     public final JavaBytecode valueCode;
 
-    public HalfLowerResult(MortarDataType dataType, JavaBytecode valueCode) {
+    public HalfLowerResult(MortarDataTypestate dataType, JavaBytecode valueCode) {
       this.dataType = dataType;
       this.valueCode = valueCode;
     }

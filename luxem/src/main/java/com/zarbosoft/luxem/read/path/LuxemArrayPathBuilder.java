@@ -37,14 +37,18 @@ public class LuxemArrayPathBuilder extends LuxemPathBuilder {
 
   @Override
   protected void renderInternal(TSList<LuxemPath.Element> values) {
-    if (parent != null) parent.renderInternal(values);
+    if (parent != null) {
+        parent.renderInternal(values);
+    }
     values.add(new LuxemPath.Element(index, false, typeCount));
   }
 
   @Override
   public String toString() {
     StringBuilder out = new StringBuilder();
-    if (parent != null) out.append(parent.toString());
+    if (parent != null) {
+        out.append(parent.toString());
+    }
     out.append("/");
     out.append(index);
     for (int i = 0; i < typeCount; i += 1) {

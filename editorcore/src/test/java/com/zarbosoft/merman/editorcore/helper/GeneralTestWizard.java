@@ -104,14 +104,18 @@ public class GeneralTestWizard {
       System.out.printf(" %02d  ", i);
       for (int j = 0; j < course.children.size(); ++j) {
         Brick brick = course.children.get(j);
-        if (inner.editor.context.wall.cornerstone == brick) System.out.format("*");
+        if (inner.editor.context.wall.cornerstone == brick) {
+            System.out.format("*");
+        }
         if (brick instanceof BrickText) {
           System.out.printf("%s ", ((MockeryText) ((BrickText) brick).text).text());
         } else if (brick instanceof BrickLine) {
           System.out.printf("\\l ");
         } else if (brick instanceof BrickEmpty) {
           System.out.printf("\\w ");
-        } else throw new Assertion();
+        } else {
+            throw new Assertion();
+        }
       }
       if (inner.editor.context.wall.cornerstoneCourse == course) {
         System.out.format(" **");
@@ -156,9 +160,13 @@ public class GeneralTestWizard {
 
   public GeneralTestWizard select(String... path) {
     Object got = inner.editor.context.syntaxLocate(new SyntaxPath(path));
-    if (got instanceof Atom) ((Atom) got).visual.selectIntoAnyChild(inner.editor.context);
-    else if (got instanceof Field) ((Field) got).selectInto(inner.editor.context);
-    else throw Assertion.format("Invalid path %s", (Object) path);
+    if (got instanceof Atom) {
+        ((Atom) got).visual.selectIntoAnyChild(inner.editor.context);
+    } else if (got instanceof Field) {
+        ((Field) got).selectInto(inner.editor.context);
+    } else {
+        throw Assertion.format("Invalid path %s", (Object) path);
+    }
     return this;
   }
 
@@ -167,7 +175,9 @@ public class GeneralTestWizard {
       ((CursorAtom) inner.editor.context.cursor).actionWindow(inner.editor.context);
     } else if (inner.editor.context.cursor instanceof CursorFieldArray) {
       ((CursorFieldArray) inner.editor.context.cursor).actionWindow(inner.editor.context);
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
@@ -179,7 +189,9 @@ public class GeneralTestWizard {
     } else if (inner.editor.context.cursor instanceof CursorFieldPrimitive) {
       ((CursorFieldPrimitive) inner.editor.context.cursor)
           .actionGatherNextGlyph(inner.editor.context);
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
@@ -198,7 +210,9 @@ public class GeneralTestWizard {
       ((CursorAtom) inner.editor.context.cursor).actionEnter(inner.editor.context);
     } else if (inner.editor.context.cursor instanceof CursorFieldArray) {
       ((CursorFieldArray) inner.editor.context.cursor).actionEnter(inner.editor.context);
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
@@ -212,7 +226,9 @@ public class GeneralTestWizard {
       ((CursorFieldArray) cursor).actionExit(inner.editor.context);
     } else if (cursor instanceof CursorFieldPrimitive) {
       ((CursorFieldPrimitive) cursor).actionExit(inner.editor.context);
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
     assertThat(cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
@@ -296,7 +312,9 @@ public class GeneralTestWizard {
       ((BaseEditCursorAtom) inner.editor.context.cursor).editDelete(inner.editor);
     } else if (inner.editor.context.cursor instanceof CursorFieldArray) {
       ((BaseEditCursorFieldArray) inner.editor.context.cursor).editDelete(inner.editor);
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;

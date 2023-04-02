@@ -74,7 +74,9 @@ public class VisualAtom extends Visual {
     }
     if (needIntermediateCursor && atom.type.defaultSelection != null) {
       for (int i = 0; i < selectable.size(); ++i) {
-        if (!selectable.get(i).first.equals(atom.type.defaultSelection)) continue;
+        if (!selectable.get(i).first.equals(atom.type.defaultSelection)) {
+            continue;
+        }
         defaultSelection = i;
         break;
       }
@@ -90,29 +92,42 @@ public class VisualAtom extends Visual {
   public Alignment findAlignment(final String alignment, ROSetRef<String> allow) {
     if (allow == null || allow.contains(alignment)) {
       Alignment found = localAlignments.getOpt(alignment);
-      if (found != null) return found;
+      if (found != null) {
+          return found;
+      }
     }
-    if (parent != null) return parent.findAlignment(alignment);
+    if (parent != null) {
+        return parent.findAlignment(alignment);
+    }
     return null;
   }
 
   @Override
   public boolean selectIntoAnyChild(final Context context) {
-    if (selectable.isEmpty()) return false;
-    if (needIntermediateCursor) select(context, defaultSelection);
-    else selectable.get(0).second.selectIntoAnyChild(context);
+    if (selectable.isEmpty()) {
+        return false;
+    }
+    if (needIntermediateCursor) {
+        select(context, defaultSelection);
+    } else {
+        selectable.get(0).second.selectIntoAnyChild(context);
+    }
     return true;
   }
 
   @Override
   public void notifyLastBrickCreated(Context context, Brick brick) {
-    if (parent == null) return;
+    if (parent == null) {
+        return;
+    }
     parent.notifyLastBrickCreated(context, brick);
   }
 
   @Override
   public void notifyFirstBrickCreated(Context context, Brick brick) {
-    if (parent == null) return;
+    if (parent == null) {
+        return;
+    }
     parent.notifyFirstBrickCreated(context, brick);
   }
 
@@ -120,8 +135,12 @@ public class VisualAtom extends Visual {
   public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     for (Visual child : children) {
       CreateBrickResult out = child.createOrGetCornerstoneCandidate(context);
-      if (out.empty) continue;
-      if (out.brick != null) return out;
+      if (out.empty) {
+          continue;
+      }
+      if (out.brick != null) {
+          return out;
+      }
       throw new Assertion();
     }
     return CreateBrickResult.empty();
@@ -131,9 +150,15 @@ public class VisualAtom extends Visual {
   public ExtendBrickResult createFirstBrick(final Context context) {
     for (Visual child : children) {
       ExtendBrickResult out = child.createFirstBrick(context);
-      if (out.empty) continue;
-      if (out.exists) return out;
-      if (out.brick != null) return out;
+      if (out.empty) {
+          continue;
+      }
+      if (out.exists) {
+          return out;
+      }
+      if (out.brick != null) {
+          return out;
+      }
       throw new Assertion();
     }
     return ExtendBrickResult.empty();
@@ -143,9 +168,15 @@ public class VisualAtom extends Visual {
   public ExtendBrickResult createLastBrick(final Context context) {
     for (Visual child : new ReverseIterable<>(children)) {
       ExtendBrickResult out = child.createLastBrick(context);
-      if (out.empty) continue;
-      if (out.exists) return out;
-      if (out.brick != null) return out;
+      if (out.empty) {
+          continue;
+      }
+      if (out.exists) {
+          return out;
+      }
+      if (out.brick != null) {
+          return out;
+      }
       throw new Assertion();
     }
     return ExtendBrickResult.empty();
@@ -155,7 +186,9 @@ public class VisualAtom extends Visual {
   public Brick getFirstBrick(final Context context) {
     for (Visual child : children) {
       Brick out = child.getFirstBrick(context);
-      if (out != null) return out;
+      if (out != null) {
+          return out;
+      }
     }
     return null;
   }
@@ -164,7 +197,9 @@ public class VisualAtom extends Visual {
   public Brick getLastBrick(final Context context) {
     for (Visual child : new ReverseIterable<>(children)) {
       Brick out = child.getLastBrick(context);
-      if (out != null) return out;
+      if (out != null) {
+          return out;
+      }
     }
     return null;
   }
@@ -230,16 +265,23 @@ public class VisualAtom extends Visual {
 
   @Override
   public void uproot(final Context context, final Visual root) {
-    if (root == this) return;
-    if (cursor != null) context.clearCursor();
-    if (hoverable != null) context.clearHover();
+    if (root == this) {
+        return;
+    }
+    if (cursor != null) {
+        context.clearCursor();
+    }
+    if (hoverable != null) {
+        context.clearHover();
+    }
     atom.visual = null;
     for (int i = children.size(); i > 0; --i) {
       Visual child = children.get(i - 1);
       child.uproot(context, root);
     }
-    for (final Map.Entry<String, Alignment> entry : localAlignments)
-      entry.getValue().destroy(context);
+    for (final Map.Entry<String, Alignment> entry : localAlignments) {
+        entry.getValue().destroy(context);
+    }
   }
 
   public AtomType type() {
@@ -247,7 +289,9 @@ public class VisualAtom extends Visual {
   }
 
   public void select(Context context, int index) {
-    if (hoverable != null) hoverable.notifySelected(context, index);
+    if (hoverable != null) {
+        hoverable.notifySelected(context, index);
+    }
     if (cursor == null) {
       cursor = context.cursorFactory.createAtomCursor(context, this, index);
       context.setCursor(cursor);
@@ -292,11 +336,17 @@ public class VisualAtom extends Visual {
     public ExtendBrickResult createNextBrick(final Context context) {
       for (int at = index + 1; at < children.size(); ++at) {
         ExtendBrickResult res = children.get(at).createFirstBrick(context);
-        if (res.empty) continue;
+        if (res.empty) {
+            continue;
+        }
         return res;
       }
-      if (parent == null) return ExtendBrickResult.empty();
-      if (context.windowAtom() == VisualAtom.this.atom) return ExtendBrickResult.empty();
+      if (parent == null) {
+          return ExtendBrickResult.empty();
+      }
+      if (context.windowAtom() == VisualAtom.this.atom) {
+          return ExtendBrickResult.empty();
+      }
       return parent.createNextBrick(context);
     }
 
@@ -304,11 +354,17 @@ public class VisualAtom extends Visual {
     public ExtendBrickResult createPreviousBrick(final Context context) {
       for (int at = index - 1; at >= 0; --at) {
         ExtendBrickResult res = children.get(at).createLastBrick(context);
-        if (res.empty) continue;
+        if (res.empty) {
+            continue;
+        }
         return res;
       }
-      if (parent == null) return ExtendBrickResult.empty();
-      if (context.windowAtom() == VisualAtom.this.atom) return ExtendBrickResult.empty();
+      if (parent == null) {
+          return ExtendBrickResult.empty();
+      }
+      if (context.windowAtom() == VisualAtom.this.atom) {
+          return ExtendBrickResult.empty();
+      }
       return parent.createPreviousBrick(context);
     }
 
@@ -316,10 +372,16 @@ public class VisualAtom extends Visual {
     public Brick findPreviousBrick(final Context context) {
       for (int at = index - 1; at >= 0; --at) {
         final Brick test = children.get(at).getLastBrick(context);
-        if (test != null) return test;
+        if (test != null) {
+            return test;
+        }
       }
-      if (context.windowAtom() == VisualAtom.this.atom) return null;
-      if (parent == null) return null;
+      if (context.windowAtom() == VisualAtom.this.atom) {
+          return null;
+      }
+      if (parent == null) {
+          return null;
+      }
       return parent.findPreviousBrick(context);
     }
 
@@ -327,41 +389,65 @@ public class VisualAtom extends Visual {
     public Brick findNextBrick(final Context context) {
       for (int at = index + 1; at < children.size(); ++at) {
         final Brick test = children.get(at).getLastBrick(context);
-        if (test != null) return test;
+        if (test != null) {
+            return test;
+        }
       }
-      if (context.windowAtom() == VisualAtom.this.atom) return null;
-      if (parent == null) return null;
+      if (context.windowAtom() == VisualAtom.this.atom) {
+          return null;
+      }
+      if (parent == null) {
+          return null;
+      }
       return parent.findNextBrick(context);
     }
 
     @Override
     public Brick getPreviousBrick(final Context context) {
       if (index == 0) {
-        if (context.windowAtom() == VisualAtom.this.atom) return null;
-        if (parent == null) return null;
+        if (context.windowAtom() == VisualAtom.this.atom) {
+            return null;
+        }
+        if (parent == null) {
+            return null;
+        }
         return parent.getPreviousBrick(context);
-      } else return children.get(index - 1).getLastBrick(context);
+      } else {
+          return children.get(index - 1).getLastBrick(context);
+      }
     }
 
     @Override
     public Brick getNextBrick(final Context context) {
       if (index + 1 >= children.size()) {
-        if (context.windowAtom() == VisualAtom.this.atom) return null;
-        if (parent == null) return null;
+        if (context.windowAtom() == VisualAtom.this.atom) {
+            return null;
+        }
+        if (parent == null) {
+            return null;
+        }
         return parent.getNextBrick(context);
-      } else return children.get(index + 1).getFirstBrick(context);
+      } else {
+          return children.get(index + 1).getFirstBrick(context);
+      }
     }
 
     @Override
     public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
-      if (parent == null) return null;
+      if (parent == null) {
+          return null;
+      }
       return parent.hover(context, point);
     }
 
     @Override
     public void notifyLastBrickCreated(Context context, Brick brick) {
-      if (cursor != null && cursor.index == index) cursor.border.setLast(context, brick);
-      if (hoverable != null && hoverable.index == index) hoverable.border.setLast(context, brick);
+      if (cursor != null && cursor.index == index) {
+          cursor.border.setLast(context, brick);
+      }
+      if (hoverable != null && hoverable.index == index) {
+          hoverable.border.setLast(context, brick);
+      }
       if (index + 1 == children.size()) {
         VisualAtom.this.notifyLastBrickCreated(context, brick);
       }
@@ -369,8 +455,12 @@ public class VisualAtom extends Visual {
 
     @Override
     public void notifyFirstBrickCreated(Context context, Brick brick) {
-      if (cursor != null && cursor.index == index) cursor.border.setFirst(context, brick);
-      if (hoverable != null && hoverable.index == index) hoverable.border.setFirst(context, brick);
+      if (cursor != null && cursor.index == index) {
+          cursor.border.setFirst(context, brick);
+      }
+      if (hoverable != null && hoverable.index == index) {
+          hoverable.border.setFirst(context, brick);
+      }
       if (index == 0) {
         VisualAtom.this.notifyFirstBrickCreated(context, brick);
       }
@@ -403,7 +493,9 @@ public class VisualAtom extends Visual {
         }
         return new ROPair<>(hoverable, changed);
       }
-      if (parent != null) return parent.hover(context, point);
+      if (parent != null) {
+          return parent.hover(context, point);
+      }
       return null;
     }
   }

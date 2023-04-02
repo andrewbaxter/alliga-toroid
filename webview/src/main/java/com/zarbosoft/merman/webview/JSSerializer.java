@@ -52,7 +52,9 @@ public class JSSerializer implements Serializer {
   public JSSerializer(BackType backType, ROList<String> prioritizeKeys) {
     this.backType = backType;
     this.prioritizeKeys = prioritizeKeys;
-    if (backType == BackType.LUXEM) throw new Assertion();
+    if (backType == BackType.LUXEM) {
+        throw new Assertion();
+    }
   }
 
   @Override
@@ -76,7 +78,9 @@ public class JSSerializer implements Serializer {
           document.root.write(stack);
           uncheck(
               () -> {
-                while (!stack.isEmpty()) stack.removeLast().run(env, stack, writer);
+                while (!stack.isEmpty()) {
+                    stack.removeLast().run(env, stack, writer);
+                }
               });
           return writer.resultOne();
         });
@@ -100,7 +104,9 @@ public class JSSerializer implements Serializer {
             default:
               throw new DeadCode();
           }
-          while (!stack.isEmpty()) stack.removeLast().run(env, stack, writer);
+          while (!stack.isEmpty()) {
+              stack.removeLast().run(env, stack, writer);
+          }
           return writer.resultMany();
         });
   }
@@ -127,12 +133,16 @@ public class JSSerializer implements Serializer {
       TSMap<String, Integer> keys = new TSMap<>();
       for (int i = 0; i < keys0.length; ++i) {
         String key = keys0.getAt(i);
-        if (!((JsObject) o).hasOwnProperty(key)) continue;
+        if (!((JsObject) o).hasOwnProperty(key)) {
+            continue;
+        }
         keys.put(key, i);
       }
       for (String key : prioritizeKeys) {
         Integer i = keys.removeGetOpt(key);
-        if (i == null) continue;
+        if (i == null) {
+            continue;
+        }
         events.add(new ROPair<>(new EPrimitiveEvent(key), path));
         walkJSJson(events, ((JsPropertyMap) o).get(key), path.add(i));
       }
@@ -141,7 +151,9 @@ public class JSSerializer implements Serializer {
         walkJSJson(events, ((JsPropertyMap) o).get(pair.getKey()), path.add(pair.getValue()));
       }
       events.add(new ROPair<>(new EObjectCloseEvent(), path));
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
   }
 
   public Document loadDocument(Syntax syntax, java.lang.String data) {

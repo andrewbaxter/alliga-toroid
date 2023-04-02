@@ -57,8 +57,9 @@ public class NotMain extends Application {
   public void start(Stage primaryStage) throws Exception {
     try {
       List<String> args = getParameters().getUnnamed();
-      if (args.isEmpty())
-        throw new RuntimeException("need to specify one file to open on the command line");
+      if (args.isEmpty()) {
+          throw new RuntimeException("need to specify one file to open on the command line");
+      }
       String path = args.get(0);
       Environment env = new JFXEnvironment(Locale.getDefault());
       SyntaxOut syntaxOut = JsonSyntax.create(env, new Padding(5, 5, 5, 5));
@@ -178,7 +179,9 @@ public class NotMain extends Application {
                     // If end/start paths are the same then the longest match includes the index
                     // vs if they're different, then it includes the primitive but not index
                     // Adjust so the index is the next element in both cases
-                    if (longestMatch == startPathList.size()) longestMatch -= 1;
+                    if (longestMatch == startPathList.size()) {
+                        longestMatch -= 1;
+                    }
                     int startIndex = Integer.parseInt(startPathList.get(longestMatch));
                     int endIndex = Integer.parseInt(endPathList.get(longestMatch));
                     if (endIndex < startIndex) {
@@ -188,7 +191,9 @@ public class NotMain extends Application {
                     }
                   } else if (base instanceof Atom) {
                     ((Atom) base).fieldParentRef.selectField(context);
-                  } else throw new Assertion();
+                  } else {
+                      throw new Assertion();
+                  }
                 }
               }
             }

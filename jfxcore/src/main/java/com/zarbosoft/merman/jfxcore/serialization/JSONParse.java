@@ -103,7 +103,9 @@ public class JSONParse<O> extends BaseParseBuilder<O, JSONParse<O>> {
               default:
                 throw new Assertion();
             }
-            if (e == null) break;
+            if (e == null) {
+                break;
+            }
             out.add(new ROPair<>(e, path));
             path = path.push(e);
           }
@@ -112,8 +114,9 @@ public class JSONParse<O> extends BaseParseBuilder<O, JSONParse<O>> {
   }
 
   public JSONParse<O> eventUncertainty(final int limit) {
-    if (eventUncertainty != 20)
-      throw new IllegalArgumentException("Max event uncertainty already set");
+    if (eventUncertainty != 20) {
+        throw new IllegalArgumentException("Max event uncertainty already set");
+    }
     final JSONParse<O> out = split();
     out.eventUncertainty = limit;
     return out;

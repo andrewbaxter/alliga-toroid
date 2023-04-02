@@ -41,15 +41,10 @@ import com.zarbosoft.alligatoroid.compiler.model.language.RecordElement;
 import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
 import com.zarbosoft.alligatoroid.compiler.model.language.Wrap;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarDataPrototype;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarObjectPrototype;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarPrimitivePrototype;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarProtofield;
-import com.zarbosoft.alligatoroid.compiler.mortar.halftypes.MortarStaticMethodType;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataConstValue;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataVariableValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NoExportValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
@@ -78,12 +73,12 @@ public class StaticAutogen {
   public static final ROMap<Object, String> singletonExportableKeyLookup;
   public static final ROMap<String, Object> singletonExportableLookup;
   public static final ROMap<Class, ExportableType> detachedExportableTypeLookup;
-  public static final ROMap<Class, MortarObjectPrototype> autoMortarHalfObjectTypes;
-  public static final ROMap<Class, MortarDataPrototype> primitivePrototypeLookup;
+  public static final ROMap<Class, MortarObjectImplType> autoMortarHalfObjectTypes;
+  public static final ROMap<Class, MortarDataType> primitivePrototypeLookup;
   public static final LooseRecord builtin;
-  public static final MortarDataPrototype prototypeLanguageElement;
-  public static final MortarObjectPrototype prototypeValue;
-  public static final MortarObjectPrototype prototypeLocation;
+  public static final MortarDataType prototypeLanguageElement;
+  public static final MortarObjectImplType prototypeValue;
+  public static final MortarObjectImplType prototypeLocation;
 
   static {
     final WorkingMeta working = new WorkingMeta();
@@ -132,7 +127,9 @@ public class StaticAutogen {
                       accessPath.mut().add(Integer.toString(i)));
               if (subNonCollectionArg != null) {
                 elementData.add(subNonCollectionArg);
-              } else throw new Assertion();
+              } else {
+                throw new Assertion();
+              }
             }
             return SemiserialTuple.create(elementData);
           }
@@ -192,7 +189,9 @@ public class StaticAutogen {
                       el.getValue(),
                       path,
                       accessPath);
-              if (k == null || v == null) throw new Assertion();
+              if (k == null || v == null) {
+                throw new Assertion();
+              }
               elementData.putNew(k, v);
             }
             return SemiserialRecord.create(elementData);
@@ -233,7 +232,7 @@ public class StaticAutogen {
     working.inlineTypeLookup.put(Integer.class, intConverter);
     working.detachedExportType(int.class, intConverter);
     working.detachedExportType(Integer.class, intConverter);
-    working.primitivePrototypeLookup.put(int.class, MortarPrimitivePrototype.intPrototype);
+    working.primitivePrototypeLookup.put(int.class, MortarPrimitiveAll.typeInt);
 
     InlineType boolConverter =
         new InlineType() {
@@ -267,7 +266,7 @@ public class StaticAutogen {
     working.inlineTypeLookup.put(Boolean.class, boolConverter);
     working.detachedExportType(boolean.class, boolConverter);
     working.detachedExportType(Boolean.class, boolConverter);
-    working.primitivePrototypeLookup.put(boolean.class, MortarPrimitivePrototype.boolPrototype);
+    working.primitivePrototypeLookup.put(boolean.class, MortarPrimitiveAll.typeBool);
 
     InlineType stringConverter =
         new InlineType() {
@@ -299,10 +298,10 @@ public class StaticAutogen {
         };
     working.inlineTypeLookup.put(String.class, stringConverter);
     working.detachedExportType(String.class, stringConverter);
-    working.primitivePrototypeLookup.put(String.class, MortarPrimitivePrototype.stringPrototype);
+    working.primitivePrototypeLookup.put(String.class, MortarPrimitiveAll.typeString);
 
-    working.primitivePrototypeLookup.put(byte.class, MortarPrimitivePrototype.bytePrototype);
-    working.primitivePrototypeLookup.put(byte[].class, MortarPrimitivePrototype.bytesPrototype);
+    working.primitivePrototypeLookup.put(byte.class, MortarPrimitiveAll.typeByte);
+    working.primitivePrototypeLookup.put(byte[].class, MortarPrimitiveAll.typeBytes);
 
     working.generateMortarType(ModuleId.class);
     {
@@ -341,8 +340,12 @@ public class StaticAutogen {
           JavaQualifiedName.class,
           JavaInternalName.class,
         }) {
-      if (NoExportValue.class.isAssignableFrom(klass)) throw new Assertion();
-      if (!BuiltinAutoExportable.class.isAssignableFrom(klass)) throw new Assertion();
+      if (NoExportValue.class.isAssignableFrom(klass)) {
+        throw new Assertion();
+      }
+      if (!BuiltinAutoExportable.class.isAssignableFrom(klass)) {
+        throw new Assertion();
+      }
       working.generateBuiltinExportableType(klass);
       working.generateMortarType(klass);
     }
@@ -356,9 +359,8 @@ public class StaticAutogen {
     singletonExportableKeyLookup = working.singletonBuiltinKeyLookup;
     singletonExportableLookup = working.singletonBuiltinLookup;
     autoMortarHalfObjectTypes = working.autoMortarHalfDataTypes;
-    primitivePrototypeLookup =
-        working.primitivePrototypeLookup;
-        prototypeLanguageElement = autoMortarHalfObjectTypes.get(LanguageElement.class);
+    primitivePrototypeLookup = working.primitivePrototypeLookup;
+    prototypeLanguageElement = autoMortarHalfObjectTypes.get(LanguageElement.class);
     prototypeValue = autoMortarHalfObjectTypes.get(Value.class);
     prototypeLocation = autoMortarHalfObjectTypes.get(Location.class);
   }
@@ -374,17 +376,17 @@ public class StaticAutogen {
    */
   public static FuncInfo funcDescriptor(WorkingMeta working, Method method) {
     boolean needsLocation = false;
-    TSList<ROPair<Object, MortarDataPrototype>> argTypes = new TSList<>();
+    TSList<ROPair<Object, MortarDataType>> argTypes = new TSList<>();
     for (int i = 0; i < method.getParameters().length; ++i) {
       Parameter parameter = method.getParameters()[i];
       if (i == 0 && parameter.getType() == Location.class) {
         needsLocation = true;
       }
-      MortarDataPrototype paramType = dataDescriptor(working, parameter.getType());
+      MortarDataType paramType = dataDescriptor(working, parameter.getType());
       argTypes.add(new ROPair<>(parameter.getName(), paramType));
     }
 
-    MortarDataPrototype retType = dataDescriptor(working, method.getReturnType());
+    MortarDataType retType = dataDescriptor(working, method.getReturnType());
 
     return new FuncInfo(
         method.getName(),
@@ -394,24 +396,53 @@ public class StaticAutogen {
         needsLocation);
   }
 
-  /**
-   * Must be called during initialization (single thread)!
-   *
-   * @param autoMortarHalfDataTypes
-   * @param klass
-   * @param working.builtinSingletonIndexes
-   * @param builtinSingletons0
-   * @return
-   */
-  public static MortarDataPrototype dataDescriptor(WorkingMeta working, Class klass) {
+  /** Must be called during initialization (single thread)! */
+  public static MortarDataType dataDescriptor(WorkingMeta working, Class klass) {
     if (klass == void.class) {
-      return MortarNullType;
+      return NullType.type;
+    } else if (klass.isPrimitive()) {
+      if (klass == byte.class) {
+        return MortarPrimitiveAll.typeByte;
+      } else if (klass == boolean.class) {
+        return MortarPrimitiveAll.typeBool;
+      } else if (klass == int.class) {
+        return MortarPrimitiveAll.typeInt;
+      } else {
+        throw new Assertion();
+      }
     } else if (klass == String.class) {
-      return MortarPrimitivePrototype.prototype_string;
+      return MortarPrimitiveAll.typeString;
     } else if (klass == byte[].class) {
-      return MortarPrimitivePrototype.prototype_bytes;
+      return MortarPrimitiveAll.typeBytes;
     } else {
       return working.generateMortarType(klass);
+    }
+  }
+
+  /** Must be called during initialization (single thread)! */
+  public static MortarObjectField fieldDescriptor(
+      MortarObjectInnerType parent, String name, WorkingMeta working, Class klass) {
+    if (klass == void.class) {
+      return NullMortarField.field;
+    } else if (klass.isPrimitive()) {
+      final MortarPrimitiveAll t;
+      if (klass == byte.class) {
+        t = MortarPrimitiveAll.typeByte;
+      } else if (klass == boolean.class) {
+        t = MortarPrimitiveAll.typeBool;
+      } else if (klass == int.class) {
+        t = MortarPrimitiveAll.typeInt;
+      } else {
+        throw new Assertion();
+      }
+      return new MortarPrimitiveFieldAll(parent, name, t);
+    } else if (klass == String.class) {
+      return new MortarPrimitiveFieldAll(parent, name, MortarPrimitiveAll.typeString);
+    } else if (klass == byte[].class) {
+      return new MortarPrimitiveFieldAll(parent, name, MortarPrimitiveAll.typeBytes);
+    } else {
+      final MortarObjectImplType t = working.generateMortarType(klass);
+      return new MortarObjectImplField(parent, name, t.meta, t.fields);
     }
   }
 
@@ -419,20 +450,25 @@ public class StaticAutogen {
       WorkingMeta working, Class klass, String name) {
     Method method = null;
     for (Method checkMethod : klass.getMethods()) {
-      if (!checkMethod.getName().equals(name)) continue;
+      if (!checkMethod.getName().equals(name)) {
+        continue;
+      }
       method = checkMethod;
       break;
     }
-    if (method == null)
+    if (method == null) {
       throw Assertion.format("builtin wrap [%s] function [%s] missing", klass.getName(), name);
-    return MortarStaticMethodType.type.type_constAsValue(funcDescriptor(working, method));
+    }
+    return MortarStaticMethodTypestate.type.typestate_constAsValue(funcDescriptor(working, method));
   }
 
   private static LooseRecord aggregateBuiltinForGraph(
       WorkingMeta working, Class klass, String path) {
     TSOrderedMap<Object, EvaluateResult> values = new TSOrderedMap<>();
     for (Field f : klass.getDeclaredFields()) {
-      if (!Modifier.isStatic(f.getModifiers())) continue;
+      if (!Modifier.isStatic(f.getModifiers())) {
+        continue;
+      }
       String name = f.getName();
       if (name.startsWith("_")) {
         name = name.substring(1);
@@ -447,15 +483,17 @@ public class StaticAutogen {
       } else {
         working.registerSingletonBuiltinExportable((BuiltinSingletonExportable) data);
         if (data instanceof Value) {
-          values.put(name, EvaluateResult.pure((MortarDataConstValue) data));
+          values.put(name, EvaluateResult.pure((MortarDataValueConst) data));
         } else {
-          final MortarObjectPrototype type = working.generateMortarType(data.getClass());
-          values.put(name, EvaluateResult.pure(type.prototype_constAsValue(data)));
+          final MortarObjectImplType type = working.generateMortarType(data.getClass());
+          values.put(name, EvaluateResult.pure(type.type_constAsValue(data)));
         }
       }
     }
     for (Method m : klass.getDeclaredMethods()) {
-      if (!Modifier.isStatic(m.getModifiers())) continue;
+      if (!Modifier.isStatic(m.getModifiers())) {
+        continue;
+      }
       String name = m.getName();
       if (name.startsWith("_")) {
         name = name.substring(1);
@@ -484,12 +522,12 @@ public class StaticAutogen {
 
   private static class WorkingMeta {
     public final TSMap<Class, ExportableType> detachedExportableTypeLookup = new TSMap<>();
-    public final TSMap<Class, MortarObjectPrototype> autoMortarHalfDataTypes = new TSMap<>();
+    public final TSMap<Class, MortarObjectImplType> autoMortarHalfDataTypes = new TSMap<>();
     public final TSMap<Class, ExportableType> autoExportableTypeLookup = new TSMap<>();
     public final TSMap<Class, InlineType> inlineTypeLookup = new TSMap<>();
     public final TSMap<Object, String> singletonBuiltinKeyLookup = new TSMap<>();
     public final TSMap<String, Object> singletonBuiltinLookup = new TSMap<>();
-    public final TSMap<Class, MortarDataPrototype> primitivePrototypeLookup = new TSMap<>();
+    public final TSMap<Class, MortarDataType> primitivePrototypeLookup = new TSMap<>();
     public int singletonCount;
 
     private void registerSingletonBuiltinExportable(BuiltinSingletonExportable e) {
@@ -507,37 +545,51 @@ public class StaticAutogen {
       autoExportableTypeLookup.put(klass, type);
       {
         final Constructor[] constructors = klass.getConstructors();
-        if (constructors.length != 1) throw new Assertion();
-        if (constructors[0].getParameterCount() != 0) throw new Assertion();
+        if (constructors.length != 1) {
+          throw new Assertion();
+        }
+        if (constructors[0].getParameterCount() != 0) {
+          throw new Assertion();
+        }
         for (Field field : klass.getFields()) {
-          if (Modifier.isStatic(field.getModifiers())) continue;
-          if (Modifier.isFinal(field.getModifiers())) throw new Assertion();
-          if (!Modifier.isPublic(field.getModifiers())) throw new Assertion();
+          if (Modifier.isStatic(field.getModifiers())) {
+            continue;
+          }
+          if (Modifier.isFinal(field.getModifiers())) {
+            throw new Assertion();
+          }
+          if (!Modifier.isPublic(field.getModifiers())) {
+            throw new Assertion();
+          }
         }
       }
       registerSingletonBuiltinExportable(klass.getCanonicalName(), type);
     }
 
-    public MortarObjectPrototype generateMortarType(Class klass) {
-      MortarObjectPrototype out = autoMortarHalfDataTypes.getOpt(klass);
+    public MortarObjectImplType generateMortarType(Class klass) {
+      MortarObjectImplType out = autoMortarHalfDataTypes.getOpt(klass);
       if (out == null) {
-        TSMap<Object, MortarProtofield> fields = new TSMap<>();
-        TSList<MortarObjectMeta> inherits = new TSList<>();
-        final MortarObjectMeta meta = new MortarObjectMeta(JavaBytecodeUtils.qualifiedNameFromClass(klass), inherits);
-        MortarObjectPrototype out1 =
-            new MortarObjectPrototype(meta,fields);
-        autoMortarHalfDataTypes.put(klass, out1);
-        if (klass != MortarDataVariableValue.class)
+        TSMap<Object, MortarObjectField> fields = new TSMap<>();
+        TSList<MortarObjectInnerType> inherits = new TSList<>();
+        final MortarObjectInnerType innerType =
+            new MortarObjectInnerType(JavaBytecodeUtils.qualifiedNameFromClass(klass), inherits);
+        if (klass != MortarDataValueVariableStack.class) {
           for (Method method : klass.getDeclaredMethods()) {
-            if (!Modifier.isPublic(method.getModifiers())) continue;
-            if (!method.isAnnotationPresent(WrapExpose.class)) continue;
+            if (!Modifier.isPublic(method.getModifiers())) {
+              continue;
+            }
+            if (!method.isAnnotationPresent(WrapExpose.class)) {
+              continue;
+            }
             fields.putNew(
-                method.getName(), new MortarMethodFieldtype(funcDescriptor(this, method)));
+                method.getName(),
+                new MortarObjectMethodAll(innerType, funcDescriptor(this, method)));
           }
+        }
         for (Field field : klass.getDeclaredFields()) {
-          MortarDataPrototype dataType = dataDescriptor(this, field.getType());
+          MortarDataType dataType = dataDescriptor(this, field.getType());
           String fieldName = field.getName();
-          fields.putNew(fieldName, dataType.prototype_protofieldNew(meta, field.getName()));
+          fields.putNew(fieldName, fieldDescriptor(innerType, fieldName, this, field.getType()));
         }
         if (klass.getSuperclass() != null && klass.getSuperclass() != Object.class) {
           inherits.add(generateMortarType(klass.getSuperclass()).meta);
@@ -545,6 +597,8 @@ public class StaticAutogen {
         for (Class iface : klass.getInterfaces()) {
           inherits.add(generateMortarType(iface).meta);
         }
+        MortarObjectImplType out1 = new MortarObjectImplType(innerType, fields);
+        autoMortarHalfDataTypes.put(klass, out1);
         out = out1;
       }
       return out;
@@ -590,16 +644,16 @@ public class StaticAutogen {
   public static class FuncInfo {
     public final String name;
     public final JavaQualifiedName base;
-    public final ROList<ROPair<Object, MortarDataPrototype>> arguments;
-    public final MortarDataPrototype returnType;
+    public final ROList<ROPair<Object, MortarDataType>> arguments;
+    public final MortarDataType returnType;
     public final boolean needsLocation;
 
     public FuncInfo(
-            String name,
-            JavaQualifiedName base,
-            TSList<ROPair<Object, MortarDataPrototype>> arguments,
-            MortarDataPrototype returnType,
-            boolean needsLocation) {
+        String name,
+        JavaQualifiedName base,
+        TSList<ROPair<Object, MortarDataType>> arguments,
+        MortarDataType returnType,
+        boolean needsLocation) {
       this.name = name;
       this.base = base;
       this.arguments = arguments;
@@ -609,8 +663,8 @@ public class StaticAutogen {
 
     public ROList<JavaDataDescriptor> argDescriptor() {
       TSList<JavaDataDescriptor> out = new TSList<>();
-      for (ROPair<Object, MortarDataPrototype> argumentType : arguments) {
-        out.add(argumentType.second.prototype_jvmDesc());
+      for (ROPair<Object, MortarDataType> argumentType : arguments) {
+        out.add(argumentType.second.type_jvmDesc());
       }
       return out;
     }

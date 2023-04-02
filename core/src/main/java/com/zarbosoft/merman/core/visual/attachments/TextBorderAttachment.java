@@ -83,32 +83,53 @@ public class TextBorderAttachment implements ObboxStyle.Stylable {
       final int firstIndex,
       final BrickText last,
       final int lastIndex) {
-    if (this.first != null && this.first != first)
-      this.first.removeAttachment(this.firstAttachment);
-    if (this.last != null && this.last != last) this.last.removeAttachment(this.lastAttachment);
+    if (this.first != null && this.first != first) {
+        this.first.removeAttachment(this.firstAttachment);
+    }
+    if (this.last != null && this.last != last) {
+        this.last.removeAttachment(this.lastAttachment);
+    }
     this.first = first;
     this.last = last;
-    if (firstIndex < 0) throw new AssertionError();
+    if (firstIndex < 0) {
+        throw new AssertionError();
+    }
     this.firstIndex = firstIndex;
-    if (lastIndex < 0) throw new AssertionError();
+    if (lastIndex < 0) {
+        throw new AssertionError();
+    }
     this.lastIndex = lastIndex;
     blockRedraw = true;
-    if (first != null) this.first.addAttachment(context, this.firstAttachment);
-    if (last != null) this.last.addAttachment(context, this.lastAttachment);
+    if (first != null) {
+        this.first.addAttachment(context, this.firstAttachment);
+    }
+    if (last != null) {
+        this.last.addAttachment(context, this.lastAttachment);
+    }
     blockRedraw = false;
     redraw(context);
   }
 
   public void destroy(final Context context) {
-    if (first != null) first.removeAttachment(this.firstAttachment);
-    if (last != null) last.removeAttachment(this.lastAttachment);
+    if (first != null) {
+        first.removeAttachment(this.firstAttachment);
+    }
+    if (last != null) {
+        last.removeAttachment(this.lastAttachment);
+    }
     context.background.removeNode(border.drawing);
   }
 
   public void redraw(final Context context) {
-    if (first == null) return;
-    if (last == null) return;
-    if (blockRedraw) return;
+    if (first == null) {
+        return;
+    }
+    if (last == null) {
+        return;
+    }
+    if (blockRedraw) {
+        return;
+    }
     border.setSize(
         context,
         this.first.parent == this.last.parent,

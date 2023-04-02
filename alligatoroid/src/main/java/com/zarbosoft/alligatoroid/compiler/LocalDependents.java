@@ -83,18 +83,20 @@ public class LocalDependents {
                         gotHash = new Utils.SHA256().add(Paths.get(source.getKey())).buildHex();
                       } catch (Common.UncheckedFileNotFoundException ignored) {
                       }
-                      if (gotHash == null || !gotHash.equals(source.getValue().hash))
-                        markDirty(source.getKey());
+                      if (gotHash == null || !gotHash.equals(source.getValue().hash)) {
+                          markDirty(source.getKey());
+                      }
                     }
                   }
 
                   private void markDirty(String path) {
                     dirty.add(path);
                     SerialFormatElement state = dependents.elements.getOpt(path);
-                    if (state != null)
-                      for (String s : state.dependents) {
-                        markDirty(s);
-                      }
+                    if (state != null) {
+                        for (String s : state.dependents) {
+                          markDirty(s);
+                        }
+                    }
                   }
                 };
                 return dirty;
@@ -132,7 +134,9 @@ public class LocalDependents {
   }
 
   public void write() {
-    if (cachePath == null) return;
+    if (cachePath == null) {
+        return;
+    }
     TSMap<String, SerialFormatElement> data = new TSMap<>();
     for (ROPair<String, String> dependency : localDependencies) {
       data.getCreate(

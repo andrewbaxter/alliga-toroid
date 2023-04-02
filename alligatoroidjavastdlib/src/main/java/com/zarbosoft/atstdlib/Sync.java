@@ -16,7 +16,9 @@ public class Sync {
   public synchronized Future push(GenerateClass k) {
     {
       Future found = seen.get(k.klass);
-      if (found != null) return found;
+      if (found != null) {
+          return found;
+      }
     }
     CompletableFuture future = new CompletableFuture();
     seen.put(k.klass, future);

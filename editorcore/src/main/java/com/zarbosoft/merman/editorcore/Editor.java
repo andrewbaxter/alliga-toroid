@@ -139,7 +139,9 @@ public class Editor {
 
   public static void atomSet(
       Editor editor, History.Recorder recorder, FieldAtom field, Atom value) {
-    if (field.data != null) removeIds(editor, field.data);
+    if (field.data != null) {
+        removeIds(editor, field.data);
+    }
     makeIdsUnique(editor, recorder, value);
     recorder.apply(editor, new ChangeAtom(field, value));
   }
@@ -158,7 +160,9 @@ public class Editor {
         }
       } else if (field instanceof FieldPrimitive) {
         // nop
-      } else throw new Assertion();
+      } else {
+          throw new Assertion();
+      }
     }
   }
 
@@ -182,7 +186,9 @@ public class Editor {
       Editor editor, History.Recorder recorder, Atom atom, Field field) {
     if (field instanceof FieldId) {
       Integer uniqueId = editor.fileIds.take(((FieldId) field).id);
-      if (uniqueId != null) recorder.apply(editor, new ChangeId((FieldId) field, uniqueId));
+      if (uniqueId != null) {
+          recorder.apply(editor, new ChangeId((FieldId) field, uniqueId));
+      }
       editor.fileIdMap.put(((FieldId) field).id, atom);
     } else if (field instanceof FieldAtom) {
       makeIdsUnique(editor, recorder, ((FieldAtom) field).data);
@@ -192,7 +198,9 @@ public class Editor {
       }
     } else if (field instanceof FieldPrimitive) {
       // nop
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
   }
 
   public static void makeIdsUnique(Editor editor, History.Recorder recorder, Atom atom) {
@@ -267,7 +275,9 @@ public class Editor {
       return new FieldPrimitive((BaseBackPrimitiveSpec) backSpecData, "");
     } else if (backSpecData instanceof BackIdSpec) {
       return new FieldId((BackIdSpec) backSpecData, fileIds.take(null));
-    } else throw new Assertion();
+    } else {
+        throw new Assertion();
+    }
   }
 
   public static Field createEmptyField(
@@ -281,7 +291,9 @@ public class Editor {
         field.initialSet(createEmptyGap(fileIds, syntax.gap));
       }
       return field;
-    } else return createEndEmptyField(fileIds, backSpecData);
+    } else {
+        return createEndEmptyField(fileIds, backSpecData);
+    }
   }
 
   public Field createEmptyField(BackSpecData backSpecData) {
@@ -296,9 +308,11 @@ public class Editor {
     final ROOrderedSetRef<AtomType> childTypes =
         this.context.syntax.splayedTypes.get(value.back().elementAtomType());
     final Atom element;
-    if (childTypes.size() == 1)
-      element = createEmptyAtom(this.context.syntax, fileIds, childTypes.iterator().next());
-    else element = createEmptyGap(fileIds, this.context.syntax.gap);
+    if (childTypes.size() == 1) {
+        element = createEmptyAtom(this.context.syntax, fileIds, childTypes.iterator().next());
+    } else {
+        element = createEmptyGap(fileIds, this.context.syntax.gap);
+    }
     recorder.apply(this, new ChangeArray(value, index, 0, TSList.of(element)));
     return element;
   }

@@ -47,7 +47,9 @@ public class ConditionNode extends ConditionType {
 
   @Override
   protected boolean defaultOnImplementation() {
-    if (is == ConditionNode.Is.PRECEDENT && !invert) return false;
+    if (is == ConditionNode.Is.PRECEDENT && !invert) {
+        return false;
+    }
     return true;
   }
 

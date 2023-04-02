@@ -19,7 +19,9 @@ public class Threads {
               joinThreads.addAll(threads.keySet());
               threads.clear();
             }
-            if (joinThreads.isEmpty()) break;
+            if (joinThreads.isEmpty()) {
+                break;
+            }
             for (Thread thread : joinThreads) {
               thread.join();
             }

@@ -88,8 +88,11 @@ public abstract class BaseSequence<K, T> extends Node<ROList<T>> {
         Grammar grammar, Step step, Leaf leaf, K result, MismatchCause mismatchCause) {
       final int nextStep = this.step + 1;
       ROList<T> newCollected;
-      if (self.children.get(this.step).second) newCollected = self.collect(collected, result);
-      else newCollected = collected;
+      if (self.children.get(this.step).second) {
+          newCollected = self.collect(collected, result);
+      } else {
+          newCollected = collected;
+      }
       if (nextStep >= self.children.size()) {
         parent.advance(grammar, step, leaf, newCollected, mismatchCause);
       } else {

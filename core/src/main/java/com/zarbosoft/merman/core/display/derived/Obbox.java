@@ -25,8 +25,12 @@ public class Obbox {
   }
 
   private static double simpleNorm(double v) {
-    if (aeq(v, 0, 0.1)) return 0;
-    if (v < 0) return -1;
+    if (aeq(v, 0, 0.1)) {
+        return 0;
+    }
+    if (v < 0) {
+        return -1;
+    }
     return 1;
   }
 

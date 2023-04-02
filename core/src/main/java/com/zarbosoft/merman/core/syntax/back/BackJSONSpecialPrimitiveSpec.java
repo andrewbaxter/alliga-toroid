@@ -86,7 +86,9 @@ public class BackJSONSpecialPrimitiveSpec extends BaseBackPrimitiveSpec {
                       new FieldPrimitive(
                           BackJSONSpecialPrimitiveSpec.this,
                           ((JSpecialPrimitiveEvent) event).value))));
-        } else return new ROPair<>(false, null);
+        } else {
+            return new ROPair<>(false, null);
+        }
       }
 
       @Override

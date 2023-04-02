@@ -31,7 +31,9 @@ public class JavaFXText implements Text {
   }
 
   private void transition(Transition newTransition) {
-    if (transition != null) transition.stop();
+    if (transition != null) {
+        transition.stop();
+    }
     transition = newTransition;
     transition.setOnFinished(
         e -> {
@@ -94,7 +96,9 @@ public class JavaFXText implements Text {
   }
 
   public double getConverseAtIndex(final int index) {
-    if (index == 0) return 0;
+    if (index == 0) {
+        return 0;
+    }
     Font.Measurer measurer = font().measurer();
     final double precedingLength = measurer.getWidth(text.getText().substring(0, index));
     int charStart = Math.max(0, index - 1);
@@ -121,12 +125,13 @@ public class JavaFXText implements Text {
     Bounds bounds = text.getLayoutBounds();
     Display.UnconvertVector v =
         display.convert.unconvert(converse, transverseBaseline, bounds.getWidth(), 0);
-    if (animate)
-      transition(
-          new TransitionSmoothOut(
-              text,
-              v.x - (text.getLayoutX() + text.getTranslateX()),
-              v.y - (text.getLayoutY() + text.getTranslateY())));
+    if (animate) {
+        transition(
+            new TransitionSmoothOut(
+                text,
+                v.x - (text.getLayoutX() + text.getTranslateX()),
+                v.y - (text.getLayoutY() + text.getTranslateY())));
+    }
     text.setLayoutX(v.x);
     text.setLayoutY(v.y);
   }
@@ -164,16 +169,18 @@ public class JavaFXText implements Text {
 
   public void setJFXPositionInternal(final Display.UnconvertAxis v, final boolean animate) {
     if (v.x) {
-      if (animate)
-        transition(
-            new TransitionSmoothOut(
-                text, v.amount - (text.getLayoutX() + text.getTranslateX()), null));
+      if (animate) {
+          transition(
+              new TransitionSmoothOut(
+                  text, v.amount - (text.getLayoutX() + text.getTranslateX()), null));
+      }
       text.setLayoutX(v.amount);
     } else {
-      if (animate)
-        transition(
-            new TransitionSmoothOut(
-                text, null, v.amount - (text.getLayoutY() + text.getTranslateY())));
+      if (animate) {
+          transition(
+              new TransitionSmoothOut(
+                  text, null, v.amount - (text.getLayoutY() + text.getTranslateY())));
+      }
       text.setLayoutY(v.amount);
     }
   }

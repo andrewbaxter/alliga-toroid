@@ -45,7 +45,9 @@ public interface ROSetRef<T> extends Iterable<T> {
 
   default boolean containsAny(ROSetRef<T> other) {
     for (T t : other) {
-      if (contains(t)) return true;
+      if (contains(t)) {
+          return true;
+      }
     }
     return false;
   }

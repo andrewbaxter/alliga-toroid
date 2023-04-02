@@ -34,13 +34,17 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
 
   private int precedingStart(final Environment.GlyphWalker iter, final int offset) {
     int to = iter.before(offset);
-    if (to == I18N_DONE) to = 0;
+    if (to == I18N_DONE) {
+        to = 0;
+    }
     return Math.max(0, to);
   }
 
   private int precedingStart(final Environment.WordWalker iter, final int offset) {
     int to = iter.startBefore(offset);
-    if (to == I18N_DONE) to = 0;
+    if (to == I18N_DONE) {
+        to = 0;
+    }
     return to;
   }
 
@@ -54,13 +58,17 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
 
   private int precedingEnd(final Environment.GlyphWalker iter, final int offset) {
     int to = iter.before(offset);
-    if (to == I18N_DONE) to = 0;
+    if (to == I18N_DONE) {
+        to = 0;
+    }
     return Math.max(0, to);
   }
 
   private int precedingEnd(final Environment.WordWalker iter, final int offset) {
     int to = iter.endBefore(offset);
-    if (to == I18N_DONE) to = 0;
+    if (to == I18N_DONE) {
+        to = 0;
+    }
     return to;
   }
 
@@ -74,13 +82,17 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
 
   private int followingStart(final Environment.GlyphWalker iter, final int offset) {
     int to = iter.after(offset);
-    if (to == I18N_DONE) to = visualPrimitive.value.length();
+    if (to == I18N_DONE) {
+        to = visualPrimitive.value.length();
+    }
     return to;
   }
 
   private int followingStart(final Environment.WordWalker iter, final int offset) {
     int to = iter.startAfter(offset);
-    if (to == I18N_DONE) to = visualPrimitive.value.length();
+    if (to == I18N_DONE) {
+        to = visualPrimitive.value.length();
+    }
     return to;
   }
 
@@ -94,13 +106,17 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
 
   private int followingEnd(final Environment.GlyphWalker iter, final int offset) {
     int to = iter.after(offset);
-    if (to == I18N_DONE) to = visualPrimitive.value.length();
+    if (to == I18N_DONE) {
+        to = visualPrimitive.value.length();
+    }
     return Math.min(visualPrimitive.value.length(), to);
   }
 
   private int followingEnd(final Environment.WordWalker iter, final int offset) {
     int to = iter.endAfter(offset);
-    if (to == I18N_DONE) to = visualPrimitive.value.length();
+    if (to == I18N_DONE) {
+        to = visualPrimitive.value.length();
+    }
     return to;
   }
 
@@ -127,7 +143,9 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
     if (sourceLine.index + 1 < visualPrimitive.lines.size()) {
       final VisualFieldPrimitive.Line nextLine = visualPrimitive.lines.get(sourceLine.index + 1);
       return nextLine.offset + Math.min(nextLine.text.length(), source - sourceLine.offset);
-    } else return sourceLine.offset + sourceLine.text.length();
+    } else {
+        return sourceLine.offset + sourceLine.text.length();
+    }
   }
 
   private int previousLine(final VisualFieldPrimitive.Line sourceLine, final int source) {
@@ -135,7 +153,9 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
       final VisualFieldPrimitive.Line previousLine =
           visualPrimitive.lines.get(sourceLine.index - 1);
       return previousLine.offset + Math.min(previousLine.text.length(), source - sourceLine.offset);
-    } else return sourceLine.offset;
+    } else {
+        return sourceLine.offset;
+    }
   }
 
   private int endOfLine(final VisualFieldPrimitive.Line sourceLine) {
@@ -172,70 +192,94 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
 
   public void actionNextGlyph(final Context context) {
     final int newIndex = followingStart();
-    if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+    if (range.beginOffset == newIndex && range.endOffset == newIndex) {
+        return;
+    }
     range.setOffsets(context, newIndex);
   }
 
   public void actionPreviousGlyph(final Context context) {
     final int newIndex = precedingStart();
-    if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+    if (range.beginOffset == newIndex && range.endOffset == newIndex) {
+        return;
+    }
     range.setOffsets(context, newIndex);
   }
 
   public void actionNextWord(final Context context) {
     final int newIndex = nextWordStart(context, range.endOffset);
-    if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+    if (range.beginOffset == newIndex && range.endOffset == newIndex) {
+        return;
+    }
     range.setOffsets(context, newIndex);
   }
 
   public void actionGatherFirst(Context context) {
-    if (range.beginOffset == 0) return;
+    if (range.beginOffset == 0) {
+        return;
+    }
     range.setBeginOffset(context, 0);
   }
 
   public void actionGatherLast(Context context) {
     int last = visualPrimitive.value.length();
-    if (range.endOffset == last) return;
+    if (range.endOffset == last) {
+        return;
+    }
     range.setEndOffset(context, last);
   }
 
   public void actionFirstGlyph(Context context) {
-    if (range.beginOffset == 0 && range.endOffset == 0) return;
+    if (range.beginOffset == 0 && range.endOffset == 0) {
+        return;
+    }
     range.setOffsets(context, 0);
   }
 
   public void actionLastGlyph(Context context) {
-    if (range.beginOffset == 0 && range.endOffset == 0) return;
+    if (range.beginOffset == 0 && range.endOffset == 0) {
+        return;
+    }
     range.setOffsets(context, visualPrimitive.value.length());
   }
 
   public void actionPreviousWord(final Context context) {
     final int newIndex = previousWordStart(context, range.beginOffset);
-    if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+    if (range.beginOffset == newIndex && range.endOffset == newIndex) {
+        return;
+    }
     range.setOffsets(context, newIndex);
   }
 
   public void actionLineBegin(final Context context) {
     final int newIndex = startOfLine(range.beginLine);
-    if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+    if (range.beginOffset == newIndex && range.endOffset == newIndex) {
+        return;
+    }
     range.setOffsets(context, newIndex);
   }
 
   public void actionLineEnd(final Context context) {
     final int newIndex = endOfLine(range.endLine);
-    if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+    if (range.beginOffset == newIndex && range.endOffset == newIndex) {
+        return;
+    }
     range.setOffsets(context, newIndex);
   }
 
   public void actionNextLine(final Context context) {
     final int newIndex = nextLine(range.endLine, range.endOffset);
-    if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+    if (range.beginOffset == newIndex && range.endOffset == newIndex) {
+        return;
+    }
     range.setOffsets(context, newIndex);
   }
 
   public void actionPreviousLine(final Context context) {
     final int newIndex = previousLine(range.beginLine, range.beginOffset);
-    if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+    if (range.beginOffset == newIndex && range.endOffset == newIndex) {
+        return;
+    }
     range.setOffsets(context, newIndex);
   }
 
@@ -245,107 +289,143 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
 
   public void actionGatherNextGlyph(final Context context) {
     final int newIndex = followingStart();
-    if (range.endOffset == newIndex) return;
+    if (range.endOffset == newIndex) {
+        return;
+    }
     range.setEndOffset(context, newIndex);
   }
 
   public void actionGatherNextWord(final Context context) {
     final int newIndex = nextWordEnd(context, range.endOffset);
-    if (range.endOffset == newIndex) return;
+    if (range.endOffset == newIndex) {
+        return;
+    }
     range.setEndOffset(context, newIndex);
   }
 
   public void actionGatherNextLineEnd(final Context context) {
     final int newIndex = endOfLine(range.endLine);
-    if (range.endOffset == newIndex) return;
+    if (range.endOffset == newIndex) {
+        return;
+    }
     range.setEndOffset(context, newIndex);
   }
 
   public void actionGatherNextLine(final Context context) {
     final int newIndex = nextLine(range.endLine, range.endOffset);
-    if (range.endOffset == newIndex) return;
+    if (range.endOffset == newIndex) {
+        return;
+    }
     range.setEndOffset(context, newIndex);
   }
 
   public void actionReleaseNextGlyph(final Context context) {
     final int newIndex = Math.max(range.beginOffset, precedingEnd(range.endOffset));
-    if (range.endOffset == newIndex) return;
+    if (range.endOffset == newIndex) {
+        return;
+    }
     range.setEndOffset(context, newIndex);
   }
 
   public void actionReleaseNextWord(final Context context) {
     final int newIndex = Math.max(range.beginOffset, previousWordStart(context, range.endOffset));
-    if (range.endOffset == newIndex) return;
+    if (range.endOffset == newIndex) {
+        return;
+    }
     range.setEndOffset(context, newIndex);
   }
 
   public void actionReleaseNextLineEnd(final Context context) {
     final int newIndex = Math.max(range.beginOffset, startOfLine(range.endLine));
-    if (range.endOffset == newIndex) return;
+    if (range.endOffset == newIndex) {
+        return;
+    }
     range.setEndOffset(context, newIndex);
   }
 
   public void actionReleaseNextLine(final Context context) {
     final int newIndex = Math.max(range.beginOffset, previousLine(range.endLine, range.endOffset));
-    if (range.endOffset == newIndex) return;
+    if (range.endOffset == newIndex) {
+        return;
+    }
     range.setEndOffset(context, newIndex);
   }
 
   public void actionReleaseAll(final Context context) {
-    if (range.beginOffset == range.endOffset) return;
+    if (range.beginOffset == range.endOffset) {
+        return;
+    }
     range.setOffsets(context, range.leadFirst ? range.beginOffset : range.endOffset);
   }
 
   public void actionGatherPreviousGlyph(final Context context) {
     final int newIndex = precedingStart();
-    if (range.beginOffset == newIndex) return;
+    if (range.beginOffset == newIndex) {
+        return;
+    }
     range.setBeginOffset(context, newIndex);
   }
 
   public void actionGatherPreviousWord(final Context context) {
     final int newIndex = previousWordStart(context, range.beginOffset);
-    if (range.beginOffset == newIndex) return;
+    if (range.beginOffset == newIndex) {
+        return;
+    }
     range.setBeginOffset(context, newIndex);
   }
 
   public void actionGatherPreviousLineStart(final Context context) {
     final int newIndex = startOfLine(range.beginLine);
-    if (range.beginOffset == newIndex) return;
+    if (range.beginOffset == newIndex) {
+        return;
+    }
     range.setBeginOffset(context, newIndex);
   }
 
   public void actionGatherPreviousLine(final Context context) {
     final int newIndex = previousLine(range.beginLine, range.beginOffset);
-    if (range.beginOffset == newIndex) return;
+    if (range.beginOffset == newIndex) {
+        return;
+    }
     range.setBeginOffset(context, newIndex);
   }
 
   public void actionReleasePreviousGlyph(final Context context) {
     final int newIndex = Math.min(range.endOffset, followingStart(range.beginOffset));
-    if (range.beginOffset == newIndex) return;
+    if (range.beginOffset == newIndex) {
+        return;
+    }
     range.setBeginOffset(context, newIndex);
   }
 
   public void actionReleasePreviousWord(final Context context) {
     final int newIndex = Math.min(range.endOffset, nextWordStart(context, range.beginOffset));
-    if (range.beginOffset == newIndex) return;
+    if (range.beginOffset == newIndex) {
+        return;
+    }
     range.setBeginOffset(context, newIndex);
   }
 
   public void actionReleasePreviousLineStart(final Context context) {
     final int newIndex = Math.min(range.endOffset, endOfLine(range.beginLine));
-    if (range.beginOffset == newIndex) return;
+    if (range.beginOffset == newIndex) {
+        return;
+    }
     range.setBeginOffset(context, newIndex);
   }
 
   public void actionReleasePreviousLine(final Context context) {
     final int newIndex = Math.min(range.endOffset, nextLine(range.beginLine, range.beginOffset));
-    if (newIndex == range.beginOffset) return;
+    if (newIndex == range.beginOffset) {
+        return;
+    }
     range.setBeginOffset(context, newIndex);
   }
 
   public void actionExit(final Context context) {
-    if (visualPrimitive.value.atomParentRef == null) return;
+    if (visualPrimitive.value.atomParentRef == null) {
+        return;
+    }
     visualPrimitive.value.atomParentRef.selectParent(context);
   }
 

@@ -85,15 +85,22 @@ public class TestAttachments {
 
                   @Override
                   public boolean add(final Object o) {
-                    if (contains(o)) return false;
-                    if (flipSetOrder) inner.add(0, o);
-                    else inner.add(o);
+                    if (contains(o)) {
+                        return false;
+                    }
+                    if (flipSetOrder) {
+                        inner.add(0, o);
+                    } else {
+                        inner.add(o);
+                    }
                     return true;
                   }
 
                   @Override
                   public boolean remove(final Object o) {
-                    if (!contains(o)) return false;
+                    if (!contains(o)) {
+                        return false;
+                    }
                     inner.remove(o);
                     return true;
                   }
@@ -106,7 +113,9 @@ public class TestAttachments {
                   @Override
                   public boolean addAll(final Collection c) {
                     boolean out = false;
-                    for (final Object o : c) out = out || add(o);
+                    for (final Object o : c) {
+                        out = out || add(o);
+                    }
                     return out;
                   }
 

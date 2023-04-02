@@ -31,7 +31,9 @@ public class BackIdSpec extends BackSpecData {
     return new Terminal<BackEvent, ROList<AtomType.FieldParseResult>>() {
       @Override
       protected ROPair<Boolean, ROList<AtomType.FieldParseResult>> matches(BackEvent event) {
-        if (!(event instanceof EPrimitiveEvent)) return new ROPair<>(false, null);
+        if (!(event instanceof EPrimitiveEvent)) {
+            return new ROPair<>(false, null);
+        }
         int valueId;
         try {
           valueId = Integer.parseInt(((EPrimitiveEvent) event).value);

@@ -27,9 +27,13 @@ public class WriteStateDeepDataArray extends WriteState {
 
   @Override
   public void run(Environment env, final TSList<WriteState> stack, final EventConsumer writer) {
-    if (!iterator.hasNext()) return;
+    if (!iterator.hasNext()) {
+        return;
+    }
     final Atom next = iterator.next();
-    if (iterator.hasNext()) stack.add(this);
+    if (iterator.hasNext()) {
+        stack.add(this);
+    }
     index += 1;
     BackSpec nextPlate = boilerplate.getOpt(next.type.id());
     if (nextPlate != null) {

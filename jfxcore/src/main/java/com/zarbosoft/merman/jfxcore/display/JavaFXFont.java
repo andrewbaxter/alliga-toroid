@@ -9,8 +9,11 @@ public class JavaFXFont implements Font {
   javafx.scene.text.Font font;
 
   public JavaFXFont(final String font, final double size) {
-    if (font == null) this.font = javafx.scene.text.Font.font(size);
-    else this.font = javafx.scene.text.Font.font(font, size);
+    if (font == null) {
+        this.font = javafx.scene.text.Font.font(size);
+    } else {
+        this.font = javafx.scene.text.Font.font(font, size);
+    }
   }
 
   public JavaFXFont(final javafx.scene.text.Font font) {

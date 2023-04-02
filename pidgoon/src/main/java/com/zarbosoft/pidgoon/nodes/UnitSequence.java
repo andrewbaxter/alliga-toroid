@@ -23,7 +23,9 @@ public class UnitSequence<T> extends Node<T> {
   TSList<ROPair<Node, Boolean>> children = new TSList<>();
 
   public UnitSequence<T> add(final Node<T> child) {
-    if (found) throw new Assertion("Multiple non-ignored children!");
+    if (found) {
+        throw new Assertion("Multiple non-ignored children!");
+    }
     found = true;
     children.add(new ROPair<>(child, true));
     return this;
@@ -90,8 +92,11 @@ public class UnitSequence<T> extends Node<T> {
         Grammar grammar, Step step, Leaf leaf, Object result, MismatchCause mismatchCause) {
       final int nextStep = this.step + 1;
       T newCollected;
-      if (self.children.get(this.step).second) newCollected = (T) result;
-      else newCollected = collected;
+      if (self.children.get(this.step).second) {
+          newCollected = (T) result;
+      } else {
+          newCollected = collected;
+      }
       if (nextStep >= self.children.size()) {
         parent.advance(grammar, step, leaf, newCollected, mismatchCause);
       } else {
