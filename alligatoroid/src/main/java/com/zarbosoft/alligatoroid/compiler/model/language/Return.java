@@ -6,10 +6,12 @@ import com.zarbosoft.alligatoroid.compiler.JumpKey;
 import com.zarbosoft.alligatoroid.compiler.UnreachableValue;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeJump;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
+import com.zarbosoft.alligatoroid.compiler.mortar.GeneralLocationError;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class Return extends LanguageElement {
@@ -25,17 +27,36 @@ public class Return extends LanguageElement {
   public EvaluateResult evaluate(EvaluationContext context) {
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
     final Value res = ectx.evaluate(value);
-    final ROPair<JumpKey, Value> jump = new ROPair<>(new JumpKey(), res);
-    // TODO drop scopes up until dest
-    // TODO store remaining scope tree in jumps as well as value, for merge
-    if (key.isEmpty()) {
-    ROList<Scope> scopes = context.popScopesUntilBlock();
-      ectx.jumps.add(jump);
-    } else {
-      ROList<Scope> scopes = context.popScopesUntilName(key);
-      ectx.namedJumps.getCreate(key, () -> new TSList<>()).add(jump);
+    boolean found = false;
+    JumpKey dest = null;
+    while (true) {
+      for (ROPair<String, JumpKey> label : context.scope.jumps) {
+        if (label.first.equals(key)) {
+          dest = label.second;
+          found = true;
+          break;
+        }
+      }
+      if (found) {
+        break;
+      }
+      for (Binding binding : new ReverseIterable<>(context.scope.atLevel())) {
+        ectx.recordPost(binding.dropCode(context, id));
+      }
+      context.popScope();
     }
-    ectx.recordPre(new MortarTargetCode(new JavaBytecodeJump(key)));
+    if (!found) {
+      if (key == null) {
+        throw new Assertion();
+      } else {
+        context.errors.add(
+            new GeneralLocationError(id, String.format("No return destination with name %s", key)));
+      }
+    }
+    ectx.jumps
+        .getCreate(dest, () -> new TSList<>())
+        .add(new EvaluateResult.Jump(res, context.scope));
+    ectx.recordPre(context.target.codeJump(dest));
     return ectx.build(UnreachableValue.value);
   }
 }

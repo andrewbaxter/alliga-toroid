@@ -51,7 +51,7 @@ public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
 
   @Override
   public Binding type_newInitialBinding(JavaBytecodeBindingKey key) {
-    return new MortarDataBinding(key, this);
+    return new MortarDataBinding(key, this, catchKey);
   }
 
   public interface Inner {

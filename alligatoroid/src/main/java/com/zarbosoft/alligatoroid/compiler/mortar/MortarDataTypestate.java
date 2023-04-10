@@ -7,6 +7,9 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatch;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchStart;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
@@ -29,7 +32,7 @@ public interface MortarDataTypestate {
     return EvaluateResult.error;
   }
 
-  default MortarDataValueVariableStack typestate_forkBinding(MortarDataBinding binding) {
+  default MortarDataValueVariableStack typestate_loadBinding(MortarDataBinding binding) {
     return new MortarDataValueVariableStack(
         binding.type.typestate_fork(),
         new MortarDeferredCodeBinding(
@@ -43,12 +46,28 @@ public interface MortarDataTypestate {
   default ROPair<TargetCode, Binding> typestate_varValueBind(
           EvaluationContext context, JavaBytecode code) {
     JavaBytecodeBindingKey key = new JavaBytecodeBindingKey();
+    final JavaBytecodeCatchKey javaBytecodeCatchKey = new JavaBytecodeCatchKey();
     return new ROPair<>(
         new MortarTargetCode(
             new JavaBytecodeSequence()
                 .add(((MortarTargetCode) code).e)
-                .add(typestate_storeBytecode(key))),
-        new MortarDataBinding(key, this));
+                .add(typestate_storeBytecode(key)).add(new JavaBytecodeCatchStart(javaBytecodeCatchKey))),
+        new MortarDataBinding(key, this, javaBytecodeCatchKey));
+  }
+
+  /**
+   * Actual drop code, not including finally/jumps/etc
+   */
+  default JavaBytecode typestate_varBindDropInner(EvaluationContext context, Location location, MortarDataBinding mortarDataBinding) {
+  return null;
+  }
+
+  default JavaBytecode typestate_varBindDrop(EvaluationContext context, Location location, MortarDataBinding mortarDataBinding) {
+    final JavaBytecode inner = typestate_varBindDropInner(context, location, mortarDataBinding);
+    if (inner == null) {
+      return null;
+    }
+    return new JavaBytecodeCatch(mortarDataBinding.javaBytecodeCatchKey, inner);
   }
 
   JavaDataDescriptor typestate_jvmDesc();
@@ -105,4 +124,5 @@ public interface MortarDataTypestate {
   boolean typestate_canCastTo(AlligatorusType prototype);
 
   MortarDataType typestate_asType();
+
 }

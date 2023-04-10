@@ -10,6 +10,7 @@ public class JavaInternalName implements BuiltinAutoExportable {
   public static final JavaInternalName INT = JavaBytecodeUtils.internalNameFromClass(Integer.class);
   public static final JavaInternalName OBJECT = JavaBytecodeUtils.internalNameFromClass(Object.class);
   public static final JavaInternalName STRING = JavaBytecodeUtils.internalNameFromClass(String.class);
+  public static final JavaInternalName RUNTIME_EXCEPTION = JavaBytecodeUtils.internalNameFromClass(RuntimeException.class);
   @BuiltinAutoExportableType.Param
   public String value;
 

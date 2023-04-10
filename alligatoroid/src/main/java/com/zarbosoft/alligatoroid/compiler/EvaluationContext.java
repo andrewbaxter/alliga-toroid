@@ -12,13 +12,13 @@ public class EvaluationContext {
   public final TSList<Location> sourceMapReverse;
   public final TSList<String> log;
   public final TSList<Error> errors;
-  public Scope scope;
+  public ScopeState scope;
 
   private EvaluationContext(
           ModuleCompileContext moduleContext,
           TargetModuleContext target,
           boolean isModuleRoot,
-          TSList<Location> sourceMapReverse, TSList<String> log, TSList<Error> errors, Scope scope) {
+          TSList<Location> sourceMapReverse, TSList<String> log, TSList<Error> errors, ScopeState scope) {
     this.moduleContext = moduleContext;
     this.target = target;
     this.isModuleRoot = isModuleRoot;
@@ -33,11 +33,11 @@ public class EvaluationContext {
           TargetModuleContext target,
           boolean isModuleRoot
   ) {
-    return new EvaluationContext(moduleContext, target, isModuleRoot, new TSList<>(), new TSList<>(), new TSList<>(), Scope.create());
+    return new EvaluationContext(moduleContext, target, isModuleRoot, new TSList<>(), new TSList<>(), new TSList<>(), ScopeState.create());
   }
 
   public void pushScope() {
-    this.scope = Scope.createChild(scope);
+    this.scope = ScopeState.createChild(scope);
   }
 
   public void popScope() {
@@ -45,7 +45,7 @@ public class EvaluationContext {
   }
 
   public EvaluationContext forkScope() {
-    return new EvaluationContext(moduleContext,target,isModuleRoot,sourceMapReverse,log,errors,scope.fork());
+    return new EvaluationContext(moduleContext,target,isModuleRoot,sourceMapReverse,log,errors,scope.forkChild());
   }
 
   public int sourceLocation(Location location) {

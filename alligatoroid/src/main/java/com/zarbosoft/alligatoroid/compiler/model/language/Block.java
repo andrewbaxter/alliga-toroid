@@ -3,17 +3,13 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.UnreachableValue;
-import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
-import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
-import com.zarbosoft.rendaw.common.ROPair;
-import com.zarbosoft.rendaw.common.ReverseIterable;
 
 public class Block extends LanguageElement {
   @BuiltinAutoExportableType.Param public ROList<LanguageElement> statements;
@@ -26,15 +22,8 @@ public class Block extends LanguageElement {
     return block;
   }
 
-  public static EvaluateResult evaluate(
-      EvaluationContext context,
-      Location location,
-      ROList<LanguageElement> children,
-      ROOrderedMap<Object, Binding> injectScope) {
-    context.pushScope();
-    for (ROPair<Object, Binding> local : injectScope) {
-      context.scope.put(local.first, local.second);
-    }
+  public static EvaluateResult evaluateRaw(
+      EvaluationContext context, Location location, ROList<LanguageElement> children) {
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     boolean unreachable = false;
     for (LanguageElement child : children) {
@@ -49,12 +38,6 @@ public class Block extends LanguageElement {
       ectx.recordPre(childRes.value.drop(context, location));
       ectx.recordPre(childRes.postEffect);
     }
-    if (!unreachable) {
-      for (Binding binding : new ReverseIterable<>(context.scope.atLevel())) {
-        ectx.recordPre(binding.dropCode(context, location));
-      }
-    }
-    context.popScope();
     if (unreachable) {
       return ectx.build(UnreachableValue.value);
     } else {
@@ -69,6 +52,12 @@ public class Block extends LanguageElement {
 
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
-    return evaluate(context, id, statements, ROOrderedMap.empty);
+    return Label.evaluateRaw(
+        context,
+        id,
+        null,
+        c1 -> {
+          return Scope.evaluateRaw(c1, id, c2 -> evaluateRaw(c2, id, statements), ROOrderedMap.empty);
+        });
   }
 }

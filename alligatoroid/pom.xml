@@ -59,5 +59,11 @@
             <artifactId>ormlite-jdbc</artifactId>
             <version>6.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.pcollections</groupId>
+            <artifactId>pcollections</artifactId>
+            <version>4.0.1</version>
+        </dependency>
+
     </dependencies>
 </project>

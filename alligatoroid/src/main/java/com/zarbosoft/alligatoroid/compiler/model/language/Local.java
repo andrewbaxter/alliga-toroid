@@ -42,6 +42,6 @@ public class Local extends LanguageElement {
       context.errors.add(new NoField(id, key));
       return EvaluateResult.error;
     }
-    return ectx.build(ectx.record(value.fork(context, id)));
+    return ectx.build(ectx.record(value.load(context, id)));
   }
 }

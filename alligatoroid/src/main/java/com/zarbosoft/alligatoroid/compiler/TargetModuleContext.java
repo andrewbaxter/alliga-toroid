@@ -12,6 +12,10 @@ public interface TargetModuleContext {
 
   boolean isCodeEmpty(TargetCode code);
 
+    TargetCode codeLand(JumpKey jumpKey);
+
+  TargetCode codeJump(JumpKey jumpKey);
+
   public abstract static class Id {
     @Override
     public abstract String toString();

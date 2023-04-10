@@ -15,7 +15,7 @@ public class SimpleBinding implements Binding {
   }
 
   @Override
-  public EvaluateResult fork(EvaluationContext context, Location location) {
+  public EvaluateResult load(EvaluationContext context, Location location) {
     return EvaluateResult.pure(value);
   }
 

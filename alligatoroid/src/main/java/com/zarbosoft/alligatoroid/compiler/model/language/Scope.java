@@ -2,18 +2,17 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.UnreachableValue;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ReverseIterable;
-import com.zarbosoft.rendaw.common.TSList;
+
+import java.util.function.Function;
 
 public class Scope extends LanguageElement {
   @BuiltinAutoExportableType.Param public LanguageElement inner;
@@ -31,17 +30,17 @@ public class Scope extends LanguageElement {
     return hasLowerInSubtree(inner);
   }
 
-  public static EvaluateResult evaluate(
+  public static EvaluateResult evaluateRaw(
       EvaluationContext context,
       Location location,
-      LanguageElement inner,
+      Function<EvaluationContext, EvaluateResult> inner,
       ROOrderedMap<Object, Binding> injectScope) {
     context.pushScope();
     for (ROPair<Object, Binding> local : injectScope) {
       context.scope.put(local.first, local.second);
     }
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
-    final Value res = ectx.evaluate(inner);
+    final Value res = ectx.record(inner.apply(context));
     if (res != UnreachableValue.value) {
       for (Binding binding : new ReverseIterable<>(context.scope.atLevel())) {
         ectx.recordPost(binding.dropCode(context, location));
@@ -53,6 +52,6 @@ public class Scope extends LanguageElement {
 
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
-    return evaluate(context, id, inner, ROOrderedMap.empty);
+    return evaluateRaw(context, id, c -> inner.evaluate(c), ROOrderedMap.empty);
   }
 }

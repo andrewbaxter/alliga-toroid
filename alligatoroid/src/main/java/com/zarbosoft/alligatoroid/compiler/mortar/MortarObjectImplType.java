@@ -53,6 +53,6 @@ public class MortarObjectImplType implements MortarDataType {
 
   @Override
   public Binding type_newInitialBinding(JavaBytecodeBindingKey key) {
-    return new MortarDataBinding(key, newTypestate());
+    return new MortarDataBinding(key, newTypestate(), catchKey);
   }
 }

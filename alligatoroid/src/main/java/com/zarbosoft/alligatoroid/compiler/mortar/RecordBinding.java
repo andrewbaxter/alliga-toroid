@@ -18,7 +18,7 @@ private final ROMap<Object, Binding> children;
     }
 
     @Override
-    public EvaluateResult fork(EvaluationContext context, Location location) {
+    public EvaluateResult load(EvaluationContext context, Location location) {
     }
 
     @Override

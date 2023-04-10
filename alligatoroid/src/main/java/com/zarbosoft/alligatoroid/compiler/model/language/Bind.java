@@ -7,10 +7,10 @@ import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
+import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstKey;
-import static com.zarbosoft.alligatoroid.compiler.mortar.value.ConstDataBuiltinSingletonValue.nullValue;
 
 public class Bind extends LanguageElement {
   @BuiltinAutoExportableType.Param
@@ -39,6 +39,6 @@ public class Bind extends LanguageElement {
     ROPair<TargetCode, Binding> bound = value.bind(context, id);
     context.scope.put(key, bound.second);
     ectx.recordPre(bound.first);
-    return ectx.build(nullValue);
+    return ectx.build(NullValue.value);
   }
 }

@@ -1,7 +1,5 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
-import org.objectweb.asm.MethodVisitor;
-
 public class JavaBytecodeInstructionInt implements JavaBytecodeInstruction {
   public final int code;
 
@@ -10,7 +8,7 @@ public class JavaBytecodeInstructionInt implements JavaBytecodeInstruction {
   }
 
   @Override
-  public void write(MethodVisitor out) {
-  out.visitInsn(code);
+  public void dispatchMore(MoreDispatcher moreDispatcher) {
+  moreDispatcher.handleInt(this);
   }
 }

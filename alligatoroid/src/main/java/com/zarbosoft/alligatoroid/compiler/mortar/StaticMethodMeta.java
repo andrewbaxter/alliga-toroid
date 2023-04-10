@@ -3,9 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
-import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.GraphDeferred;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaClass;
@@ -61,7 +59,7 @@ public class StaticMethodMeta {
                     evaluationContext,
                     Location.rootLocation,
                     ectx.record(
-                        Scope.evaluate(
+                        Scope.evaluateRaw(
                             evaluationContext, Location.rootLocation, tree, initialBindings)))));
     context.moduleContext.log.addAll(evaluationContext.log);
     context.moduleContext.errors.addAll(evaluationContext.errors);

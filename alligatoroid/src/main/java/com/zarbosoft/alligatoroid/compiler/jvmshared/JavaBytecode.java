@@ -11,9 +11,24 @@ public interface JavaBytecode {
     T handleSequence(JavaBytecodeSequence n);
 
     T handleStoreLoad(JavaBytecodeStoreLoad n);
+
+    T handleCatch(JavaBytecodeCatch n);
+
+    T handleCatchStart(JavaBytecodeCatchStart n);
   }
 
   public interface DefaultDispatcher<T> extends Dispatcher<T> {
+
+    @Override
+    default T handleCatch(JavaBytecodeCatch n) {
+      return handleDefault(n);
+    }
+
+    @Override
+    default T handleCatchStart(JavaBytecodeCatchStart n) {
+      return handleDefault(n);
+    }
+
     default T handleDefault(JavaBytecode n) {
       return null;
     }

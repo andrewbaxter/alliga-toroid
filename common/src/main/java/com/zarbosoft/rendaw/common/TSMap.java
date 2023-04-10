@@ -126,8 +126,8 @@ public class TSMap<K, V> implements ROMap<K, V> {
     return this;
   }
 
-  public V update(K k, Function<V, V> map) {
-    V got = map.apply(inner.get(k));
+  public V update(K k, Supplier<V> create, Function<V, V> map) {
+    V got = map.apply(getOr(k, create));
     inner.put(k, got);
     return got;
   }

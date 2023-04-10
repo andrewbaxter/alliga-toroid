@@ -16,7 +16,7 @@ public class ConstBinding implements Binding {
   }
 
   @Override
-  public EvaluateResult fork(EvaluationContext context, Location location) {
+  public EvaluateResult load(EvaluationContext context, Location location) {
     return EvaluateResult.pure(type.typestate_constAsValue(value));
   }
 

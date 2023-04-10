@@ -19,7 +19,7 @@ public interface MortarObjectFieldstateData  extends MortarObjectFieldstate{
                         new JavaBytecodeSequence()
                                 .add(((MortarTargetCode) fieldstate_consume(context,location, parentCode)).e)
                                 .add(fieldstate_storeBytecode(key))),
-                new MortarDataBinding(key, fieldstate_newTypestate()));
+                new MortarDataBinding(key, fieldstate_newTypestate(), catchKey));
     }
 
     JavaBytecode fieldstate_storeBytecode(JavaBytecodeBindingKey key);
