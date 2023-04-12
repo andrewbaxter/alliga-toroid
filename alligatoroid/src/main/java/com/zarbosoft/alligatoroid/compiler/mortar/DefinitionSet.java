@@ -46,7 +46,7 @@ public class DefinitionSet implements BuiltinAutoExportable {
             new StaticAutogen.FuncInfo(
                 "call", JavaBytecodeUtils.qualifiedName(className), arguments, ret, false),
             this);
-    return new FunctionRet(MortarStaticMethodTypestate.type.typestate_constAsValue(meta), meta);
+    return new FunctionRet(MortarStaticMethodTypestate.typestate.typestate_constAsValue(meta), meta);
   }
 
   public boolean isResolved() {

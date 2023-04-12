@@ -13,21 +13,10 @@ import java.util.Map;
 
 public class EvaluateResult {
   public static final EvaluateResult error =
-      new EvaluateResult(null, null, ErrorValue.value, ROMap.empty);
+      new EvaluateResult(null, ErrorValue.value, ROMap.empty);
   public static final EvaluateResult unreachable =
-      new EvaluateResult(null, null, UnreachableValue.value, ROMap.empty);
-  /**
-   * Code that results in no stack change, the effects of everything leading up to the result of an
-   * expression. Includes the code that results in the stack with value on top. In case value is
-   * unreachable, the pre effect should be consumed.
-   */
-  public final TargetCode preEffect;
-  /**
-   * Code that results in no stack change. Must remain separate from pre until the end of the
-   * statement (code for dropping temporaries). In the case value is unreachable, post should be
-   * empty.
-   */
-  public final TargetCode postEffect;
+      new EvaluateResult(null, UnreachableValue.value, ROMap.empty);
+  public final TargetCode effect;
 
   public final Value value;
   public final ROMap<JumpKey, ROList<Jump>> jumps;
@@ -43,20 +32,22 @@ public class EvaluateResult {
   }
 
   public EvaluateResult(
-      TargetCode preEffect, TargetCode postEffect, Value value, ROMap<JumpKey, ROList<Jump>> jumps) {
-    this.preEffect = preEffect;
-    this.postEffect = postEffect;
+          TargetCode effect, Value value, ROMap<JumpKey, ROList<Jump>> jumps) {
+    this.effect = effect;
     this.value = value;
     this.jumps = jumps;
   }
 
   public static <T extends Value> EvaluateResult pure(T value) {
-    return new EvaluateResult(null, null, value, ROMap.empty);
+    return new EvaluateResult(null, value, ROMap.empty);
+  }
+
+  public static <T extends Value> EvaluateResult simple(T value, TargetCode code) {
+    return new EvaluateResult(code,value, ROMap.empty);
   }
 
   public static class Context {
-    public final TSList<TargetCode> preEffect = new TSList<>();
-    public final TSList<TargetCode> postEffect = new TSList<>();
+    public final TSList<TargetCode> effect = new TSList<>();
     public final TSMap<JumpKey, TSList<Jump>> jumps = new TSMap<>();
     public final EvaluationContext context;
     private final Location location;
@@ -70,23 +61,15 @@ public class EvaluateResult {
       return record(element.evaluate(context));
     }
 
-    public void recordPost(TargetCode sideEffect) {
+    public void recordEffect(TargetCode sideEffect) {
       if (sideEffect == null) {
         return;
       }
-      this.postEffect.add(sideEffect);
-    }
-
-    public void recordPre(TargetCode sideEffect) {
-      if (sideEffect == null) {
-        return;
-      }
-      this.preEffect.add(sideEffect);
+      this.effect.add(sideEffect);
     }
 
     public Value record(EvaluateResult res) {
-      preEffect.add(res.preEffect);
-      postEffect.add(res.postEffect);
+      effect.add(res.effect);
       for (Map.Entry<JumpKey, ROList<Jump>> jumpValue : res.jumps) {
         jumps.getCreate(jumpValue.getKey(), () -> new TSList<>()).addAll(jumpValue.getValue());
       }
@@ -95,8 +78,7 @@ public class EvaluateResult {
 
     public EvaluateResult build(Value value) {
       return new EvaluateResult(
-          context.target.merge(context, location, preEffect),
-          context.target.merge(context, location, new ReverseIterable<>(postEffect)),
+          context.target.merge(context, location, effect),
           value,
           TSMap.createWith(
               m -> {

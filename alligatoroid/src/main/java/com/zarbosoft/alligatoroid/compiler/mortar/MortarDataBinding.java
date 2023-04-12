@@ -11,12 +11,12 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 public class MortarDataBinding implements Binding {
   public final JavaBytecodeBindingKey key;
   public final MortarDataTypestate type;
-  public final JavaBytecodeCatchKey javaBytecodeCatchKey;
+  public final JavaBytecodeCatchKey finallyKey;
 
-  public MortarDataBinding(JavaBytecodeBindingKey key, MortarDataTypestate type, JavaBytecodeCatchKey javaBytecodeCatchKey) {
+  public MortarDataBinding(JavaBytecodeBindingKey key, MortarDataTypestate type, JavaBytecodeCatchKey finallyKey) {
     this.key = key;
     this.type = type;
-    this.javaBytecodeCatchKey = javaBytecodeCatchKey;
+    this.finallyKey = finallyKey;
   }
 
   @Override
@@ -26,11 +26,16 @@ public class MortarDataBinding implements Binding {
 
   @Override
   public Binding fork() {
-  return new MortarDataBinding(key, type.typestate_fork(), javaBytecodeCatchKey);
+  return new MortarDataBinding(key, type.typestate_fork(), finallyKey);
   }
 
   @Override
   public TargetCode dropCode(EvaluationContext context, Location location) {
     return new MortarTargetCode(type.typestate_varBindDrop(context, location, this));
+  }
+
+  @Override
+  public boolean merge(EvaluationContext context, Location location, Binding other) {
+    return type.typestate_varBindMerge(context, location, other);
   }
 }

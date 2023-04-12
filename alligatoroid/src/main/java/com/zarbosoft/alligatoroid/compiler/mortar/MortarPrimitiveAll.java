@@ -6,6 +6,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
@@ -41,17 +42,18 @@ public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
       return EvaluateResult.error;
     }
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
-    ectx.recordPre(new MortarTargetCode(base));
-    ectx.recordPre(
+    ectx.recordEffect(new MortarTargetCode(base));
+    ectx.recordEffect(
         ectx.record(ectx.record(value.castTo(context, location, this)).vary(context, location))
             .consume(context, location));
-    ectx.recordPre(new MortarTargetCode(setField));
+    ectx.recordEffect(new MortarTargetCode(setField));
     return ectx.build(NullValue.value);
   }
 
   @Override
-  public Binding type_newInitialBinding(JavaBytecodeBindingKey key) {
-    return new MortarDataBinding(key, this, catchKey);
+  public Binding type_newInitialBinding(
+      JavaBytecodeBindingKey key, JavaBytecodeCatchKey finallyKey) {
+    return new MortarDataBinding(key, this, finallyKey);
   }
 
   public interface Inner {
@@ -147,5 +149,11 @@ public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
   @Override
   public MortarDataType typestate_asType() {
     return this;
+  }
+
+  @Override
+  public boolean typestate_varBindMerge(
+      EvaluationContext context, Location location, Binding other) {
+    return true;
   }
 }

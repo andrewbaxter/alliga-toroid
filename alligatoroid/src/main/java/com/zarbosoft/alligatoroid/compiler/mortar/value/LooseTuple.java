@@ -54,7 +54,7 @@ public class LooseTuple implements Value, NoExportValue {
     for (int i = 0; i < data.size(); ++i) {
       EvaluateResult e = data.get(i);
       if (out == null) {
-        pre.add(e.preEffect);
+        pre.add(e.effect);
         if (key == i) {
           out = e.value;
           post.add(e.postEffect);
@@ -63,7 +63,7 @@ public class LooseTuple implements Value, NoExportValue {
           pre.add(e.postEffect);
         }
       } else {
-        post.add(e.preEffect);
+        post.add(e.effect);
         post.add(e.value.drop(context, location));
         post.add(e.postEffect);
       }
@@ -82,9 +82,9 @@ public class LooseTuple implements Value, NoExportValue {
   public TargetCode drop(EvaluationContext context, Location location) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     for (EvaluateResult value : new ReverseIterable<>(data)) {
-      ectx.recordPre(ectx.record(value).drop(context, location));
+      ectx.recordEffect(ectx.record(value).drop(context, location));
     }
-    return ectx.build(nullValue).preEffect;
+    return ectx.build(nullValue).effect;
   }
 
   @Override

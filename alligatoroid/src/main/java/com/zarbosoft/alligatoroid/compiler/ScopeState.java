@@ -2,7 +2,6 @@ package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.GeneralLocationError;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Common;
@@ -15,16 +14,16 @@ public class ScopeState {
   public final ScopeState parent;
   private final TSOrderedMap<Object, Binding> data;
   // Null key == block, non-null key = label
-  public final TSList<ROPair<String, JumpKey>> jumps;
+  public final TSList<ROPair<String, JumpKey>> labels;
   public boolean error = false;
 
   private ScopeState(
       ScopeState parent,
       TSOrderedMap<Object, Binding> data,
-      TSList<ROPair<String, JumpKey>> jumps) {
+      TSList<ROPair<String, JumpKey>> labels) {
     this.parent = parent;
     this.data = data;
-    this.jumps = jumps;
+    this.labels = labels;
   }
 
   public ScopeState forkChild() {
@@ -37,7 +36,7 @@ public class ScopeState {
             parent.forkChild(),
             newData,
             /* Labels can be reused because it won't be used until forks removed */
-            jumps));
+                labels));
   }
 
   public static ScopeState create() {

@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.JumpKey;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.TargetModuleContext;
@@ -9,6 +10,8 @@ import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeInstruction;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeInstructionObj;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeJump;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeLand;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
@@ -86,21 +89,19 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       Location location,
       JavaBytecodeSequence pre,
       JavaBytecodeSequence code,
-      JavaBytecodeSequence post,
       Value argument) {
     boolean bad = false;
     if (argument instanceof LooseTuple) {
       for (EvaluateResult e : ((LooseTuple) argument).data) {
-        pre.add((JavaBytecodeSequence) e.preEffect);
-        if (!convertFunctionArgument(context, location, pre, code, post, e.value)) {
+        pre.add((JavaBytecodeSequence) e.effect);
+        if (!convertFunctionArgument(context, location, pre, code, e.value)) {
           bad = true;
           continue;
         }
-        post.add((JavaBytecode) e.postEffect);
       }
       return !bad;
     } else {
-      return convertFunctionArgument(context, location, pre, code, post, argument);
+      return convertFunctionArgument(context, location, pre, code, argument);
     }
   }
 
@@ -109,7 +110,6 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       Location location,
       JavaBytecodeSequence pre,
       JavaBytecodeSequence code,
-      JavaBytecodeSequence post,
       Value argument) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     final Value variable = ectx.record(argument.vary(context, location));
@@ -118,8 +118,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     }
     code.add(((MortarTargetCode) ((MortarDataValue) variable).consume(context, location)).e);
     final EvaluateResult prePost = ectx.build(null);
-    pre.add((JavaBytecodeSequence) prePost.preEffect);
-    post.add((JavaBytecode) prePost.postEffect);
+    pre.add((JavaBytecodeSequence) prePost.effect);
     return true;
   }
 
@@ -136,15 +135,26 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     return ID;
   }
 
+  @Override
+  public TargetCode codeLand(JumpKey jumpKey) {
+    return new MortarTargetCode(new JavaBytecodeLand(jumpKey));
+  }
+
+  @Override
+  public TargetCode codeJump(JumpKey jumpKey) {
+    return new MortarTargetCode(new JavaBytecodeJump(jumpKey));
+  }
+
   public JavaBytecodeSequence transfer(Object object) {
-    String name = transfers.getOpt(new ObjId(object));
+    final ObjId idObj = new ObjId(object);
+    String name = transfers.getOpt(idObj);
     if (name == null) {
       name = TRANSFER_PREFIX + transfers.size();
-      transfers.put(object, name);
+      transfers.put(idObj, name);
     }
     JavaBytecodeSequence javaBytecodeSequence = new JavaBytecodeSequence();
     javaBytecodeSequence.add(
-        new JavaBytecodeInstruction(
+        new JavaBytecodeInstructionObj(
             new FieldInsnNode(
                 GETSTATIC,
                 moduleInternalName,

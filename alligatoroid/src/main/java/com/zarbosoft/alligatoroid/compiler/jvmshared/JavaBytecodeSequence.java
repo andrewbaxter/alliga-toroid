@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
+import com.zarbosoft.alligatoroid.compiler.JumpKey;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -165,9 +166,10 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
           });
     }
 
-    // Pass 2, forward: flatten, replacing catch blocks with instructions + labels
+    // Pass 2, forward: flatten, replacing catch blocks with instructions + labels; jumps
     TSList<JavaBytecode> flattened = new TSList<>();
     {
+      TSMap<JumpKey, LabelNode> jumpLabels = new TSMap<>();
       TSMap<JavaBytecodeCatchKey, Label> catchStartLabels = new TSMap<>();
       TSMap<JavaBytecodeCatchKey, Label> catchFinallyLabels = new TSMap<>();
       final int[] catchIndex = {0};
@@ -267,6 +269,23 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
               flattened.add(new JavaBytecodeInstructionObj(new LabelNode(startLabel)));
               catchStartLabels.put(n.key, startLabel);
               catchFinallyLabels.putReplace(n.key, handleLabel);
+              return null;
+            }
+
+            @Override
+            public Iterator<JavaBytecode> handleLand(JavaBytecodeLand n) {
+              flattened.add(
+                  new JavaBytecodeInstructionObj(
+                      new JumpInsnNode(
+                          GOTO, jumpLabels.getCreate(n.jumpKey, () -> new LabelNode()))));
+              return null;
+            }
+
+            @Override
+            public Iterator<JavaBytecode> handleJump(JavaBytecodeJump n) {
+              flattened.add(
+                  new JavaBytecodeInstructionObj(
+                      jumpLabels.getCreate(n.jumpKey, () -> new LabelNode())));
               return null;
             }
           });
@@ -524,6 +543,16 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
 
               @Override
               public Object handleCatchStart(JavaBytecodeCatchStart n) {
+                throw new Assertion();
+              }
+
+              @Override
+              public Object handleLand(JavaBytecodeLand n) {
+                throw new Assertion();
+              }
+
+              @Override
+              public Object handleJump(JavaBytecodeJump n) {
                 throw new Assertion();
               }
             });

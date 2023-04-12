@@ -30,7 +30,7 @@ public class Scope extends LanguageElement {
     return hasLowerInSubtree(inner);
   }
 
-  public static EvaluateResult evaluateRaw(
+  public static EvaluateResult evaluateScoped(
       EvaluationContext context,
       Location location,
       Function<EvaluationContext, EvaluateResult> inner,
@@ -43,7 +43,7 @@ public class Scope extends LanguageElement {
     final Value res = ectx.record(inner.apply(context));
     if (res != UnreachableValue.value) {
       for (Binding binding : new ReverseIterable<>(context.scope.atLevel())) {
-        ectx.recordPost(binding.dropCode(context, location));
+        ectx.recordEffect(binding.dropCode(context, location));
       }
     }
     context.popScope();
@@ -52,6 +52,6 @@ public class Scope extends LanguageElement {
 
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
-    return evaluateRaw(context, id, c -> inner.evaluate(c), ROOrderedMap.empty);
+    return evaluateScoped(context, id, c -> inner.evaluate(c), ROOrderedMap.empty);
   }
 }

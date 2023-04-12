@@ -11,6 +11,8 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.languageinout.LanguageDeserializer;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatch;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaClass;
@@ -30,6 +32,8 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.language.Block;
+import com.zarbosoft.alligatoroid.compiler.model.language.Label;
+import com.zarbosoft.alligatoroid.compiler.model.language.Scope;
 import com.zarbosoft.alligatoroid.compiler.modules.CacheImportIdRes;
 import com.zarbosoft.alligatoroid.compiler.modules.Module;
 import com.zarbosoft.alligatoroid.compiler.modules.ModuleResolver;
@@ -76,15 +80,25 @@ public class ModuleCompiler implements ModuleResolver {
     /// Do first pass evaluation, and get type of result (or const result).
     MortarTargetModuleContext targetContext = new MortarTargetModuleContext(jvmClassName.value);
     JavaBytecodeBindingKey ectxKey = new JavaBytecodeBindingKey();
+    JavaBytecodeCatchKey ectxFinallyKey = new JavaBytecodeCatchKey();
     final MortarDataType ectxType =
         StaticAutogen.autoMortarHalfObjectTypes.get(Evaluation2Context.class);
     final EvaluationContext context = EvaluationContext.create(moduleContext, targetContext, true);
     EvaluateResult firstPass =
-        Block.evaluate(
+        Label.evaluateLabeled(
             context,
+            Location.rootLocation,
             null,
-            TSList.of(rootStatement),
-            new TSOrderedMap<>(m -> m.put("ectx", ectxType.type_newInitialBinding(ectxKey))));
+            c1 ->
+                Scope.evaluateScoped(
+                    c1,
+                    Location.rootLocation,
+                    c2 -> rootStatement.evaluate(c2),
+                    new TSOrderedMap<>(
+                        m ->
+                            m.put(
+                                "ectx",
+                                ectxType.type_newInitialBinding(ectxKey, ectxFinallyKey)))));
     moduleContext.log.addAll(context.log);
     moduleContext.errors.addAll(context.errors);
     if (context.errors.some()) {
@@ -119,8 +133,7 @@ public class ModuleCompiler implements ModuleResolver {
         JavaMethodDescriptor.fromParts(
             resultType.type_jvmDesc(), new TSList<>(ectxType.type_jvmDesc())),
         new JavaBytecodeSequence()
-            .add(((MortarTargetCode) firstPass.preEffect).e)
-            .add(((MortarTargetCode) firstPass.postEffect).e)
+            .add(((MortarTargetCode) firstPass.effect).e)
             .add(resultType.type_returnBytecode()),
         new TSList<>(ectxKey));
     Class klass = moduleContext.compileContext.loadRootClass(className, preClass.render());

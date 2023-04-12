@@ -27,13 +27,14 @@ public class Label extends LanguageElement {
     return value.hasLowerInSubtree();
   }
 
-  public static EvaluateResult evaluateRaw(
+  public static EvaluateResult evaluateLabeled(
       EvaluationContext context,
       Location id,
+      // Nullable, for jumping 1 unlabeled block up
       String stringKey,
       Function<EvaluationContext, EvaluateResult> inner) {
     final JumpKey jumpKey = new JumpKey();
-    context.scope.jumps.add(new ROPair<>(stringKey, jumpKey));
+    context.scope.labels.add(new ROPair<>(stringKey, jumpKey));
     final EvaluateResult res = inner.apply(context);
 
     // Locate paths leading to/out of this label and sort the values for merging
@@ -43,6 +44,9 @@ public class Label extends LanguageElement {
     for (Map.Entry<JumpKey, ROList<EvaluateResult.Jump>> e : res.jumps) {
       if (e.getKey() == jumpKey) {
         for (EvaluateResult.Jump pair : e.getValue()) {
+          if (pair.value == UnreachableValue.value) {
+            continue;
+          }
           unforkValues.add(pair.value);
           unforkScopes.add(pair.scope);
         }
@@ -59,16 +63,15 @@ public class Label extends LanguageElement {
     context.scope = unforkScopes.get(0);
     if (unforkScopes.size() > 1) {
       for (int i = 1; i < unforkScopes.size(); ++i) {
-        context.scope.merge(context,id, unforkScopes.get(i));
+        context.scope.merge(context, id, unforkScopes.get(i));
       }
     }
 
     // Merge values
     unforkValues.reverse();
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
-    ectx.recordPre(res.preEffect);
-    ectx.recordPre(res.postEffect); // TODO check
-    ectx.recordPre(context.target.codeLand(jumpKey));
+    ectx.recordEffect(res.effect);
+    ectx.recordEffect(context.target.codeLand(jumpKey));
     ectx.jumps.putAll(forwardRemainingJumpResults);
 
     if (unforkValues.isEmpty()) {
@@ -81,12 +84,12 @@ public class Label extends LanguageElement {
 
   @Override
   public EvaluateResult evaluate(EvaluationContext context0) {
-    return Scope.evaluateRaw(
+    return evaluateLabeled(
         context0,
         id,
-        context -> {
-          return evaluateRaw(context, id, key, c1 -> value.evaluate(c1));
-        },
-        ROOrderedMap.empty);
+        key,
+        c1 -> {
+          return Scope.evaluateScoped(c1, id, c2 -> value.evaluate(c2), ROOrderedMap.empty);
+        });
   }
 }

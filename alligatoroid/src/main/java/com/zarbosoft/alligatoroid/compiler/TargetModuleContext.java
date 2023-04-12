@@ -8,11 +8,7 @@ public interface TargetModuleContext {
 
   Id id();
 
-  EvaluateResult vary(EvaluationContext context, Location id, Value value);
-
-  boolean isCodeEmpty(TargetCode code);
-
-    TargetCode codeLand(JumpKey jumpKey);
+  TargetCode codeLand(JumpKey jumpKey);
 
   TargetCode codeJump(JumpKey jumpKey);
 

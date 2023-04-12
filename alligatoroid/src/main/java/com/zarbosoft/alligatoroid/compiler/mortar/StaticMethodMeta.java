@@ -3,14 +3,19 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
+import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.GraphDeferred;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchStart;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaClass;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.model.language.Label;
 import com.zarbosoft.alligatoroid.compiler.model.language.Scope;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Evaluation2Context;
 import com.zarbosoft.rendaw.common.Common;
@@ -38,16 +43,22 @@ public class StaticMethodMeta {
     final String entryMethodName = "call";
     JavaInternalName jvmClassName = funcInfo.base.asInternalName();
 
+    MortarTargetModuleContext targetContext = new MortarTargetModuleContext(jvmClassName.value);
+
+    JavaBytecodeSequence pre = new JavaBytecodeSequence();
+
     TSList<JavaBytecodeBindingKey> initialIndexes = new TSList<>();
     final TSOrderedMap<Object, Binding> initialBindings = new TSOrderedMap<>();
     for (ROPair<Object, MortarDataType> argument : funcInfo.arguments) {
       final JavaBytecodeBindingKey key = new JavaBytecodeBindingKey();
       initialIndexes.add(key);
-      initialBindings.putNew(argument.first, argument.second.type_newInitialBinding(key));
+      JavaBytecodeCatchKey bindingFinallyKey = new JavaBytecodeCatchKey();
+      pre.add(new JavaBytecodeCatchStart(bindingFinallyKey));
+      initialBindings.putNew(
+          argument.first, argument.second.type_newInitialBinding(key, bindingFinallyKey));
     }
 
     // Do evaluation
-    MortarTargetModuleContext targetContext = new MortarTargetModuleContext(jvmClassName.value);
     EvaluationContext evaluationContext =
         EvaluationContext.create(context.moduleContext, targetContext, true);
     final EvaluateResult.Context ectx =
@@ -59,8 +70,16 @@ public class StaticMethodMeta {
                     evaluationContext,
                     Location.rootLocation,
                     ectx.record(
-                        Scope.evaluateRaw(
-                            evaluationContext, Location.rootLocation, tree, initialBindings)))));
+                        Label.evaluateLabeled(
+                            evaluationContext,
+                            Location.rootLocation,
+                            null,
+                            c1 ->
+                                Scope.evaluateScoped(
+                                    c1,
+                                    Location.rootLocation,
+                                    c2 -> tree.evaluate(c2),
+                                    initialBindings))))));
     context.moduleContext.log.addAll(evaluationContext.log);
     context.moduleContext.errors.addAll(evaluationContext.errors);
     if (evaluationContext.errors.some()) {
@@ -81,8 +100,7 @@ public class StaticMethodMeta {
         JavaMethodDescriptor.fromParts(
             funcInfo.returnType.type_jvmDesc(), funcInfo.argDescriptor()),
         new JavaBytecodeSequence()
-            .add(((MortarTargetCode) firstPass.preEffect).e)
-            .add(((MortarTargetCode) firstPass.postEffect).e)
+            .add(((MortarTargetCode) firstPass.effect).e)
             .add(funcInfo.returnType.type_returnBytecode()),
         initialIndexes);
 

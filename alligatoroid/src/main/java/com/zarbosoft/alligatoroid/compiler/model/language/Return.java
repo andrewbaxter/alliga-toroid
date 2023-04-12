@@ -30,7 +30,7 @@ public class Return extends LanguageElement {
     boolean found = false;
     JumpKey dest = null;
     while (true) {
-      for (ROPair<String, JumpKey> label : context.scope.jumps) {
+      for (ROPair<String, JumpKey> label : context.scope.labels) {
         if (label.first.equals(key)) {
           dest = label.second;
           found = true;
@@ -41,7 +41,7 @@ public class Return extends LanguageElement {
         break;
       }
       for (Binding binding : new ReverseIterable<>(context.scope.atLevel())) {
-        ectx.recordPost(binding.dropCode(context, id));
+        ectx.recordEffect(binding.dropCode(context, id));
       }
       context.popScope();
     }
@@ -56,7 +56,7 @@ public class Return extends LanguageElement {
     ectx.jumps
         .getCreate(dest, () -> new TSList<>())
         .add(new EvaluateResult.Jump(res, context.scope));
-    ectx.recordPre(context.target.codeJump(dest));
+    ectx.recordEffect(context.target.codeJump(dest));
     return ectx.build(UnreachableValue.value);
   }
 }

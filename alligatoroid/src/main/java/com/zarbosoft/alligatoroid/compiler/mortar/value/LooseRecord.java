@@ -42,7 +42,7 @@ public class LooseRecord implements Value, NoExportValue {
   public TargetCode drop(EvaluationContext context, Location location) {
     TSList<TargetCode> out = new TSList<>();
     for (ROPair<Object, EvaluateResult> e : data) {
-      out.add(e.second.preEffect);
+      out.add(e.second.effect);
       out.add(e.second.value.drop(context, location));
       out.add(e.second.postEffect);
     }
@@ -60,7 +60,7 @@ public class LooseRecord implements Value, NoExportValue {
     Value out = null;
     for (ROPair<Object, EvaluateResult> e : data) {
       if (out == null) {
-        pre.add(e.second.preEffect);
+        pre.add(e.second.effect);
         if (e.first.equals(key)) {
           out = e.second.value;
           post.add(e.second.postEffect);
@@ -69,7 +69,7 @@ public class LooseRecord implements Value, NoExportValue {
           pre.add(e.second.postEffect);
         }
       } else {
-        post.add(e.second.preEffect);
+        post.add(e.second.effect);
         post.add(e.second.value.drop(context, location));
         post.add(e.second.postEffect);
       }

@@ -9,6 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 
 public class NullMortarField implements MortarObjectField, MortarObjectFieldstate {
@@ -34,7 +35,7 @@ public class NullMortarField implements MortarObjectField, MortarObjectFieldstat
   @Override
   public EvaluateResult fieldstate_variableObjectFieldAsValue(
       EvaluationContext context, Location location, MortarDeferredCode base) {
-    return new EvaluateResult(new MortarTargetCode(base.drop()), null, NullValue.value, jumpValues, jumpValues);
+    return new EvaluateResult(new MortarTargetCode(base.drop()), NullValue.value, ROMap.empty);
   }
 
   @Override
@@ -52,7 +53,7 @@ public class NullMortarField implements MortarObjectField, MortarObjectFieldstat
   @Override
   public EvaluateResult fieldstate_set(
       EvaluationContext context, Location location, JavaBytecode base, Value value) {
-    return new EvaluateResult(value.drop(context, location), null, NullValue.value, jumpValues, jumpValues);
+    return new EvaluateResult(value.drop(context, location), NullValue.value, ROMap.empty);
   }
 
   @Override
@@ -67,5 +68,10 @@ public class NullMortarField implements MortarObjectField, MortarObjectFieldstat
   @Override
   public boolean fieldstate_canCastTo(AlligatorusType type) {
     return type == NullType.type;
+  }
+
+  @Override
+  public boolean fieldstate_triviallyAssignableTo(MortarObjectField field) {
+    return field == this;
   }
 }

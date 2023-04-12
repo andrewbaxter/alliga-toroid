@@ -67,7 +67,7 @@ public interface MortarDataTypestate {
     if (inner == null) {
       return null;
     }
-    return new JavaBytecodeCatch(mortarDataBinding.javaBytecodeCatchKey, inner);
+    return new JavaBytecodeCatch(mortarDataBinding.finallyKey, inner);
   }
 
   JavaDataDescriptor typestate_jvmDesc();
@@ -125,4 +125,5 @@ public interface MortarDataTypestate {
 
   MortarDataType typestate_asType();
 
+  boolean typestate_varBindMerge(EvaluationContext context, Location location, Binding other);
 }

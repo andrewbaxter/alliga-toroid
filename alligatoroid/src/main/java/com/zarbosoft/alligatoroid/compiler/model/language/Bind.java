@@ -34,11 +34,11 @@ public class Bind extends LanguageElement {
     }
     Binding old = context.scope.remove(key);
     if (old != null) {
-      ectx.recordPre(old.dropCode(context, id));
+      ectx.recordEffect(old.dropCode(context, id));
     }
     ROPair<TargetCode, Binding> bound = value.bind(context, id);
     context.scope.put(key, bound.second);
-    ectx.recordPre(bound.first);
+    ectx.recordEffect(bound.first);
     return ectx.build(NullValue.value);
   }
 }

@@ -11,7 +11,7 @@ import com.zarbosoft.alligatoroid.compiler.model.error.MortarInvalidCast;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 
-public interface MortarDataType extends MortarType{
+public interface MortarDataType extends MortarType {
   JavaDataDescriptor type_jvmDesc();
 
   Value type_stackAsValue(JavaBytecode code);
@@ -19,17 +19,11 @@ public interface MortarDataType extends MortarType{
   JavaBytecode type_returnBytecode();
 
   Value type_constAsValue(Object data);
-  /*
-  default Value type_constAsValue(Object data) {
-    return MortarDataValueConst.create(type_newTypestate(), data);
-  }
-   */
 
   public default EvaluateResult type_cast(
       EvaluationContext evaluationContext, Location location, Value value) {
-    if (
-        value.canCastTo(this)) {
-      return ( value).castTo(evaluationContext,location,this);
+    if (value.canCastTo(this)) {
+      return (value).castTo(evaluationContext, location, this);
     } else {
       evaluationContext.errors.add(new MortarInvalidCast(location, this));
       return EvaluateResult.error;

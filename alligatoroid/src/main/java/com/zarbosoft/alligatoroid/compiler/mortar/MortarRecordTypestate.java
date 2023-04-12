@@ -4,9 +4,13 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRecord;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialSubvalue;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.ExtraField;
@@ -26,8 +30,8 @@ import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
-public class MortarRecordTypestate extends MortarBaseObjectTypestate
-    implements BuiltinAutoExportable {
+public class MortarRecordTypestate
+        implements BuiltinAutoExportable, MortarDataTypestate {
   public final TSOrderedMap<Object, ROPair<Integer, MortarTupleFieldType>> fields;
 
   public MortarRecordTypestate(TSOrderedMap<Object, ROPair<Integer, MortarTupleFieldType>> fields) {
@@ -203,5 +207,36 @@ public class MortarRecordTypestate extends MortarBaseObjectTypestate
       return EvaluateResult.error;
     }
     return field.second.tuple_fieldtype_variableAsValue(context,location,base, field.first);
+  }
+
+  @Override
+  public JavaBytecode typestate_arrayLoadBytecode() {
+    return JavaBytecodeUtils.arrayLoadObj;
+  }
+
+  @Override
+  public JavaBytecode typestate_arrayStoreBytecode() {
+    return JavaBytecodeUtils.arrayStoreObj;
+  }
+
+  @Override
+  public JavaBytecode typestate_loadBytecode(JavaBytecodeBindingKey key) {
+    return JavaBytecodeUtils.loadObj(key);
+  }
+
+  @Override
+  public JavaBytecode typestate_returnBytecode() {
+    return JavaBytecodeUtils.returnObj;
+  }
+
+  @Override
+  public JavaBytecode typestate_storeBytecode(JavaBytecodeBindingKey key) {
+    return JavaBytecodeUtils.storeObj(key);
+  }
+
+  @Override
+  public EvaluateResult typestate_vary(EvaluationContext context, Location id, Object data) {
+    return EvaluateResult.pure(
+        typestate_stackAsValue(((MortarTargetModuleContext) context.target).transfer((Exportable) data)));
   }
 }

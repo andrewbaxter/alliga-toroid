@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.builtin;
 
+import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.Value;
@@ -11,7 +12,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.CreatedFile;
 @StaticAutogen.BuiltinAggregate
 public class Builtin {
   public static final Value _null = NullValue.value;
-  public static final MortarNullType nullType = MortarNullType.type;
+  public static final NullType nullType = NullType.type;
   public static final BuiltinJavaBytecode jbc = new BuiltinJavaBytecode();
 
   public static CreatedFile createFile(String path) {

@@ -16,6 +16,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 
 public class MortarDataValueVariableStack implements MortarDataValue, NoExportValue {
   public final MortarDeferredCode code;
@@ -76,5 +77,10 @@ public class MortarDataValueVariableStack implements MortarDataValue, NoExportVa
         ((MortarDataType) type)
             .type_stackAsValue(
                 typestate.typestate_castTo(context, location, (MortarDataType) type, code)));
+  }
+
+  @Override
+  public EvaluateResult unfork(EvaluationContext context, Location location, TSList<Value> otherValues) {
+
   }
 }

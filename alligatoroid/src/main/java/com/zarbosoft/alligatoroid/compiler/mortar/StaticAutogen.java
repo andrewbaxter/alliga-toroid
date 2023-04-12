@@ -459,7 +459,7 @@ public class StaticAutogen {
     if (method == null) {
       throw Assertion.format("builtin wrap [%s] function [%s] missing", klass.getName(), name);
     }
-    return MortarStaticMethodTypestate.type.typestate_constAsValue(funcDescriptor(working, method));
+    return MortarStaticMethodTypestate.typestate.typestate_constAsValue(funcDescriptor(working, method));
   }
 
   private static LooseRecord aggregateBuiltinForGraph(

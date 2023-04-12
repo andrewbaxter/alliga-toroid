@@ -82,12 +82,12 @@ public class MortarObjectImplFieldstate implements MortarObjectFieldstateData {
       return EvaluateResult.error;
     }
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
-    ectx.recordPre(new MortarTargetCode(base));
-    ectx.recordPre(
+    ectx.recordEffect(new MortarTargetCode(base));
+    ectx.recordEffect(
         ectx.record(
                 ectx.record(value.castTo(context, location, currentType)).vary(context, location))
             .consume(context, location));
-    ectx.recordPre(
+    ectx.recordEffect(
         new MortarTargetCode(
             JavaBytecodeUtils.setField(
                 context.sourceLocation(location),

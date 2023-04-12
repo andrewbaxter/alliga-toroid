@@ -84,5 +84,8 @@ public interface Value {
 
   EvaluateResult castTo(EvaluationContext context, Location location, AlligatorusType type);
 
+  /**
+   * Create a value that represents
+   */
   EvaluateResult unfork(EvaluationContext context, Location location, TSList<Value> otherValues);
 }

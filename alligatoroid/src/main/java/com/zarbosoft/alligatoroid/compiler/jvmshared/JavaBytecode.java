@@ -15,9 +15,22 @@ public interface JavaBytecode {
     T handleCatch(JavaBytecodeCatch n);
 
     T handleCatchStart(JavaBytecodeCatchStart n);
+
+    T handleLand(JavaBytecodeLand n);
+
+    T handleJump(JavaBytecodeJump n);
   }
 
   public interface DefaultDispatcher<T> extends Dispatcher<T> {
+    @Override
+    default T handleJump(JavaBytecodeJump n) {
+      return handleDefault(n);
+    }
+
+    @Override
+    default T handleLand(JavaBytecodeLand n) {
+      return handleLand(n);
+    }
 
     @Override
     default T handleCatch(JavaBytecodeCatch n) {

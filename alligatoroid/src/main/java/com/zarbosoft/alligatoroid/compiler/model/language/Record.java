@@ -41,13 +41,12 @@ public class Record extends LanguageElement {
       data.put(
           key,
           new EvaluateResult(
-              context.target.merge(context, id, new TSList<>(keyRes.preEffect, valueRes.preEffect)),
-              valueRes.postEffect,
-              valueRes.value, jumpValues, jumpValues));
+              context.target.merge(context, id, new TSList<>(keyRes.effect, valueRes.effect)),
+                  valueRes.value, jumpValues, jumpValues));
     }
     if (badKeys) {
         return EvaluateResult.error;
     }
-    return new EvaluateResult(null, null, new LooseRecord(data), jumpValues, jumpValues);
+    return new EvaluateResult(null, new LooseRecord(data), jumpValues, jumpValues);
   }
 }
