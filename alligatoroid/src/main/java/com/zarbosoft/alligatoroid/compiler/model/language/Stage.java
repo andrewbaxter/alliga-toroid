@@ -44,25 +44,21 @@ public class Stage extends LanguageElement {
     if (element instanceof Lower) {
       final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
       Value val = ectx.evaluate(((Lower) element).child);
-      if (val instanceof MortarCastable
-          && ((MortarCastable) val).canCastTo(prototypeLanguageElement)) {
+      if (val.canCastTo(prototypeLanguageElement)) {
         // Lowering language value - use directly to interpret in next layer
-        return ectx.build(
-            prototypeLanguageElement.type_stackAsValue(
-                ((MortarCastable) val).castTo(prototypeLanguageElement)));
+        return ectx.build(ectx.record(val.castTo(context, location, prototypeLanguageElement)));
+
       } else {
         // Some other variable value - wrap in Wrap to embed in language tree
-        return ectx.build(
-            autoMortarHalfObjectTypes
-                .get(Wrap.class)
-                .type_stackAsValue(
-                    new JavaBytecodeSequence()
-                        .add(
-                            ((MortarTargetCode)
-                                    ectx.record(val.vary(context, location))
-                                        .consume(context, location))
-                                .e)
-                        .add(JavaBytecodeUtils.callStaticMethodReflect(Wrap.class, "create"))));
+        ectx.recordEffect(
+            new MortarTargetCode(
+                new JavaBytecodeSequence()
+                    .add(
+                        ((MortarTargetCode)
+                                ectx.record(val.vary(context, location)).consume(context, location))
+                            .e)
+                    .add(JavaBytecodeUtils.callStaticMethodReflect(Wrap.class, "create"))));
+        return ectx.build(autoMortarHalfObjectTypes.get(Wrap.class).type_stackAsValue());
       }
     }
 
@@ -113,7 +109,8 @@ public class Stage extends LanguageElement {
               listBad = true;
               continue;
             }
-            code.add(((MortarTargetCode) ((MortarDataValue) subValue).consume(context, location)).e);
+            code.add(
+                ((MortarTargetCode) ((MortarDataValue) subValue).consume(context, location)).e);
             code.add(MortarTargetModuleContext.tsListAddCode);
           }
           if (listBad) {
@@ -152,8 +149,7 @@ public class Stage extends LanguageElement {
           }
 
           fieldDesc = JavaDataDescriptor.fromClass(field.getType());
-          final Value val =
-              ectx.record( ectx.record(evaluation).vary(context, location));
+          final Value val = ectx.record(ectx.record(evaluation).vary(context, location));
           if (val == ErrorValue.value) {
             bad = true;
             continue;
@@ -167,8 +163,8 @@ public class Stage extends LanguageElement {
         return EvaluateResult.error;
       }
 
-      return ectx.build(
-          prototypeLanguageElement.type_stackAsValue(
+      ectx.recordEffect(
+          new MortarTargetCode(
               code.add(JavaBytecodeUtils.dup)
                   .add(
                       JavaBytecodeUtils.callInterfaceMthod(
@@ -176,6 +172,7 @@ public class Stage extends LanguageElement {
                           JavaBytecodeUtils.internalNameFromClass(Exportable.class),
                           "postInit",
                           JavaMethodDescriptor.fromParts(JavaDataDescriptor.VOID, ROList.empty)))));
+      return ectx.build(prototypeLanguageElement.type_stackAsValue());
     }
 
     // 3. Subtree has no lower, transfer directly (stays constant)

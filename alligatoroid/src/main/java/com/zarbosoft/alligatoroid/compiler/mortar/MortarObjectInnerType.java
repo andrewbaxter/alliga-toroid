@@ -1,7 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaQualifiedName;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.Arrays;
@@ -17,7 +16,7 @@ public class MortarObjectInnerType {
     this.implements_ = implements_;
   }
 
-  public boolean canCastTo(MortarObjectInnerType other) {
+  public boolean canAssignTo(MortarObjectInnerType other) {
     return walkParents(t -> t == other);
   }
 

@@ -201,7 +201,7 @@ public class MortarRecordTypestate
   }
 
   @Override
-  public EvaluateResult typestate_variableValueAccess(EvaluationContext context, Location location, MortarDeferredCode base, Value field0) {
+  public EvaluateResult typestate_varAccess(EvaluationContext context, Location location, Value field0, MortarDeferredCode baseCode) {
     final ROPair<Integer, MortarTupleFieldType> field = assertField(context, location, field0);
     if (field == null) {
       return EvaluateResult.error;
@@ -235,7 +235,7 @@ public class MortarRecordTypestate
   }
 
   @Override
-  public EvaluateResult typestate_vary(EvaluationContext context, Location id, Object data) {
+  public EvaluateResult typestate_constVary(EvaluationContext context, Location id, Object data) {
     return EvaluateResult.pure(
         typestate_stackAsValue(((MortarTargetModuleContext) context.target).transfer((Exportable) data)));
   }

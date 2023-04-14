@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
+import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
@@ -9,20 +10,24 @@ import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.CantSetStackValue;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.ConstBinding;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
+import com.zarbosoft.alligatoroid.compiler.mortar.GeneralLocationError;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataTypestate;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public class MortarDataValueConst implements MortarDataValue, BuiltinAutoExportable {
-  public MortarDataTypestate typestate;
-  public Object value;
+public class MortarDataValueConst extends MortarDataValue implements BuiltinAutoExportable {
+  public final Object value;
+
+  public MortarDataValueConst(MortarDataTypestate typestate, Object value) {
+    super(typestate);
+    this.value = value;
+  }
 
   public static MortarDataValueConst create(MortarDataTypestate typestate, Object value) {
-    final MortarDataValueConst out = new MortarDataValueConst();
-    out.typestate = typestate;
-    out.value = value;
+    final MortarDataValueConst out = new MortarDataValueConst(typestate, value);
     out.postInit();
     return out;
   }
@@ -59,7 +64,25 @@ public class MortarDataValueConst implements MortarDataValue, BuiltinAutoExporta
 
   @Override
   public EvaluateResult vary(EvaluationContext context, Location id) {
-    return typestate.typestate_vary(context, id, value);
+    return typestate.typestate_constVary(context, id, value);
+  }
+
+  @Override
+  public boolean canCastTo(AlligatorusType type) {
+    return typestate.typestate_canCastTo(type);
+  }
+
+  @Override
+  public EvaluateResult castTo(EvaluationContext context, Location location, AlligatorusType type) {
+    if (!(type instanceof MortarDataType)) {
+      throw new Assertion();
+    }
+    return typestate.typestate_constCastTo(context, location, (MortarDataType) type, value);
+  }
+
+  @Override
+  public Value unfork(EvaluationContext context, Location location, ROPair<Location, Value> other) {
+    throw new Assertion(); // Should be varied/realized before reaching here
   }
 
   @Override

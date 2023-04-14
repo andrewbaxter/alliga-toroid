@@ -10,8 +10,6 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeStack;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 
@@ -29,25 +27,6 @@ public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
 
   private MortarPrimitiveAll(Inner inner) {
     this.inner = inner;
-  }
-
-  public EvaluateResult set(
-      EvaluationContext context,
-      Location location,
-      JavaBytecode base,
-      Value value,
-      JavaBytecode setField) {
-    if (!value.canCastTo(this)) {
-      context.errors.add(new GeneralLocationError(location, "RHS can't be cast to LHS"));
-      return EvaluateResult.error;
-    }
-    final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
-    ectx.recordEffect(new MortarTargetCode(base));
-    ectx.recordEffect(
-        ectx.record(ectx.record(value.castTo(context, location, this)).vary(context, location))
-            .consume(context, location));
-    ectx.recordEffect(new MortarTargetCode(setField));
-    return ectx.build(NullValue.value);
   }
 
   @Override
@@ -80,8 +59,8 @@ public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
   }
 
   @Override
-  public Value type_stackAsValue(JavaBytecode code) {
-    return new MortarDataValueVariableStack(this, new MortarDeferredCodeStack(code));
+  public Value type_stackAsValue() {
+    return new MortarDataValueVariableStack(this);
   }
 
   @Override
@@ -125,16 +104,21 @@ public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
   }
 
   @Override
-  public EvaluateResult typestate_vary(EvaluationContext context, Location id, Object data) {
-    return EvaluateResult.pure(
-        new MortarDataValueVariableStack(
-            this, new MortarDeferredCodeStack(inner.literalBytecode(data))));
+  public EvaluateResult typestate_constVary(EvaluationContext context, Location id, Object data) {
+    return EvaluateResult.simple(
+        new MortarDataValueVariableStack(this), new MortarTargetCode(inner.literalBytecode(data)));
   }
 
   @Override
-  public JavaBytecode typestate_castTo(
-      EvaluationContext context, Location location, MortarDataType type, MortarDeferredCode code) {
-    return code.consume();
+  public EvaluateResult typestate_varCastTo(
+      EvaluationContext context, Location location, MortarDataType type) {
+    return EvaluateResult.pure(type.type_stackAsValue());
+  }
+
+  @Override
+  public EvaluateResult typestate_constCastTo(
+      EvaluationContext context, Location location, MortarDataType type, Object value) {
+    return EvaluateResult.pure(MortarDataValueConst.create(this, value));
   }
 
   public boolean triviallyAssignableTo(AlligatorusType type) {
@@ -153,7 +137,20 @@ public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
 
   @Override
   public boolean typestate_varBindMerge(
-      EvaluationContext context, Location location, Binding other) {
+          EvaluationContext context, Location location, Binding other, Location otherLocation) {
     return true;
+  }
+
+  @Override
+  public MortarDataTypestate typestate_unfork(
+      EvaluationContext context,
+      Location location,
+      MortarDataTypestate other,
+      Location otherLocation) {
+    if (other != this) {
+      context.errors.add(new GeneralLocationError(location, "Type mismatch at branch merge"));
+      return null;
+    }
+    return this;
   }
 }

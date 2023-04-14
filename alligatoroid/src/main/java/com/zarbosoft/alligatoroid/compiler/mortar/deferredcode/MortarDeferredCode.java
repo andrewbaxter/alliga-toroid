@@ -7,5 +7,5 @@ public interface MortarDeferredCode {
 
   JavaBytecode consume();
 
-  JavaBytecode set(JavaBytecode value);
+  JavaBytecode set(JavaBytecode valueCode);
 }

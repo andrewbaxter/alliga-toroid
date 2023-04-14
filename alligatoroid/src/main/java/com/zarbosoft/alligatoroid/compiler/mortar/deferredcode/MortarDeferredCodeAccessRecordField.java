@@ -43,7 +43,7 @@ public class MortarDeferredCodeAccessRecordField implements MortarDeferredCode {
   }
 
   @Override
-  public JavaBytecode set(JavaBytecode value) {
+  public JavaBytecode set(JavaBytecode valueCode) {
     JavaBytecodeSequence out =
         JavaBytecodeUtils.seq()
             .add(base.consume())

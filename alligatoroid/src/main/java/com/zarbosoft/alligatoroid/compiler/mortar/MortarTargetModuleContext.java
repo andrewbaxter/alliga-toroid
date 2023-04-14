@@ -87,28 +87,26 @@ public class MortarTargetModuleContext implements TargetModuleContext {
   public static boolean convertFunctionArgumentRoot(
       EvaluationContext context,
       Location location,
-      JavaBytecodeSequence pre,
       JavaBytecodeSequence code,
       Value argument) {
     boolean bad = false;
     if (argument instanceof LooseTuple) {
       for (EvaluateResult e : ((LooseTuple) argument).data) {
-        pre.add((JavaBytecodeSequence) e.effect);
-        if (!convertFunctionArgument(context, location, pre, code, e.value)) {
+        code.add((JavaBytecodeSequence) e.effect);
+        if (!convertFunctionArgument(context, location,  code, e.value)) {
           bad = true;
           continue;
         }
       }
       return !bad;
     } else {
-      return convertFunctionArgument(context, location, pre, code, argument);
+      return convertFunctionArgument(context, location,  code, argument);
     }
   }
 
   public static boolean convertFunctionArgument(
       EvaluationContext context,
       Location location,
-      JavaBytecodeSequence pre,
       JavaBytecodeSequence code,
       Value argument) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
@@ -116,9 +114,8 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     if (variable == ErrorValue.value) {
       return false;
     }
-    code.add(((MortarTargetCode) ((MortarDataValue) variable).consume(context, location)).e);
-    final EvaluateResult prePost = ectx.build(null);
-    pre.add((JavaBytecodeSequence) prePost.effect);
+    ectx.recordEffect(((MortarDataValue) variable).consume(context, location));
+    code.add(((MortarTargetCode)ectx.build(null).effect).e);
     return true;
   }
 

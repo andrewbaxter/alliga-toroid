@@ -16,7 +16,6 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeStack;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
@@ -46,9 +45,8 @@ public class MortarStaticMethodTypestate
       ((MortarTargetModuleContext) context.target).dependencies.add(meta.definitionSet);
     }
     final StaticAutogen.FuncInfo funcInfo = meta.funcInfo;
-    JavaBytecodeSequence pre = new JavaBytecodeSequence();
     JavaBytecodeSequence code = new JavaBytecodeSequence();
-    if (!convertFunctionArgumentRoot(context, location, pre, code, argument)) {
+    if (!convertFunctionArgumentRoot(context, location, code, argument)) {
       return EvaluateResult.error;
     }
     code.add(JavaBytecodeLineNumber.create(context.sourceLocation(location)));
@@ -60,24 +58,29 @@ public class MortarStaticMethodTypestate
             JavaMethodDescriptor.fromParts(
                 funcInfo.returnType.type_jvmDesc(), funcInfo.argDescriptor())));
     if (funcInfo.returnType == nullType) {
-      return EvaluateResult.simple(NullValue.value, new MortarTargetCode(pre.add(code)));
+      return EvaluateResult.simple(NullValue.value, new MortarTargetCode(code));
     } else {
       return EvaluateResult.simple(
-          funcInfo.returnType.type_stackAsValue(code), new MortarTargetCode(pre));
+          funcInfo.returnType.type_stackAsValue(), new MortarTargetCode(code));
     }
   }
 
   @Override
-  public JavaBytecode typestate_castTo(
-      EvaluationContext context,
-      Location location,
-      MortarDataType prototype,
-      MortarDeferredCode code) {
+  public EvaluateResult typestate_varCastTo(
+      EvaluationContext context, Location location, MortarDataType prototype) {
     throw new Assertion();
   }
 
   @Override
-  public boolean typestate_canCastTo(AlligatorusType prototype) {}
+  public EvaluateResult typestate_constCastTo(
+      EvaluationContext context, Location location, MortarDataType type, Object value) {
+    return EvaluateResult.pure(new MortarDataValueConst(this, value));
+  }
+
+  @Override
+  public boolean typestate_canCastTo(AlligatorusType prototype) {
+    return prototype == this;
+  }
 
   @Override
   public MortarDataType typestate_asType() {
@@ -86,8 +89,21 @@ public class MortarStaticMethodTypestate
 
   @Override
   public boolean typestate_varBindMerge(
-      EvaluationContext context, Location location, Binding other) {
+      EvaluationContext context, Location location, Binding other, Location otherLocation) {
     return true;
+  }
+
+  @Override
+  public MortarDataTypestate typestate_unfork(
+      EvaluationContext context,
+      Location location,
+      MortarDataTypestate other,
+      Location otherLocation) {
+    if (other != this) {
+      context.errors.add(new GeneralLocationError(location, "Type mismatch at branch merge"));
+      return null;
+    }
+    return this;
   }
 
   @Override
@@ -121,9 +137,10 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
-  public EvaluateResult typestate_vary(EvaluationContext context, Location id, Object data) {
-    return EvaluateResult.pure(
-        typestate_stackAsValue(
+  public EvaluateResult typestate_constVary(EvaluationContext context, Location id, Object data) {
+    return EvaluateResult.simple(
+        new MortarDataValueVariableStack(this),
+        new MortarTargetCode(
             ((MortarTargetModuleContext) context.target).transfer((Exportable) data)));
   }
 
@@ -133,8 +150,8 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
-  public Value type_stackAsValue(JavaBytecode code) {
-    return new MortarDataValueVariableStack(this, new MortarDeferredCodeStack(code));
+  public Value type_stackAsValue() {
+    return new MortarDataValueVariableStack(this);
   }
 
   @Override

@@ -14,7 +14,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 public interface MortarDataType extends MortarType {
   JavaDataDescriptor type_jvmDesc();
 
-  Value type_stackAsValue(JavaBytecode code);
+  Value type_stackAsValue();
 
   JavaBytecode type_returnBytecode();
 

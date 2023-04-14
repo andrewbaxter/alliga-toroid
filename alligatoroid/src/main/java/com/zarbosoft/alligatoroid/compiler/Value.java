@@ -10,7 +10,6 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
-import com.zarbosoft.rendaw.common.TSList;
 
 public interface Value {
   public default TargetCode drop(EvaluationContext context, Location location) {
@@ -29,7 +28,7 @@ public interface Value {
   }
 
   /**
-   * Prepare a serializable form of the current value.  Only used in mortar target.
+   * Prepare a serializable form of the current value. Only used in mortar target.
    *
    * @param context
    * @param location
@@ -86,6 +85,14 @@ public interface Value {
 
   /**
    * Create a value that represents
+   *
+   * @return
    */
-  EvaluateResult unfork(EvaluationContext context, Location location, TSList<Value> otherValues);
+  Value unfork(EvaluationContext context, Location location, ROPair<Location, Value> other);
+
+  /**
+   * Take a deferred value and make it not deferred (like consume, but returns stack value too).
+   * Done before finishing branches because unfork must be done on stack values.
+   */
+  EvaluateResult realize(EvaluationContext context, Location id);
 }

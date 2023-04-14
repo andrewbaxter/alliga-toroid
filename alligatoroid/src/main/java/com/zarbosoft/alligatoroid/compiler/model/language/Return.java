@@ -55,7 +55,7 @@ public class Return extends LanguageElement {
     }
     ectx.jumps
         .getCreate(dest, () -> new TSList<>())
-        .add(new EvaluateResult.Jump(res, context.scope));
+        .add(new EvaluateResult.Jump(id, res, context.scope));
     ectx.recordEffect(context.target.codeJump(dest));
     return ectx.build(UnreachableValue.value);
   }

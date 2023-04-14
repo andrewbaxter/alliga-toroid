@@ -23,25 +23,25 @@ public interface MortarObjectFieldstate {
   EvaluateResult fieldstate_constObjectFieldAsValue(
       EvaluationContext context, Location location, Object base);
 
-  ROPair<TargetCode, Binding> fieldstate_bind(
-      EvaluationContext context, Location location, MortarDeferredCode parentCode);
-
   default EvaluateResult fieldstate_variableValueAccess(
       EvaluationContext context, Location location, Value field) {
     context.errors.add(new AccessNotSupported(location));
     return EvaluateResult.error;
   }
 
-  EvaluateResult fieldstate_set(
-      EvaluationContext context, Location location, JavaBytecode base, Value value);
-
-  JavaBytecode fieldstate_castTo(
-      EvaluationContext context,
-      Location location,
-      MortarDataType prototype,
-      MortarDeferredCode parentCode);
-
   boolean fieldstate_canCastTo(AlligatorusType prototype);
 
   boolean fieldstate_triviallyAssignableTo(MortarObjectField field);
+
+  MortarObjectFieldstate fieldstate_unfork(
+      EvaluationContext context,
+      Location location,
+      MortarObjectFieldstate other,
+      Location otherLocation);
+
+  boolean fieldstate_varBindMerge(
+      EvaluationContext context,
+      Location location,
+      MortarObjectFieldstate other,
+      Location otherLocation);
 }

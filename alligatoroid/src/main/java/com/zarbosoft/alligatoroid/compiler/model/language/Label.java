@@ -35,11 +35,16 @@ public class Label extends LanguageElement {
       Function<EvaluationContext, EvaluateResult> inner) {
     final JumpKey jumpKey = new JumpKey();
     context.scope.labels.add(new ROPair<>(stringKey, jumpKey));
-    final EvaluateResult res = inner.apply(context);
+    final EvaluateResult res;
+    {
+      final EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
+      final Value res1 = ectx.record(inner.apply(context));
+      res = ectx.build(ectx.record(res1.realize(context, id)));
+    }
 
     // Locate paths leading to/out of this label and sort the values for merging
-    TSList<ScopeState> unforkScopes = new TSList<>();
-    TSList<Value> unforkValues = new TSList<>();
+    TSList<ROPair<Location, ScopeState>> unforkScopes = new TSList<>();
+    TSList<ROPair<Location, Value>> unforkValues = new TSList<>();
     TSMap<JumpKey, TSList<EvaluateResult.Jump>> forwardRemainingJumpResults = new TSMap<>();
     for (Map.Entry<JumpKey, ROList<EvaluateResult.Jump>> e : res.jumps) {
       if (e.getKey() == jumpKey) {
@@ -47,23 +52,24 @@ public class Label extends LanguageElement {
           if (pair.value == UnreachableValue.value) {
             continue;
           }
-          unforkValues.add(pair.value);
-          unforkScopes.add(pair.scope);
+          unforkValues.add(new ROPair<>(pair.location, pair.value));
+          unforkScopes.add(new ROPair<>(pair.location, pair.scope));
         }
       } else {
         forwardRemainingJumpResults.put(e.getKey(), e.getValue().mut());
       }
     }
     if (res.value != UnreachableValue.value) {
-      unforkValues.add(res.value);
-      unforkScopes.add(context.scope);
+      unforkValues.add(new ROPair<>(id, res.value));
+      unforkScopes.add(new ROPair<>(id, context.scope));
     }
 
     // Merge scopes
-    context.scope = unforkScopes.get(0);
+    Location firstScopeLocation = unforkScopes.get(0).first;
+    context.scope = unforkScopes.get(0).second;
     if (unforkScopes.size() > 1) {
       for (int i = 1; i < unforkScopes.size(); ++i) {
-        context.scope.merge(context, id, unforkScopes.get(i));
+        context.scope.merge(context, firstScopeLocation, unforkScopes.get(i));
       }
     }
 
@@ -77,8 +83,12 @@ public class Label extends LanguageElement {
     if (unforkValues.isEmpty()) {
       return ectx.build(UnreachableValue.value);
     } else {
-      return ectx.build(
-          ectx.record(unforkValues.get(0).unfork(context, id, unforkValues.subFrom(1))));
+      Location baseLocation = unforkValues.get(0).first;
+      Value base = unforkValues.get(0).second;
+      for (ROPair<Location, Value> other : unforkValues.subFrom(1)) {
+        base = base.unfork(context, baseLocation, other);
+      }
+      return ectx.build(base);
     }
   }
 

@@ -30,8 +30,8 @@ public class MortarObjectImplType implements MortarDataType {
   }
 
   @Override
-  public Value type_stackAsValue(JavaBytecode code) {
-    return new MortarDataValueVariableStack(newTypestate(), new MortarDeferredCodeStack(code));
+  public Value type_stackAsValue() {
+    return new MortarDataValueVariableStack(newTypestate());
   }
 
   @Override
@@ -54,6 +54,6 @@ public class MortarObjectImplType implements MortarDataType {
 
   @Override
   public Binding type_newInitialBinding(JavaBytecodeBindingKey key, JavaBytecodeCatchKey finallyKey) {
-    return new MortarDataBinding(key, newTypestate(), catchKey);
+    return new MortarDataBinding(key, newTypestate(), finallyKey);
   }
 }

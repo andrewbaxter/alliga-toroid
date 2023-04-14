@@ -5,7 +5,6 @@ import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
-import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -22,10 +21,12 @@ public class EvaluateResult {
   public final ROMap<JumpKey, ROList<Jump>> jumps;
 
   public static class Jump {
+  public final Location location;
     public final Value value;
     public final ScopeState scope;
 
-    public Jump(Value value, ScopeState scope) {
+    public Jump(Location location, Value value, ScopeState scope) {
+      this.location = location;
       this.value = value;
       this.scope = scope;
     }

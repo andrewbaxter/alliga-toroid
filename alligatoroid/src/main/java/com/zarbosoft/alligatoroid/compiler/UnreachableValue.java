@@ -3,7 +3,7 @@ package com.zarbosoft.alligatoroid.compiler;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.GeneralLocationError;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.ROPair;
 
 public class UnreachableValue implements Value {
   public static final UnreachableValue value = new UnreachableValue();
@@ -32,7 +32,7 @@ public class UnreachableValue implements Value {
   }
 
   @Override
-  public EvaluateResult unfork(EvaluationContext context, Location location, TSList<Value> otherValues) {
+  public Value unfork(EvaluationContext context, Location location, ROPair<Location, Value> other) {
     throw new Assertion();
   }
 }

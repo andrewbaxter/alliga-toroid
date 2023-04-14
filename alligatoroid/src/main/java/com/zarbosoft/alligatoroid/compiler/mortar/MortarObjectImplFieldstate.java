@@ -12,6 +12,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeAccessObjectField;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableDeferred;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -20,7 +21,7 @@ import java.util.Map;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class MortarObjectImplFieldstate implements MortarObjectFieldstateData {
+public class MortarObjectImplFieldstate implements MortarObjectFieldstate {
   public final MortarObjectInnerType info;
   private final ROMap<Object, MortarObjectFieldstate> fields;
   private final MortarObjectInnerType parentInfo;
@@ -59,7 +60,7 @@ public class MortarObjectImplFieldstate implements MortarObjectFieldstateData {
   public EvaluateResult fieldstate_variableObjectFieldAsValue(
       EvaluationContext context, Location location, MortarDeferredCode base) {
     return EvaluateResult.pure(
-        new MortarDataValueVariableStack(
+        new MortarDataValueVariableDeferred(
             newTypestate(),
             new MortarDeferredCodeAccessObjectField(
                 base, parentInfo.name.asInternalName(), name, jvmDesc())));
@@ -73,7 +74,6 @@ public class MortarObjectImplFieldstate implements MortarObjectFieldstateData {
             newTypestate(), uncheck(() -> base.getClass().getField(name).get(base))));
   }
 
-  @Override
   public EvaluateResult fieldstate_set(
       EvaluationContext context, Location location, JavaBytecode base, Value value) {
     MortarObjectImplType currentType = asType();
@@ -136,15 +136,6 @@ public class MortarObjectImplFieldstate implements MortarObjectFieldstateData {
   }
 
   @Override
-  public JavaBytecode fieldstate_castTo(
-      EvaluationContext context,
-      Location location,
-      MortarDataType prototype,
-      MortarDeferredCode parentCode) {
-    return consume(context, location, parentCode);
-  }
-
-  @Override
   public boolean fieldstate_canCastTo(AlligatorusType type) {
     if (!(type instanceof MortarObjectImplType)) {
       return false;
@@ -156,7 +147,7 @@ public class MortarObjectImplFieldstate implements MortarObjectFieldstateData {
   public boolean triviallyAssignableTo(
       MortarObjectInnerType other, ROMap<Object, MortarObjectField> fields) {
     // Is subclass
-    if (!info.canCastTo(other)) {
+    if (!info.canAssignTo(other)) {
       return false;
     }
     for (Map.Entry<Object, MortarObjectFieldstate> field : this.fields) {
@@ -183,23 +174,42 @@ public class MortarObjectImplFieldstate implements MortarObjectFieldstateData {
   }
 
   @Override
-  public JavaBytecode fieldstate_storeBytecode(JavaBytecodeBindingKey key) {
-    return JavaBytecodeUtils.storeObj(key);
+  public MortarObjectFieldstate fieldstate_unfork(
+      EvaluationContext context,
+      Location location,
+      MortarObjectFieldstate other,
+      Location otherLocation) {
+    if (!(other instanceof MortarObjectImplFieldstate)) {
+      context.errors.add(new GeneralLocationError(location, "Type mismatch unforking"));
+      return null;
+    }
+    final MortarObjectImplTypestate.UnforkedRes unforked =
+        MortarObjectImplTypestate.unfork(
+            context,
+            info,
+            fields,
+            location,
+            ((MortarObjectImplFieldstate) other).info,
+            ((MortarObjectImplFieldstate) other).fields,
+            otherLocation);
+    if (unforked.useSelf) {
+      return new MortarObjectImplFieldstate(parentInfo, name, info, unforked.fields);
+    } else {
+      return new MortarObjectImplFieldstate(
+          ((MortarObjectImplFieldstate) other).parentInfo,
+          name,
+          ((MortarObjectImplFieldstate) other).info,
+          unforked.fields);
+    }
   }
 
   @Override
-  public MortarDataTypestate fieldstate_newTypestate() {
-    return newTypestate();
-  }
-
-  @Override
-  public JavaBytecode fieldstate_consume(
-      EvaluationContext context, Location location, MortarDeferredCode parentCode) {
-    return consume(context, location, parentCode);
-  }
-
-  @Override
-  public MortarDataType fieldstate_asType() {
-    return asType();
+  public boolean fieldstate_varBindMerge(
+      EvaluationContext context,
+      Location location,
+      MortarObjectFieldstate other,
+      Location otherLocation) {
+    return MortarObjectImplTypestate.bindMerge(
+        context, location, fields, ((MortarObjectImplFieldstate) other).fields, otherLocation);
   }
 }

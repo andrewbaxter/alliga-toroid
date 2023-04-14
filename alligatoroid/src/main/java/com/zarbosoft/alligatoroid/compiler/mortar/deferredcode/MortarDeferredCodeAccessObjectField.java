@@ -32,10 +32,10 @@ public class MortarDeferredCodeAccessObjectField implements MortarDeferredCode {
   }
 
   @Override
-  public JavaBytecode set(JavaBytecode value) {
+  public JavaBytecode set(JavaBytecode valueCode) {
     return JavaBytecodeUtils.seq()
         .add(base.consume())
-        .add(value)
+        .add(valueCode)
         .add(JavaBytecodeUtils.setField(-1, klass, field, type));
   }
 }

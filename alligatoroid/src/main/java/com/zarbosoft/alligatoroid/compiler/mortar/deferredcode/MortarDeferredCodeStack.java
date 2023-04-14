@@ -5,24 +5,21 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.rendaw.common.Assertion;
 
 public class MortarDeferredCodeStack implements MortarDeferredCode {
-  private final JavaBytecode code;
 
-  public MortarDeferredCodeStack(JavaBytecode code) {
-    this.code = code;
-  }
+  public MortarDeferredCodeStack() {}
 
   @Override
   public JavaBytecode drop() {
-    return JavaBytecodeUtils.seq().add(code).add(JavaBytecodeUtils.pop);
+    return JavaBytecodeUtils.pop;
   }
 
   @Override
   public JavaBytecode consume() {
-    return code;
+    return null;
   }
 
   @Override
-  public JavaBytecode set(JavaBytecode value) {
+  public JavaBytecode set(JavaBytecode valueCode) {
     throw new Assertion();
   }
 }

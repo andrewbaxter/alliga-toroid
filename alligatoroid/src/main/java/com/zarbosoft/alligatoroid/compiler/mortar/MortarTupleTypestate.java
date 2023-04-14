@@ -42,7 +42,7 @@ public class MortarTupleTypestate implements BuiltinAutoExportable, MortarDataTy
   }
 
   @Override
-  public JavaBytecode typestate_castTo(EvaluationContext context, Location location, MortarDataType prototype, MortarDeferredCode code) {
+  public EvaluateResult typestate_varCastTo(EvaluationContext context, Location location, MortarDataType prototype) {
   return code.consume();
   }
 
@@ -101,8 +101,8 @@ public class MortarTupleTypestate implements BuiltinAutoExportable, MortarDataTy
   }
 
   @Override
-  public EvaluateResult typestate_variableValueAccess(
-      EvaluationContext context, Location location, MortarDeferredCode base, Value field0) {
+  public EvaluateResult typestate_varAccess(
+          EvaluationContext context, Location location, Value field0, MortarDeferredCode baseCode) {
     ROPair<Integer, MortarTupleFieldType> field = assertField(context, location, field0);
     if (field == null) {
       return EvaluateResult.error;
@@ -146,7 +146,7 @@ public class MortarTupleTypestate implements BuiltinAutoExportable, MortarDataTy
   }
 
   @Override
-  public EvaluateResult typestate_vary(EvaluationContext context, Location id, Object data) {
+  public EvaluateResult typestate_constVary(EvaluationContext context, Location id, Object data) {
     return EvaluateResult.pure(
         typestate_stackAsValue(((MortarTargetModuleContext) context.target).transfer((Exportable) data)));
   }

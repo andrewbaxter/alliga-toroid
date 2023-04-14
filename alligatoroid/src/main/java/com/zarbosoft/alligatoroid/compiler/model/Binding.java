@@ -23,5 +23,5 @@ public interface Binding {
    * Merges forked bindings, so assumptions can be made about the type/state of other based on
    * pre-fork values
    */
-  boolean merge(EvaluationContext context, Location location, Binding other);
+  boolean merge(EvaluationContext context, Location location, Binding other, Location otherLocation);
 }

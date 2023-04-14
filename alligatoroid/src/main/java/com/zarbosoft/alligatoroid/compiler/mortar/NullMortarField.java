@@ -3,14 +3,11 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
-import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 import com.zarbosoft.rendaw.common.ROMap;
-import com.zarbosoft.rendaw.common.ROPair;
 
 public class NullMortarField implements MortarObjectField, MortarObjectFieldstate {
   public static final NullMortarField field = new NullMortarField();
@@ -44,25 +41,9 @@ public class NullMortarField implements MortarObjectField, MortarObjectFieldstat
     return EvaluateResult.pure(NullValue.value);
   }
 
-  @Override
-  public ROPair<TargetCode, Binding> fieldstate_bind(
-      EvaluationContext context, Location location, MortarDeferredCode parentCode) {
-    return new ROPair<>(null, NullBinding.binding);
-  }
-
-  @Override
-  public EvaluateResult fieldstate_set(
+    public EvaluateResult fieldstate_set(
       EvaluationContext context, Location location, JavaBytecode base, Value value) {
     return new EvaluateResult(value.drop(context, location), NullValue.value, ROMap.empty);
-  }
-
-  @Override
-  public JavaBytecode fieldstate_castTo(
-      EvaluationContext context,
-      Location location,
-      MortarDataType prototype,
-      MortarDeferredCode parentCode) {
-    return parentCode.drop();
   }
 
   @Override

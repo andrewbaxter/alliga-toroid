@@ -36,7 +36,7 @@ public class ScopeState {
             parent.forkChild(),
             newData,
             /* Labels can be reused because it won't be used until forks removed */
-                labels));
+            labels));
   }
 
   public static ScopeState create() {
@@ -82,25 +82,26 @@ public class ScopeState {
     return data;
   }
 
-  public void merge(EvaluationContext context, Location location, ScopeState other) {
+  public void merge(
+      EvaluationContext context, Location location, ROPair<Location, ScopeState> other) {
     if (error) {
       return;
     }
-    if (other.error) {
+    if (other.second.error) {
       error = true;
       return;
     }
-    if (data.size() != other.data.size()) {
+    if (data.size() != other.second.data.size()) {
       throw new Assertion();
     }
     for (int i = 0; i < data.size(); i += 1) {
-      if (!data.get(i).merge(context, location, other.data.get(i))) {
+      if (!data.get(i).merge(context, location, other.second.data.get(i), other.first)) {
         error = true;
       }
     }
-    if ((parent == null) != (other.parent == null)) {
+    if ((parent == null) != (other.second.parent == null)) {
       throw new Assertion();
     }
-    parent.merge(context, location, other.parent);
+    parent.merge(context, location, new ROPair<>(other.first, other.second.parent));
   }
 }
