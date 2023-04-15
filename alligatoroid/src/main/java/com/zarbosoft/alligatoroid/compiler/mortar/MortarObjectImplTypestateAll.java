@@ -9,11 +9,11 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -25,30 +25,22 @@ import java.util.Map;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstKey;
 
-public class MortarObjectImplTypestate implements BuiltinAutoExportable, MortarDataTypestate {
+public class MortarObjectImplTypestateAll
+    implements BuiltinAutoExportable, MortarDataTypestate, MortarDataBindstate {
   public final MortarObjectInnerType meta;
   private final ROMap<Object, MortarObjectFieldstate> fields;
 
-  public MortarObjectImplTypestate(
+  public MortarObjectImplTypestateAll(
       MortarObjectInnerType meta, ROMap<Object, MortarObjectFieldstate> fields) {
     this.meta = meta;
     this.fields = fields;
   }
 
-  public static MortarObjectImplTypestate create(
+  public static MortarObjectImplTypestateAll create(
       MortarObjectInnerType meta, ROMap<Object, MortarObjectFieldstate> fields) {
-    final MortarObjectImplTypestate out = new MortarObjectImplTypestate(meta, fields);
+    final MortarObjectImplTypestateAll out = new MortarObjectImplTypestateAll(meta, fields);
     out.postInit();
     return out;
-  }
-
-  @Override
-  public MortarDataTypestate typestate_fork() {
-    TSMap<Object, MortarObjectFieldstate> forkedFields = new TSMap<>();
-    for (Map.Entry<Object, MortarObjectFieldstate> fieldType : fields) {
-      forkedFields.put(fieldType.getKey(), fieldType.getValue().fieldstate_fork());
-    }
-    return MortarObjectImplTypestate.create(meta, forkedFields);
   }
 
   @Override
@@ -115,14 +107,6 @@ public class MortarObjectImplTypestate implements BuiltinAutoExportable, MortarD
     return ok;
   }
 
-  @Override
-  public boolean typestate_varBindMerge(
-      EvaluationContext context, Location location, Binding otherBinding, Location otherLocation) {
-    final MortarObjectImplTypestate other =
-        (MortarObjectImplTypestate) ((MortarDataBinding) otherBinding).typestate;
-    return bindMerge(context, location, fields, other.fields, otherLocation);
-  }
-
   public static UnforkedRes unfork(
       EvaluationContext context,
       MortarObjectInnerType selfMeta,
@@ -177,7 +161,7 @@ public class MortarObjectImplTypestate implements BuiltinAutoExportable, MortarD
       Location location,
       MortarDataTypestate other,
       Location otherLocation) {
-    if (!(other instanceof MortarObjectImplTypestate)) {
+    if (!(other instanceof MortarObjectImplTypestateAll)) {
       context.errors.add(new GeneralLocationError(location, "Type mismatch unforking"));
       return null;
     }
@@ -187,11 +171,11 @@ public class MortarObjectImplTypestate implements BuiltinAutoExportable, MortarD
             this.meta,
             this.fields,
             location,
-            ((MortarObjectImplTypestate) other).meta,
-            ((MortarObjectImplTypestate) other).fields,
+            ((MortarObjectImplTypestateAll) other).meta,
+            ((MortarObjectImplTypestateAll) other).fields,
             otherLocation);
-    return MortarObjectImplTypestate.create(
-        unforked.useSelf ? meta : ((MortarObjectImplTypestate) other).meta, unforked.fields);
+    return MortarObjectImplTypestateAll.create(
+        unforked.useSelf ? meta : ((MortarObjectImplTypestateAll) other).meta, unforked.fields);
   }
 
   @Override
@@ -224,6 +208,16 @@ public class MortarObjectImplTypestate implements BuiltinAutoExportable, MortarD
   }
 
   @Override
+  public JavaBytecode typestate_storeBytecode(JavaBytecodeBindingKey key) {
+    return JavaBytecodeUtils.storeObj(key);
+  }
+
+  @Override
+  public MortarDataBindstate typestate_newBinding() {
+    return fork();
+  }
+
+  @Override
   public EvaluateResult typestate_constValueAccess(
       EvaluationContext context, Location location, Object base, Value field0) {
     final ROPair<Object, MortarObjectFieldstate> field = assertField(context, location, field0);
@@ -234,32 +228,12 @@ public class MortarObjectImplTypestate implements BuiltinAutoExportable, MortarD
   }
 
   @Override
-  public JavaDataDescriptor typestate_jvmDesc() {
-    return JavaDataDescriptor.fromJVMName(meta.name.asInternalName());
-  }
-
-  @Override
-  public JavaBytecode typestate_arrayLoadBytecode() {
-    return JavaBytecodeUtils.arrayLoadObj;
-  }
-
-  @Override
-  public JavaBytecode typestate_arrayStoreBytecode() {
-    return JavaBytecodeUtils.arrayStoreObj;
-  }
-
-  @Override
-  public JavaBytecode typestate_loadBytecode(JavaBytecodeBindingKey key) {
+  public JavaBytecode bindstate_loadBytecode(JavaBytecodeBindingKey key) {
     return JavaBytecodeUtils.loadObj(key);
   }
 
   @Override
-  public JavaBytecode typestate_returnBytecode() {
-    return JavaBytecodeUtils.returnObj;
-  }
-
-  @Override
-  public JavaBytecode typestate_storeBytecode(JavaBytecodeBindingKey key) {
+  public JavaBytecode bindstate_storeBytecode(JavaBytecodeBindingKey key) {
     return JavaBytecodeUtils.storeObj(key);
   }
 
@@ -269,6 +243,40 @@ public class MortarObjectImplTypestate implements BuiltinAutoExportable, MortarD
         new MortarDataValueVariableStack(this),
         new MortarTargetCode(
             ((MortarTargetModuleContext) context.target).transfer((Exportable) data)));
+  }
+
+  @Override
+  public Value bindstate_constAsValue(Object value) {
+    return new MortarDataValueConst(fork(), value);
+  }
+
+  @Override
+  public MortarDataTypestate bindstate_load() {
+    return fork();
+  }
+
+  public MortarObjectImplTypestateAll fork() {
+    TSMap<Object, MortarObjectFieldstate> forkedFields = new TSMap<>();
+    for (Map.Entry<Object, MortarObjectFieldstate> fieldType : fields) {
+      forkedFields.put(fieldType.getKey(), fieldType.getValue().fieldstate_fork());
+    }
+    return MortarObjectImplTypestateAll.create(meta, forkedFields);
+  }
+
+  @Override
+  public MortarDataBindstate bindstate_fork() {
+    return fork();
+  }
+
+  @Override
+  public boolean bindstate_bindMerge(
+      EvaluationContext context, Location location, Binding other, Location otherLocation) {
+    return bindMerge(
+        context,
+        location,
+        fields,
+        ((MortarObjectImplTypestateAll) ((MortarDataVarBinding) other).bindstate).fields,
+        otherLocation);
   }
 
   public static class UnforkedRes {

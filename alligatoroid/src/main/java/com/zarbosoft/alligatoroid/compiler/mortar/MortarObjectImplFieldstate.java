@@ -5,7 +5,6 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
@@ -13,7 +12,6 @@ import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCod
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeAccessObjectField;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableDeferred;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -109,7 +107,7 @@ public class MortarObjectImplFieldstate implements MortarObjectFieldstate {
   }
 
   private MortarDataTypestate newTypestate() {
-    return new MortarObjectImplTypestate(
+    return new MortarObjectImplTypestateAll(
         info,
         TSMap.createWith(
             m -> {
@@ -183,8 +181,8 @@ public class MortarObjectImplFieldstate implements MortarObjectFieldstate {
       context.errors.add(new GeneralLocationError(location, "Type mismatch unforking"));
       return null;
     }
-    final MortarObjectImplTypestate.UnforkedRes unforked =
-        MortarObjectImplTypestate.unfork(
+    final MortarObjectImplTypestateAll.UnforkedRes unforked =
+        MortarObjectImplTypestateAll.unfork(
             context,
             info,
             fields,
@@ -209,7 +207,7 @@ public class MortarObjectImplFieldstate implements MortarObjectFieldstate {
       Location location,
       MortarObjectFieldstate other,
       Location otherLocation) {
-    return MortarObjectImplTypestate.bindMerge(
+    return MortarObjectImplTypestateAll.bindMerge(
         context, location, fields, ((MortarObjectImplFieldstate) other).fields, otherLocation);
   }
 }

@@ -583,7 +583,7 @@ public class StaticAutogen {
             }
             fields.putNew(
                 method.getName(),
-                new MortarObjectMethodAll(innerType, funcDescriptor(this, method)));
+                new MortarObjectMethodFieldAll(innerType, funcDescriptor(this, method)));
           }
         }
         for (Field field : klass.getDeclaredFields()) {

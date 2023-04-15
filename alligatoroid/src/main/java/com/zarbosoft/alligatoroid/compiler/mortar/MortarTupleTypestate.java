@@ -82,11 +82,6 @@ public class MortarTupleTypestate implements BuiltinAutoExportable, MortarDataTy
   return new MortarDataProtofield(newPrototype(), parentMeta, fieldName);
   }
 
-  @Override
-  public JavaDataDescriptor typestate_jvmDesc() {
-    return DESC;
-  }
-
   public ROPair<Integer, MortarTupleFieldType> assertField(
       EvaluationContext context, Location location, Value field) {
     Integer key = assertConstIntlike(context, location, field);
@@ -121,23 +116,8 @@ public class MortarTupleTypestate implements BuiltinAutoExportable, MortarDataTy
   }
 
   @Override
-  public JavaBytecode typestate_arrayLoadBytecode() {
-    return JavaBytecodeUtils.arrayLoadObj;
-  }
-
-  @Override
-  public JavaBytecode typestate_arrayStoreBytecode() {
-    return JavaBytecodeUtils.arrayStoreObj;
-  }
-
-  @Override
   public JavaBytecode typestate_loadBytecode(JavaBytecodeBindingKey key) {
     return JavaBytecodeUtils.loadObj(key);
-  }
-
-  @Override
-  public JavaBytecode typestate_returnBytecode() {
-    return JavaBytecodeUtils.returnObj;
   }
 
   @Override

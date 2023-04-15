@@ -82,7 +82,13 @@ public class MortarDataValueVariableStack extends MortarDataValue implements NoE
               other.first, "Type doesn't match other branches")); // todo log both locations
       return ErrorValue.value;
     }
-    return new MortarDataValueVariableStack(this.typestate.typestate_unfork(
-        context, location, ((MortarDataValue) other.second).typestate, other.first));
+    return new MortarDataValueVariableStack(
+        this.typestate.typestate_unfork(
+            context, location, ((MortarDataValue) other.second).typestate, other.first));
+  }
+
+  @Override
+  public EvaluateResult realize(EvaluationContext context, Location id) {
+    return EvaluateResult.pure(this);
   }
 }

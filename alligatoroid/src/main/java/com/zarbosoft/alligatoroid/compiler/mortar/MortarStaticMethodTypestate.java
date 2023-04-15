@@ -16,7 +16,6 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeStack;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -88,12 +87,6 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
-  public boolean typestate_varBindMerge(
-      EvaluationContext context, Location location, Binding other, Location otherLocation) {
-    return true;
-  }
-
-  @Override
   public MortarDataTypestate typestate_unfork(
       EvaluationContext context,
       Location location,
@@ -107,28 +100,8 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
-  public JavaDataDescriptor typestate_jvmDesc() {
-    return DESC;
-  }
-
-  @Override
-  public JavaBytecode typestate_arrayLoadBytecode() {
-    return JavaBytecodeUtils.arrayLoadObj;
-  }
-
-  @Override
-  public JavaBytecode typestate_arrayStoreBytecode() {
-    return JavaBytecodeUtils.arrayStoreObj;
-  }
-
-  @Override
   public JavaBytecode typestate_loadBytecode(JavaBytecodeBindingKey key) {
     return JavaBytecodeUtils.loadObj(key);
-  }
-
-  @Override
-  public JavaBytecode typestate_returnBytecode() {
-    return JavaBytecodeUtils.returnObj;
   }
 
   @Override
@@ -167,7 +140,7 @@ public class MortarStaticMethodTypestate
   @Override
   public Binding type_newInitialBinding(
       JavaBytecodeBindingKey key, JavaBytecodeCatchKey finallyKey) {
-    return new MortarDataBinding(key, this, finallyKey);
+    return new MortarDataVarBinding(key, this, finallyKey);
   }
 
   public static class ConvertImmediateArgRootRes {

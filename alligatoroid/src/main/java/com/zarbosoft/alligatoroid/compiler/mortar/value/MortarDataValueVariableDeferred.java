@@ -15,6 +15,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataTypestate;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
+import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeStack;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 
@@ -46,7 +47,7 @@ public class MortarDataValueVariableDeferred extends MortarDataValue implements 
 
   @Override
   public TargetCode drop(EvaluationContext context, Location location) {
-  return new MortarTargetCode(code.drop());
+    return new MortarTargetCode(code.drop());
   }
 
   @Override
@@ -63,9 +64,12 @@ public class MortarDataValueVariableDeferred extends MortarDataValue implements 
     }
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     ectx.recordEffect(
-            ectx.record(ectx.record(value.castTo(context, location, currentType)).vary(context, location))
-                    .consume(context, location));
-    return EvaluateResult.simple(NullValue.value, new MortarTargetCode(code.set(((MortarTargetCode)ectx.build(null).effect).e)));
+        ectx.record(
+                ectx.record(value.castTo(context, location, currentType)).vary(context, location))
+            .consume(context, location));
+    return EvaluateResult.simple(
+        NullValue.value,
+        new MortarTargetCode(code.set(((MortarTargetCode) ectx.build(null).effect).e)));
   }
 
   @Override
@@ -93,5 +97,11 @@ public class MortarDataValueVariableDeferred extends MortarDataValue implements 
   public Value unfork(EvaluationContext context, Location location, ROPair<Location, Value> other) {
     // Should already be realized as stack values before unforking
     throw new Assertion();
+  }
+
+  @Override
+  public EvaluateResult realize(EvaluationContext context, Location id) {
+    return EvaluateResult.simple(
+        new MortarDataValueVariableStack(typestate), new MortarTargetCode(code.consume()));
   }
 }

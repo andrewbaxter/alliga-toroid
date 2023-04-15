@@ -7,7 +7,6 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
-import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeStack;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -44,16 +43,17 @@ public class MortarObjectImplType implements MortarDataType {
     return MortarDataValueConst.create(newTypestate(), data);
   }
 
-  public MortarDataTypestate newTypestate() {
+  public MortarObjectImplTypestateAll newTypestate() {
     TSMap<Object, MortarObjectFieldstate> fields = new TSMap<>();
     for (Map.Entry<Object, MortarObjectField> field : this.fields) {
       fields.put(field.getKey(), field.getValue().field_newFieldstate());
     }
-    return MortarObjectImplTypestate.create(meta, fields);
+    return MortarObjectImplTypestateAll.create(meta, fields);
   }
 
   @Override
-  public Binding type_newInitialBinding(JavaBytecodeBindingKey key, JavaBytecodeCatchKey finallyKey) {
-    return new MortarDataBinding(key, newTypestate(), finallyKey);
+  public Binding type_newInitialBinding(
+      JavaBytecodeBindingKey key, JavaBytecodeCatchKey finallyKey) {
+    return new MortarDataVarBinding(key, newTypestate(), finallyKey);
   }
 }

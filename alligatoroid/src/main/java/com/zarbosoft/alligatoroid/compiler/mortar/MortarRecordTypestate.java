@@ -11,7 +11,6 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.ExtraField;
 import com.zarbosoft.alligatoroid.compiler.model.error.MissingField;
@@ -137,11 +136,6 @@ public class MortarRecordTypestate
         });
   }
 
-  @Override
-  public JavaDataDescriptor typestate_jvmDesc() {
-    return MortarTupleTypestate.DESC;
-  }
-
   public ROPair<Integer, MortarTupleFieldType> assertField(EvaluationContext context, Location location, Value field0) {
     final Object fieldKey = assertConstKey(context, location, field0);
     if (fieldKey == null) {
@@ -210,23 +204,8 @@ public class MortarRecordTypestate
   }
 
   @Override
-  public JavaBytecode typestate_arrayLoadBytecode() {
-    return JavaBytecodeUtils.arrayLoadObj;
-  }
-
-  @Override
-  public JavaBytecode typestate_arrayStoreBytecode() {
-    return JavaBytecodeUtils.arrayStoreObj;
-  }
-
-  @Override
   public JavaBytecode typestate_loadBytecode(JavaBytecodeBindingKey key) {
     return JavaBytecodeUtils.loadObj(key);
-  }
-
-  @Override
-  public JavaBytecode typestate_returnBytecode() {
-    return JavaBytecodeUtils.returnObj;
   }
 
   @Override

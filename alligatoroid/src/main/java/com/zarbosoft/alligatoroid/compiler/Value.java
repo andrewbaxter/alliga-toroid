@@ -6,8 +6,10 @@ import com.zarbosoft.alligatoroid.compiler.model.error.BindNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.CallNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.ExportNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.SetNotSupported;
+import com.zarbosoft.alligatoroid.compiler.model.error.VaryNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
@@ -77,18 +79,25 @@ public interface Value {
     return ROList.empty;
   }
 
-  EvaluateResult vary(EvaluationContext context, Location id);
+  default EvaluateResult vary(EvaluationContext context, Location id) {
+    context.errors.add(new VaryNotSupported(id));
+    return EvaluateResult.error;
+  }
 
-  boolean canCastTo(AlligatorusType type);
+  default boolean canCastTo(AlligatorusType type) {
+    return false;
+  }
 
-  EvaluateResult castTo(EvaluationContext context, Location location, AlligatorusType type);
+  default EvaluateResult castTo(
+      EvaluationContext context, Location location, AlligatorusType type) {
+    throw new Assertion();
+  }
 
-  /**
-   * Create a value that represents
-   *
-   * @return
-   */
-  Value unfork(EvaluationContext context, Location location, ROPair<Location, Value> other);
+  /** Create a value that represents the state of the result of multiple forks unforking. */
+  default Value unfork(
+      EvaluationContext context, Location location, ROPair<Location, Value> other) {
+    throw new Assertion();
+  }
 
   /**
    * Take a deferred value and make it not deferred (like consume, but returns stack value too).

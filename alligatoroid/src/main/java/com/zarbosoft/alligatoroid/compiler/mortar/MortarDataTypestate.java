@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
@@ -10,7 +11,6 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatch;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchStart;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.AccessNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.CallNotSupported;
@@ -25,20 +25,9 @@ import com.zarbosoft.rendaw.common.ROPair;
 public interface MortarDataTypestate {
 
   default EvaluateResult typestate_varAccess(
-          EvaluationContext context, Location location, Value field, MortarDeferredCode baseCode) {
+      EvaluationContext context, Location location, Value field, MortarDeferredCode baseCode) {
     context.errors.add(new AccessNotSupported(location));
     return EvaluateResult.error;
-  }
-
-  default Value typestate_loadBinding(MortarDataBinding binding) {
-    return new MortarDataValueVariableDeferred(
-        binding.typestate.typestate_fork(),
-        new MortarDeferredCodeBinding(
-            typestate_loadBytecode(binding.key), typestate_storeBytecode(binding.key)));
-  }
-
-  default MortarDataTypestate typestate_fork() {
-    return this;
   }
 
   default ROPair<JavaBytecode, Binding> typestate_varBind(EvaluationContext context) {
@@ -48,35 +37,19 @@ public interface MortarDataTypestate {
         new JavaBytecodeSequence()
             .add(typestate_storeBytecode(key))
             .add(new JavaBytecodeCatchStart(javaBytecodeCatchKey)),
-        new MortarDataBinding(key, this, javaBytecodeCatchKey));
+        new MortarDataVarBinding(key, typestate_newBinding(), javaBytecodeCatchKey));
   }
-
-  /** Actual drop code, not including finally/jumps/etc */
-  default JavaBytecode typestate_varBindDropInner(
-      EvaluationContext context, Location location, MortarDataBinding mortarDataBinding) {
-    return null;
-  }
-
-  default JavaBytecode typestate_varBindDrop(
-      EvaluationContext context, Location location, MortarDataBinding mortarDataBinding) {
-    final JavaBytecode inner = typestate_varBindDropInner(context, location, mortarDataBinding);
-    if (inner == null) {
-      return null;
-    }
-    return new JavaBytecodeCatch(mortarDataBinding.finallyKey, inner);
-  }
-
-  JavaDataDescriptor typestate_jvmDesc();
-
-  JavaBytecode typestate_returnBytecode();
 
   JavaBytecode typestate_storeBytecode(JavaBytecodeBindingKey key);
 
-  JavaBytecode typestate_loadBytecode(JavaBytecodeBindingKey key);
+  MortarDataBindstate typestate_newBinding();
 
-  JavaBytecode typestate_arrayStoreBytecode();
-
-  JavaBytecode typestate_arrayLoadBytecode();
+  default ROPair<TargetCode, Binding> typestate_constBind(
+      EvaluationContext context, Location location, Object data) {
+    JavaBytecodeBindingKey key = new JavaBytecodeBindingKey();
+    final JavaBytecodeCatchKey javaBytecodeCatchKey = new JavaBytecodeCatchKey();
+    return new ROPair<>(null, new ConstBinding(typestate_newBinding(), data));
+  }
 
   default Value typestate_constAsValue(Object value) {
     return MortarDataValueConst.create(this, value);
@@ -120,11 +93,7 @@ public interface MortarDataTypestate {
 
   MortarDataType typestate_asType();
 
-  boolean typestate_varBindMerge(EvaluationContext context, Location location, Binding other, Location otherLocation);
-
-  /**
-   * Returns null if error.
-   */
+  /** Returns null if error. */
   MortarDataTypestate typestate_unfork(
       EvaluationContext context,
       Location location,

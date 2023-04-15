@@ -13,7 +13,10 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 
-public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
+import static com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils.pop;
+
+public class MortarPrimitiveAll
+    implements MortarDataType, MortarDataTypestate, MortarDataBindstate {
   public static final MortarPrimitiveAll typeByte =
       new MortarPrimitiveAll(MortarPrimitiveAllByte.instance);
   public static final MortarPrimitiveAll typeBool =
@@ -32,7 +35,28 @@ public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
   @Override
   public Binding type_newInitialBinding(
       JavaBytecodeBindingKey key, JavaBytecodeCatchKey finallyKey) {
-    return new MortarDataBinding(key, this, finallyKey);
+    return new MortarDataVarBinding(key, this, finallyKey);
+  }
+
+  @Override
+  public Value bindstate_constAsValue(Object value) {
+    return MortarDataValueConst.create(this, value);
+  }
+
+  @Override
+  public MortarDataTypestate bindstate_load() {
+    return this;
+  }
+
+  @Override
+  public MortarDataBindstate bindstate_fork() {
+    return this;
+  }
+
+  @Override
+  public boolean bindstate_bindMerge(
+      EvaluationContext context, Location location, Binding other, Location otherLocation) {
+    return true;
   }
 
   public interface Inner {
@@ -74,13 +98,13 @@ public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
   }
 
   @Override
-  public JavaDataDescriptor typestate_jvmDesc() {
-    return inner.jvmDesc();
+  public JavaBytecode bindstate_storeBytecode(JavaBytecodeBindingKey key) {
+    return inner.storeBytecode(key);
   }
 
   @Override
-  public JavaBytecode typestate_returnBytecode() {
-    return inner.returnBytecode();
+  public JavaBytecode bindstate_loadBytecode(JavaBytecodeBindingKey key) {
+    return inner.loadBytecode(key);
   }
 
   @Override
@@ -89,18 +113,8 @@ public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
   }
 
   @Override
-  public JavaBytecode typestate_loadBytecode(JavaBytecodeBindingKey key) {
-    return inner.loadBytecode(key);
-  }
-
-  @Override
-  public JavaBytecode typestate_arrayStoreBytecode() {
-    return inner.arrayStoreBytecode();
-  }
-
-  @Override
-  public JavaBytecode typestate_arrayLoadBytecode() {
-    return inner.arrayLoadBytecode();
+  public MortarDataBindstate typestate_newBinding() {
+    return this;
   }
 
   @Override
@@ -133,12 +147,6 @@ public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
   @Override
   public MortarDataType typestate_asType() {
     return this;
-  }
-
-  @Override
-  public boolean typestate_varBindMerge(
-          EvaluationContext context, Location location, Binding other, Location otherLocation) {
-    return true;
   }
 
   @Override

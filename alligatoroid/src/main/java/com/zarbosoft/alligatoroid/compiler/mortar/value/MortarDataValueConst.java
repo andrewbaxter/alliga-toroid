@@ -86,8 +86,13 @@ public class MortarDataValueConst extends MortarDataValue implements BuiltinAuto
   }
 
   @Override
+  public EvaluateResult realize(EvaluationContext context, Location id) {
+    return vary(context, id);
+  }
+
+  @Override
   public final ROPair<TargetCode, Binding> bind(EvaluationContext context, Location location) {
-    return new ROPair<>(null, new ConstBinding(typestate, getInner()));
+    return typestate.typestate_constBind(context, location, getInner());
   }
 
   @Override
