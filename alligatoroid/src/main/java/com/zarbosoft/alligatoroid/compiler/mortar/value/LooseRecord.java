@@ -39,12 +39,16 @@ public class LooseRecord implements Value, NoExportValue {
   }
 
   @Override
+  public EvaluateResult realize(EvaluationContext context, Location id) {
+  return context.target.realizeRecord(context, id, this);
+  }
+
+  @Override
   public TargetCode drop(EvaluationContext context, Location location) {
     TSList<TargetCode> out = new TSList<>();
     for (ROPair<Object, EvaluateResult> e : data) {
       out.add(e.second.effect);
       out.add(e.second.value.drop(context, location));
-      out.add(e.second.postEffect);
     }
     return context.target.merge(context, location, out);
   }
@@ -55,48 +59,28 @@ public class LooseRecord implements Value, NoExportValue {
     if (key == null) {
         return EvaluateResult.error;
     }
-    TSList<TargetCode> pre = new TSList<>();
-    TSList<TargetCode> post = new TSList<>();
+    TSList<TargetCode> code = new TSList<>();
     Value out = null;
     for (ROPair<Object, EvaluateResult> e : data) {
-      if (out == null) {
-        pre.add(e.second.effect);
+        code.add(e.second.effect);
         if (e.first.equals(key)) {
           out = e.second.value;
-          post.add(e.second.postEffect);
         } else {
-          pre.add(e.second.value.drop(context, location));
-          pre.add(e.second.postEffect);
+          code.add(e.second.value.drop(context, location));
         }
-      } else {
-        post.add(e.second.effect);
-        post.add(e.second.value.drop(context, location));
-        post.add(e.second.postEffect);
-      }
     }
     if (out == null) {
-      com.zarbosoft.alligatoroid.compiler.ThreadEvaluationContext.addError(new NoField(location, key));
+      context.errors.add(new NoField(location, key));
       return EvaluateResult.error;
     }
-    return new EvaluateResult(
-        context.target.merge(context, location, pre),
-        context.target.merge(context, location, post),
-        out, jumpValues, jumpValues);
+    return EvaluateResult.simple(
+    out,
+        context.target.merge(context, location, code)
+        );
   }
 
   @Override
   public EvaluateResult export(EvaluationContext context, Location location) {
-    TSOrderedMap<Object, MortarDataTypestate> types = new TSOrderedMap();
-    final TSMap<Object, Object> data = new TSMap<>();
-    final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
-    for (ROPair<Object, EvaluateResult> e : this.data) {
-      Value exported = ectx.record(ectx.record(e.second).export(context, location));
-      if (!(exported instanceof MortarDataValue)) {
-          throw new Assertion();
-      }
-      types.put(e.first, ((MortarDataValue) exported).type());
-      data.put(e.first, ((MortarDataValue) exported).getInner());
-    }
-    return ectx.build(new MortarRecordTypestate(types).typestate_constAsValue(Record.create(data)));
+  throw new Assertion(); // Should be realized
   }
 }

@@ -28,7 +28,10 @@ import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleConte
  * call the static method.
  */
 public class MortarStaticMethodTypestate
-    implements BuiltinSingletonExportable, MortarDataTypestate, MortarDataType {
+    implements BuiltinSingletonExportable,
+        MortarDataTypestate,
+        MortarDataBindstate,
+        MortarDataType {
   // TODO move method type info into the type, check during type check
   public static final MortarStaticMethodTypestate typestate = new MortarStaticMethodTypestate();
   public static final JavaDataDescriptor DESC =
@@ -100,13 +103,13 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
-  public JavaBytecode typestate_loadBytecode(JavaBytecodeBindingKey key) {
-    return JavaBytecodeUtils.loadObj(key);
+  public JavaBytecode typestate_storeBytecode(JavaBytecodeBindingKey key) {
+    return JavaBytecodeUtils.storeObj(key);
   }
 
   @Override
-  public JavaBytecode typestate_storeBytecode(JavaBytecodeBindingKey key) {
-    return JavaBytecodeUtils.storeObj(key);
+  public MortarDataBindstate typestate_newBinding() {
+    return this;
   }
 
   @Override
@@ -141,6 +144,37 @@ public class MortarStaticMethodTypestate
   public Binding type_newInitialBinding(
       JavaBytecodeBindingKey key, JavaBytecodeCatchKey finallyKey) {
     return new MortarDataVarBinding(key, this, finallyKey);
+  }
+
+  @Override
+  public Value bindstate_constAsValue(Object value) {
+    return new MortarDataValueConst(this, value);
+  }
+
+  @Override
+  public MortarDataTypestate bindstate_load() {
+    return this;
+  }
+
+  @Override
+  public JavaBytecode bindstate_storeBytecode(JavaBytecodeBindingKey key) {
+    return JavaBytecodeUtils.storeObj(key);
+  }
+
+  @Override
+  public JavaBytecode bindstate_loadBytecode(JavaBytecodeBindingKey key) {
+    return JavaBytecodeUtils.loadObj(key);
+  }
+
+  @Override
+  public MortarDataBindstate bindstate_fork() {
+    return this;
+  }
+
+  @Override
+  public boolean bindstate_bindMerge(
+      EvaluationContext context, Location location, Binding other, Location otherLocation) {
+    return true;
   }
 
   public static class ConvertImmediateArgRootRes {

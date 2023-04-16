@@ -3,9 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
-import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.GraphDeferred;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchStart;
@@ -25,9 +23,9 @@ import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 public class StaticMethodMeta {
   public final StaticAutogen.FuncInfo funcInfo;
-  public DefinitionSet definitionSet;
+  public MortarDefinitionSet definitionSet;
 
-  public StaticMethodMeta(StaticAutogen.FuncInfo funcInfo, DefinitionSet definitionSet) {
+  public StaticMethodMeta(StaticAutogen.FuncInfo funcInfo, MortarDefinitionSet definitionSet) {
     this.funcInfo = funcInfo;
     this.definitionSet = definitionSet;
   }
@@ -85,7 +83,7 @@ public class StaticMethodMeta {
     if (evaluationContext.errors.some()) {
       throw new RuntimeException("Couldn't implement function, see body for specific errors.");
     }
-    for (DefinitionSet dependency : targetContext.dependencies) {
+    for (MortarDefinitionSet dependency : targetContext.dependencies) {
       definitionSet.dependencies.add(GraphDeferred.create(dependency.id, dependency));
     }
 
@@ -105,11 +103,11 @@ public class StaticMethodMeta {
         initialIndexes);
 
     // Register definition in set
-    final TSList<DefinitionSet.Transfer> transfers = new TSList<>();
+    final TSList<MortarDefinitionSet.Transfer> transfers = new TSList<>();
     for (ROPair<ObjId<Object>, String> transfer : targetContext.transfers) {
-      transfers.add(DefinitionSet.Transfer.create(transfer.first.obj, transfer.second));
+      transfers.add(MortarDefinitionSet.Transfer.create(transfer.first.obj, transfer.second));
     }
     definitionSet.definitions.put(
-        funcInfo.base.toString(), DefinitionSet.Definition.create(preClass.render(), transfers));
+        funcInfo.base.toString(), MortarDefinitionSet.Definition.create(preClass.render(), transfers));
   }
 }

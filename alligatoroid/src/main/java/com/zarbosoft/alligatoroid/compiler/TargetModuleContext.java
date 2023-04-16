@@ -1,6 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
 
 public interface TargetModuleContext {
   public TargetCode merge(
@@ -12,7 +14,10 @@ public interface TargetModuleContext {
 
   TargetCode codeJump(JumpKey jumpKey);
 
-  public abstract static class Id {
+    EvaluateResult realizeRecord(EvaluationContext context, Location id, LooseRecord looseRecord);
+  EvaluateResult realizeTuple(EvaluationContext context, Location id, LooseTuple looseTuple);
+
+    public abstract static class Id {
     @Override
     public abstract String toString();
   }

@@ -13,8 +13,7 @@ import com.zarbosoft.rendaw.common.TSOrderedMap;
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstKey;
 
 public class Record extends LanguageElement {
-  @BuiltinAutoExportableType.Param
-  public ROList<LanguageElement> elements;
+  @BuiltinAutoExportableType.Param public ROList<LanguageElement> elements;
 
   @Override
   protected boolean innerHasLowerInSubtree() {
@@ -40,13 +39,13 @@ public class Record extends LanguageElement {
       EvaluateResult valueRes = ((RecordElement) element).value.evaluate(context);
       data.put(
           key,
-          new EvaluateResult(
-              context.target.merge(context, id, new TSList<>(keyRes.effect, valueRes.effect)),
-                  valueRes.value, jumpValues, jumpValues));
+          EvaluateResult.simple(
+              valueRes.value,
+              context.target.merge(context, id, new TSList<>(keyRes.effect, valueRes.effect))));
     }
     if (badKeys) {
-        return EvaluateResult.error;
+      return EvaluateResult.error;
     }
-    return new EvaluateResult(null, new LooseRecord(data), jumpValues, jumpValues);
+    return EvaluateResult.pure(new LooseRecord(data));
   }
 }

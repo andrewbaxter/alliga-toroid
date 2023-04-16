@@ -5,7 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.DefinitionSet;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarDefinitionSet;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.FutureValue;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -30,8 +30,8 @@ public class Evaluation2Context {
   }
 
   @StaticAutogen.WrapExpose
-  public DefinitionSet define(Location location) {
-    return DefinitionSet.create(
+  public MortarDefinitionSet define(Location location) {
+    return MortarDefinitionSet.create(
         location, moduleContext.importCacheId, moduleContext.nextLocalId.incrementAndGet());
   }
 

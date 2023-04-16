@@ -11,7 +11,6 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.languageinout.LanguageDeserializer;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatch;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
@@ -39,7 +38,7 @@ import com.zarbosoft.alligatoroid.compiler.modules.Module;
 import com.zarbosoft.alligatoroid.compiler.modules.ModuleResolver;
 import com.zarbosoft.alligatoroid.compiler.modules.Source;
 import com.zarbosoft.alligatoroid.compiler.mortar.ContinueError;
-import com.zarbosoft.alligatoroid.compiler.mortar.DefinitionSet;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarDefinitionSet;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
@@ -113,7 +112,7 @@ public class ModuleCompiler implements ModuleResolver {
     }
 
     boolean noDepErrors = true;
-    for (DefinitionSet dependency : targetContext.dependencies) {
+    for (MortarDefinitionSet dependency : targetContext.dependencies) {
       if (!dependency.resolve(moduleContext)) {
         noDepErrors = false;
       }

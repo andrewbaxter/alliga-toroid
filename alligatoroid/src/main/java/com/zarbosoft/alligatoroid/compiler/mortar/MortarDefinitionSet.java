@@ -19,17 +19,17 @@ import java.util.Map;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class DefinitionSet implements BuiltinAutoExportable {
+public class MortarDefinitionSet implements BuiltinAutoExportable {
   public Location location;
   public long moduleId;
   public UniqueId id;
-  public TSSet<GraphDeferred<DefinitionSet>> dependencies;
+  public TSSet<GraphDeferred<MortarDefinitionSet>> dependencies;
   public int nextId = 0;
   public TSMap<String, Definition> definitions = new TSMap<>();
   private boolean resolved = false;
 
-  public static DefinitionSet create(Location location, long importCacheId, int definitionSetId) {
-    final DefinitionSet out = new DefinitionSet();
+  public static MortarDefinitionSet create(Location location, long importCacheId, int definitionSetId) {
+    final MortarDefinitionSet out = new MortarDefinitionSet();
     out.location = location;
     out.id = UniqueId.create(importCacheId, definitionSetId);
     return out;
@@ -58,17 +58,17 @@ public class DefinitionSet implements BuiltinAutoExportable {
         return true;
     }
     if (context.importCacheId != id.importCacheId) {
-      context.errors.add(new DefinitionNotResolved(location, context.importId));
+      context.errors.add(new GeneralLocationError(location, "Couldn't resolve definition"));
       return false;
     }
 
     // Ensure dependencies are resolved
-    for (GraphDeferred<DefinitionSet> dependency : dependencies) {
+    for (GraphDeferred<MortarDefinitionSet> dependency : dependencies) {
       if (context.compileContext.loadedDefinitionSets.contains(dependency.id)) {
           continue;
       }
       if (dependency.artifact == null) {
-        dependency.artifact = (DefinitionSet) context.lookupRef(dependency.ref);
+        dependency.artifact = (MortarDefinitionSet) context.lookupRef(dependency.ref);
       }
       dependency.artifact.resolve(context);
     }
