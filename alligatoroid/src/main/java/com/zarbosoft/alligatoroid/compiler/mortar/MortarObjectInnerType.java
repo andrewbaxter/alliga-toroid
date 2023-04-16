@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaQualifiedName;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -18,6 +19,10 @@ public class MortarObjectInnerType {
 
   public boolean canAssignTo(MortarObjectInnerType other) {
     return walkParents(t -> t == other);
+  }
+
+  public JavaDataDescriptor jvmDesc() {
+    return JavaDataDescriptor.fromJVMName(name.asInternalName());
   }
 
   private boolean walkParents(Function<MortarObjectInnerType, Boolean> process) {

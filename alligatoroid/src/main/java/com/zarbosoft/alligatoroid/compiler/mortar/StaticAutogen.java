@@ -419,33 +419,6 @@ public class StaticAutogen {
     }
   }
 
-  /** Must be called during initialization (single thread)! */
-  public static MortarObjectField fieldDescriptor(
-      MortarObjectInnerType parent, String name, WorkingMeta working, Class klass) {
-    if (klass == void.class) {
-      return NullMortarField.field;
-    } else if (klass.isPrimitive()) {
-      final MortarPrimitiveAll t;
-      if (klass == byte.class) {
-        t = MortarPrimitiveAll.typeByte;
-      } else if (klass == boolean.class) {
-        t = MortarPrimitiveAll.typeBool;
-      } else if (klass == int.class) {
-        t = MortarPrimitiveAll.typeInt;
-      } else {
-        throw new Assertion();
-      }
-      return new MortarPrimitiveFieldAll(parent, name, t);
-    } else if (klass == String.class) {
-      return new MortarPrimitiveFieldAll(parent, name, MortarPrimitiveAll.typeString);
-    } else if (klass == byte[].class) {
-      return new MortarPrimitiveFieldAll(parent, name, MortarPrimitiveAll.typeBytes);
-    } else {
-      final MortarObjectImplType t = working.generateMortarType(klass);
-      return new MortarObjectImplField(parent, name, t.meta, t.fields);
-    }
-  }
-
   private static Value autoMortarHalfStaticMethodType(
       WorkingMeta working, Class klass, String name) {
     Method method = null;
@@ -583,13 +556,13 @@ public class StaticAutogen {
             }
             fields.putNew(
                 method.getName(),
-                new MortarObjectMethodFieldAll(innerType, funcDescriptor(this, method)));
+                new MortarObjectMethodAll(innerType, funcDescriptor(this, method)));
           }
         }
         for (Field field : klass.getDeclaredFields()) {
           MortarDataType dataType = dataDescriptor(this, field.getType());
           String fieldName = field.getName();
-          fields.putNew(fieldName, fieldDescriptor(innerType, fieldName, this, field.getType()));
+          fields.putNew(fieldName, dataDescriptor( this, field.getType()).type_newField(innerType, fieldName));
         }
         if (klass.getSuperclass() != null && klass.getSuperclass() != Object.class) {
           inherits.add(generateMortarType(klass.getSuperclass()).meta);

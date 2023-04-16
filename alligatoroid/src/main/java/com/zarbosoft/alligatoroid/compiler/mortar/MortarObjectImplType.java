@@ -25,7 +25,7 @@ public class MortarObjectImplType implements MortarDataType {
 
   @Override
   public JavaDataDescriptor type_jvmDesc() {
-    return JavaDataDescriptor.fromJVMName(meta.name.asInternalName());
+  return meta.jvmDesc();
   }
 
   @Override
@@ -41,6 +41,16 @@ public class MortarObjectImplType implements MortarDataType {
   @Override
   public Value type_constAsValue(Object data) {
     return MortarDataValueConst.create(newTypestate(), data);
+  }
+
+  @Override
+  public MortarDataTypestate type_newTypestate() {
+  return newTypestate();
+  }
+
+  @Override
+  public MortarObjectField type_newField(MortarObjectInnerType parentType, String fieldName) {
+  return new MortarDataGenericField(parentType,fieldName,this);
   }
 
   public MortarObjectImplTypestateAll newTypestate() {

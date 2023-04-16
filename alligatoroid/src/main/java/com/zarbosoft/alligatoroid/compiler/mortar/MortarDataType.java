@@ -31,4 +31,8 @@ public interface MortarDataType extends MortarType {
       return EvaluateResult.error;
     }
   }
+
+  MortarDataTypestate type_newTypestate();
+
+  MortarObjectField type_newField(MortarObjectInnerType parentType, String fieldName);
 }

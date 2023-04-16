@@ -9,6 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
@@ -26,7 +27,7 @@ import java.util.Map;
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecTupTypestate.assertConstKey;
 
 public class MortarObjectImplTypestateAll
-    implements BuiltinAutoExportable, MortarDataTypestate, MortarDataBindstate {
+    implements BuiltinAutoExportable, MortarDataTypestate {
   public final MortarObjectInnerType meta;
   private final ROMap<Object, MortarObjectFieldstate> fields;
 
@@ -179,6 +180,45 @@ public class MortarObjectImplTypestateAll
   }
 
   @Override
+  public MortarDataTypestate typestate_fork() {
+  return fork();
+  }
+
+  @Override
+  public boolean typestate_bindMerge(EvaluationContext context, Location location, MortarDataTypestate other, Location otherLocation) {
+    return bindMerge(
+            context, location, fields, ((MortarObjectImplTypestateAll) other).fields, otherLocation);
+  }
+
+  @Override
+  public boolean typestate_triviallyAssignableTo(AlligatorusType other) {
+  if (!(other instanceof MortarObjectImplType)) {
+    return false;
+  }
+    // Is subclass
+    if (!meta.canAssignTo(((MortarObjectImplType) other).meta)) {
+      return false;
+    }
+    for (Map.Entry<Object, MortarObjectFieldstate> field : this.fields) {
+      final MortarObjectField otherField = ((MortarObjectImplType) other).fields.getOpt(field.getKey());
+      // Child has new fields; as subclass, this is okay
+      if (otherField == null) {
+        continue;
+      }
+      // Enforce restrictions (i.e. subclass where X must be even)
+      if (!field.getValue().fieldstate_triviallyAssignableTo(otherField)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
+  public JavaDataDescriptor typestate_jvmDesc() {
+    return meta.jvmDesc();
+  }
+
+  @Override
   public String toString() {
     return meta.name.toString();
   }
@@ -212,10 +252,6 @@ public class MortarObjectImplTypestateAll
     return JavaBytecodeUtils.storeObj(key);
   }
 
-  @Override
-  public MortarDataBindstate typestate_newBinding() {
-    return fork();
-  }
 
   @Override
   public EvaluateResult typestate_constValueAccess(
@@ -227,15 +263,6 @@ public class MortarObjectImplTypestateAll
     return field.second.fieldstate_constObjectFieldAsValue(context, location, base);
   }
 
-  @Override
-  public JavaBytecode bindstate_loadBytecode(JavaBytecodeBindingKey key) {
-    return JavaBytecodeUtils.loadObj(key);
-  }
-
-  @Override
-  public JavaBytecode bindstate_storeBytecode(JavaBytecodeBindingKey key) {
-    return JavaBytecodeUtils.storeObj(key);
-  }
 
   @Override
   public EvaluateResult typestate_constVary(EvaluationContext context, Location id, Object data) {
@@ -245,15 +272,6 @@ public class MortarObjectImplTypestateAll
             ((MortarTargetModuleContext) context.target).transfer((Exportable) data)));
   }
 
-  @Override
-  public Value bindstate_constAsValue(Object value) {
-    return new MortarDataValueConst(fork(), value);
-  }
-
-  @Override
-  public MortarDataTypestate bindstate_load() {
-    return fork();
-  }
 
   public MortarObjectImplTypestateAll fork() {
     TSMap<Object, MortarObjectFieldstate> forkedFields = new TSMap<>();
@@ -263,6 +281,28 @@ public class MortarObjectImplTypestateAll
     return MortarObjectImplTypestateAll.create(meta, forkedFields);
   }
 
+  @Override
+  public MortarDataBindstate typestate_newBinding() {
+    return fork();
+  }
+  @Override
+  public JavaBytecode bindstate_loadBytecode(JavaBytecodeBindingKey key) {
+    return JavaBytecodeUtils.loadObj(key);
+  }
+
+  @Override
+  public JavaBytecode bindstate_storeBytecode(JavaBytecodeBindingKey key) {
+    return JavaBytecodeUtils.storeObj(key);
+  }
+  @Override
+  public Value bindstate_constAsValue(Object value) {
+    return new MortarDataValueConst(fork(), value);
+  }
+
+  @Override
+  public MortarDataTypestate bindstate_load() {
+    return fork();
+  }
   @Override
   public MortarDataBindstate bindstate_fork() {
     return fork();

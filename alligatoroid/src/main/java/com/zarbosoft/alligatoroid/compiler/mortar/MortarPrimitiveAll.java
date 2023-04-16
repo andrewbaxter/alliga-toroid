@@ -98,6 +98,16 @@ public class MortarPrimitiveAll
   }
 
   @Override
+  public MortarDataTypestate type_newTypestate() {
+  return this;
+  }
+
+  @Override
+  public MortarObjectField type_newField(MortarObjectInnerType parentType, String fieldName) {
+  return new MortarDataGenericField(parentType,fieldName,this);
+  }
+
+  @Override
   public JavaBytecode bindstate_storeBytecode(JavaBytecodeBindingKey key) {
     return inner.storeBytecode(key);
   }
@@ -160,5 +170,25 @@ public class MortarPrimitiveAll
       return null;
     }
     return this;
+  }
+
+  @Override
+  public MortarDataTypestate typestate_fork() {
+  return this;
+  }
+
+  @Override
+  public boolean typestate_bindMerge(EvaluationContext context, Location location, MortarDataTypestate other, Location otherLocation) {
+  return true;
+  }
+
+  @Override
+  public boolean typestate_triviallyAssignableTo(AlligatorusType type) {
+  return type == this;
+  }
+
+  @Override
+  public JavaDataDescriptor typestate_jvmDesc() {
+  return inner.jvmDesc();
   }
 }

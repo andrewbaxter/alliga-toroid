@@ -3,41 +3,35 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.model.error.AccessNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeAccessObjectField;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableDeferred;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarMethodValueVariableDeferred;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class MortarPrimitiveFieldAll implements MortarObjectField, MortarObjectFieldstate {
-  private final MortarObjectInnerType parentType;
+public class MortarDataGenericFieldstate implements MortarObjectFieldstate {
+  private final MortarObjectInnerType parentInfo;
   private final String name;
-  public final MortarPrimitiveAll data;
+  private final MortarDataTypestate typestate;
 
-  public MortarPrimitiveFieldAll(
-      MortarObjectInnerType parentType, String name, MortarPrimitiveAll data) {
-    this.parentType = parentType;
+  public MortarDataGenericFieldstate(
+      MortarObjectInnerType parentInfo, String name, MortarDataTypestate typestate) {
+    this.parentInfo = parentInfo;
     this.name = name;
-    this.data = data;
+    this.typestate = typestate;
   }
 
   @Override
   public MortarObjectFieldstate fieldstate_fork() {
-    return this;
+    return new MortarDataGenericFieldstate(parentInfo, name, typestate.typestate_fork());
   }
 
   @Override
   public MortarObjectField fieldstate_asField() {
-    return this;
-  }
-
-  @Override
-  public MortarObjectFieldstate field_newFieldstate() {
-    return this;
+    return new MortarDataGenericField(parentInfo, name, typestate.typestate_asType());
   }
 
   @Override
@@ -45,36 +39,30 @@ public class MortarPrimitiveFieldAll implements MortarObjectField, MortarObjectF
       EvaluationContext context, Location location, MortarDeferredCode base) {
     return EvaluateResult.pure(
         new MortarDataValueVariableDeferred(
-            data,
+            typestate.typestate_fork(),
             new MortarDeferredCodeAccessObjectField(
-                base, parentType.name.asInternalName(), name, data.inner.jvmDesc())));
+                base, parentInfo.name.asInternalName(), name, typestate.typestate_jvmDesc())));
   }
 
   @Override
   public EvaluateResult fieldstate_constObjectFieldAsValue(
       EvaluationContext context, Location location, Object base) {
     return EvaluateResult.pure(
-        MortarDataValueConst.create(data, uncheck(() -> base.getClass().getField(name).get(base))));
+        MortarDataValueConst.create(
+            typestate.typestate_fork(), uncheck(() -> base.getClass().getField(name).get(base))));
   }
 
   @Override
-  public EvaluateResult fieldstate_variableValueAccess(
-      EvaluationContext context, Location location, Value field) {
-    context.errors.add(new AccessNotSupported(location));
-    return EvaluateResult.error;
-  }
-
-  @Override
-  public boolean fieldstate_canCastTo(AlligatorusType type) {
-    return data.triviallyAssignableTo(type);
+  public boolean fieldstate_canCastTo(AlligatorusType prototype) {
+    return typestate.typestate_canCastTo(prototype);
   }
 
   @Override
   public boolean fieldstate_triviallyAssignableTo(MortarObjectField field) {
-    if (!(field instanceof MortarPrimitiveFieldAll)) {
+    if (!(field instanceof MortarDataGenericField)) {
       return false;
     }
-    return data.triviallyAssignableTo(((MortarPrimitiveFieldAll) field).data);
+    return typestate.typestate_triviallyAssignableTo(((MortarDataGenericField) field).type);
   }
 
   @Override
@@ -83,7 +71,11 @@ public class MortarPrimitiveFieldAll implements MortarObjectField, MortarObjectF
       Location location,
       MortarObjectFieldstate other,
       Location otherLocation) {
-    return this;
+    return new MortarDataGenericFieldstate(
+        parentInfo,
+        name,
+        typestate.typestate_unfork(
+            context, location, ((MortarDataGenericFieldstate) other).typestate, otherLocation));
   }
 
   @Override
@@ -92,6 +84,7 @@ public class MortarPrimitiveFieldAll implements MortarObjectField, MortarObjectF
       Location location,
       MortarObjectFieldstate other,
       Location otherLocation) {
-    return true;
+    return typestate.typestate_bindMerge(
+        context, location, ((MortarDataGenericFieldstate) other).typestate, otherLocation);
   }
 }

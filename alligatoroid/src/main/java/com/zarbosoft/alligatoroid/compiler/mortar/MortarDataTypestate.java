@@ -7,18 +7,16 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatch;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchStart;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.AccessNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.CallNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeBinding;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableDeferred;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
@@ -98,4 +96,20 @@ public interface MortarDataTypestate {
       Location location,
       MortarDataTypestate other,
       Location otherLocation);
+
+  MortarDataTypestate typestate_fork();
+
+  boolean typestate_bindMerge(EvaluationContext context, Location location, MortarDataTypestate other, Location otherLocation);
+
+  boolean typestate_triviallyAssignableTo(AlligatorusType type);
+
+  JavaDataDescriptor typestate_jvmDesc();
+
+  JavaBytecode typestate_loadBytecode(JavaBytecodeBindingKey key);
+
+  /** Actual drop code, not including finally/jumps/etc */
+  default JavaBytecode typestate_varBindDrop(
+          EvaluationContext context, Location location, MortarDataVarBinding mortarDataBinding) {
+    return null;
+  }
 }
