@@ -20,7 +20,7 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import org.jetbrains.annotations.NotNull;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstIntlike;
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecTupTypestate.assertConstIntlike;
 
 public class MortarTupleTypestate implements BuiltinAutoExportable, MortarDataTypestate {
   public static final JavaInternalName JVMNAME =

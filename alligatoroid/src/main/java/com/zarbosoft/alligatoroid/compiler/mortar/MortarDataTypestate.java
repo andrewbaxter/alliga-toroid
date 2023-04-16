@@ -23,7 +23,6 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
 public interface MortarDataTypestate {
-
   default EvaluateResult typestate_varAccess(
       EvaluationContext context, Location location, Value field, MortarDeferredCode baseCode) {
     context.errors.add(new AccessNotSupported(location));

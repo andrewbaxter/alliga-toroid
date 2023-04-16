@@ -23,7 +23,7 @@ import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Map;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstKey;
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecTupTypestate.assertConstKey;
 
 public class MortarObjectImplTypestateAll
     implements BuiltinAutoExportable, MortarDataTypestate, MortarDataBindstate {

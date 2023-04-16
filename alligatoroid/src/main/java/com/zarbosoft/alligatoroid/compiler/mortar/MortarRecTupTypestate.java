@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
@@ -11,6 +12,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.ExtraField;
 import com.zarbosoft.alligatoroid.compiler.model.error.MissingField;
@@ -29,11 +31,11 @@ import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
-public class MortarRecordTypestate
-        implements BuiltinAutoExportable, MortarDataTypestate {
+public class MortarRecTupTypestate
+        implements BuiltinAutoExportable, MortarDataTypestate, MortarDataBindstate {
   public final TSOrderedMap<Object, ROPair<Integer, MortarTupleFieldType>> fields;
 
-  public MortarRecordTypestate(TSOrderedMap<Object, ROPair<Integer, MortarTupleFieldType>> fields) {
+  public MortarRecTupTypestate(TSOrderedMap<Object, ROPair<Integer, MortarTupleFieldType>> fields) {
     this.fields = fields;
   }
 
@@ -121,21 +123,6 @@ public class MortarRecordTypestate
     return out;
   }
 
-  @Override
-  public Object graphDesemiserializeValue(ModuleCompileContext context, SemiserialSubvalue data) {
-    return data.dispatch(
-        new SemiserialSubvalue.DefaultDispatcher<>() {
-          @Override
-          public Object handleRecord(SemiserialRecord s) {
-            TSMap<Object, Object> out = new TSMap<>();
-            for (ROPair<Object, MortarDataTypestate> field : fields) {
-              //
-            }
-            for (ROPair<SemiserialSubvalue, SemiserialSubvalue> datum : s.data) {}
-          }
-        });
-  }
-
   public ROPair<Integer, MortarTupleFieldType> assertField(EvaluationContext context, Location location, Value field0) {
     final Object fieldKey = assertConstKey(context, location, field0);
     if (fieldKey == null) {
@@ -165,17 +152,17 @@ public class MortarRecordTypestate
     if (type instanceof ImmutableType) {
       type = ((ImmutableType) type).innerType;
     }
-    if (!(type instanceof MortarRecordTypestate)) {
+    if (!(type instanceof MortarRecTupTypestate)) {
       errors.add(new WrongType(location, path, type.toString(), "record"));
       return false;
     }
     boolean bad = false;
     final TSSet otherKeys = new TSSet<>();
-    for (ROPair<Object, ROPair<Integer, MortarTupleFieldType>> e : ((MortarRecordTypestate) type).fields) {
+    for (ROPair<Object, ROPair<Integer, MortarTupleFieldType>> e : ((MortarRecTupTypestate) type).fields) {
       otherKeys.add(e.first);
     }
     for (ROPair<Object, ROPair<Integer, MortarTupleFieldType>> field : fields) {
-      final ROPair<Integer, MortarTupleFieldType> otherField = ((MortarRecordTypestate) type).fields.getOpt(field.first);
+      final ROPair<Integer, MortarTupleFieldType> otherField = ((MortarRecTupTypestate) type).fields.getOpt(field.first);
       if (otherField == null) {
         errors.add(new MissingField(location, path, field.first));
         bad = true;
@@ -204,7 +191,7 @@ public class MortarRecordTypestate
   }
 
   @Override
-  public JavaBytecode typestate_loadBytecode(JavaBytecodeBindingKey key) {
+  public JavaBytecode bindstate_loadBytecode(JavaBytecodeBindingKey key) {
     return JavaBytecodeUtils.loadObj(key);
   }
 
@@ -214,8 +201,72 @@ public class MortarRecordTypestate
   }
 
   @Override
+  public MortarDataBindstate typestate_newBinding() {
+  return this;
+  }
+
+  @Override
   public EvaluateResult typestate_constVary(EvaluationContext context, Location id, Object data) {
     return EvaluateResult.pure(
         typestate_stackAsValue(((MortarTargetModuleContext) context.target).transfer((Exportable) data)));
+  }
+
+  @Override
+  public EvaluateResult typestate_varCastTo(EvaluationContext context, Location location, MortarDataType prototype) {
+    TODO();
+  }
+
+  @Override
+  public EvaluateResult typestate_constCastTo(EvaluationContext context, Location location, MortarDataType type, Object value) {
+  return EvaluateResult.pure(new MortarDataValueConst(this, value));
+  }
+
+  @Override
+  public boolean typestate_canCastTo(AlligatorusType prototype) {
+  if (!(prototype instanceof MortarRecTupTypestate)) {
+    return false;
+  }
+    final TSOrderedMap<Object, ROPair<Integer, MortarTupleFieldType>> otherFields = ((MortarRecTupTypestate) prototype).fields;
+    if (otherFields.size() != fields.size()) {
+      return false;
+    }
+    for (int i = 0; i < fields.size(); i++) {
+    if (!fields.get(i).second)
+    }
+  }
+
+  @Override
+  public MortarDataType typestate_asType() {
+    TODO();
+  }
+
+  @Override
+  public MortarDataTypestate typestate_unfork(EvaluationContext context, Location location, MortarDataTypestate other, Location otherLocation) {
+    TODO();
+  }
+
+  @Override
+  public Value bindstate_constAsValue(Object value) {
+    TODO();
+  }
+
+  @Override
+  public MortarDataTypestate bindstate_load() {
+    TODO();
+  }
+
+  @Override
+  public JavaBytecode bindstate_storeBytecode(JavaBytecodeBindingKey key) {
+    TODO();
+  }
+
+  @Override
+  public MortarDataBindstate bindstate_fork() {
+    TODO();
+  }
+
+  @Override
+  public boolean bindstate_bindMerge(EvaluationContext context, Location location, Binding other, Location otherLocation) {
+    TODO();
   }
 }

@@ -22,6 +22,8 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -147,18 +149,33 @@ public class MortarTargetModuleContext implements TargetModuleContext {
 
   @Override
   public EvaluateResult realizeRecord(EvaluationContext context, Location id, LooseRecord looseRecord) {
+  boolean allConst = true;
+  for (ROPair<Object, EvaluateResult> e : looseRecord.data) {
+        allConst = allConst && e.second.value instanceof MortarDataValueConst;
+  }
+
     TSOrderedMap<Object, MortarDataTypestate> types = new TSOrderedMap();
     final TSMap<Object, Object> data = new TSMap<>();
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
-    for (ROPair<Object, EvaluateResult> e : looseRecord.data) {
-      Value exported = ectx.record(ectx.record(e.second).export(context, id));
-      if (!(exported instanceof MortarDataValue)) {
-        throw new Assertion();
+    if (allConst) {
+      Object[] record = new Object[looseRecord.data.size()];
+      for (int i = 0; i < looseRecord.data.size(); i+=1) {
+        final ROPair<Object, EvaluateResult> e = looseRecord.data.getI(i);
+        final MortarDataValueConst value = (MortarDataValueConst) ectx.record(e.second);
+        // TODO type
+        record[i] = value.value;
       }
-      types.put(e.first, ((MortarDataValue) exported).type());
-      data.put(e.first, ((MortarDataValue) exported).getInner());
+      return ectx.build(new MortarDataValueConst(new MortarRecTupTypestate(fields), record));
+    } else {
+      for (int i = 0; i < looseRecord.data.size(); i+=1) {
+        final ROPair<Object, EvaluateResult> e = looseRecord.data.getI(i);
+        // TODO type
+        ((MortarDataValue)ectx.record(ectx.record(e.second).vary(context, id))).type().x();
+        // TODO box
+        ectx.recordEffect(new MortarTargetCode(JavaBytecodeUtils.arrayStoreObj));
+      }
+      return ectx.build(new MortarDataValueVariableStack(new MortarRecTupTypestate(fields)));
     }
-    return ectx.build(new MortarRecordTypestate(types).typestate_constAsValue(Record.create(data)));
   }
 
   @Override

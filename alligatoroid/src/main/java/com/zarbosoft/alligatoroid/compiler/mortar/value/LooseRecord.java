@@ -6,18 +6,13 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.model.language.Record;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataTypestate;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
-import com.zarbosoft.rendaw.common.TSOrderedMap;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstKey;
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecTupTypestate.assertConstKey;
 
 public class LooseRecord implements Value, NoExportValue {
   public final ROOrderedMap<Object, EvaluateResult> data;

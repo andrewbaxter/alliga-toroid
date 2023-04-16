@@ -16,4 +16,6 @@ public interface ROOrderedMap<K, V> extends Iterable<ROPair<K, V>> {
   TSOrderedMap<K, V> mut();
 
   V get(K key);
+
+  ROPair<K, V> getI(int i);
 }

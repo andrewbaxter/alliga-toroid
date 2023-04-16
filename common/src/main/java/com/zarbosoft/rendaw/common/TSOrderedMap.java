@@ -56,6 +56,11 @@ public class TSOrderedMap<K, V> implements ROOrderedMap<K, V> {
   }
 
   @Override
+  public ROPair<K, V> getI(int i) {
+    return ordered.get(i);
+  }
+
+  @Override
   public V getOpt(K key) {
     return unordered.get(key);
   }
@@ -98,7 +103,7 @@ public class TSOrderedMap<K, V> implements ROOrderedMap<K, V> {
 
   public TSOrderedMap<K, V> putNew(K k, V v) {
     if (unordered.containsKey(k)) {
-        throw new Assertion();
+      throw new Assertion();
     }
     put(k, v);
     return this;

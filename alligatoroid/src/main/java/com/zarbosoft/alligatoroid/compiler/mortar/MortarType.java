@@ -6,5 +6,4 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 
 public interface MortarType extends AlligatorusType {
-  Binding type_newInitialBinding(JavaBytecodeBindingKey key, JavaBytecodeCatchKey finallyKey);
 }
