@@ -5,7 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarRecTupTypestate;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarTupleTypestate;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class MortarDeferredCodeAccessRecordField implements MortarDeferredCode {
@@ -34,7 +34,7 @@ public class MortarDeferredCodeAccessRecordField implements MortarDeferredCode {
             .add(
                 JavaBytecodeUtils.callMethod(
                     -1,
-                    MortarRecTupTypestate.JVMNAME,
+                    MortarTupleTypestate.JVMNAME,
                     "get",
                     JavaMethodDescriptor.fromParts(
                         JavaDataDescriptor.OBJECT, new TSList<>(JavaDataDescriptor.OBJECT))))
@@ -52,7 +52,7 @@ public class MortarDeferredCodeAccessRecordField implements MortarDeferredCode {
             .add(
                 JavaBytecodeUtils.callMethod(
                     -1,
-                    MortarRecTupTypestate.JVMNAME,
+                    MortarTupleTypestate.JVMNAME,
                     "set",
                     JavaMethodDescriptor.fromParts(
                         JavaDataDescriptor.OBJECT,

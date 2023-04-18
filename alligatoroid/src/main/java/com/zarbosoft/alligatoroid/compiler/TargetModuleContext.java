@@ -17,7 +17,15 @@ public interface TargetModuleContext {
     EvaluateResult realizeRecord(EvaluationContext context, Location id, LooseRecord looseRecord);
   EvaluateResult realizeTuple(EvaluationContext context, Location id, LooseTuple looseTuple);
 
-    public abstract static class Id {
+    boolean looseRecordCanCastTo(EvaluationContext context, LooseRecord looseRecord, AlligatorusType type);
+
+  EvaluateResult looseRecordCastTo(EvaluationContext context, Location location, AlligatorusType type);
+
+  EvaluateResult looseTupleCastTo(EvaluationContext context, Location location, AlligatorusType type);
+
+  boolean looseTupleCanCastTo(EvaluationContext context, LooseTuple looseTuple, AlligatorusType type);
+
+  public abstract static class Id {
     @Override
     public abstract String toString();
   }

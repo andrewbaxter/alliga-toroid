@@ -22,7 +22,7 @@ public class UnreachableValue implements Value {
   }
 
   @Override
-  public boolean canCastTo(AlligatorusType type) {
+  public boolean canCastTo(EvaluationContext context, AlligatorusType type) {
   return false;
   }
 

@@ -15,7 +15,6 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataTypestate;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeStack;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 
@@ -58,7 +57,7 @@ public class MortarDataValueVariableDeferred extends MortarDataValue implements 
   @Override
   public EvaluateResult set(EvaluationContext context, Location location, Value value) {
     final MortarDataType currentType = this.typestate.typestate_asType();
-    if (!value.canCastTo(currentType)) {
+    if (!value.canCastTo(context, currentType)) {
       context.errors.add(new GeneralLocationError(location, "RHS can't be cast to LHS"));
       return EvaluateResult.error;
     }
@@ -78,7 +77,7 @@ public class MortarDataValueVariableDeferred extends MortarDataValue implements 
   }
 
   @Override
-  public boolean canCastTo(AlligatorusType type) {
+  public boolean canCastTo(EvaluationContext context, AlligatorusType type) {
     return typestate.typestate_canCastTo(type);
   }
 

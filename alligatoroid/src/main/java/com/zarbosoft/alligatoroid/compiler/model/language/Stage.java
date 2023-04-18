@@ -44,7 +44,7 @@ public class Stage extends LanguageElement {
     if (element instanceof Lower) {
       final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
       Value val = ectx.evaluate(((Lower) element).child);
-      if (val.canCastTo(prototypeLanguageElement)) {
+      if (val.canCastTo(context,prototypeLanguageElement)) {
         // Lowering language value - use directly to interpret in next layer
         return ectx.build(ectx.record(val.castTo(context, location, prototypeLanguageElement)));
 

@@ -6,23 +6,23 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 
-public class ConstBinding implements Binding {
-  public final MortarDataBindstate bindstate;
+public class MortarDataGenericBindingConst implements Binding {
+  public final MortarDataTypestate typestate;
   public Object value;
 
-  public ConstBinding(MortarDataBindstate bindstate, Object value) {
-    this.bindstate = bindstate;
+  public MortarDataGenericBindingConst(MortarDataTypestate typestate, Object value) {
+    this.typestate = typestate;
     this.value = value;
   }
 
   @Override
   public EvaluateResult load(EvaluationContext context, Location location) {
-    return EvaluateResult.pure(bindstate.bindstate_constAsValue(value));
+    return EvaluateResult.pure(typestate.typestate_constAsValue(value));
   }
 
   @Override
   public Binding fork() {
-    return new ConstBinding(bindstate.bindstate_fork(), value);
+    return new MortarDataGenericBindingConst(typestate.typestate_fork(), value);
   }
 
   @Override
@@ -33,6 +33,7 @@ public class ConstBinding implements Binding {
   @Override
   public boolean merge(
       EvaluationContext context, Location location, Binding other, Location otherLocation) {
-    return bindstate.bindstate_bindMerge(context, location, other, otherLocation);
+    return typestate.typestate_bindMerge(
+        context, location, ((MortarDataGenericBindingConst) other).typestate, otherLocation);
   }
 }

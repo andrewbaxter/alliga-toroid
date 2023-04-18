@@ -53,7 +53,7 @@ public class StaticMethodMeta {
       JavaBytecodeCatchKey bindingFinallyKey = new JavaBytecodeCatchKey();
       pre.add(new JavaBytecodeCatchStart(bindingFinallyKey));
       initialBindings.putNew(
-          argument.first, argument.second.type_newInitialBinding(key, bindingFinallyKey));
+          argument.first, argument.second.type_newInitialBinding(key));
     }
 
     // Do evaluation

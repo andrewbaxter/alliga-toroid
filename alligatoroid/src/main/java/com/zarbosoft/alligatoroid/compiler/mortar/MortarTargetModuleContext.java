@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.JumpKey;
@@ -17,23 +18,27 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.error.WrongTarget;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.model.language.Record;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ChainComparator;
+import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 import com.zarbosoft.rendaw.common.TSSet;
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
@@ -90,37 +95,31 @@ public class MortarTargetModuleContext implements TargetModuleContext {
   }
 
   public static boolean convertFunctionArgumentRoot(
-      EvaluationContext context,
-      Location location,
-      JavaBytecodeSequence code,
-      Value argument) {
+      EvaluationContext context, Location location, JavaBytecodeSequence code, Value argument) {
     boolean bad = false;
     if (argument instanceof LooseTuple) {
       for (EvaluateResult e : ((LooseTuple) argument).data) {
         code.add((JavaBytecodeSequence) e.effect);
-        if (!convertFunctionArgument(context, location,  code, e.value)) {
+        if (!convertFunctionArgument(context, location, code, e.value)) {
           bad = true;
           continue;
         }
       }
       return !bad;
     } else {
-      return convertFunctionArgument(context, location,  code, argument);
+      return convertFunctionArgument(context, location, code, argument);
     }
   }
 
   public static boolean convertFunctionArgument(
-      EvaluationContext context,
-      Location location,
-      JavaBytecodeSequence code,
-      Value argument) {
+      EvaluationContext context, Location location, JavaBytecodeSequence code, Value argument) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     final Value variable = ectx.record(argument.vary(context, location));
     if (variable == ErrorValue.value) {
       return false;
     }
     ectx.recordEffect(((MortarDataValue) variable).consume(context, location));
-    code.add(((MortarTargetCode)ectx.build(null).effect).e);
+    code.add(((MortarTargetCode) ectx.build(null).effect).e);
     return true;
   }
 
@@ -147,43 +146,164 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     return new MortarTargetCode(new JavaBytecodeJump(jumpKey));
   }
 
-  @Override
-  public EvaluateResult realizeRecord(EvaluationContext context, Location id, LooseRecord looseRecord) {
-  boolean allConst = true;
-  for (ROPair<Object, EvaluateResult> e : looseRecord.data) {
-        allConst = allConst && e.second.value instanceof MortarDataValueConst;
+  public static enum SuperComparableType {
+    Int,
+    Bool,
+    String,
+    Tuple
   }
 
-    TSOrderedMap<Object, MortarDataTypestate> types = new TSOrderedMap();
-    final TSMap<Object, Object> data = new TSMap<>();
-    final EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
-    if (allConst) {
-      Object[] record = new Object[looseRecord.data.size()];
-      for (int i = 0; i < looseRecord.data.size(); i+=1) {
-        final ROPair<Object, EvaluateResult> e = looseRecord.data.getI(i);
-        final MortarDataValueConst value = (MortarDataValueConst) ectx.record(e.second);
-        // TODO type
-        record[i] = value.value;
+  public static class SuperComparable implements Comparable<SuperComparable> {
+    public final SuperComparableType type;
+    public final Object data;
+
+    private SuperComparable(SuperComparableType type, Object data) {
+      this.type = type;
+      this.data = data;
+    }
+
+    public static SuperComparable int_(int value) {
+      return new SuperComparable(SuperComparableType.Int, value);
+    }
+
+    public static SuperComparable bool(boolean value) {
+      return new SuperComparable(SuperComparableType.Bool, value ? 1 : 0);
+    }
+
+    public static SuperComparable string(String value) {
+      return new SuperComparable(SuperComparableType.String, value);
+    }
+
+    public static SuperComparable tuple(SuperComparable... value) {
+      return new SuperComparable(SuperComparableType.Tuple, value.clone());
+    }
+
+    @Override
+    public int compareTo(@NotNull SuperComparable o) {
+      int typeComp = type.compareTo(o.type);
+      if (typeComp != 0) {
+        return typeComp;
       }
-      return ectx.build(new MortarDataValueConst(new MortarRecTupTypestate(fields), record));
-    } else {
-      for (int i = 0; i < looseRecord.data.size(); i+=1) {
-        final ROPair<Object, EvaluateResult> e = looseRecord.data.getI(i);
-        // TODO type
-        ((MortarDataValue)ectx.record(ectx.record(e.second).vary(context, id))).type().x();
-        // TODO box
-        ectx.recordEffect(new MortarTargetCode(JavaBytecodeUtils.arrayStoreObj));
+      switch (type) {
+        case Int:
+        case Bool:
+          return (int) data - (int) o.data;
+        case String:
+          return ((String) data).compareTo((String) o.data);
+        case Tuple:
+          {
+            SuperComparable[] data = (SuperComparable[]) this.data;
+            SuperComparable[] otherData = (SuperComparable[]) o.data;
+            final int tieBreaker = data.length - otherData.length;
+            final int useLength = tieBreaker < 0 ? data.length : otherData.length;
+            for (int i = 0; i < useLength; i += 1) {
+              int res = data[i].compareTo(otherData[i]);
+              if (res != 0) {
+                return res;
+              }
+            }
+            return tieBreaker;
+          }
+        default:
+          throw new DeadCode();
       }
-      return ectx.build(new MortarDataValueVariableStack(new MortarRecTupTypestate(fields)));
     }
   }
 
   @Override
-  public EvaluateResult realizeTuple(EvaluationContext context, Location id, LooseTuple looseTuple) {
+  public EvaluateResult realizeRecord(
+      EvaluationContext context, Location id, LooseRecord looseRecord) {
+    boolean allConst = true;
+    List<Object> keys = new ArrayList<>();
+    for (ROPair<Object, EvaluateResult> e : looseRecord.data) {
+      allConst = allConst && e.second.value instanceof MortarDataValueConst;
+      keys.add(e.first);
+    }
+
+    keys.sort(
+        new ChainComparator<Object>()
+            .lesserFirst(
+                e -> {
+                  if (e instanceof Boolean) {
+                    return SuperComparable.bool((Boolean) e);
+                  } else if (e instanceof Integer) {
+                    return SuperComparable.int_((Integer) e);
+                  } else if (e instanceof String) {
+                    return SuperComparable.string((String) e);
+                  } else {
+                    throw new Assertion();
+                  }
+                })
+            .build());
+    TSMap<Object, Integer> keyOrder = new TSMap<>();
+    for (int i = 0; i < keys.size(); i++) {
+      keyOrder.put(keys.get(i), i);
+    }
+
+    if (allConst) {
+      ROPair<Object, MortarTupleFieldstate>[] types = new ROPair[looseRecord.data.size()];
+      Object[] record = new Object[looseRecord.data.size()];
+      final EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
+      for (int i = 0; i < looseRecord.data.size(); i += 1) {
+        final ROPair<Object, EvaluateResult> e = looseRecord.data.getI(i);
+        final MortarDataValueConst value = (MortarDataValueConst) ectx.record(e.second);
+        record[keyOrder.get(i)] = value.value;
+        types[keyOrder.get(i)] = new ROPair<>(e.first, value.typestate.asTupleFieldstate());
+      }
+      return ectx.build(
+          new MortarDataValueConst(new MortarTupleTypestate(TSList.of(types)), record));
+    } else {
+      ROPair<Object, EvaluateResult>[] working = new ROPair[looseRecord.data.size()];
+      for (int i = 0; i < looseRecord.data.size(); i += 1) {
+        working[keyOrder.get(i)] = new ROPair<>(i, looseRecord.data.get(i));
+      }
+      return MortarTupleTypestate.newTupleCode(context, id, TSList.of(working));
+    }
+  }
+
+  @Override
+  public EvaluateResult realizeTuple(
+      EvaluationContext context, Location id, LooseTuple looseTuple) {
+    boolean allConst = true;
+    for (EvaluateResult e : looseTuple.data) {
+      allConst = allConst && e.value instanceof MortarDataValueConst;
+    }
+
+    TSList<ROPair<Object, MortarTupleFieldstate>> types = new TSList<>();
+    final TSMap<Object, Object> data = new TSMap<>();
+    if (allConst) {
+      final EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
+      Object[] tuple = new Object[looseTuple.data.size()];
+      for (int i = 0; i < looseTuple.data.size(); i += 1) {
+        final EvaluateResult e = looseTuple.data.get(i);
+        final MortarDataValueConst value = (MortarDataValueConst) ectx.record(e);
+        tuple[i] = value.value;
+        types.add(new ROPair<>(i, value.typestate.asTupleFieldstate()));
+      }
+      return ectx.build(new MortarDataValueConst(new MortarTupleTypestate(types), tuple));
+    } else {
+      TSList<ROPair<Object, EvaluateResult>> working = new TSList<>();
+      for (int i = 0; i < looseTuple.data.size(); i += 1) {
+        final EvaluateResult e = looseTuple.data.get(i);
+        working.add(new ROPair<>(i, e));
+      }
+      return MortarTupleTypestate.newTupleCode(context, id, working);
+    }
+  }
+
+
+  @Override
+  public EvaluateResult looseTupleCastTo(EvaluationContext context, Location location, AlligatorusType type) {
     TODO();
   }
 
-  public JavaBytecodeSequence transfer(Object object) {
+  @Override
+  public boolean looseTupleCanCastTo(EvaluationContext context, LooseTuple looseTuple, AlligatorusType type) {
+    TODO();
+  }
+
+  public JavaBytecodeSequence transfer(DeepCloneable object) {
+    object = object.deepClone();
     final ObjId idObj = new ObjId(object);
     String name = transfers.getOpt(idObj);
     if (name == null) {

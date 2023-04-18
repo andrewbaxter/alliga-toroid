@@ -5,7 +5,6 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarTupleTypestate;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class MortarDeferredCodeAccessTupleField implements MortarDeferredCode {

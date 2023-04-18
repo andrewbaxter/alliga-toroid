@@ -62,7 +62,7 @@ public class MortarDataValueVariableStack extends MortarDataValue implements NoE
   }
 
   @Override
-  public boolean canCastTo(AlligatorusType type) {
+  public boolean canCastTo(EvaluationContext context, AlligatorusType type) {
     return typestate.typestate_canCastTo(type);
   }
 

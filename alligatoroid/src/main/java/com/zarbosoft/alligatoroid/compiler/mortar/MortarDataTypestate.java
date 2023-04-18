@@ -8,8 +8,6 @@ import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchStart;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.AccessNotSupported;
@@ -20,7 +18,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public interface MortarDataTypestate {
+public interface MortarDataTypestate extends MortarTupleFieldable{
   default EvaluateResult typestate_varAccess(
       EvaluationContext context, Location location, Value field, MortarDeferredCode baseCode) {
     context.errors.add(new AccessNotSupported(location));
@@ -29,23 +27,19 @@ public interface MortarDataTypestate {
 
   default ROPair<JavaBytecode, Binding> typestate_varBind(EvaluationContext context) {
     JavaBytecodeBindingKey key = new JavaBytecodeBindingKey();
-    final JavaBytecodeCatchKey javaBytecodeCatchKey = new JavaBytecodeCatchKey();
     return new ROPair<>(
-        new JavaBytecodeSequence()
-            .add(typestate_storeBytecode(key))
-            .add(new JavaBytecodeCatchStart(javaBytecodeCatchKey)),
-        new MortarDataVarBinding(key, typestate_newBinding(), javaBytecodeCatchKey));
+            typestate_storeBytecode(key)
+            ,
+        new MortarDataGenericBindingVar(key, this));
   }
 
   JavaBytecode typestate_storeBytecode(JavaBytecodeBindingKey key);
-
-  MortarDataBindstate typestate_newBinding();
 
   default ROPair<TargetCode, Binding> typestate_constBind(
       EvaluationContext context, Location location, Object data) {
     JavaBytecodeBindingKey key = new JavaBytecodeBindingKey();
     final JavaBytecodeCatchKey javaBytecodeCatchKey = new JavaBytecodeCatchKey();
-    return new ROPair<>(null, new ConstBinding(typestate_newBinding(), data));
+    return new ROPair<>(null, new MortarDataGenericBindingConst(this, data));
   }
 
   default Value typestate_constAsValue(Object value) {
@@ -109,7 +103,7 @@ public interface MortarDataTypestate {
 
   /** Actual drop code, not including finally/jumps/etc */
   default JavaBytecode typestate_varBindDrop(
-          EvaluationContext context, Location location, MortarDataVarBinding mortarDataBinding) {
+          EvaluationContext context, Location location, MortarDataGenericBindingVar mortarDataBinding) {
     return null;
   }
 }

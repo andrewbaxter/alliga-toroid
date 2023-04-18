@@ -17,7 +17,7 @@ public class NullValue implements Value {
   }
 
   @Override
-  public boolean canCastTo(AlligatorusType type) {
+  public boolean canCastTo(EvaluationContext context, AlligatorusType type) {
     return type == NullType.type;
   }
 

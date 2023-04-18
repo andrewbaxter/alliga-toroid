@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
+import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
@@ -12,7 +13,7 @@ import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecTupTypestate.assertConstKey;
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTupleTypestate.assertConstKey;
 
 public class LooseRecord implements Value, NoExportValue {
   public final ROOrderedMap<Object, EvaluateResult> data;
@@ -26,7 +27,7 @@ public class LooseRecord implements Value, NoExportValue {
     final TSList<String> out = new TSList<>();
     for (ROPair<Object, EvaluateResult> datum : data) {
       if (!(datum.first instanceof String)) {
-          continue;
+        continue;
       }
       out.add((String) datum.first);
     }
@@ -34,8 +35,18 @@ public class LooseRecord implements Value, NoExportValue {
   }
 
   @Override
+  public boolean canCastTo(EvaluationContext context, AlligatorusType type) {
+  return context.target.looseRecordCanCastTo(context, this, type);
+  }
+
+  @Override
+  public EvaluateResult castTo(EvaluationContext context, Location location, AlligatorusType type) {
+  return context.target.looseRecordCastTo(context,location,type);
+  }
+
+  @Override
   public EvaluateResult realize(EvaluationContext context, Location id) {
-  return context.target.realizeRecord(context, id, this);
+    return context.target.realizeRecord(context, id, this);
   }
 
   @Override
@@ -52,30 +63,27 @@ public class LooseRecord implements Value, NoExportValue {
   public EvaluateResult access(EvaluationContext context, Location location, Value field) {
     final Object key = assertConstKey(context, location, field);
     if (key == null) {
-        return EvaluateResult.error;
+      return EvaluateResult.error;
     }
     TSList<TargetCode> code = new TSList<>();
     Value out = null;
     for (ROPair<Object, EvaluateResult> e : data) {
-        code.add(e.second.effect);
-        if (e.first.equals(key)) {
-          out = e.second.value;
-        } else {
-          code.add(e.second.value.drop(context, location));
-        }
+      code.add(e.second.effect);
+      if (e.first.equals(key)) {
+        out = e.second.value;
+      } else {
+        code.add(e.second.value.drop(context, location));
+      }
     }
     if (out == null) {
       context.errors.add(new NoField(location, key));
       return EvaluateResult.error;
     }
-    return EvaluateResult.simple(
-    out,
-        context.target.merge(context, location, code)
-        );
+    return EvaluateResult.simple(out, context.target.merge(context, location, code));
   }
 
   @Override
   public EvaluateResult export(EvaluationContext context, Location location) {
-  throw new Assertion(); // Should be realized
+    throw new Assertion(); // Should be realized
   }
 }

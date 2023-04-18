@@ -8,7 +8,6 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinSingletonExportabl
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeLineNumber;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
@@ -28,10 +27,7 @@ import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleConte
  * call the static method.
  */
 public class MortarStaticMethodTypestate
-    implements BuiltinSingletonExportable,
-        MortarDataTypestate,
-        MortarDataBindstate,
-        MortarDataType {
+    implements BuiltinSingletonExportable, MortarDataTypestate, MortarDataType {
   // TODO move method type info into the type, check during type check
   public static final MortarStaticMethodTypestate typestate = new MortarStaticMethodTypestate();
   public static final JavaDataDescriptor DESC =
@@ -103,13 +99,37 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
-  public JavaBytecode typestate_storeBytecode(JavaBytecodeBindingKey key) {
-    return JavaBytecodeUtils.storeObj(key);
+  public MortarDataTypestate typestate_fork() {
+    return this;
   }
 
   @Override
-  public MortarDataBindstate typestate_newBinding() {
-    return this;
+  public boolean typestate_bindMerge(
+      EvaluationContext context,
+      Location location,
+      MortarDataTypestate other,
+      Location otherLocation) {
+    return true;
+  }
+
+  @Override
+  public boolean typestate_triviallyAssignableTo(AlligatorusType type) {
+    return type == this;
+  }
+
+  @Override
+  public JavaDataDescriptor typestate_jvmDesc() {
+    return DESC;
+  }
+
+  @Override
+  public JavaBytecode typestate_loadBytecode(JavaBytecodeBindingKey key) {
+    return JavaBytecodeUtils.loadObj(key);
+  }
+
+  @Override
+  public JavaBytecode typestate_storeBytecode(JavaBytecodeBindingKey key) {
+    return JavaBytecodeUtils.storeObj(key);
   }
 
   @Override
@@ -141,40 +161,18 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
-  public Binding type_newInitialBinding(
-      JavaBytecodeBindingKey key, JavaBytecodeCatchKey finallyKey) {
-    return new MortarDataVarBinding(key, this, finallyKey);
-  }
-
-  @Override
-  public Value bindstate_constAsValue(Object value) {
-    return new MortarDataValueConst(this, value);
-  }
-
-  @Override
-  public MortarDataTypestate bindstate_load() {
+  public MortarDataTypestate type_newTypestate() {
     return this;
   }
 
   @Override
-  public JavaBytecode bindstate_storeBytecode(JavaBytecodeBindingKey key) {
-    return JavaBytecodeUtils.storeObj(key);
+  public MortarObjectField type_newField(MortarObjectInnerType parentType, String fieldName) {
+    return new MortarDataGenericField(parentType, fieldName, this);
   }
 
   @Override
-  public JavaBytecode bindstate_loadBytecode(JavaBytecodeBindingKey key) {
-    return JavaBytecodeUtils.loadObj(key);
-  }
-
-  @Override
-  public MortarDataBindstate bindstate_fork() {
-    return this;
-  }
-
-  @Override
-  public boolean bindstate_bindMerge(
-      EvaluationContext context, Location location, Binding other, Location otherLocation) {
-    return true;
+  public Binding type_newInitialBinding(JavaBytecodeBindingKey key) {
+    return new MortarDataGenericBindingVar(key, this);
   }
 
   public static class ConvertImmediateArgRootRes {

@@ -79,7 +79,6 @@ public class ModuleCompiler implements ModuleResolver {
     /// Do first pass evaluation, and get type of result (or const result).
     MortarTargetModuleContext targetContext = new MortarTargetModuleContext(jvmClassName.value);
     JavaBytecodeBindingKey ectxKey = new JavaBytecodeBindingKey();
-    JavaBytecodeCatchKey ectxFinallyKey = new JavaBytecodeCatchKey();
     final MortarDataType ectxType =
         StaticAutogen.autoMortarHalfObjectTypes.get(Evaluation2Context.class);
     final EvaluationContext context = EvaluationContext.create(moduleContext, targetContext, true);
@@ -97,7 +96,7 @@ public class ModuleCompiler implements ModuleResolver {
                         m ->
                             m.put(
                                 "ectx",
-                                ectxType.type_newInitialBinding(ectxKey, ectxFinallyKey)))));
+                                ectxType.type_newInitialBinding(ectxKey)))));
     moduleContext.log.addAll(context.log);
     moduleContext.errors.addAll(context.errors);
     if (context.errors.some()) {

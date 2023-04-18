@@ -10,7 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.rendaw.common.ROPair;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecTupTypestate.assertConstKey;
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTupleTypestate.assertConstKey;
 
 public class Bind extends LanguageElement {
   @BuiltinAutoExportableType.Param

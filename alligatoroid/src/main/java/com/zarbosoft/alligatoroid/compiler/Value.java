@@ -84,7 +84,7 @@ public interface Value {
     return EvaluateResult.error;
   }
 
-  default boolean canCastTo(AlligatorusType type) {
+  default boolean canCastTo(EvaluationContext context, AlligatorusType type) {
     return false;
   }
 

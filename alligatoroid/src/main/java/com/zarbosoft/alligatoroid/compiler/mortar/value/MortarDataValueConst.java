@@ -9,8 +9,6 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.CantSetStackValue;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.alligatoroid.compiler.mortar.ConstBinding;
-import com.zarbosoft.alligatoroid.compiler.mortar.GeneralLocationError;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataTypestate;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
@@ -68,7 +66,7 @@ public class MortarDataValueConst extends MortarDataValue implements BuiltinAuto
   }
 
   @Override
-  public boolean canCastTo(AlligatorusType type) {
+  public boolean canCastTo(EvaluationContext context, AlligatorusType type) {
     return typestate.typestate_canCastTo(type);
   }
 
