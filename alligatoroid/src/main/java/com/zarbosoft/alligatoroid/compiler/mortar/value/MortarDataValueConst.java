@@ -72,9 +72,6 @@ public class MortarDataValueConst extends MortarDataValue implements BuiltinAuto
 
   @Override
   public EvaluateResult castTo(EvaluationContext context, Location location, AlligatorusType type) {
-    if (!(type instanceof MortarDataType)) {
-      throw new Assertion();
-    }
     return typestate.typestate_constCastTo(context, location, (MortarDataType) type, value);
   }
 

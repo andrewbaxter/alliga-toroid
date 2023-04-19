@@ -61,4 +61,14 @@ public class MortarPrimitiveAllBytes implements MortarPrimitiveAll.Inner {
     }
     return out;
   }
+
+  @Override
+  public JavaBytecode fromObj() {
+    return JavaBytecodeUtils.cast(jvmDesc());
+  }
+
+  @Override
+  public JavaBytecode toObj() {
+    return null;
+  }
 }

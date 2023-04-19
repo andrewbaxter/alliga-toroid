@@ -1,5 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
+
 public class MortarDataGenericField implements MortarObjectField {
   private final MortarObjectInnerType parentInfo;
   private final String name;
@@ -15,5 +17,10 @@ public class MortarDataGenericField implements MortarObjectField {
   @Override
   public MortarObjectFieldstate field_newFieldstate() {
     return new MortarDataGenericFieldstate(parentInfo, name, type.type_newTypestate());
+  }
+
+  @Override
+  public AlligatorusType field_asType() {
+    return type;
   }
 }

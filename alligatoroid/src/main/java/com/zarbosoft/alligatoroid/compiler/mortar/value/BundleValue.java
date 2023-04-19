@@ -26,7 +26,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTupleTypestate.assertConstString;
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstString;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class BundleValue implements Value, BuiltinAutoExportable {

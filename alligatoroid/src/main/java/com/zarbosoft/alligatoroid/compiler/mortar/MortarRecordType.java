@@ -12,12 +12,12 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class MortarTupleType implements MortarDataType {
-  public final ROList<ROPair<Object, MortarTupleField>> fields;
+public class MortarRecordType implements MortarDataType {
+  public final ROList<ROPair<Object, MortarRecordField>> fields;
   public static final JavaDataDescriptor DESC =
       JavaDataDescriptor.fromObjectClass(Object.class).array();
 
-  public MortarTupleType(ROList<ROPair<Object, MortarTupleField>> fields) {
+  public MortarRecordType(ROList<ROPair<Object, MortarRecordField>> fields) {
     this.fields = fields;
   }
 
@@ -46,12 +46,12 @@ public class MortarTupleType implements MortarDataType {
     return MortarDataValueConst.create(newTypestate(), data);
   }
 
-  public MortarTupleTypestate newTypestate() {
-    final TSList<ROPair<Object, MortarTupleFieldstate>> outFields = new TSList<>();
-    for (ROPair<Object, MortarTupleField> field : fields) {
-      outFields.add(new ROPair<>(field.first, field.second.tuplefield_newFieldstate()));
+  public MortarRecordTypestate newTypestate() {
+    final TSList<ROPair<Object, MortarRecordFieldstate>> outFields = new TSList<>();
+    for (ROPair<Object, MortarRecordField> field : fields) {
+      outFields.add(new ROPair<>(field.first, field.second.recordfield_newFieldstate()));
     }
-    return new MortarTupleTypestate(outFields);
+    return new MortarRecordTypestate(outFields);
   }
 
   @Override

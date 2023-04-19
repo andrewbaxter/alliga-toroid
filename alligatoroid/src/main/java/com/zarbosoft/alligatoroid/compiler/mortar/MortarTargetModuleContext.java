@@ -20,13 +20,13 @@ import com.zarbosoft.alligatoroid.compiler.model.error.WrongTarget;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ChainComparator;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -97,10 +97,10 @@ public class MortarTargetModuleContext implements TargetModuleContext {
   public static boolean convertFunctionArgumentRoot(
       EvaluationContext context, Location location, JavaBytecodeSequence code, Value argument) {
     boolean bad = false;
-    if (argument instanceof LooseTuple) {
-      for (EvaluateResult e : ((LooseTuple) argument).data) {
-        code.add((JavaBytecodeSequence) e.effect);
-        if (!convertFunctionArgument(context, location, code, e.value)) {
+    if (argument instanceof LooseRecord) {
+      for (ROPair<Object, EvaluateResult> e : ((LooseRecord) argument).data) {
+        code.add((JavaBytecodeSequence) e.second.effect);
+        if (!convertFunctionArgument(context, location, code, e.second.value)) {
           bad = true;
           continue;
         }
@@ -241,69 +241,107 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     }
 
     if (allConst) {
-      ROPair<Object, MortarTupleFieldstate>[] types = new ROPair[looseRecord.data.size()];
+      ROPair<Object, MortarRecordFieldstate>[] types = new ROPair[looseRecord.data.size()];
       Object[] record = new Object[looseRecord.data.size()];
       final EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
       for (int i = 0; i < looseRecord.data.size(); i += 1) {
         final ROPair<Object, EvaluateResult> e = looseRecord.data.getI(i);
         final MortarDataValueConst value = (MortarDataValueConst) ectx.record(e.second);
         record[keyOrder.get(i)] = value.value;
-        types[keyOrder.get(i)] = new ROPair<>(e.first, value.typestate.asTupleFieldstate());
+        types[keyOrder.get(i)] = new ROPair<>(e.first, value.typestate.asTupleFieldstate(i));
       }
       return ectx.build(
-          new MortarDataValueConst(new MortarTupleTypestate(TSList.of(types)), record));
+          new MortarDataValueConst(new MortarRecordTypestate(TSList.of(types)), record));
     } else {
       ROPair<Object, EvaluateResult>[] working = new ROPair[looseRecord.data.size()];
       for (int i = 0; i < looseRecord.data.size(); i += 1) {
         working[keyOrder.get(i)] = new ROPair<>(i, looseRecord.data.get(i));
       }
-      return MortarTupleTypestate.newTupleCode(context, id, TSList.of(working));
+      return MortarRecordTypestate.newTupleCode(context, id, TSList.of(working));
     }
   }
 
   @Override
-  public EvaluateResult realizeTuple(
-      EvaluationContext context, Location id, LooseTuple looseTuple) {
+  public boolean looseRecordCanCastTo(
+      EvaluationContext context, LooseRecord looseRecord, AlligatorusType type) {
+    if (!(type instanceof MortarRecordType)) {
+      return false;
+    }
+    final MortarRecordTypestate other = (MortarRecordTypestate) type;
+    if (other.fields.size() != looseRecord.data.size()) {
+      return false;
+    }
+    for (int i = 0; i < looseRecord.data.size(); i++) {
+      final ROPair<Object, EvaluateResult> looseEl = looseRecord.data.getI(i);
+      if (!looseEl.second.value.canCastTo(
+          context, other.fields.get(i).second.recordfieldstate_asType())) {
+        return false;
+      }
+      if (!other.fieldLookup.getOpt(looseEl.first).equals(i)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
+  public EvaluateResult looseRecordCastTo(
+      EvaluationContext context,
+      Location location,
+      ROOrderedMap<Object, EvaluateResult> data,
+      AlligatorusType type) {
     boolean allConst = true;
-    for (EvaluateResult e : looseTuple.data) {
-      allConst = allConst && e.value instanceof MortarDataValueConst;
+    for (ROPair<Object, EvaluateResult> e : data) {
+      allConst = allConst && e.second.value instanceof MortarDataValueConst;
     }
 
-    TSList<ROPair<Object, MortarTupleFieldstate>> types = new TSList<>();
-    final TSMap<Object, Object> data = new TSMap<>();
+    TSMap<Object, Integer> keyOrder = new TSMap<>();
+    final ROList<ROPair<Object, MortarRecordField>> destFields = ((MortarRecordType) type).fields;
+    for (int i = 0; i < destFields.size(); i++) {
+      keyOrder.put(destFields.get(i).first, i);
+    }
+
     if (allConst) {
-      final EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
-      Object[] tuple = new Object[looseTuple.data.size()];
-      for (int i = 0; i < looseTuple.data.size(); i += 1) {
-        final EvaluateResult e = looseTuple.data.get(i);
-        final MortarDataValueConst value = (MortarDataValueConst) ectx.record(e);
-        tuple[i] = value.value;
-        types.add(new ROPair<>(i, value.typestate.asTupleFieldstate()));
+      ROPair<Object, MortarRecordFieldstate>[] types = new ROPair[data.size()];
+      Object[] record = new Object[data.size()];
+      final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
+      for (int i = 0; i < data.size(); i += 1) {
+        final ROPair<Object, EvaluateResult> e = data.getI(i);
+        final int destIndex = keyOrder.get(i);
+        final MortarDataValueConst value =
+            (MortarDataValueConst)
+                ectx.record(
+                    ectx.record(e.second)
+                        .castTo(
+                            context,
+                            location,
+                            destFields.get(destIndex).second.recordfield_asType()));
+        record[destIndex] = value.value;
+        types[destIndex] = new ROPair<>(e.first, value.typestate.asTupleFieldstate(i));
       }
-      return ectx.build(new MortarDataValueConst(new MortarTupleTypestate(types), tuple));
+      return ectx.build(
+          new MortarDataValueConst(new MortarRecordTypestate(TSList.of(types)), record));
     } else {
-      TSList<ROPair<Object, EvaluateResult>> working = new TSList<>();
-      for (int i = 0; i < looseTuple.data.size(); i += 1) {
-        final EvaluateResult e = looseTuple.data.get(i);
-        working.add(new ROPair<>(i, e));
+      ROPair<Object, EvaluateResult>[] working = new ROPair[data.size()];
+      for (int i = 0; i < data.size(); i += 1) {
+        final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
+        final int destIndex = keyOrder.get(i);
+        working[destIndex] =
+            new ROPair<>(
+                i,
+                ectx.build(
+                    ectx.record(
+                        ectx.record(data.get(i))
+                            .castTo(
+                                context,
+                                location,
+                                destFields.get(destIndex).second.recordfield_asType()))));
       }
-      return MortarTupleTypestate.newTupleCode(context, id, working);
+      return MortarRecordTypestate.newTupleCode(context, location, TSList.of(working));
     }
   }
 
-
-  @Override
-  public EvaluateResult looseTupleCastTo(EvaluationContext context, Location location, AlligatorusType type) {
-    TODO();
-  }
-
-  @Override
-  public boolean looseTupleCanCastTo(EvaluationContext context, LooseTuple looseTuple, AlligatorusType type) {
-    TODO();
-  }
-
-  public JavaBytecodeSequence transfer(DeepCloneable object) {
-    object = object.deepClone();
+  public JavaBytecodeSequence transfer(Object object) {
     final ObjId idObj = new ObjId(object);
     String name = transfers.getOpt(idObj);
     if (name == null) {

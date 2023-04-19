@@ -12,8 +12,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 
-public class MortarPrimitiveAll
-    implements MortarDataType, MortarDataTypestate {
+public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
   public static final MortarPrimitiveAll typeByte =
       new MortarPrimitiveAll(MortarPrimitiveAllByte.instance);
   public static final MortarPrimitiveAll typeBool =
@@ -30,9 +29,13 @@ public class MortarPrimitiveAll
   }
 
   @Override
-  public Binding type_newInitialBinding(
-      JavaBytecodeBindingKey key) {
+  public Binding type_newInitialBinding(JavaBytecodeBindingKey key) {
     return new MortarDataGenericBindingVar(key, this);
+  }
+
+  @Override
+  public MortarRecordFieldstate asTupleFieldstate(int offset) {
+    return new MortarDataGenericTupleFieldstate(offset, this);
   }
 
   public interface Inner {
@@ -49,6 +52,10 @@ public class MortarPrimitiveAll
     JavaBytecode arrayStoreBytecode();
 
     JavaBytecode literalBytecode(Object constData);
+
+    JavaBytecode fromObj();
+
+    JavaBytecode toObj();
   }
 
   public final Inner inner;
@@ -75,17 +82,27 @@ public class MortarPrimitiveAll
 
   @Override
   public MortarDataTypestate type_newTypestate() {
-  return this;
+    return this;
   }
 
   @Override
   public MortarObjectField type_newField(MortarObjectInnerType parentType, String fieldName) {
-  return new MortarDataGenericField(parentType,fieldName,this);
+    return new MortarDataGenericField(parentType, fieldName, this);
   }
 
   @Override
   public JavaBytecode typestate_loadBytecode(JavaBytecodeBindingKey key) {
     return inner.loadBytecode(key);
+  }
+
+  @Override
+  public JavaBytecode typestate_jvmToObj() {
+    return inner.toObj();
+  }
+
+  @Override
+  public JavaBytecode typestate_jvmFromObj() {
+    return inner.fromObj();
   }
 
   @Override
@@ -140,21 +157,25 @@ public class MortarPrimitiveAll
 
   @Override
   public MortarDataTypestate typestate_fork() {
-  return this;
+    return this;
   }
 
   @Override
-  public boolean typestate_bindMerge(EvaluationContext context, Location location, MortarDataTypestate other, Location otherLocation) {
-  return true;
+  public boolean typestate_bindMerge(
+      EvaluationContext context,
+      Location location,
+      MortarDataTypestate other,
+      Location otherLocation) {
+    return true;
   }
 
   @Override
   public boolean typestate_triviallyAssignableTo(AlligatorusType type) {
-  return type == this;
+    return type == this;
   }
 
   @Override
   public JavaDataDescriptor typestate_jvmDesc() {
-  return inner.jvmDesc();
+    return inner.jvmDesc();
   }
 }

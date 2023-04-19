@@ -4,4 +4,6 @@ import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 
 public interface MortarObjectField {
     public MortarObjectFieldstate field_newFieldstate();
+
+    AlligatorusType field_asType();
 }

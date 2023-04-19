@@ -16,7 +16,6 @@ import java.util.Objects;
 public class GraphDeferred<T> implements Exportable {
   public static final String SEMIKEY_REF = "ref";
   public static final String SEMIKEY_ID = "id";
-  public static final ExportableType exportType = new ExportableType();
   public SemiserialRef ref;
   public UniqueId id;
   public T artifact;
@@ -47,29 +46,31 @@ public class GraphDeferred<T> implements Exportable {
 
   @Override
   public com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType exportableType() {
-    return exportType;
+    return new ExportableType(this);
   }
 
-  @Override
-  public SemiserialSubvalue graphSemiserializeBody(
-      long importCacheId,
-      Semiserializer semiserializer,
-      ROList<Semiserializable> path,
-      ROList<String> accessPath) {
-    return SemiserialRecord.create(
-        new TSOrderedMap<>(
-            t ->
-                t.put(SemiserialString.create(SEMIKEY_REF), ref)
-                    .put(
-                        SemiserialString.create(SEMIKEY_ID),
-                        id.graphSemiserialize(
-                            importCacheId,
-                            semiserializer,
-                            path.mut().add(this),
-                            accessPath.mut().add("id")))));
-  }
 
-  public static class ExportableType implements BuiltinSingletonExportable, com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType {
+  public static class ExportableType<T> implements BuiltinSingletonExportable, com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType {
+    private final GraphDeferred<T> graphDeferred;
+
+    public ExportableType(GraphDeferred<T> graphDeferred) {
+      this.graphDeferred = graphDeferred;
+    }
+
+    @Override
+    public SemiserialSubvalue graphSemiserializeBody(long importCacheId, Semiserializer semiserializer, ROList<Object> path, ROList<String> accessPath, Object value) {
+      return SemiserialRecord.create(
+              new TSOrderedMap<>(
+                      t ->
+                              t.put(SemiserialString.create(SEMIKEY_REF), graphDeferred.ref)
+                                      .put(
+                                              SemiserialString.create(SEMIKEY_ID),
+                                              graphDeferred.id.exportableType().graphSemiserialize(
+                                                      importCacheId,
+                                                      semiserializer,
+                                                      path.mut().add(this),
+                                                      accessPath.mut().add("id")))));
+    }
     @Override
     public Object graphDesemiserializeBody(
         ModuleCompileContext context,
@@ -94,5 +95,6 @@ public class GraphDeferred<T> implements Exportable {
             }
           });
     }
+
   }
 }

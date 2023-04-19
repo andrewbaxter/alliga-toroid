@@ -57,9 +57,9 @@ import static org.objectweb.asm.Opcodes.PUTSTATIC;
 import static org.objectweb.asm.Opcodes.RETURN;
 
 public class JavaBytecodeUtils {
-  public static final JavaBytecode boxBool = box(JavaDataDescriptor.BOOL, JavaInternalName.BOOL);
-  public static final JavaBytecode boxByte = box(JavaDataDescriptor.BYTE, JavaInternalName.BYTE);
-  public static final JavaBytecode boxInt = box(JavaDataDescriptor.INT, JavaInternalName.INT);
+  public static final JavaBytecode boxBool = box(JavaDataDescriptor.BOOL, JavaInternalName.BOXED_BOOL);
+  public static final JavaBytecode boxByte = box(JavaDataDescriptor.BYTE, JavaInternalName.BOXED_BYTE);
+  public static final JavaBytecode boxInt = box(JavaDataDescriptor.INT, JavaInternalName.BOXED_INT);
   public static final JavaBytecode arrayLoadObj = inst(AALOAD);
   public static final JavaBytecode arrayStoreObj = inst(AASTORE);
   public static final JavaBytecode arrayLoadInt = inst(IALOAD);

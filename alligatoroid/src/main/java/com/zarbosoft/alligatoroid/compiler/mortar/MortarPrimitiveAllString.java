@@ -44,4 +44,14 @@ public class MortarPrimitiveAllString implements MortarPrimitiveAll.Inner {
   public JavaBytecode literalBytecode(Object constData) {
     return JavaBytecodeUtils.literalString((String) constData);
   }
+
+  @Override
+  public JavaBytecode fromObj() {
+    return JavaBytecodeUtils.cast(jvmDesc());
+  }
+
+  @Override
+  public JavaBytecode toObj() {
+    return null;
+  }
 }

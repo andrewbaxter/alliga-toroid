@@ -5,24 +5,29 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarTupleTypestate;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate;
 import com.zarbosoft.rendaw.common.TSList;
+
+import static org.objectweb.asm.Opcodes.AALOAD;
+import static org.objectweb.asm.Opcodes.AASTORE;
 
 public class MortarDeferredCodeAccessRecordField implements MortarDeferredCode {
   public final MortarDeferredCode base;
-  public final JavaBytecode field;
-  public final JavaDataDescriptor type;
+  public final int field;
+  private final JavaBytecode box;
+  private final JavaBytecode unbox;
 
   public MortarDeferredCodeAccessRecordField(
-      MortarDeferredCode base, JavaBytecode field, JavaDataDescriptor type) {
+      MortarDeferredCode base, int field, JavaBytecode box, JavaBytecode unbox) {
     this.base = base;
     this.field = field;
-    this.type = type;
+    this.box = box;
+    this.unbox = unbox;
   }
 
   @Override
   public JavaBytecode drop() {
-    return JavaBytecodeUtils.seq().add(base.drop()).add(field).add(JavaBytecodeUtils.pop);
+    return JavaBytecodeUtils.seq().add(base.drop());
   }
 
   @Override
@@ -30,15 +35,9 @@ public class MortarDeferredCodeAccessRecordField implements MortarDeferredCode {
     JavaBytecodeSequence out =
         JavaBytecodeUtils.seq()
             .add(base.consume())
-            .add(field)
-            .add(
-                JavaBytecodeUtils.callMethod(
-                    -1,
-                    MortarTupleTypestate.JVMNAME,
-                    "get",
-                    JavaMethodDescriptor.fromParts(
-                        JavaDataDescriptor.OBJECT, new TSList<>(JavaDataDescriptor.OBJECT))))
-            .add(JavaBytecodeUtils.cast(type));
+            .add(JavaBytecodeUtils.literalIntShortByte(field))
+            .add(JavaBytecodeUtils.inst(AALOAD))
+            .add(unbox);
     return out;
   }
 
@@ -47,16 +46,10 @@ public class MortarDeferredCodeAccessRecordField implements MortarDeferredCode {
     JavaBytecodeSequence out =
         JavaBytecodeUtils.seq()
             .add(base.consume())
-            .add(field)
-            .add(value)
-            .add(
-                JavaBytecodeUtils.callMethod(
-                    -1,
-                    MortarTupleTypestate.JVMNAME,
-                    "set",
-                    JavaMethodDescriptor.fromParts(
-                        JavaDataDescriptor.OBJECT,
-                        new TSList<>(JavaDataDescriptor.OBJECT, JavaDataDescriptor.OBJECT))));
+            .add(valueCode)
+            .add(box)
+            .add(JavaBytecodeUtils.literalIntShortByte(field))
+            .add(JavaBytecodeUtils.inst(AASTORE));
     return out;
   }
 }

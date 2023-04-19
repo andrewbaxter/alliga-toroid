@@ -17,7 +17,6 @@ public class LiteralBool extends LanguageElement {
 
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
-    MortarPrimitiveAll.typeBool.type_constAsValue()
-    return EvaluateResult.pure(MortarPrimitiveType.typeByte.type_constAsValue(value));
+    return EvaluateResult.pure(MortarPrimitiveAll.typeBool.type_constAsValue(value));
   }
 }

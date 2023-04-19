@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseTuple;
+import com.zarbosoft.rendaw.common.ROOrderedMap;
 
 public interface TargetModuleContext {
   public TargetCode merge(
@@ -14,16 +14,13 @@ public interface TargetModuleContext {
 
   TargetCode codeJump(JumpKey jumpKey);
 
-    EvaluateResult realizeRecord(EvaluationContext context, Location id, LooseRecord looseRecord);
-  EvaluateResult realizeTuple(EvaluationContext context, Location id, LooseTuple looseTuple);
+  EvaluateResult realizeRecord(EvaluationContext context, Location id, LooseRecord looseRecord);
 
-    boolean looseRecordCanCastTo(EvaluationContext context, LooseRecord looseRecord, AlligatorusType type);
+  boolean looseRecordCanCastTo(
+      EvaluationContext context, LooseRecord looseRecord, AlligatorusType type);
 
-  EvaluateResult looseRecordCastTo(EvaluationContext context, Location location, AlligatorusType type);
-
-  EvaluateResult looseTupleCastTo(EvaluationContext context, Location location, AlligatorusType type);
-
-  boolean looseTupleCanCastTo(EvaluationContext context, LooseTuple looseTuple, AlligatorusType type);
+  EvaluateResult looseRecordCastTo(
+          EvaluationContext context, Location location, ROOrderedMap<Object, EvaluateResult> data, AlligatorusType type);
 
   public abstract static class Id {
     @Override

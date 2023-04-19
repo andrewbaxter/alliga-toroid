@@ -128,6 +128,16 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
+  public JavaBytecode typestate_jvmToObj() {
+    return null;
+  }
+
+  @Override
+  public JavaBytecode typestate_jvmFromObj() {
+    return JavaBytecodeUtils.cast(DESC);
+  }
+
+  @Override
   public JavaBytecode typestate_storeBytecode(JavaBytecodeBindingKey key) {
     return JavaBytecodeUtils.storeObj(key);
   }
@@ -136,8 +146,7 @@ public class MortarStaticMethodTypestate
   public EvaluateResult typestate_constVary(EvaluationContext context, Location id, Object data) {
     return EvaluateResult.simple(
         new MortarDataValueVariableStack(this),
-        new MortarTargetCode(
-            ((MortarTargetModuleContext) context.target).transfer((Exportable) data)));
+        new MortarTargetCode(((MortarTargetModuleContext) context.target).transfer(data)));
   }
 
   @Override
@@ -173,6 +182,11 @@ public class MortarStaticMethodTypestate
   @Override
   public Binding type_newInitialBinding(JavaBytecodeBindingKey key) {
     return new MortarDataGenericBindingVar(key, this);
+  }
+
+  @Override
+  public MortarRecordFieldstate asTupleFieldstate(int offset) {
+    return new MortarDataGenericTupleFieldstate(offset, this);
   }
 
   public static class ConvertImmediateArgRootRes {

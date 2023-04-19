@@ -13,7 +13,7 @@ import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTupleTypestate.assertConstKey;
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstKey;
 
 public class LooseRecord implements Value, NoExportValue {
   public final ROOrderedMap<Object, EvaluateResult> data;
@@ -41,7 +41,7 @@ public class LooseRecord implements Value, NoExportValue {
 
   @Override
   public EvaluateResult castTo(EvaluationContext context, Location location, AlligatorusType type) {
-  return context.target.looseRecordCastTo(context,location,type);
+  return context.target.looseRecordCastTo(context,location,data,type);
   }
 
   @Override
