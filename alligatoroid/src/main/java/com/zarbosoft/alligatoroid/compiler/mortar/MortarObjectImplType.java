@@ -13,7 +13,7 @@ import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Map;
 
-public class MortarObjectImplType implements MortarDataType {
+public class MortarObjectImplType implements MortarDataTypeForGeneric {
   public final MortarObjectInnerType meta;
   public final ROMap<Object, MortarObjectField> fields;
 

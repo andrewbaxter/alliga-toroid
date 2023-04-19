@@ -25,4 +25,9 @@ public class NullValue implements Value {
   public EvaluateResult castTo(EvaluationContext context, Location location, AlligatorusType type) {
     return EvaluateResult.pure(this);
   }
+
+  @Override
+  public EvaluateResult realize(EvaluationContext context, Location id) {
+  return EvaluateResult.pure(this);
+  }
 }

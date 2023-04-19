@@ -5,10 +5,10 @@ import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 public class MortarDataGenericField implements MortarObjectField {
   private final MortarObjectInnerType parentInfo;
   private final String name;
-  public final MortarDataType type;
+  public final MortarDataTypeForGeneric type;
 
   public MortarDataGenericField(
-      MortarObjectInnerType parentInfo, String name, MortarDataType type) {
+      MortarObjectInnerType parentInfo, String name, MortarDataTypeForGeneric type) {
     this.parentInfo = parentInfo;
     this.name = name;
     this.type = type;

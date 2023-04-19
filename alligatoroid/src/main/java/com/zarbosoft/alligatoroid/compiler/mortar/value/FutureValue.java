@@ -5,7 +5,6 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialUnknown;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
@@ -25,6 +24,11 @@ public class FutureValue implements Value {
   @Override
   public ROList<String> traceFields(EvaluationContext context, Location location) {
     return get().traceFields(context, location);
+  }
+
+  @Override
+  public EvaluateResult realize(EvaluationContext context, Location id) {
+    return get().realize(context, id);
   }
 
   @Override
@@ -49,14 +53,5 @@ public class FutureValue implements Value {
 
   public Value get() {
     return Utils.await(future);
-  }
-
-  @Override
-  public SemiserialUnknown graphSemiserialize(
-      long importCacheId,
-      Semiserializer semiserializer,
-      ROList<Exportable> path,
-      ROList<String> accessPath) {
-    return get().graphSemiserialize(importCacheId, semiserializer, path, accessPath);
   }
 }

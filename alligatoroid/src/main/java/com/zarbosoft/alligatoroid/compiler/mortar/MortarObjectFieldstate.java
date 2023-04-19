@@ -29,7 +29,7 @@ public interface MortarObjectFieldstate {
     return EvaluateResult.error;
   }
 
-  boolean fieldstate_canCastTo(AlligatorusType prototype);
+  boolean fieldstate_canCastTo(AlligatorusType type);
 
   boolean fieldstate_triviallyAssignableTo(MortarObjectField field);
 

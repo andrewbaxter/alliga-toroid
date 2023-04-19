@@ -78,11 +78,11 @@ public class MortarObjectImplTypestateAll implements BuiltinAutoExportable, Mort
     for (Map.Entry<Object, MortarObjectFieldstate> field : fields) {
       final MortarObjectField otherField = other.fields.getOpt(field.getKey());
       if (otherField == null) {
-      return false;
-    }
-    if (!field.getValue().fieldstate_canCastTo(otherField.field_asType())) {
-      return false;
-    }
+        return false;
+      }
+      if (!field.getValue().fieldstate_canCastTo(otherField.field_asType())) {
+        return false;
+      }
     }
     return true;
   }
@@ -233,12 +233,12 @@ public class MortarObjectImplTypestateAll implements BuiltinAutoExportable, Mort
 
   @Override
   public JavaBytecode typestate_jvmToObj() {
-  return null;
+    return null;
   }
 
   @Override
   public JavaBytecode typestate_jvmFromObj() {
-  return JavaBytecodeUtils.cast(meta.jvmDesc());
+    return JavaBytecodeUtils.cast(meta.jvmDesc());
   }
 
   @Override
@@ -289,8 +289,7 @@ public class MortarObjectImplTypestateAll implements BuiltinAutoExportable, Mort
   public EvaluateResult typestate_constVary(EvaluationContext context, Location id, Object data) {
     return EvaluateResult.simple(
         new MortarDataValueVariableStack(this),
-        new MortarTargetCode(
-            ((MortarTargetModuleContext) context.target).transfer( data)));
+        new MortarTargetCode(((MortarTargetModuleContext) context.target).transfer(data)));
   }
 
   public MortarObjectImplTypestateAll fork() {
@@ -303,7 +302,7 @@ public class MortarObjectImplTypestateAll implements BuiltinAutoExportable, Mort
 
   @Override
   public MortarRecordFieldstate asTupleFieldstate(int offset) {
-  return new MortarDataGenericTupleFieldstate(offset, this);
+    return new MortarDataGenericTupleFieldstate(offset, this);
   }
 
   public static class UnforkedRes {

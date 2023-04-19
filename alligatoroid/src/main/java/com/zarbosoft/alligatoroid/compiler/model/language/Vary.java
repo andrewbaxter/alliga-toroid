@@ -18,6 +18,6 @@ public class Vary extends LanguageElement {
   @Override
   public <V extends Value> EvaluateResult evaluate(EvaluationContext context) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
-    return ectx.build(ectx.evaluate(this.child).vary(context,id));
+    return ectx.build(ectx.record(ectx.evaluate(this.child).vary(context,id)));
   }
 }

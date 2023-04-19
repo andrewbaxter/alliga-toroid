@@ -12,7 +12,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 
-public class MortarPrimitiveAll implements MortarDataType, MortarDataTypestate {
+public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataTypestate {
   public static final MortarPrimitiveAll typeByte =
       new MortarPrimitiveAll(MortarPrimitiveAllByte.instance);
   public static final MortarPrimitiveAll typeBool =

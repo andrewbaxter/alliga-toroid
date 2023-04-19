@@ -33,7 +33,7 @@ public class MortarRecordType implements MortarDataType {
 
   @Override
   public Value type_stackAsValue() {
-    return new MortarDataValueVariableStack(type_newTypestate());
+    return new MortarDataValueVariableStack(newTypestate());
   }
 
   @Override

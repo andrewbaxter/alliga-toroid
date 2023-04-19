@@ -17,7 +17,17 @@ public class NullBinding implements Binding {
   }
 
   @Override
+  public Binding fork() {
+  return this;
+  }
+
+  @Override
   public TargetCode dropCode(EvaluationContext context, Location location) {
     return null;
+  }
+
+  @Override
+  public boolean merge(EvaluationContext context, Location location, Binding other, Location otherLocation) {
+  return true;
   }
 }

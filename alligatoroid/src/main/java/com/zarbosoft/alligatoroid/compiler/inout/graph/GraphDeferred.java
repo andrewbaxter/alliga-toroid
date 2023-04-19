@@ -30,10 +30,10 @@ public class GraphDeferred<T> implements Exportable {
   @Override
   public boolean equals(Object o) {
     if (this == o) {
-        return true;
+      return true;
     }
     if (o == null || getClass() != o.getClass()) {
-        return false;
+      return false;
     }
     GraphDeferred<?> that = (GraphDeferred<?>) o;
     return id.equals(that.id);
@@ -49,8 +49,9 @@ public class GraphDeferred<T> implements Exportable {
     return new ExportableType(this);
   }
 
-
-  public static class ExportableType<T> implements BuiltinSingletonExportable, com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType {
+  public static class ExportableType<T>
+      implements BuiltinSingletonExportable,
+          com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType {
     private final GraphDeferred<T> graphDeferred;
 
     public ExportableType(GraphDeferred<T> graphDeferred) {
@@ -58,19 +59,29 @@ public class GraphDeferred<T> implements Exportable {
     }
 
     @Override
-    public SemiserialSubvalue graphSemiserializeBody(long importCacheId, Semiserializer semiserializer, ROList<Object> path, ROList<String> accessPath, Object value) {
+    public SemiserialSubvalue graphSemiserializeBody(
+        long importCacheId,
+        Semiserializer semiserializer,
+        ROList<Object> path,
+        ROList<String> accessPath,
+        Object value) {
       return SemiserialRecord.create(
-              new TSOrderedMap<>(
-                      t ->
-                              t.put(SemiserialString.create(SEMIKEY_REF), graphDeferred.ref)
-                                      .put(
-                                              SemiserialString.create(SEMIKEY_ID),
-                                              graphDeferred.id.exportableType().graphSemiserialize(
-                                                      importCacheId,
-                                                      semiserializer,
-                                                      path.mut().add(this),
-                                                      accessPath.mut().add("id")))));
+          new TSOrderedMap<>(
+              t -> {
+                final com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType
+                    idExportableType = graphDeferred.id.exportableType();
+                t.put(SemiserialString.create(SEMIKEY_REF), graphDeferred.ref)
+                    .put(
+                        SemiserialString.create(SEMIKEY_ID),
+                        idExportableType.semiserializeValue(
+                            importCacheId,
+                            semiserializer,
+                            path.mut().add(this),
+                            accessPath.mut().add("id"),
+                            idExportableType));
+              }));
     }
+
     @Override
     public Object graphDesemiserializeBody(
         ModuleCompileContext context,
@@ -80,21 +91,18 @@ public class GraphDeferred<T> implements Exportable {
           new SemiserialSubvalue.DefaultDispatcher<>() {
             @Override
             public Exportable handleRecord(SemiserialRecord s) {
-              final GraphDeferred<Semiserializable> out = new GraphDeferred<>();
+              final GraphDeferred<Exportable> out = new GraphDeferred<>();
               out.ref =
                   (SemiserialRef)
                       context.lookupRef(
-                          (SemiserialRef)
-                              s.data.get(SemiserialString.create(SEMIKEY_REF)));
+                          (SemiserialRef) s.data.get(SemiserialString.create(SEMIKEY_REF)));
               out.id =
                   (UniqueId)
                       context.lookupRef(
-                          (SemiserialRef)
-                              s.data.get(SemiserialString.create(SEMIKEY_ID)));
+                          (SemiserialRef) s.data.get(SemiserialString.create(SEMIKEY_ID)));
               return out;
             }
           });
     }
-
   }
 }

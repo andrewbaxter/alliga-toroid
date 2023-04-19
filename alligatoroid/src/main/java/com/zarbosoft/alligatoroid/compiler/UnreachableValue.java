@@ -17,22 +17,30 @@ public class UnreachableValue implements Value {
 
   @Override
   public EvaluateResult vary(EvaluationContext context, Location id) {
-  context.errors.add(new GeneralLocationError(id, "This tree never exits directly, result can't be used in an expression context"));
-  return EvaluateResult.error;
+    context.errors.add(
+        new GeneralLocationError(
+            id, "This tree never exits directly, result can't be used in an expression context"));
+    return EvaluateResult.error;
   }
 
   @Override
   public boolean canCastTo(EvaluationContext context, AlligatorusType type) {
-  return false;
+    return false;
   }
 
   @Override
   public EvaluateResult castTo(EvaluationContext context, Location location, AlligatorusType type) {
-  throw new Assertion();
+    throw new Assertion();
   }
 
   @Override
   public Value unfork(EvaluationContext context, Location location, ROPair<Location, Value> other) {
+    throw new Assertion();
+  }
+
+  @Override
+  public EvaluateResult realize(EvaluationContext context, Location id) {
+    // This value should cause language elements to skip realize call, effectively dead code
     throw new Assertion();
   }
 }

@@ -1,11 +1,15 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
+import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.rendaw.common.Assertion;
 
 public class NullType implements MortarDataType {
@@ -19,9 +23,8 @@ public class NullType implements MortarDataType {
   }
 
   @Override
-  public Value type_stackAsValue(JavaBytecode code) {
-    // TODO gracefully fail
-    throw new Assertion();
+  public Value type_stackAsValue() {
+    return NullValue.value;
   }
 
   @Override
@@ -32,6 +35,11 @@ public class NullType implements MortarDataType {
   @Override
   public Value type_constAsValue(Object data) {
     return NullValue.value;
+  }
+
+  @Override
+  public MortarObjectField type_newField(MortarObjectInnerType parentType, String fieldName) {
+    return NullFieldAll.inst;
   }
 
   public static JavaBytecode returnBytecode() {

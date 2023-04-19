@@ -53,8 +53,8 @@ public class MortarDataGenericFieldstate implements MortarObjectFieldstate {
   }
 
   @Override
-  public boolean fieldstate_canCastTo(AlligatorusType prototype) {
-    return typestate.typestate_canCastTo(prototype);
+  public boolean fieldstate_canCastTo(AlligatorusType type) {
+    return typestate.typestate_canCastTo(type);
   }
 
   @Override

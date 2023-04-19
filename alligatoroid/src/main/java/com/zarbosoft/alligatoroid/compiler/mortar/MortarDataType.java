@@ -23,15 +23,13 @@ public interface MortarDataType extends MortarType {
 
   public default EvaluateResult type_cast(
       EvaluationContext evaluationContext, Location location, Value value) {
-    if (value.canCastTo(context, this)) {
+    if (value.canCastTo(evaluationContext, this)) {
       return (value).castTo(evaluationContext, location, this);
     } else {
       evaluationContext.errors.add(new MortarInvalidCast(location, this));
       return EvaluateResult.error;
     }
   }
-
-  MortarDataTypestate type_newTypestate();
 
   MortarObjectField type_newField(MortarObjectInnerType parentType, String fieldName);
 }

@@ -11,8 +11,6 @@ public interface SemiserialSubvalue {
         SemiserialRecord.class,
         SemiserialTuple.class,
         SemiserialBool.class,
-        SemiserialType.class,
-        SemiserialExportableIdentityBody.class,
       };
 
   public <T> T dispatch(Dispatcher<T> dispatcher);
@@ -27,8 +25,6 @@ public interface SemiserialSubvalue {
     T handleTuple(SemiserialTuple s);
 
     T handleBool(SemiserialBool s);
-
-    T handleType(SemiserialType s);
 
     T handleUnknown(SemiserialRef s);
   }
@@ -45,11 +41,6 @@ public interface SemiserialSubvalue {
 
     @Override
     default T handleBool(SemiserialBool s) {
-      return handleDefault(s);
-    }
-
-    @Override
-    default T handleType(SemiserialType s) {
       return handleDefault(s);
     }
 

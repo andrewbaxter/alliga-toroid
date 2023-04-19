@@ -14,6 +14,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.alligatoroid.compiler.modules.Source;
+import com.zarbosoft.alligatoroid.compiler.mortar.GeneralLocationError;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -22,24 +23,19 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstString;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class BundleValue implements Value, BuiltinAutoExportable {
-  private static final String GRAPH_KEY_ROOT = "root";
-  private static final String GRAPH_KEY_ID = "id";
-  @BuiltinAutoExportableType.Param
-  public String root;
-  @BuiltinAutoExportableType.Param
-  public ImportId id;
-
-  public static BundleValue graphDeserialize(Record data) {
-    return create((ImportId) data.data.get(GRAPH_KEY_ID), (String) data.data.get(GRAPH_KEY_ROOT));
-  }
+  @BuiltinAutoExportableType.Param public String root;
+  @BuiltinAutoExportableType.Param public ImportId id;
 
   public static BundleValue create(ImportId id, String root) {
     final BundleValue out = new BundleValue();
@@ -81,19 +77,31 @@ public class BundleValue implements Value, BuiltinAutoExportable {
     final URI zipUri = URI.create("jar:file:" + source.path.toString());
     uncheck(
         () -> {
-          FileSystem fs;
-          try {
-            fs = FileSystems.newFileSystem(zipUri, Collections.emptyMap());
+          Consumer<FileSystem> inner =
+              fs -> {
+                try (Stream<Path> st = uncheck(() -> Files.list(fs.getPath(path)))) {
+                  st.forEach(
+                      s -> {
+                        out.add(s.getFileName().toString());
+                      });
+                }
+              };
+          try (FileSystem fs = FileSystems.newFileSystem(zipUri, Collections.emptyMap())) {
+            inner.accept(fs);
           } catch (FileSystemAlreadyExistsException e) {
-            fs = FileSystems.getFileSystem(zipUri);
+            try (FileSystem fs = FileSystems.getFileSystem(zipUri)) {
+              inner.accept(fs);
+            }
           }
-          Files.list(fs.getPath(path))
-              .forEach(
-                  s -> {
-                    out.add(s.getFileName().toString());
-                  });
         });
     return out;
+  }
+
+  @Override
+  public EvaluateResult realize(EvaluationContext context, Location id) {
+    context.errors.add(
+        new GeneralLocationError(id, "Bundle imports can't be returned from branches"));
+    return EvaluateResult.error;
   }
 
   @Override
@@ -105,7 +113,7 @@ public class BundleValue implements Value, BuiltinAutoExportable {
   public EvaluateResult access(EvaluationContext context, Location location, Value field) {
     final String key = assertConstString(context, location, field);
     if (key == null) {
-        return EvaluateResult.error;
+      return EvaluateResult.error;
     }
     CompletableFuture<Value> importResult =
         context.moduleContext.getModule(

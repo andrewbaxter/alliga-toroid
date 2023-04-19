@@ -3,6 +3,8 @@ package com.zarbosoft.alligatoroid.compiler.model.ids;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRecord;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
 import com.zarbosoft.alligatoroid.compiler.model.error.ImportOutsideOwningBundleModule;
 import com.zarbosoft.luxem.write.Writer;
 
@@ -10,12 +12,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public final class RemoteModuleId implements ModuleId, BuiltinAutoExportable {
-  public static final String GRAPH_KEY_URL = "url";
-  public static final String GRAPH_KEY_HASH = "hash";
-  @BuiltinAutoExportableType.Param
-  public String url;
-  @BuiltinAutoExportableType.Param
-  public String hash;
+  public static final SemiserialString GRAPH_KEY_URL = SemiserialString.create("url");
+  public static final SemiserialString GRAPH_KEY_HASH = SemiserialString.create("hash");
+  @BuiltinAutoExportableType.Param public String url;
+  @BuiltinAutoExportableType.Param public String hash;
 
   public static RemoteModuleId create(String url, String hash) {
     final RemoteModuleId out = new RemoteModuleId();
@@ -25,9 +25,10 @@ public final class RemoteModuleId implements ModuleId, BuiltinAutoExportable {
     return out;
   }
 
-  public static RemoteModuleId graphDeserialize(Record data) {
+  public static RemoteModuleId graphDeserialize(SemiserialRecord data) {
     return RemoteModuleId.create(
-        (String) data.data.get(GRAPH_KEY_URL), (String) data.data.get(GRAPH_KEY_HASH));
+        ((SemiserialString) data.data.get(GRAPH_KEY_URL)).value,
+        ((SemiserialString) data.data.get(GRAPH_KEY_HASH)).value);
   }
 
   @Override

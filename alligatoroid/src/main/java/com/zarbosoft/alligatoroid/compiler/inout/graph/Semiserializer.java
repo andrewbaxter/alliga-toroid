@@ -21,13 +21,17 @@ public class Semiserializer {
     this.artifactLookup = artifactLookup;
   }
 
+  /**
+   * Entrypoint to semiserialization; sets up serializer, deals with errors, and just calls
+   * `exportableType.semiserializeValue`
+   */
   public static SemiserialModule semiserialize(
       ModuleCompileContext moduleContext, Object value, Location location) {
     TSList<Error.PreError> errors = new TSList<>();
     Semiserializer s = new Semiserializer(errors, moduleContext.backArtifactLookup);
     ExportableType exportableType = null;
     if (value instanceof Exportable) {
-        exportableType = ((Exportable) value).exportableType();
+      exportableType = ((Exportable) value).exportableType();
     }
     if (exportableType == null) {
       ExportableType et0 = StaticAutogen.detachedExportableTypeLookup.get(value.getClass());

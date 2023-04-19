@@ -1,22 +1,19 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
-import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialUnknown;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 
-public interface NoExportValue {
+public interface NoExportValue extends Exportable {
   @Override
   default void postInit() {
     throw new Assertion();
   }
 
   @Override
-  default SemiserialUnknown graphSemiserialize(
-      long importCacheId,
-      Semiserializer semiserializer,
-      ROList<Exportable> path,
-      ROList<String> accessPath) {
+  default ExportableType exportableType() {
     throw new Assertion();
   }
 }

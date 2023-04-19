@@ -39,4 +39,9 @@ public final class ErrorValue implements Value, NoExportValue {
   public EvaluateResult set(EvaluationContext context, Location location, Value value) {
     return EvaluateResult.error;
   }
+
+  @Override
+  public EvaluateResult realize(EvaluationContext context, Location id) {
+    return EvaluateResult.error;
+  }
 }
