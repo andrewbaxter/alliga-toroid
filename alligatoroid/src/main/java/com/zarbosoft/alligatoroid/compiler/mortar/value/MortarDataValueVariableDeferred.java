@@ -40,6 +40,11 @@ public class MortarDataValueVariableDeferred extends MortarDataValue implements 
   }
 
   @Override
+  public TargetCode cleanup(EvaluationContext context, Location location) {
+    return new MortarTargetCode(typestate.typestate_cleanup(context, location));
+  }
+
+  @Override
   public MortarTargetCode consume(EvaluationContext context, Location location) {
     return new MortarTargetCode(code.consume());
   }
@@ -62,10 +67,11 @@ public class MortarDataValueVariableDeferred extends MortarDataValue implements 
       return EvaluateResult.error;
     }
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
-    ectx.recordEffect(
+    final Value usedValue =
         ectx.record(
-                ectx.record(value.castTo(context, location, currentType)).vary(context, location))
-            .consume(context, location));
+            ectx.record(value.castTo(context, location, currentType)).vary(context, location));
+    ectx.recordEffect(usedValue.consume(context, location));
+    ectx.recordEffect(usedValue.cleanup(context, location));
     return EvaluateResult.simple(
         NullValue.value,
         new MortarTargetCode(code.set(((MortarTargetCode) ectx.build(null).effect).e)));

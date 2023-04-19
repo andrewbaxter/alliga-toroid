@@ -28,6 +28,7 @@ import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -98,29 +99,38 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       EvaluationContext context, Location location, JavaBytecodeSequence code, Value argument) {
     boolean bad = false;
     if (argument instanceof LooseRecord) {
+      TSList<Value> convertedValues = new TSList<>();
       for (ROPair<Object, EvaluateResult> e : ((LooseRecord) argument).data) {
-        code.add((JavaBytecodeSequence) e.second.effect);
-        if (!convertFunctionArgument(context, location, code, e.second.value)) {
+        code.add(((MortarTargetCode) e.second.effect).e);
+        final Value convertedValue =
+            convertFunctionArgument(context, location, code, e.second.value);
+        if (convertedValue == ErrorValue.value) {
           bad = true;
           continue;
         }
+        convertedValues.add(convertedValue);
+      }
+      for (Value value : new ReverseIterable<>(convertedValues)) {
+        code.add(((MortarTargetCode) value.cleanup(context, location)).e);
       }
       return !bad;
     } else {
-      return convertFunctionArgument(context, location, code, argument);
+      final Value convertedValue = convertFunctionArgument(context, location, code, argument);
+      code.add(((MortarTargetCode) convertedValue.cleanup(context, location)).e);
+      return convertedValue != ErrorValue.value;
     }
   }
 
-  public static boolean convertFunctionArgument(
+  public static Value convertFunctionArgument(
       EvaluationContext context, Location location, JavaBytecodeSequence code, Value argument) {
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
-    final Value variable = ectx.record(argument.vary(context, location));
-    if (variable == ErrorValue.value) {
-      return false;
+    final Value value = ectx.record(argument.vary(context, location));
+    if (value == ErrorValue.value) {
+      return ErrorValue.value;
     }
-    ectx.recordEffect(((MortarDataValue) variable).consume(context, location));
+    ectx.recordEffect(((MortarDataValue) value).consume(context, location));
     code.add(((MortarTargetCode) ectx.build(null).effect).e);
-    return true;
+    return value;
   }
 
   public static boolean assertTarget(EvaluationContext context, Location location) {

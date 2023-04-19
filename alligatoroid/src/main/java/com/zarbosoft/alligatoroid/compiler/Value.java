@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.AccessNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.BindNotSupported;
@@ -8,6 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.model.error.ExportNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.SetNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.error.VaryNotSupported;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
@@ -106,4 +108,9 @@ public interface Value {
   EvaluateResult realize(EvaluationContext context, Location id);
 
   AlligatorusType type(EvaluationContext context);
+
+  /** Called after consume, end of lifecycle path. */
+  default TargetCode cleanup(EvaluationContext context, Location location) {
+    return null;
+  }
 }

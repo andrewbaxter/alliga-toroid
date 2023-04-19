@@ -18,7 +18,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public interface MortarDataTypestate  {
+public interface MortarDataTypestate {
   default EvaluateResult typestate_varAccess(
       EvaluationContext context, Location location, Value field, MortarDeferredCode baseCode) {
     context.errors.add(new AccessNotSupported(location));
@@ -27,10 +27,7 @@ public interface MortarDataTypestate  {
 
   default ROPair<JavaBytecode, Binding> typestate_varBind(EvaluationContext context) {
     JavaBytecodeBindingKey key = new JavaBytecodeBindingKey();
-    return new ROPair<>(
-            typestate_storeBytecode(key)
-            ,
-        new MortarDataGenericBindingVar(key, this));
+    return new ROPair<>(typestate_storeBytecode(key), new MortarDataGenericBindingVar(key, this));
   }
 
   JavaBytecode typestate_storeBytecode(JavaBytecodeBindingKey key);
@@ -93,7 +90,11 @@ public interface MortarDataTypestate  {
 
   MortarDataTypestate typestate_fork();
 
-  boolean typestate_bindMerge(EvaluationContext context, Location location, MortarDataTypestate other, Location otherLocation);
+  boolean typestate_bindMerge(
+      EvaluationContext context,
+      Location location,
+      MortarDataTypestate other,
+      Location otherLocation);
 
   boolean typestate_triviallyAssignableTo(AlligatorusType type);
 
@@ -103,7 +104,7 @@ public interface MortarDataTypestate  {
 
   /** Actual drop code, not including finally/jumps/etc */
   default JavaBytecode typestate_varBindDrop(
-          EvaluationContext context, Location location, MortarDataGenericBindingVar mortarDataBinding) {
+      EvaluationContext context, Location location, MortarDataGenericBindingVar mortarDataBinding) {
     return null;
   }
 
@@ -112,4 +113,8 @@ public interface MortarDataTypestate  {
   JavaBytecode typestate_jvmFromObj();
 
   Object typestate_constConsume(EvaluationContext context, Location id, Object value);
+
+  default JavaBytecode typestate_cleanup(EvaluationContext context, Location location) {
+    return null;
+  }
 }

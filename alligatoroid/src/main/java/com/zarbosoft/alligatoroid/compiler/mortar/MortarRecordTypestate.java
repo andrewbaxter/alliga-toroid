@@ -22,6 +22,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableS
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import org.jetbrains.annotations.NotNull;
@@ -71,8 +72,7 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
       return null;
     }
     final AlligatorusType type = value.type(context);
-    if (type != MortarPrimitiveAll.typeString
-        && type != MortarPrimitiveAll.typeInt) {
+    if (type != MortarPrimitiveAll.typeString && type != MortarPrimitiveAll.typeInt) {
       return null;
     }
     if (!(value instanceof MortarDataValueConst)) {
@@ -162,13 +162,21 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
     TSList<ROPair<Object, MortarRecordFieldstate>> fields = new TSList<>();
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     ectx.recordEffect(new MortarTargetCode(new JavaBytecodeInstructionInt(ANEWARRAY)));
+    TSList<Value> usedValues = new TSList<>();
     for (int i = 0; i < data.size(); i++) {
       final AlligatorusType elType = data.get(i).second.value.type(context);
-      ectx.recordEffect(ectx.record(data.get(i).second).consume(context, location));
+      final Value usedValue = ectx.record(data.get(i).second);
+      ectx.recordEffect(usedValue.consume(context, location));
+      usedValues.add(usedValue);
       ectx.recordEffect(new MortarTargetCode(JavaBytecodeUtils.literalIntShortByte(i)));
       ectx.recordEffect(new MortarTargetCode(JavaBytecodeUtils.arrayStoreObj));
       fields.add(
-          new ROPair<>(data.get(i).first, ((MortarRecordFieldable) elType).newTupleField(i).recordfield_newFieldstate()));
+          new ROPair<>(
+              data.get(i).first,
+              ((MortarRecordFieldable) elType).newTupleField(i).recordfield_newFieldstate()));
+    }
+    for (Value value : new ReverseIterable<>(usedValues)) {
+      ectx.recordEffect(value.cleanup(context, location));
     }
     return ectx.build(new MortarDataValueVariableStack(new MortarRecordTypestate(fields)));
   }
@@ -339,6 +347,4 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
   public JavaDataDescriptor typestate_jvmDesc() {
     return MortarRecordType.DESC;
   }
-
-
 }

@@ -17,6 +17,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.ErrorValue;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.lang.reflect.Field;
@@ -34,17 +35,21 @@ public class Stage extends LanguageElement {
   /**
    * @param context
    * @param location
+   * @param loweredValues
    * @param element
    * @return Value of LanguageElement
    */
   public static EvaluateResult stageLower1(
-      EvaluationContext context, Location location, LanguageElement element) {
+      EvaluationContext context,
+      Location location,
+      TSList<Value> loweredValues,
+      LanguageElement element) {
 
     // 1. Encountered lower = evaluate and embed result
     if (element instanceof Lower) {
       final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
       Value val = ectx.evaluate(((Lower) element).child);
-      if (val.canCastTo(context,prototypeLanguageElement)) {
+      if (val.canCastTo(context, prototypeLanguageElement)) {
         // Lowering language value - use directly to interpret in next layer
         return ectx.build(ectx.record(val.castTo(context, location, prototypeLanguageElement)));
 
@@ -103,7 +108,7 @@ public class Stage extends LanguageElement {
           for (Object o : ((TSList) parameterValue)) {
             final Value subValue =
                 ectx.record(
-                    ectx.record(stageLower1(context, location, (LanguageElement) o))
+                    ectx.record(stageLower1(context, location, loweredValues, (LanguageElement) o))
                         .vary(context, location));
             if (subValue == ErrorValue.value) {
               listBad = true;
@@ -126,6 +131,7 @@ public class Stage extends LanguageElement {
                 stageLower1(
                     context,
                     location,
+                    loweredValues,
                     (LanguageElement) uncheck(() -> klass.getField(field.getName()).get(element)));
             if (evaluation == EvaluateResult.error) {
               bad = true;
@@ -186,6 +192,12 @@ public class Stage extends LanguageElement {
 
   @Override
   public EvaluateResult evaluate(EvaluationContext context) {
-    return stageLower1(context, id, child);
+    final EvaluateResult.Context ectx = new EvaluateResult.Context(context, id);
+    TSList<Value> loweredValues = new TSList<>();
+    final Value res = ectx.record(stageLower1(context, id, loweredValues, child));
+    for (Value value : new ReverseIterable<>(loweredValues)) {
+      ectx.recordEffect(value.cleanup(context, id));
+    }
+    return ectx.build(res);
   }
 }
