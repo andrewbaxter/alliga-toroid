@@ -1,11 +1,11 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
+import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.SimpleBinding;
@@ -53,5 +53,9 @@ public class FutureValue implements Value {
 
   public Value get() {
     return Utils.await(future);
+  }
+  @Override
+  public AlligatorusType type(EvaluationContext context) {
+    return get().type(context);
   }
 }

@@ -5,7 +5,6 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
@@ -24,7 +23,8 @@ import java.util.Map;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstKey;
 
-public class MortarObjectImplTypestateAll implements BuiltinAutoExportable, MortarDataTypestate {
+public class MortarObjectImplTypestateAll
+    implements BuiltinAutoExportable, MortarDataTypestateForGeneric {
   public final MortarObjectInnerType meta;
   private final ROMap<Object, MortarObjectFieldstate> fields;
 
@@ -87,17 +87,13 @@ public class MortarObjectImplTypestateAll implements BuiltinAutoExportable, Mort
     return true;
   }
 
-  public MortarDataType asType() {
-    TSMap<Object, MortarObjectField> fields = new TSMap<>();
-    for (Map.Entry<Object, MortarObjectFieldstate> field : this.fields) {
-      fields.put(field.getKey(), field.getValue().fieldstate_asField());
-    }
-    return new MortarObjectImplType(meta, fields);
-  }
-
   @Override
-  public MortarDataType typestate_asType() {
-    return asType();
+  public MortarDataTypeForGeneric typestate_asType() {
+    TSMap<Object, MortarObjectField> fields1 = new TSMap<>();
+    for (Map.Entry<Object, MortarObjectFieldstate> field : this.fields) {
+      fields1.put(field.getKey(), field.getValue().fieldstate_asField());
+    }
+    return new MortarObjectImplType(meta, fields1);
   }
 
   public static UnforkedRes unfork(
@@ -149,7 +145,7 @@ public class MortarObjectImplTypestateAll implements BuiltinAutoExportable, Mort
   }
 
   @Override
-  public MortarDataTypestate typestate_unfork(
+  public MortarDataTypestateForGeneric typestate_unfork(
       EvaluationContext context,
       Location location,
       MortarDataTypestate other,
@@ -172,7 +168,7 @@ public class MortarObjectImplTypestateAll implements BuiltinAutoExportable, Mort
   }
 
   @Override
-  public MortarDataTypestate typestate_fork() {
+  public MortarDataTypestateForGeneric typestate_fork() {
     return fork();
   }
 
@@ -242,6 +238,11 @@ public class MortarObjectImplTypestateAll implements BuiltinAutoExportable, Mort
   }
 
   @Override
+  public Object typestate_constConsume(EvaluationContext context, Location id, Object value) {
+    return value;
+  }
+
+  @Override
   public String toString() {
     return meta.name.toString();
   }
@@ -298,11 +299,6 @@ public class MortarObjectImplTypestateAll implements BuiltinAutoExportable, Mort
       forkedFields.put(fieldType.getKey(), fieldType.getValue().fieldstate_fork());
     }
     return MortarObjectImplTypestateAll.create(meta, forkedFields);
-  }
-
-  @Override
-  public MortarRecordFieldstate asTupleFieldstate(int offset) {
-    return new MortarDataGenericTupleFieldstate(offset, this);
   }
 
   public static class UnforkedRes {

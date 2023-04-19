@@ -18,7 +18,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public interface MortarDataTypestate extends MortarRecordFieldable {
+public interface MortarDataTypestate  {
   default EvaluateResult typestate_varAccess(
       EvaluationContext context, Location location, Value field, MortarDeferredCode baseCode) {
     context.errors.add(new AccessNotSupported(location));
@@ -110,4 +110,6 @@ public interface MortarDataTypestate extends MortarRecordFieldable {
   JavaBytecode typestate_jvmToObj();
 
   JavaBytecode typestate_jvmFromObj();
+
+  Object typestate_constConsume(EvaluationContext context, Location id, Object value);
 }

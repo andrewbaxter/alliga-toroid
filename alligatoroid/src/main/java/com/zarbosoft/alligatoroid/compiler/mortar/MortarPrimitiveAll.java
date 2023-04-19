@@ -12,7 +12,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 
-public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataTypestate {
+public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataTypestateForGeneric {
   public static final MortarPrimitiveAll typeByte =
       new MortarPrimitiveAll(MortarPrimitiveAllByte.instance);
   public static final MortarPrimitiveAll typeBool =
@@ -34,8 +34,8 @@ public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataT
   }
 
   @Override
-  public MortarRecordFieldstate asTupleFieldstate(int offset) {
-    return new MortarDataGenericTupleFieldstate(offset, this);
+  public MortarRecordField newTupleField(int offset) {
+    return new MortarDataGenericTupleField(offset, this);
   }
 
   public interface Inner {
@@ -81,7 +81,7 @@ public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataT
   }
 
   @Override
-  public MortarDataTypestate type_newTypestate() {
+  public MortarDataTypestateForGeneric type_newTypestate() {
     return this;
   }
 
@@ -103,6 +103,11 @@ public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataT
   @Override
   public JavaBytecode typestate_jvmFromObj() {
     return inner.fromObj();
+  }
+
+  @Override
+  public Object typestate_constConsume(EvaluationContext context, Location id, Object value) {
+    return value;
   }
 
   @Override
@@ -138,12 +143,12 @@ public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataT
   }
 
   @Override
-  public MortarDataType typestate_asType() {
+  public MortarDataTypeForGeneric typestate_asType() {
     return this;
   }
 
   @Override
-  public MortarDataTypestate typestate_unfork(
+  public MortarDataTypestateForGeneric typestate_unfork(
       EvaluationContext context,
       Location location,
       MortarDataTypestate other,
@@ -156,7 +161,7 @@ public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataT
   }
 
   @Override
-  public MortarDataTypestate typestate_fork() {
+  public MortarDataTypestateForGeneric typestate_fork() {
     return this;
   }
 

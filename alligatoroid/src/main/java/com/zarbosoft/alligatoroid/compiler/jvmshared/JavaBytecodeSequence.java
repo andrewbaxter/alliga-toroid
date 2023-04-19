@@ -398,8 +398,8 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
           branchIndexes = new TSMap<>();
       for (int i = 0; i < initialIndexes.size(); i++) {
         final JavaBytecodeBindingKey key = initialIndexes.get(i);
-        currentIndexes[0].put(key, i);
-        currentRevIndexes[0].add(key);
+        currentIndexes[0] = currentIndexes[0].plus(key, i);
+        currentRevIndexes[0] = currentRevIndexes[0].plus(key);
       }
       int codeIndex = 0;
       for (JavaBytecode n : flattened) {
@@ -514,14 +514,14 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
                       if (currentRevIndexes[0].get(j) != null) {
                         continue;
                       }
-                      currentIndexes[0].put(storeLoad.key, j);
-                      currentRevIndexes[0].set(j, storeLoad.key);
+                      currentIndexes[0] = currentIndexes[0].plus(storeLoad.key, j);
+                      currentRevIndexes[0] = currentRevIndexes[0].with(j, storeLoad.key);
                       index = j;
                     }
                     if (index == -1) {
                       index = currentIndexes[0].size();
-                      currentIndexes[0].put(storeLoad.key, index);
-                      currentRevIndexes[0].add(storeLoad.key);
+                      currentIndexes[0] = currentIndexes[0].plus(storeLoad.key, index);
+                      currentRevIndexes[0] = currentRevIndexes[0].plus(storeLoad.key);
                     }
                   } else {
                     // Handle load - must already exist
@@ -530,8 +530,8 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
                 }
                 out.visitVarInsn(storeLoad.code, index);
                 if (bindingLastUses.get(storeLoad.key).lastIndexOf(finalCodeIndex) != -1) {
-                  currentIndexes[0].remove(storeLoad.key);
-                  currentRevIndexes[0].set(index, null);
+                  currentIndexes[0] = currentIndexes[0].minus(storeLoad.key);
+                  currentRevIndexes[0] = currentRevIndexes[0].with(index, null);
                 }
                 return null;
               }

@@ -5,7 +5,6 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinSingletonExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeLineNumber;
@@ -27,7 +26,7 @@ import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleConte
  * call the static method.
  */
 public class MortarStaticMethodTypestate
-    implements BuiltinSingletonExportable, MortarDataTypestate, MortarDataType {
+    implements BuiltinSingletonExportable, MortarDataTypestateForGeneric, MortarDataTypeForGeneric {
   // TODO move method type info into the type, check during type check
   public static final MortarStaticMethodTypestate typestate = new MortarStaticMethodTypestate();
   public static final JavaDataDescriptor DESC =
@@ -81,12 +80,12 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
-  public MortarDataType typestate_asType() {
+  public MortarDataTypeForGeneric typestate_asType() {
     return this;
   }
 
   @Override
-  public MortarDataTypestate typestate_unfork(
+  public MortarDataTypestateForGeneric typestate_unfork(
       EvaluationContext context,
       Location location,
       MortarDataTypestate other,
@@ -99,7 +98,7 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
-  public MortarDataTypestate typestate_fork() {
+  public MortarDataTypestateForGeneric typestate_fork() {
     return this;
   }
 
@@ -138,6 +137,11 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
+  public Object typestate_constConsume(EvaluationContext context, Location id, Object value) {
+    return value;
+  }
+
+  @Override
   public JavaBytecode typestate_storeBytecode(JavaBytecodeBindingKey key) {
     return JavaBytecodeUtils.storeObj(key);
   }
@@ -170,7 +174,7 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
-  public MortarDataTypestate type_newTypestate() {
+  public MortarDataTypestateForGeneric type_newTypestate() {
     return this;
   }
 
@@ -185,8 +189,8 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
-  public MortarRecordFieldstate asTupleFieldstate(int offset) {
-    return new MortarDataGenericTupleFieldstate(offset, this);
+  public MortarRecordField newTupleField(int offset) {
+    return new MortarDataGenericTupleField(offset, this);
   }
 
   public static class ConvertImmediateArgRootRes {

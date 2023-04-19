@@ -11,7 +11,6 @@ import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.languageinout.LanguageDeserializer;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeCatchKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaClass;
@@ -105,7 +104,7 @@ public class ModuleCompiler implements ModuleResolver {
     // TODO handle like returns from a block (merge all returns)
     MortarDataType resultType;
     if (firstPass.value instanceof MortarDataValue) {
-      resultType = ((MortarDataValue) firstPass.value).type();
+      resultType = (MortarDataType) firstPass.value.type(context);
     } else {
       resultType = NullType.type;
     }

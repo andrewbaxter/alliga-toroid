@@ -12,7 +12,7 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class MortarRecordType implements MortarDataType {
+public class MortarRecordType implements MortarDataTypeForGeneric {
   public final ROList<ROPair<Object, MortarRecordField>> fields;
   public static final JavaDataDescriptor DESC =
       JavaDataDescriptor.fromObjectClass(Object.class).array();
@@ -55,8 +55,13 @@ public class MortarRecordType implements MortarDataType {
   }
 
   @Override
-  public MortarDataTypestate type_newTypestate() {
+  public MortarDataTypestateForGeneric type_newTypestate() {
     return newTypestate();
+  }
+
+  @Override
+  public MortarRecordField newTupleField(int offset) {
+    return new MortarDataGenericTupleField(offset, this);
   }
 
   @Override

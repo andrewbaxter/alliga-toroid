@@ -13,9 +13,7 @@ public interface MortarRecordFieldstate {
 
   MortarRecordFieldstate recordfieldstate_fork();
 
-  JavaDataDescriptor recordfieldstate_jvmDesc();
-
-  EvaluateResult recordfieldstate_variableAsValue(
+    EvaluateResult recordfieldstate_variableAsValue(
       EvaluationContext context, Location location, MortarDeferredCode baseCode, int field);
 
   boolean recordfieldstate_canCastTo(AlligatorusType other);

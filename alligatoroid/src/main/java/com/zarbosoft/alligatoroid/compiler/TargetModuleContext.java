@@ -22,7 +22,9 @@ public interface TargetModuleContext {
   EvaluateResult looseRecordCastTo(
           EvaluationContext context, Location location, ROOrderedMap<Object, EvaluateResult> data, AlligatorusType type);
 
-  public abstract static class Id {
+    AlligatorusType looseRecordType(EvaluationContext context, LooseRecord looseRecord);
+
+    public abstract static class Id {
     @Override
     public abstract String toString();
   }

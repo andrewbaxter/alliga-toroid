@@ -247,8 +247,12 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       for (int i = 0; i < looseRecord.data.size(); i += 1) {
         final ROPair<Object, EvaluateResult> e = looseRecord.data.getI(i);
         final MortarDataValueConst value = (MortarDataValueConst) ectx.record(e.second);
-        record[keyOrder.get(i)] = value.value;
-        types[keyOrder.get(i)] = new ROPair<>(e.first, value.typestate.asTupleFieldstate(i));
+        final MortarDataType valueType = value.type(context);
+        record[keyOrder.get(i)] = value.constConsume(context, id);
+        types[keyOrder.get(i)] =
+            new ROPair<>(
+                e.first,
+                ((MortarRecordFieldable) valueType).newTupleField(i).recordfield_newFieldstate());
       }
       return ectx.build(
           new MortarDataValueConst(new MortarRecordTypestate(TSList.of(types)), record));
@@ -316,8 +320,12 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                             context,
                             location,
                             destFields.get(destIndex).second.recordfield_asType()));
-        record[destIndex] = value.value;
-        types[destIndex] = new ROPair<>(e.first, value.typestate.asTupleFieldstate(i));
+        final MortarDataType valueType = value.type(context);
+        record[destIndex] = value.constConsume(context, location);
+        types[destIndex] =
+            new ROPair<>(
+                e.first,
+                ((MortarRecordFieldable) valueType).newTupleField(i).recordfield_newFieldstate());
       }
       return ectx.build(
           new MortarDataValueConst(new MortarRecordTypestate(TSList.of(types)), record));
@@ -341,6 +349,19 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     }
   }
 
+  @Override
+  public AlligatorusType looseRecordType(EvaluationContext context, LooseRecord looseRecord) {
+    TSList<ROPair<Object, MortarRecordField>> fields = new TSList<>();
+    for (int i = 0; i < looseRecord.data.size(); i++) {
+      final ROPair<Object, EvaluateResult> e = looseRecord.data.getI(i);
+      fields.add(
+          new ROPair<>(
+              e.first, ((MortarRecordFieldable) e.second.value.type(context)).newTupleField(i)));
+    }
+    return new MortarRecordType(fields);
+  }
+
+  /** Caller type needs to make sure value is read only or a duplicate before calling. */
   public JavaBytecodeSequence transfer(Object object) {
     final ObjId idObj = new ObjId(object);
     String name = transfers.getOpt(idObj);

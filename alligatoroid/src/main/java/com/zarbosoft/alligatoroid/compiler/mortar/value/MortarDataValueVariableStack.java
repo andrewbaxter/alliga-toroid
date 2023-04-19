@@ -31,7 +31,7 @@ public class MortarDataValueVariableStack extends MortarDataValue implements NoE
   }
 
   @Override
-  public MortarDataType type() {
+  public MortarDataType type(EvaluationContext context) {
     return typestate.typestate_asType();
   }
 

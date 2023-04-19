@@ -3,7 +3,6 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeAccessRecordField;
@@ -13,9 +12,9 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableD
 
 public class MortarDataGenericTupleFieldstate implements MortarRecordFieldstate {
   private final int offset;
-  private final MortarDataTypestate typestate;
+  private final MortarDataTypestateForGeneric typestate;
 
-  public MortarDataGenericTupleFieldstate(int offset, MortarDataTypestate typestate) {
+  public MortarDataGenericTupleFieldstate(int offset, MortarDataTypestateForGeneric typestate) {
     this.offset = offset;
     this.typestate = typestate;
   }
@@ -30,11 +29,6 @@ public class MortarDataGenericTupleFieldstate implements MortarRecordFieldstate 
   @Override
   public MortarRecordFieldstate recordfieldstate_fork() {
     return new MortarDataGenericTupleFieldstate(offset, typestate.typestate_fork());
-  }
-
-  @Override
-  public JavaDataDescriptor recordfieldstate_jvmDesc() {
-    return typestate.typestate_jvmDesc();
   }
 
   @Override

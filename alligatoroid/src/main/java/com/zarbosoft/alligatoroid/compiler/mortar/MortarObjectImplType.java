@@ -43,7 +43,7 @@ public class MortarObjectImplType implements MortarDataTypeForGeneric {
   }
 
   @Override
-  public MortarDataTypestate type_newTypestate() {
+  public MortarDataTypestateForGeneric type_newTypestate() {
     return newTypestate();
   }
 
@@ -63,5 +63,10 @@ public class MortarObjectImplType implements MortarDataTypeForGeneric {
   @Override
   public Binding type_newInitialBinding(JavaBytecodeBindingKey key) {
     return new MortarDataGenericBindingVar(key, newTypestate());
+  }
+
+  @Override
+  public MortarRecordField newTupleField(int offset) {
+  return new MortarDataGenericTupleField(offset, this);
   }
 }

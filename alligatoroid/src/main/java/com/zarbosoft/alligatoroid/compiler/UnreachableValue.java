@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.GeneralLocationError;
+import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 
@@ -42,5 +43,10 @@ public class UnreachableValue implements Value {
   public EvaluateResult realize(EvaluationContext context, Location id) {
     // This value should cause language elements to skip realize call, effectively dead code
     throw new Assertion();
+  }
+
+  @Override
+  public AlligatorusType type(EvaluationContext context) {
+    return NullType.type;
   }
 }

@@ -1,6 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
-public interface MortarRecordFieldable {
-  /** Represents transfer, so no fork (or explicitly forked afterwards) */
-  MortarRecordFieldstate asTupleFieldstate(int offset);
+import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
+
+public interface MortarRecordFieldable extends AlligatorusType {
+
+  MortarRecordField newTupleField(int offset);
 }

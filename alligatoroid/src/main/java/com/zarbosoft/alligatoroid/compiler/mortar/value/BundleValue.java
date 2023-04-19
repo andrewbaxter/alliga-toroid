@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar.value;
 
+import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
@@ -15,6 +16,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.alligatoroid.compiler.modules.Source;
 import com.zarbosoft.alligatoroid.compiler.mortar.GeneralLocationError;
+import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -104,7 +106,12 @@ public class BundleValue implements Value, BuiltinAutoExportable {
     return EvaluateResult.error;
   }
 
-  @Override
+    @Override
+    public AlligatorusType type(EvaluationContext context) {
+    return NullType.type;
+    }
+
+    @Override
   public TargetCode drop(EvaluationContext context, Location location) {
     return null;
   }

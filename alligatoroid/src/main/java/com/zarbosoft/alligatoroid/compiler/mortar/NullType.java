@@ -54,4 +54,9 @@ public class NullType implements MortarDataType {
   public Binding type_newInitialBinding(JavaBytecodeBindingKey key) {
     return NullBinding.binding;
   }
+
+  @Override
+  public MortarRecordField newTupleField(int offset) {
+    return NullFieldAll.inst;
+  }
 }

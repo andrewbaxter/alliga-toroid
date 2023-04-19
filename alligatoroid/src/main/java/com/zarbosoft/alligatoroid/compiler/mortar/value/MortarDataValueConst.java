@@ -100,7 +100,11 @@ public class MortarDataValueConst extends MortarDataValue implements BuiltinAuto
     return value;
   }
 
-  public MortarDataType type() {
+  public MortarDataType type(EvaluationContext context) {
     return typestate.typestate_asType();
+  }
+
+  public Object constConsume(EvaluationContext context, Location id) {
+    return typestate.typestate_constConsume(context, id, value);
   }
 }

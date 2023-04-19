@@ -50,6 +50,11 @@ public class LooseRecord implements Value, NoExportValue {
   }
 
   @Override
+  public AlligatorusType type(EvaluationContext context) {
+  return context.target.looseRecordType(context,this);
+  }
+
+  @Override
   public TargetCode drop(EvaluationContext context, Location location) {
     TSList<TargetCode> out = new TSList<>();
     for (ROPair<Object, EvaluateResult> e : data) {

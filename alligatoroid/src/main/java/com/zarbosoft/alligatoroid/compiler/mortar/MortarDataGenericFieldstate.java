@@ -31,7 +31,8 @@ public class MortarDataGenericFieldstate implements MortarObjectFieldstate {
 
   @Override
   public MortarObjectField fieldstate_asField() {
-    return new MortarDataGenericField(parentInfo, name, typestate.typestate_asType());
+    return new MortarDataGenericField(
+        parentInfo, name, ((MortarDataTypeForGeneric) typestate.typestate_asType()));
   }
 
   @Override

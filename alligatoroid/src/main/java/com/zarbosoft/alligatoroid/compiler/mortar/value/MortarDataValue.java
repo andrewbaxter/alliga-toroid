@@ -14,8 +14,6 @@ public abstract class MortarDataValue implements Value {
     this.typestate = typestate;
   }
 
-  public abstract MortarDataType type();
-
   @Override
   public abstract MortarTargetCode consume(EvaluationContext context, Location location);
 }

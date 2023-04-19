@@ -104,4 +104,6 @@ public interface Value {
    * Done before finishing branches because unfork must be done on stack values.
    */
   EvaluateResult realize(EvaluationContext context, Location id);
+
+  AlligatorusType type(EvaluationContext context);
 }

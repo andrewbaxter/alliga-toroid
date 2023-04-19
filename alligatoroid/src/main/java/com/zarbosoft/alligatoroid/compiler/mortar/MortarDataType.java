@@ -10,7 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.MortarInvalidCast;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 
-public interface MortarDataType extends MortarType {
+public interface MortarDataType extends MortarType, MortarRecordFieldable {
   Binding type_newInitialBinding(JavaBytecodeBindingKey key);
 
   JavaDataDescriptor type_jvmDesc();
