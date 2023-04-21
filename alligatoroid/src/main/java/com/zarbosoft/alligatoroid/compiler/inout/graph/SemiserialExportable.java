@@ -1,8 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
 public class SemiserialExportable {
-  @BuiltinAutoExportableType.Param public SemiserialRef type;
-  @BuiltinAutoExportableType.Param public SemiserialSubvalue value;
+  @BuiltinAutoExporter.Param public SemiserialRef type;
+  @BuiltinAutoExporter.Param public SemiserialSubvalue value;
 
   public static SemiserialExportable create(SemiserialRef type, SemiserialSubvalue data) {
     final SemiserialExportable out = new SemiserialExportable();

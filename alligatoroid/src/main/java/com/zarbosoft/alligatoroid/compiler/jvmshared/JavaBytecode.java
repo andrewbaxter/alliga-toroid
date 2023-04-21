@@ -29,7 +29,7 @@ public interface JavaBytecode {
 
     @Override
     default T handleLand(JavaBytecodeLand n) {
-      return handleLand(n);
+      return handleDefault(n);
     }
 
     @Override

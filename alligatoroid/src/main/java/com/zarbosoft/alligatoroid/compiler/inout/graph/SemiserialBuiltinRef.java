@@ -1,12 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
 public class SemiserialBuiltinRef implements SemiserialRef {
-  @BuiltinAutoExportableType.Param
-  public String key;
+  @BuiltinAutoExporter.Param
+  public int index;
 
-  public static SemiserialBuiltinRef create(String key) {
+  public static SemiserialBuiltinRef create(int index) {
     final SemiserialBuiltinRef out = new SemiserialBuiltinRef();
-    out.key = key;
+    out.index = index;
     return out;
   }
 

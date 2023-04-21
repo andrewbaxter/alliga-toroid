@@ -8,7 +8,7 @@ public interface BuiltinAutoExportable extends Exportable {
   default void postInit() {}
 
   @Override
-  default ExportableType exportableType() {
+  default Exporter exporter() {
     return StaticAutogen.autoExportableTypeLookup.get(getClass());
   }
 }

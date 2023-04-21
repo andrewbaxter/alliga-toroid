@@ -1,12 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
 
 public final class ArtifactId {
-  @BuiltinAutoExportableType.Param
+  @BuiltinAutoExporter.Param
   public long cacheId;
-  @BuiltinAutoExportableType.Param
+  @BuiltinAutoExporter.Param
   public int index;
 
   public ArtifactId() {}

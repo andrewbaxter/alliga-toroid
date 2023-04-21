@@ -79,7 +79,7 @@ public class ModuleCompiler implements ModuleResolver {
     MortarTargetModuleContext targetContext = new MortarTargetModuleContext(jvmClassName.value);
     JavaBytecodeBindingKey ectxKey = new JavaBytecodeBindingKey();
     final MortarDataType ectxType =
-        StaticAutogen.autoMortarHalfObjectTypes.get(Evaluation2Context.class);
+        StaticAutogen.autoMortarObjectTypes.get(Evaluation2Context.class);
     final EvaluationContext context = EvaluationContext.create(moduleContext, targetContext, true);
     EvaluateResult firstPass =
         Label.evaluateLabeled(
@@ -123,14 +123,14 @@ public class ModuleCompiler implements ModuleResolver {
     JavaClass preClass = new JavaClass(jvmClassName);
     for (ROPair<ObjId<Object>, String> e : Common.iterable(targetContext.transfers.iterator())) {
       preClass.defineStaticField(
-          e.second, StaticAutogen.autoMortarHalfObjectTypes.get(e.first.getClass()).type_jvmDesc());
+          e.second, StaticAutogen.autoMortarObjectTypes.get(e.first.getClass()).type_jvmDesc());
     }
     preClass.defineFunction(
         entryMethodName,
         JavaMethodDescriptor.fromParts(
             resultType.type_jvmDesc(), new TSList<>(ectxType.type_jvmDesc())),
         new JavaBytecodeSequence()
-            .add(((MortarTargetCode) firstPass.effect).e)
+            .add(MortarTargetCode.ex(firstPass.effect))
             .add(resultType.type_returnBytecode()),
         new TSList<>(ectxKey));
     Class klass = moduleContext.compileContext.loadRootClass(className, preClass.render());

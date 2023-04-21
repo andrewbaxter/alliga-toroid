@@ -74,7 +74,7 @@ public class MortarDataValueVariableDeferred extends MortarDataValue implements 
     ectx.recordEffect(usedValue.cleanup(context, location));
     return EvaluateResult.simple(
         NullValue.value,
-        new MortarTargetCode(code.set(((MortarTargetCode) ectx.build(null).effect).e)));
+        new MortarTargetCode(code.set(MortarTargetCode.ex(ectx.build(null).effect))));
   }
 
   @Override

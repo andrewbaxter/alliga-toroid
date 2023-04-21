@@ -1,8 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
@@ -15,86 +15,30 @@ import org.objectweb.asm.util.TraceMethodVisitor;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 
-import static org.objectweb.asm.Opcodes.AALOAD;
-import static org.objectweb.asm.Opcodes.AASTORE;
-import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.DLOAD;
-import static org.objectweb.asm.Opcodes.DRETURN;
 import static org.objectweb.asm.Opcodes.DSTORE;
 import static org.objectweb.asm.Opcodes.FLOAD;
-import static org.objectweb.asm.Opcodes.FRETURN;
 import static org.objectweb.asm.Opcodes.FSTORE;
 import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.GETSTATIC;
-import static org.objectweb.asm.Opcodes.IALOAD;
-import static org.objectweb.asm.Opcodes.IASTORE;
 import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.ICONST_1;
-import static org.objectweb.asm.Opcodes.ICONST_2;
-import static org.objectweb.asm.Opcodes.ICONST_3;
-import static org.objectweb.asm.Opcodes.ICONST_4;
-import static org.objectweb.asm.Opcodes.ICONST_5;
-import static org.objectweb.asm.Opcodes.ICONST_M1;
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.IRETURN;
 import static org.objectweb.asm.Opcodes.ISTORE;
-import static org.objectweb.asm.Opcodes.LCONST_0;
-import static org.objectweb.asm.Opcodes.LCONST_1;
 import static org.objectweb.asm.Opcodes.LLOAD;
-import static org.objectweb.asm.Opcodes.LRETURN;
 import static org.objectweb.asm.Opcodes.LSTORE;
 import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.objectweb.asm.Opcodes.PUTSTATIC;
-import static org.objectweb.asm.Opcodes.RETURN;
 
 public class JavaBytecodeUtils {
-  public static final JavaBytecode boxBool = box(JavaDataDescriptor.BOOL, JavaInternalName.BOXED_BOOL);
-  public static final JavaBytecode boxByte = box(JavaDataDescriptor.BYTE, JavaInternalName.BOXED_BYTE);
-  public static final JavaBytecode boxInt = box(JavaDataDescriptor.INT, JavaInternalName.BOXED_INT);
-  public static final JavaBytecode arrayLoadObj = inst(AALOAD);
-  public static final JavaBytecode arrayStoreObj = inst(AASTORE);
-  public static final JavaBytecode arrayLoadInt = inst(IALOAD);
-  public static final JavaBytecode arrayStoreInt = inst(IASTORE);
-  public static final JavaBytecode dup = inst(Opcodes.DUP);
-  public static final JavaBytecode pop = inst(Opcodes.POP);
-  public static final JavaBytecode arrayStoreLong = inst(Opcodes.LASTORE);
-  public static final JavaBytecode arrayLoadLong = inst(Opcodes.LALOAD);
-  public static final JavaBytecode arrayStoreShort = inst(Opcodes.SASTORE);
-  public static final JavaBytecode arrayLoadShort = inst(Opcodes.SALOAD);
-  public static final JavaBytecode arrayStoreByteBool = inst(Opcodes.BASTORE);
-  public static final JavaBytecode arrayLoadByteBool = inst(Opcodes.BALOAD);
-  public static final JavaBytecode arrayStoreChar = inst(Opcodes.CASTORE);
-  public static final JavaBytecode arrayLoadChar = inst(Opcodes.CALOAD);
-  public static final JavaBytecode arrayStoreFloat = inst(Opcodes.FASTORE);
-  public static final JavaBytecode arrayLoadFloat = inst(Opcodes.FALOAD);
-  public static final JavaBytecode arrayStoreDouble = inst(Opcodes.DASTORE);
-  public static final JavaBytecode arrayLoadDouble = inst(Opcodes.DALOAD);
-  public static final JavaBytecode literalIntM1 = inst(ICONST_M1);
-  public static final JavaBytecode literalInt0 = inst(ICONST_0);
-  public static final JavaBytecode literalInt1 = inst(ICONST_1);
-  public static final JavaBytecode literalInt2 = inst(ICONST_2);
-  public static final JavaBytecode literalInt3 = inst(ICONST_3);
-  public static final JavaBytecode literalInt4 = inst(ICONST_4);
-  public static final JavaBytecode literalInt5 = inst(ICONST_5);
-  public static final JavaBytecode literalLong0 = inst(LCONST_0);
-  public static final JavaBytecode literalLong1 = inst(LCONST_1);
-  public static final JavaBytecode returnVoid = inst(RETURN);
-  public static final JavaBytecode returnIntShortByteBool = inst(IRETURN);
-  public static final JavaBytecode returnLong = inst(LRETURN);
-  public static final JavaBytecode returnFloat = inst(FRETURN);
-  public static final JavaBytecode returnDouble = inst(DRETURN);
-  public static final JavaBytecode returnObj = inst(ARETURN);
-  public static JavaBytecode literalNull = inst(ACONST_NULL);
-
   public static boolean empty(JavaBytecode e) {
     if (e == null) {
       return true;
@@ -123,7 +67,7 @@ public class JavaBytecodeUtils {
       code.add(JavaBytecodeLineNumber.create(location));
     }
     code.add(new JavaBytecodeInstructionObj(new TypeInsnNode(NEW, klass.value)));
-    code.add(dup);
+    code.add(Global.JBC_DUP);
     code.add(arguments);
     code.add(
         new JavaBytecodeInstructionObj(
@@ -253,15 +197,15 @@ public class JavaBytecodeUtils {
   }
 
   public static JavaBytecode inst(int opcode) {
-    return new JavaBytecodeInstructionObj(new InsnNode(opcode));
+    return new JavaBytecodeInstructionInt(opcode);
   }
 
   public static JavaBytecode literalLong(long value) {
     if (value == 0) {
-      return literalLong0;
+      return Global.JBC_literalLong0;
     }
     if (value == 1) {
-      return literalLong1;
+      return Global.JBC_literalLong1;
     }
     return new JavaBytecodeInstructionObj(new LdcInsnNode(value));
   }
@@ -273,19 +217,19 @@ public class JavaBytecodeUtils {
   public static JavaBytecode literalIntShortByte(int value) {
     switch (value) {
       case -1:
-        return literalIntM1;
+        return Global.JBC_literalIntM1;
       case 0:
-        return literalInt0;
+        return Global.JBC_literalInt0;
       case 1:
-        return literalInt1;
+        return Global.JBC_literalInt1;
       case 2:
-        return literalInt2;
+        return Global.JBC_literalInt2;
       case 3:
-        return literalInt3;
+        return Global.JBC_literalInt3;
       case 4:
-        return literalInt4;
+        return Global.JBC_literalInt4;
       case 5:
-        return literalInt5;
+        return Global.JBC_literalInt5;
     }
     return new JavaBytecodeInstructionObj(new LdcInsnNode(value));
   }
@@ -313,13 +257,14 @@ public class JavaBytecodeUtils {
     Class prevAt = klass;
     Class at = klass.getNestHost();
     while (true) {
+      out.value.add(at.getSimpleName());
       if (at == prevAt) {
-        out.value.removeLast();
+          out.value.removeLast();
         out.value.add(at.getCanonicalName());
         break;
-      } else {
-        out.value.add(at.getSimpleName());
       }
+      prevAt = at;
+      at = at.getNestHost();
     }
     out.value.reverse();
     out.postInit();

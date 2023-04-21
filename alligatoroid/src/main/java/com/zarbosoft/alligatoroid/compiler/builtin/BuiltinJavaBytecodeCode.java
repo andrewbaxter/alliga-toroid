@@ -11,10 +11,10 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarObjectImplType;
 
-import static com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils.arrayLoadInt;
-import static com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils.arrayStoreInt;
-import static com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils.arrayLoadObj;
-import static com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils.arrayStoreObj;
+import static com.zarbosoft.alligatoroid.compiler.Global.JBC_ARRAY_LOAD_INT;
+import static com.zarbosoft.alligatoroid.compiler.Global.JBC_ARRAY_STORE_INT;
+import static com.zarbosoft.alligatoroid.compiler.Global.JBC_ARRAY_LOAD_OBJ;
+import static com.zarbosoft.alligatoroid.compiler.Global.JBC_ARRAY_STORE_OBJ;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.ILOAD;
@@ -22,7 +22,7 @@ import static org.objectweb.asm.Opcodes.ISTORE;
 
 @StaticAutogen.BuiltinAggregate
 public class BuiltinJavaBytecodeCode {
-  public static final MortarObjectImplType type = StaticAutogen.autoMortarHalfObjectTypes.get(JavaBytecode.class);
+  public final MortarObjectImplType type = StaticAutogen.autoMortarObjectTypes.get(JavaBytecode.class);
 
   public static JavaBytecode nop() {
     return null;
@@ -53,11 +53,11 @@ public class BuiltinJavaBytecodeCode {
   }
 
   public static JavaBytecode loadArrayObject() {
-    return arrayLoadObj;
+    return JBC_ARRAY_LOAD_OBJ;
   }
 
   public static JavaBytecode storeArrayObject() {
-    return arrayStoreObj;
+    return JBC_ARRAY_STORE_OBJ;
   }
 
   public static JavaBytecode loadInt(JavaBytecodeBindingKey key) {
@@ -69,11 +69,11 @@ public class BuiltinJavaBytecodeCode {
   }
 
   public static JavaBytecode loadArrayInt() {
-    return arrayLoadInt;
+    return JBC_ARRAY_LOAD_INT;
   }
 
   public static JavaBytecode storeArrayInt() {
-    return arrayStoreInt;
+    return JBC_ARRAY_STORE_INT;
   }
 
   public static JavaBytecode loadStaticField(

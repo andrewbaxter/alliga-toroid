@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.JumpKey;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
@@ -210,7 +211,7 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
                       catchStartLabels.get(n.key),
                       endLabel,
                       catchFinallyLabels.get(n.key),
-                      JavaInternalName.RUNTIME_EXCEPTION.value));
+                      Global.INTNAME_RUNTIME_EXCEPTION.value));
 
               if (catchIndex[0] < catchLastUses.get(n.key)) {
                 // Non-final (followed by early scope exit via jump)

@@ -4,6 +4,8 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.concurrent.ExecutionException;
 
 public class Unexpected extends Error.LocationError {
@@ -23,7 +25,11 @@ public class Unexpected extends Error.LocationError {
 
     @Override
     public String toString() {
-      return Format.format("An unexpected error occurred while processing: %s", exception);
+    StringWriter sw = new StringWriter();
+PrintWriter pw = new PrintWriter(sw);
+exception.printStackTrace(pw);
+String text = sw.toString();
+      return Format.format("An unexpected error occurred while processing: %s\n%s", exception, text);
     }
   }
 }

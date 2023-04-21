@@ -1,9 +1,9 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
@@ -34,7 +34,7 @@ public class MortarObjectImplType implements MortarDataTypeForGeneric {
 
   @Override
   public JavaBytecode type_returnBytecode() {
-    return JavaBytecodeUtils.returnObj;
+    return Global.JBC_returnObj;
   }
 
   @Override

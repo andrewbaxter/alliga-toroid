@@ -11,9 +11,9 @@ import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.CreatedFile;
 /** Fields in top level builtin -- reflected into builtin value */
 @StaticAutogen.BuiltinAggregate
 public class Builtin {
-  public static final Value _null = NullValue.value;
-  public static final NullType nullType = NullType.type;
-  public static final BuiltinJavaBytecode jbc = new BuiltinJavaBytecode();
+  public final Value _null = NullValue.value;
+  public final NullType nullType = NullType.type;
+  public final BuiltinJavaBytecode jbc = new BuiltinJavaBytecode();
 
   public static CreatedFile createFile(String path) {
     return new CreatedFile(path);

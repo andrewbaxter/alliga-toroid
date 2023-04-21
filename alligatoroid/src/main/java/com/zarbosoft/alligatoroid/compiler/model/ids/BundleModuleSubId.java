@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
 import com.zarbosoft.alligatoroid.compiler.model.error.ImportOutsideOwningBundleModule;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Format;
@@ -13,9 +13,9 @@ import java.nio.file.Paths;
 public final class BundleModuleSubId implements ModuleId, BuiltinAutoExportable {
   public static final String GRAPH_KEY_MODULE = "module";
   public static final String GRAPH_KEY_PATH = "path";
-  @BuiltinAutoExportableType.Param
+  @BuiltinAutoExporter.Param
   public String path;
-  @BuiltinAutoExportableType.Param
+  @BuiltinAutoExporter.Param
   public ModuleId module;
 
   public static BundleModuleSubId create(ModuleId module, String path) {

@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
@@ -12,12 +13,12 @@ public class MortarPrimitiveAllString implements MortarPrimitiveAll.Inner {
 
   @Override
   public JavaDataDescriptor jvmDesc() {
-    return JavaDataDescriptor.STRING;
+    return Global.DESC_STRING;
   }
 
   @Override
   public JavaBytecode returnBytecode() {
-    return JavaBytecodeUtils.returnObj;
+    return Global.JBC_returnObj;
   }
 
   @Override
@@ -32,12 +33,12 @@ public class MortarPrimitiveAllString implements MortarPrimitiveAll.Inner {
 
   @Override
   public JavaBytecode arrayLoadBytecode() {
-    return JavaBytecodeUtils.arrayLoadObj;
+    return Global.JBC_ARRAY_LOAD_OBJ;
   }
 
   @Override
   public JavaBytecode arrayStoreBytecode() {
-    return JavaBytecodeUtils.arrayStoreObj;
+    return Global.JBC_ARRAY_STORE_OBJ;
   }
 
   @Override

@@ -1,15 +1,16 @@
 package com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.ProtoType;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeBool;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeInt;
+import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeLong;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeROList;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeROMap;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeROOrderedMap;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeString;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.luxem.write.Writer;
@@ -55,6 +56,18 @@ public class AutoTreeMeta {
           writer.primitive(Integer.toString((Integer) object));
         }
       };
+  private static final AutoInfo longInfo =
+      new AutoInfo() {
+        @Override
+        public BaseStateSingle create(TSList<Error> errors, LuxemPathBuilder luxemPath) {
+          return PrototypeLong.instance.create(errors, luxemPath);
+        }
+
+        @Override
+        public void write(Writer writer, Object object) {
+          writer.primitive(Long.toString((Long) object));
+        }
+      };
   private static final AutoInfo boolInfo =
       new AutoInfo() {
         @Override
@@ -74,6 +87,7 @@ public class AutoTreeMeta {
     infos.put(String.class, stringInfo);
     infos.put(Integer.class, intInfo);
     infos.put(int.class, intInfo);
+    infos.put(long.class, longInfo);
     infos.put(Boolean.class, boolInfo);
     infos.put(boolean.class, boolInfo);
   }
@@ -103,7 +117,7 @@ public class AutoTreeMeta {
       }
       writer.arrayEnd();
     } else {
-        infos.get(rf.klass).write(writer, object);
+      infos.get(rf.klass).write(writer, object);
     }
   }
 
@@ -113,16 +127,20 @@ public class AutoTreeMeta {
   }
 
   public void scan(Class klass) {
+    /// 1. Primitives, special classes - already added to infos, skip out here
     if (infos.has(klass)) {
-        return;
+      return;
     }
+
     Object fallback = null;
     for (ROPair<Class, Object> pair : fallbacks) {
       if (pair.first.isAssignableFrom(klass)) {
-          fallback = pair.second;
+        fallback = pair.second;
       }
     }
     if (Modifier.isAbstract(klass.getModifiers()) || Modifier.isInterface(klass.getModifiers())) {
+      /// 2. Abstract/interfaces - treat as union of implementing classes
+      /// which must be listed in SERIAL_UNION
       Class[] elements;
       try {
         elements = (Class[]) klass.getField("SERIAL_UNION").get(null);
@@ -159,15 +177,16 @@ public class AutoTreeMeta {
         scan(element);
       }
     } else {
+      /// 3. Concrete class - scan fields as normal
       final AutoInfoClass info = new AutoInfoClass(this, klass);
       infos.put(klass, info);
       TSMap<String, ProtoType> fields = new TSMap<>();
       for (Field field : klass.getFields()) {
         if (Modifier.isStatic(field.getModifiers())) {
-            continue;
+          continue;
         }
-        if (field.getAnnotation(BuiltinAutoExportableType.Param.class) == null) {
-            continue;
+        if (field.getAnnotation(BuiltinAutoExporter.Param.class) == null) {
+          continue;
         }
         TypeInfo fieldInfo = TypeInfo.fromField(field);
         ProtoType prototype;

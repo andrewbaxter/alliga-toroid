@@ -4,7 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.language.Access;
 import com.zarbosoft.alligatoroid.compiler.model.language.Bind;
@@ -44,7 +44,7 @@ public abstract class LanguageElement implements BuiltinAutoExportable {
         Stage.class,
         Tuple.class,
       };
-  @BuiltinAutoExportableType.Param public Location id;
+  @BuiltinAutoExporter.Param public Location id;
   private Boolean hasLowerInSubtree;
 
   protected static boolean hasLowerInSubtreeList(ROList<?> elements) {

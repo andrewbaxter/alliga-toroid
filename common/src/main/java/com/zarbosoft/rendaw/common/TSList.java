@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 public class TSList<T> implements ROList<T> {
   private final List<T> values;
@@ -124,11 +126,11 @@ public class TSList<T> implements ROList<T> {
   public int longestMatch(ROList<T> other) {
     int end = size();
     if (other.size() < end) {
-        end = other.size();
+      end = other.size();
     }
     for (int i = 0; i < end; ++i) {
       if (!get(i).equals(other.get(i))) {
-          return i;
+        return i;
       }
     }
     return end;
@@ -171,10 +173,10 @@ public class TSList<T> implements ROList<T> {
   @Override
   public boolean equals(Object o) {
     if (this == o) {
-        return true;
+      return true;
     }
     if (o == null || getClass() != o.getClass()) {
-        return false;
+      return false;
     }
     TSList<?> tsList = (TSList<?>) o;
     return Objects.equals(values, tsList.values);
@@ -208,7 +210,7 @@ public class TSList<T> implements ROList<T> {
 
   public T removeLastOpt() {
     if (values.isEmpty()) {
-        return null;
+      return null;
     }
     return removeLast();
   }
@@ -216,7 +218,7 @@ public class TSList<T> implements ROList<T> {
   @Override
   public T lastOpt() {
     if (none()) {
-        return null;
+      return null;
     }
     return last();
   }
@@ -224,6 +226,11 @@ public class TSList<T> implements ROList<T> {
   @Override
   public boolean contains(T value) {
     return values.contains(value);
+  }
+
+  @Override
+  public T[] toArray(IntFunction<T[]> f) {
+    return values.toArray(f.apply(0)); // for some reason chooses wrong override when passing f directly
   }
 
   public void set(int index, T value) {

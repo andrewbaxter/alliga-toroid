@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.JumpKey;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
@@ -62,7 +63,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     javaBytecodeSequence.add(
         new JavaBytecodeInstructionObj(
             new TypeInsnNode(NEW, JavaBytecodeUtils.internalNameFromClass(TSList.class).value)));
-    javaBytecodeSequence.add(JavaBytecodeUtils.dup);
+    javaBytecodeSequence.add(Global.JBC_DUP);
     newTSListCode =
         javaBytecodeSequence.add(
             JavaBytecodeUtils.callConstructor(
@@ -81,7 +82,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                 "add",
                 JavaMethodDescriptor.fromParts(
                         JavaDataDescriptor.fromObjectClass(TSList.class),
-                        new TSList<>(JavaDataDescriptor.OBJECT))
+                        new TSList<>(Global.DESC_OBJECT))
                     .value,
                 false)));
     tsListAddCode = javaBytecodeSequence;
@@ -101,7 +102,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     if (argument instanceof LooseRecord) {
       TSList<Value> convertedValues = new TSList<>();
       for (ROPair<Object, EvaluateResult> e : ((LooseRecord) argument).data) {
-        code.add(((MortarTargetCode) e.second.effect).e);
+        code.add(MortarTargetCode.ex(e.second.effect));
         final Value convertedValue =
             convertFunctionArgument(context, location, code, e.second.value);
         if (convertedValue == ErrorValue.value) {
@@ -111,12 +112,12 @@ public class MortarTargetModuleContext implements TargetModuleContext {
         convertedValues.add(convertedValue);
       }
       for (Value value : new ReverseIterable<>(convertedValues)) {
-        code.add(((MortarTargetCode) value.cleanup(context, location)).e);
+        code.add(MortarTargetCode.ex(value.cleanup(context, location)));
       }
       return !bad;
     } else {
       final Value convertedValue = convertFunctionArgument(context, location, code, argument);
-      code.add(((MortarTargetCode) convertedValue.cleanup(context, location)).e);
+      code.add((MortarTargetCode.ex(convertedValue.cleanup(context, location))));
       return convertedValue != ErrorValue.value;
     }
   }
@@ -129,7 +130,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       return ErrorValue.value;
     }
     ectx.recordEffect(((MortarDataValue) value).consume(context, location));
-    code.add(((MortarTargetCode) ectx.build(null).effect).e);
+    code.add(MortarTargetCode.ex(ectx.build(null).effect));
     return value;
   }
 
@@ -398,10 +399,10 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       if (chunk == null) {
         continue;
       }
-      if (!(chunk instanceof JavaBytecode)) {
+      if (!(chunk instanceof MortarTargetCode)) {
         throw new Assertion();
       }
-      code.add((JavaBytecode) chunk);
+      code.add(MortarTargetCode.ex(chunk));
     }
     return new MortarTargetCode(code);
   }

@@ -4,5 +4,5 @@ public interface Exportable  {
   /** Called after deferred initialization in graph desemiserialization. */
   default void postInit() {}
 
-  ExportableType exportableType();
+  Exporter exporter();
 }

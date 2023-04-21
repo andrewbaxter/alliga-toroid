@@ -1,7 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.ExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.Exporter;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialBuiltinRef;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialExportableRef;
@@ -61,7 +61,7 @@ public class ModuleCompileContext {
 
           @Override
           public Object handleBuiltinRef(SemiserialBuiltinRef s) {
-            return StaticAutogen.singletonExportableLookup.get(s.key);
+            return StaticAutogen.singletonExportableLookup.get(s.index);
           }
         });
   }
@@ -78,7 +78,7 @@ public class ModuleCompileContext {
     // Only identity exportables get flattened into artifacts - all others are either builtin (no
     // artifact)
     // or inline.
-    TSList<ROPair<ExportableType, ROPair<ArtifactId, SemiserialExportable>>> stratum =
+    TSList<ROPair<Exporter, ROPair<ArtifactId, SemiserialExportable>>> stratum =
         new TSList<>();
     do {
       stratum.clear();
@@ -88,7 +88,7 @@ public class ModuleCompileContext {
       while (iter.hasNext()) {
         final ROPair<ArtifactId, SemiserialExportable> pair = iter.next();
         final SemiserialExportable semiValue = pair.second;
-        ExportableType type = (ExportableType) lookupRef(semiValue.type);
+        Exporter type = (Exporter) lookupRef(semiValue.type);
         if (type != null) {
           stratum.add(new ROPair<>(type, pair));
           iter.remove();
@@ -97,7 +97,7 @@ public class ModuleCompileContext {
 
       // Desemiserialize this stratum
       Desemiserializer typeDesemiserializer = new Desemiserializer();
-      for (ROPair<ExportableType, ROPair<ArtifactId, SemiserialExportable>> candidate : stratum) {
+      for (ROPair<Exporter, ROPair<ArtifactId, SemiserialExportable>> candidate : stratum) {
         final Object value =
             candidate.first.graphDesemiserializeBody(
                 this, typeDesemiserializer, candidate.second.second.value);

@@ -12,8 +12,8 @@ import com.zarbosoft.rendaw.common.ROList;
 
 @StaticAutogen.BuiltinAggregate
 public class BuiltinJavaBytecode {
-  public static final BuiltinJavaBytecodeCode code = null;
-  public static final BuiltinJavaBytecodeDescriptors desc = null;
+  public final BuiltinJavaBytecodeCode code = new BuiltinJavaBytecodeCode();
+  public final BuiltinJavaBytecodeDescriptors desc = new BuiltinJavaBytecodeDescriptors();
 
   public static JavaBytecodeBindingKey bindingKey() {
     return new JavaBytecodeBindingKey();

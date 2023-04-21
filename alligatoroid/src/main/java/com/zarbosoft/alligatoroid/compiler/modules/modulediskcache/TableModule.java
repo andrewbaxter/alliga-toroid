@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.modules.modulediskcache;
 
+import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -8,9 +9,12 @@ public class TableModule {
   @DatabaseField(generatedId = true)
   public long id;
 
-  @DatabaseField(unique = true)
+  @DatabaseField(unique = true, dataType = DataType.BYTE_ARRAY)
   public byte[] spec;
 
-  @DatabaseField public byte[] outputHash;
-  @DatabaseField public byte[] output;
+  @DatabaseField(dataType = DataType.BYTE_ARRAY)
+  public byte[] outputHash;
+
+  @DatabaseField(dataType = DataType.BYTE_ARRAY)
+  public byte[] output;
 }

@@ -29,22 +29,22 @@ public class Semiserializer {
       ModuleCompileContext moduleContext, Object value, Location location) {
     TSList<Error.PreError> errors = new TSList<>();
     Semiserializer s = new Semiserializer(errors, moduleContext.backArtifactLookup);
-    ExportableType exportableType = null;
+    Exporter exporter = null;
     if (value instanceof Exportable) {
-      exportableType = ((Exportable) value).exportableType();
+      exporter = ((Exportable) value).exporter();
     }
-    if (exportableType == null) {
-      ExportableType et0 = StaticAutogen.detachedExportableTypeLookup.get(value.getClass());
+    if (exporter == null) {
+      Exporter et0 = StaticAutogen.detachedExportableTypeLookup.get(value.getClass());
       if (et0 != null) {
-        exportableType = et0;
+        exporter = et0;
       }
     }
-    if (exportableType == null) {
+    if (exporter == null) {
       moduleContext.errors.add(new ExportNotSupported(location));
       return null;
     }
     SemiserialRef out =
-        exportableType.semiserializeValue(
+        exporter.semiserializeValue(
             moduleContext.importCacheId, s, new TSList<>(), new TSList<>(), value);
     if (errors.some()) {
       for (Error.PreError error : errors) {

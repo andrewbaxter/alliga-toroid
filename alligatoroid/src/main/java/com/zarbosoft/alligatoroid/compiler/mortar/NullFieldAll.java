@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
@@ -12,7 +13,8 @@ public class NullFieldAll
     implements MortarObjectField,
         MortarObjectFieldstate,
         MortarRecordField,
-        MortarRecordFieldstate {
+        MortarRecordFieldstate,
+        BuiltinAutoExportable {
   public static final NullFieldAll inst = new NullFieldAll();
 
   private NullFieldAll() {}

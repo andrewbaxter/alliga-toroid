@@ -6,7 +6,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
 import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
@@ -36,8 +36,8 @@ import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.a
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class BundleValue implements Value, BuiltinAutoExportable {
-  @BuiltinAutoExportableType.Param public String root;
-  @BuiltinAutoExportableType.Param public ImportId id;
+  @BuiltinAutoExporter.Param public String root;
+  @BuiltinAutoExporter.Param public ImportId id;
 
   public static BundleValue create(ImportId id, String root) {
     final BundleValue out = new BundleValue();

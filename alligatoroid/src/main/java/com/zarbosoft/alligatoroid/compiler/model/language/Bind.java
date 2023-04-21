@@ -4,7 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
@@ -13,9 +13,9 @@ import com.zarbosoft.rendaw.common.ROPair;
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstKey;
 
 public class Bind extends LanguageElement {
-  @BuiltinAutoExportableType.Param
+  @BuiltinAutoExporter.Param
   public LanguageElement key;
-  @BuiltinAutoExportableType.Param
+  @BuiltinAutoExporter.Param
   public LanguageElement value;
 
   @Override

@@ -13,9 +13,9 @@ public class AutoSemiUtils {
       Object data,
       ROList<Object> path,
       ROList<String> accessPath) {
-    ExportableType type = null;
+    Exporter type = null;
     if (data instanceof Exportable) {
-      type = ((Exportable) data).exportableType();
+      type = ((Exportable) data).exporter();
     }
     if (type == null) {
       type = StaticAutogen.detachedExportableTypeLookup.getOpt(data.getClass());

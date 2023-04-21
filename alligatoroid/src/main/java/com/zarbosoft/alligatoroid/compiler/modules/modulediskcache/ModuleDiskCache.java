@@ -32,6 +32,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -79,7 +80,11 @@ public class ModuleDiskCache implements ModuleResolver {
                     // TODO warn properly (logger/compile context)
                     System.out.format("DEBUG failed to get cache version: %s", e);
                   }
-                  Files.delete(cachePath);
+                  try {
+                      Files.delete(cachePath);
+                  } catch (NoSuchFileException e) {
+                      // nop
+                  }
                   tables = new Tables(cachePath);
                   TableUtils.createTable(tables.version);
                   tables.version.create(TableVersion.create(currentVersion));

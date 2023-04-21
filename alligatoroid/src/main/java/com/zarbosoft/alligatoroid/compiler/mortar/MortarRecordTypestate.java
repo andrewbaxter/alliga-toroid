@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
@@ -169,7 +170,7 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
       ectx.recordEffect(usedValue.consume(context, location));
       usedValues.add(usedValue);
       ectx.recordEffect(new MortarTargetCode(JavaBytecodeUtils.literalIntShortByte(i)));
-      ectx.recordEffect(new MortarTargetCode(JavaBytecodeUtils.arrayStoreObj));
+      ectx.recordEffect(new MortarTargetCode(Global.JBC_ARRAY_STORE_OBJ));
       fields.add(
           new ROPair<>(
               data.get(i).first,

@@ -2,8 +2,9 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
@@ -23,14 +24,14 @@ import com.zarbosoft.rendaw.common.TSList;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-import static com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen.autoMortarHalfObjectTypes;
-import static com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen.primitivePrototypeLookup;
-import static com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen.prototypeLanguageElement;
-import static com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen.prototypeLocation;
+import static com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen.autoMortarObjectTypes;
+import static com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen.mortarPrimitiveTypes;
+import static com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen.typeLanguageElement;
+import static com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen.typeLocation;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Stage extends LanguageElement {
-  @BuiltinAutoExportableType.Param public LanguageElement child;
+  @BuiltinAutoExporter.Param public LanguageElement child;
 
   /**
    * @param context
@@ -49,9 +50,9 @@ public class Stage extends LanguageElement {
     if (element instanceof Lower) {
       final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
       Value val = ectx.evaluate(((Lower) element).child);
-      if (val.canCastTo(context, prototypeLanguageElement)) {
+      if (val.canCastTo(context, typeLanguageElement)) {
         // Lowering language value - use directly to interpret in next layer
-        return ectx.build(ectx.record(val.castTo(context, location, prototypeLanguageElement)));
+        return ectx.build(ectx.record(val.castTo(context, location, typeLanguageElement)));
 
       } else {
         // Some other variable value - wrap in Wrap to embed in language tree
@@ -59,11 +60,9 @@ public class Stage extends LanguageElement {
             new MortarTargetCode(
                 new JavaBytecodeSequence()
                     .add(
-                        ((MortarTargetCode)
-                                ectx.record(val.vary(context, location)).consume(context, location))
-                            .e)
+                        MortarTargetCode.ex(ectx.record(val.vary(context, location)).consume(context, location)))
                     .add(JavaBytecodeUtils.callStaticMethodReflect(Wrap.class, "create"))));
-        return ectx.build(autoMortarHalfObjectTypes.get(Wrap.class).type_stackAsValue());
+        return ectx.build(autoMortarObjectTypes.get(Wrap.class).type_stackAsValue());
       }
     }
 
@@ -85,18 +84,18 @@ public class Stage extends LanguageElement {
                       klassJvmName,
                       JavaMethodDescriptor.fromConstructorParts(ROList.empty),
                       null))
-              .add(JavaBytecodeUtils.dup);
+              .add(Global.JBC_DUP);
 
       boolean bad = false;
       for (Field field : klass.getFields()) {
         if (Modifier.isStatic(field.getModifiers())) {
           continue;
         }
-        if (field.getAnnotation(BuiltinAutoExportableType.Param.class) == null) {
+        if (field.getAnnotation(BuiltinAutoExporter.Param.class) == null) {
           continue;
         }
         JavaDataDescriptor fieldDesc;
-        code.add(JavaBytecodeUtils.dup);
+        code.add(Global.JBC_DUP);
 
         if (ROList.class.isAssignableFrom(field.getType())) {
           // Field type 1: List of language elements
@@ -115,7 +114,7 @@ public class Stage extends LanguageElement {
               continue;
             }
             code.add(
-                ((MortarTargetCode) ((MortarDataValue) subValue).consume(context, location)).e);
+                MortarTargetCode.ex(((MortarDataValue) subValue).consume(context, location)));
             code.add(MortarTargetModuleContext.tsListAddCode);
           }
           if (listBad) {
@@ -142,14 +141,14 @@ public class Stage extends LanguageElement {
             // Field case 3: Location
             evaluation =
                 EvaluateResult.pure(
-                    prototypeLocation.type_constAsValue(
+                    typeLocation.type_constAsValue(
                         uncheck(() -> klass.getField("id").get(element))));
 
           } else {
             // Field case 4: Primitive
             evaluation =
                 EvaluateResult.pure(
-                    primitivePrototypeLookup
+                    mortarPrimitiveTypes
                         .get(field.getType())
                         .type_constAsValue(uncheck(() -> field.get(element))));
           }
@@ -160,7 +159,7 @@ public class Stage extends LanguageElement {
             bad = true;
             continue;
           }
-          code.add(((MortarTargetCode) ((MortarDataValue) val).consume(context, location)).e);
+          code.add(MortarTargetCode.ex(((MortarDataValue) val).consume(context, location)));
         }
 
         code.add(JavaBytecodeUtils.setField(-1, klassJvmName, field.getName(), fieldDesc));
@@ -171,18 +170,18 @@ public class Stage extends LanguageElement {
 
       ectx.recordEffect(
           new MortarTargetCode(
-              code.add(JavaBytecodeUtils.dup)
+              code.add(Global.JBC_DUP)
                   .add(
                       JavaBytecodeUtils.callInterfaceMthod(
                           -1,
                           JavaBytecodeUtils.internalNameFromClass(Exportable.class),
                           "postInit",
-                          JavaMethodDescriptor.fromParts(JavaDataDescriptor.VOID, ROList.empty)))));
-      return ectx.build(prototypeLanguageElement.type_stackAsValue());
+                          JavaMethodDescriptor.fromParts(Global.DESC_VOID, ROList.empty)))));
+      return ectx.build(typeLanguageElement.type_stackAsValue());
     }
 
     // 3. Subtree has no lower, transfer directly (stays constant)
-    return EvaluateResult.pure(prototypeLanguageElement.type_constAsValue(element));
+    return EvaluateResult.pure(typeLanguageElement.type_constAsValue(element));
   }
 
   @Override

@@ -1,36 +1,21 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.Utils;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
 import com.zarbosoft.rendaw.common.Assertion;
 
 import java.util.Objects;
 
 /** Like La/b/c; */
-public class JavaDataDescriptor {
-  public static final JavaDataDescriptor BOOL = new JavaDataDescriptor("Z");
-  public static final JavaDataDescriptor LONG = new JavaDataDescriptor("J");
-  public static final JavaDataDescriptor INT = new JavaDataDescriptor("I");
-  public static final JavaDataDescriptor FLOAT = new JavaDataDescriptor("F");
-  public static final JavaDataDescriptor DOUBLE = new JavaDataDescriptor("D");
-  public static final JavaDataDescriptor BYTE = new JavaDataDescriptor("B");
-  public static final JavaDataDescriptor BYTE_ARRAY = BYTE.array();
-  public static final JavaDataDescriptor CHAR = new JavaDataDescriptor("C");
-  public static final JavaDataDescriptor SHORT = new JavaDataDescriptor("S");
-  public static final JavaDataDescriptor VOID = new JavaDataDescriptor("V");
-  public static final JavaDataDescriptor OBJECT = JavaDataDescriptor.fromJVMName(JavaInternalName.OBJECT);
-  public static final JavaDataDescriptor STRING = JavaDataDescriptor.fromJVMName(JavaInternalName.STRING);
-  public static final JavaDataDescriptor BOXED_BOOL = JavaDataDescriptor.fromObjectClass(Boolean.class);
-  public static final JavaDataDescriptor BOXED_INT = JavaDataDescriptor.fromObjectClass(Integer.class);
-  public static final JavaDataDescriptor BOXED_BYTE = JavaDataDescriptor.fromObjectClass(Byte.class);
+public class JavaDataDescriptor implements BuiltinAutoExportable {
+  @BuiltinAutoExporter.Param public String value;
 
-  public final String value;
-
-  private JavaDataDescriptor(String value) {
-    this.value = value;
-  }
+  public JavaDataDescriptor() {}
 
   public static JavaDataDescriptor fromJVMName(JavaInternalName name) {
-    return new JavaDataDescriptor("L" + name + ";");
+    return create("L" + name + ";");
   }
 
   public static JavaDataDescriptor fromObjectClass(Class klass) {
@@ -39,33 +24,39 @@ public class JavaDataDescriptor {
 
   public static JavaDataDescriptor fromClass(Class t) {
     if (t == int.class) {
-        return INT;
+      return Global.DESC_INT;
     }
     if (t == byte.class) {
-        return BYTE;
+      return Global.DESC_BYTE;
     }
     if (t == char.class) {
-        return CHAR;
+      return Global.DESC_CHAR;
     }
     if (t == short.class) {
-        return SHORT;
+      return Global.DESC_SHORT;
     }
     if (t == long.class) {
-        return LONG;
+      return Global.DESC_LONG;
     }
     if (t == boolean.class) {
-        return BOOL;
+      return Global.DESC_BOOL;
     }
     if (t == float.class) {
-        return FLOAT;
+      return Global.DESC_FLOAT;
     }
     if (t == double.class) {
-        return DOUBLE;
+      return Global.DESC_DOUBLE;
     }
     if (t.isPrimitive()) {
-        throw new Assertion();
+      throw new Assertion();
     }
     return fromObjectClass(t);
+  }
+
+  public static JavaDataDescriptor create(String value) {
+    final JavaDataDescriptor out = new JavaDataDescriptor();
+    out.value = value;
+    return out;
   }
 
   public String toString() {
@@ -73,7 +64,7 @@ public class JavaDataDescriptor {
   }
 
   public JavaDataDescriptor array() {
-    return new JavaDataDescriptor("[" + value);
+    return create("[" + value);
   }
 
   @Override

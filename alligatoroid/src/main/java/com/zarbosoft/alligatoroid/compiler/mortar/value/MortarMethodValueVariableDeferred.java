@@ -16,7 +16,6 @@ import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 
-import static com.zarbosoft.alligatoroid.compiler.builtin.Builtin.nullType;
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext.convertFunctionArgumentRoot;
 
 public class MortarMethodValueVariableDeferred implements Value {
@@ -46,7 +45,7 @@ public class MortarMethodValueVariableDeferred implements Value {
             funcInfo.name,
             JavaMethodDescriptor.fromParts(
                 funcInfo.returnType.type_jvmDesc(), funcInfo.argDescriptor())));
-    if (funcInfo.returnType == nullType) {
+    if (funcInfo.returnType == NullType.type) {
       return EvaluateResult.simple(NullValue.value, new MortarTargetCode(code));
     } else {
       return EvaluateResult.simple(

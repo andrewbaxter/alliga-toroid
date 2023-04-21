@@ -2,6 +2,7 @@ package com.zarbosoft.rendaw.common;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.IntFunction;
 
 public interface ROList<T> extends Iterable<T> {
   @SuppressWarnings("rawtypes")
@@ -48,4 +49,6 @@ public interface ROList<T> extends Iterable<T> {
   T lastOpt();
 
   boolean contains(T value);
+
+    T[] toArray(IntFunction<T[]> f);
 }

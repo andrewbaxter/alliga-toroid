@@ -4,7 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.UnreachableValue;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
@@ -15,7 +15,7 @@ import com.zarbosoft.rendaw.common.ReverseIterable;
 import java.util.function.Function;
 
 public class Scope extends LanguageElement {
-  @BuiltinAutoExportableType.Param public LanguageElement inner;
+  @BuiltinAutoExporter.Param public LanguageElement inner;
 
   public static Scope create(Location id, LanguageElement inner) {
     final Scope scope = new Scope();

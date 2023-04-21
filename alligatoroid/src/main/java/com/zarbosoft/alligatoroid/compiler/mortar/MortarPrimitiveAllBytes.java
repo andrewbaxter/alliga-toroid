@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeInstructionObj;
@@ -18,12 +19,12 @@ public class MortarPrimitiveAllBytes implements MortarPrimitiveAll.Inner {
 
   @Override
   public JavaDataDescriptor jvmDesc() {
-    return JavaDataDescriptor.BYTE_ARRAY;
+    return Global.DESC_BYTE_ARRAY;
   }
 
   @Override
   public JavaBytecode returnBytecode() {
-    return JavaBytecodeUtils.returnObj;
+    return Global.JBC_returnObj;
   }
 
   @Override
@@ -38,12 +39,12 @@ public class MortarPrimitiveAllBytes implements MortarPrimitiveAll.Inner {
 
   @Override
   public JavaBytecode arrayLoadBytecode() {
-    return JavaBytecodeUtils.arrayLoadObj;
+    return Global.JBC_ARRAY_LOAD_OBJ;
   }
 
   @Override
   public JavaBytecode arrayStoreBytecode() {
-    return JavaBytecodeUtils.arrayStoreObj;
+    return Global.JBC_ARRAY_STORE_OBJ;
   }
 
   @Override
@@ -54,10 +55,10 @@ public class MortarPrimitiveAllBytes implements MortarPrimitiveAll.Inner {
     out.add(new JavaBytecodeInstructionObj(new IntInsnNode(NEWARRAY, T_BYTE)));
     for (int i = 0; i < arr.length; i++) {
       final byte b = arr[i];
-      out.add(JavaBytecodeUtils.dup);
+      out.add(Global.JBC_DUP);
       out.add(JavaBytecodeUtils.literalIntShortByte(i));
       out.add(JavaBytecodeUtils.literalIntShortByte(b));
-      out.add(JavaBytecodeUtils.arrayStoreInt);
+      out.add(Global.JBC_ARRAY_STORE_INT);
     }
     return out;
   }

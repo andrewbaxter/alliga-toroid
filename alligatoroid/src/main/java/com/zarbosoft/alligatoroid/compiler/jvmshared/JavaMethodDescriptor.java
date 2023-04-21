@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.rendaw.common.ROList;
 
 public class JavaMethodDescriptor {
@@ -11,7 +12,7 @@ public class JavaMethodDescriptor {
 
   public static JavaMethodDescriptor fromConstructorParts(
       ROList<JavaDataDescriptor> argDescriptors) {
-    return fromParts(JavaDataDescriptor.VOID, argDescriptors);
+    return fromParts(Global.DESC_VOID, argDescriptors);
   }
 
   public static JavaMethodDescriptor fromParts(

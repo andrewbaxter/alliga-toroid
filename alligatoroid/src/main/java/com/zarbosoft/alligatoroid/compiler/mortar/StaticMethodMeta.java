@@ -91,14 +91,14 @@ public class StaticMethodMeta {
     JavaClass preClass = new JavaClass(jvmClassName);
     for (ROPair<ObjId<Object>, String> e : Common.iterable(targetContext.transfers.iterator())) {
       preClass.defineStaticField(
-          e.second, StaticAutogen.autoMortarHalfObjectTypes.get(e.first.getClass()).type_jvmDesc());
+          e.second, StaticAutogen.autoMortarObjectTypes.get(e.first.getClass()).type_jvmDesc());
     }
     preClass.defineFunction(
         entryMethodName,
         JavaMethodDescriptor.fromParts(
             funcInfo.returnType.type_jvmDesc(), funcInfo.argDescriptor()),
         new JavaBytecodeSequence()
-            .add(((MortarTargetCode) firstPass.effect).e)
+            .add(MortarTargetCode.ex(firstPass.effect))
             .add(funcInfo.returnType.type_returnBytecode()),
         initialIndexes);
 

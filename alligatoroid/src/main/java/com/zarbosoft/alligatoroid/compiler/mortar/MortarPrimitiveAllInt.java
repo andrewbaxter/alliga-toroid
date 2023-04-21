@@ -1,11 +1,11 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
@@ -17,12 +17,12 @@ public class MortarPrimitiveAllInt implements MortarPrimitiveAll.Inner {
 
   @Override
   public JavaDataDescriptor jvmDesc() {
-    return JavaDataDescriptor.INT;
+    return Global.DESC_INT;
   }
 
   @Override
   public JavaBytecode returnBytecode() {
-    return JavaBytecodeUtils.returnIntShortByteBool;
+    return Global.JBC_returnIntShortByteBool;
   }
 
   @Override
@@ -37,12 +37,12 @@ public class MortarPrimitiveAllInt implements MortarPrimitiveAll.Inner {
 
   @Override
   public JavaBytecode arrayLoadBytecode() {
-    return JavaBytecodeUtils.arrayLoadInt;
+    return Global.JBC_ARRAY_LOAD_INT;
   }
 
   @Override
   public JavaBytecode arrayStoreBytecode() {
-    return JavaBytecodeUtils.arrayStoreInt;
+    return Global.JBC_ARRAY_STORE_INT;
   }
 
   @Override
@@ -53,22 +53,22 @@ public class MortarPrimitiveAllInt implements MortarPrimitiveAll.Inner {
   @Override
   public JavaBytecode fromObj() {
     return new JavaBytecodeSequence()
-        .add(JavaBytecodeUtils.cast(JavaDataDescriptor.BOXED_INT))
+        .add(JavaBytecodeUtils.cast(Global.DESC_BOXED_INT))
         .add(
             JavaBytecodeUtils.callMethod(
                 -1,
-                JavaInternalName.BOXED_INT,
+                Global.INTNAME_BOXED_INT,
                 "integerValue",
-                JavaMethodDescriptor.fromParts(JavaDataDescriptor.INT, ROList.empty)));
+                JavaMethodDescriptor.fromParts(Global.DESC_INT, ROList.empty)));
   }
 
   @Override
   public JavaBytecode toObj() {
     return JavaBytecodeUtils.callStaticMethod(
         -1,
-        JavaInternalName.BOXED_INT,
+        Global.INTNAME_BOXED_INT,
         "valueOf",
         JavaMethodDescriptor.fromParts(
-            JavaDataDescriptor.BOXED_INT, TSList.of(JavaDataDescriptor.INT)));
+            Global.DESC_BOXED_INT, TSList.of(Global.DESC_INT)));
   }
 }

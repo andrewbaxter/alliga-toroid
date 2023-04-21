@@ -3,8 +3,9 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinSingletonExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeLineNumber;
@@ -18,7 +19,6 @@ import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 import com.zarbosoft.rendaw.common.Assertion;
 
-import static com.zarbosoft.alligatoroid.compiler.builtin.Builtin.nullType;
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext.convertFunctionArgumentRoot;
 
 /**
@@ -26,7 +26,7 @@ import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleConte
  * call the static method.
  */
 public class MortarStaticMethodTypestate
-    implements BuiltinSingletonExportable, MortarDataTypestateForGeneric, MortarDataTypeForGeneric {
+    implements BuiltinAutoExportable, MortarDataTypestateForGeneric, MortarDataTypeForGeneric {
   // TODO move method type info into the type, check during type check
   public static final MortarStaticMethodTypestate typestate = new MortarStaticMethodTypestate();
   public static final JavaDataDescriptor DESC =
@@ -54,7 +54,7 @@ public class MortarStaticMethodTypestate
             funcInfo.name,
             JavaMethodDescriptor.fromParts(
                 funcInfo.returnType.type_jvmDesc(), funcInfo.argDescriptor())));
-    if (funcInfo.returnType == nullType) {
+    if (funcInfo.returnType == NullType.type) {
       return EvaluateResult.simple(NullValue.value, new MortarTargetCode(code));
     } else {
       return EvaluateResult.simple(
@@ -165,7 +165,7 @@ public class MortarStaticMethodTypestate
 
   @Override
   public JavaBytecode type_returnBytecode() {
-    return JavaBytecodeUtils.returnObj;
+    return Global.JBC_returnObj;
   }
 
   @Override

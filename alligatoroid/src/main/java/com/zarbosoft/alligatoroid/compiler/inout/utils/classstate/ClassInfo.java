@@ -10,7 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateArray;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateInt;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateRecord;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateString;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportableType;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto.TypeInfo;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
@@ -44,7 +44,7 @@ public class ClassInfo {
       if (Modifier.isStatic(field0.getModifiers())) {
           continue;
       }
-      if (field0.getAnnotation(BuiltinAutoExportableType.Param.class) == null) {
+      if (field0.getAnnotation(BuiltinAutoExporter.Param.class) == null) {
           continue;
       }
       final TypeInfo field = TypeInfo.fromField(field0);

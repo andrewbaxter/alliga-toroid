@@ -1,18 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
-import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
-import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
-import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
-import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
-import com.zarbosoft.rendaw.common.Assertion;
 
-public class NullType implements MortarDataType {
+public class NullType implements MortarDataType, BuiltinAutoExportable {
   public static final NullType type = new NullType();
 
   private NullType() {}
@@ -43,11 +39,11 @@ public class NullType implements MortarDataType {
   }
 
   public static JavaBytecode returnBytecode() {
-    return JavaBytecodeUtils.returnVoid;
+    return Global.JBC_returnVoid;
   }
 
   public static JavaDataDescriptor jvmDesc() {
-    return JavaDataDescriptor.VOID;
+    return Global.DESC_VOID;
   }
 
   @Override

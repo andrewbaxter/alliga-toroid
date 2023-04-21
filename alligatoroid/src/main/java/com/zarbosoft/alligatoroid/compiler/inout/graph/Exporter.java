@@ -4,6 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
 import com.zarbosoft.alligatoroid.compiler.model.error.TypeDependencyLoopPre;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
+import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -13,7 +14,7 @@ import com.zarbosoft.rendaw.common.TSList;
  * level array of artifacts. Multiple referrers will refer to the same artifact (it only gets
  * semiserialized once)
  */
-public interface ExportableType extends Exportable {
+public interface Exporter extends Exportable {
   Object graphDesemiserializeBody(
       ModuleCompileContext context, Desemiserializer typeDesemiserializer, SemiserialSubvalue data);
 
@@ -25,13 +26,7 @@ public interface ExportableType extends Exportable {
         new SemiserialSubvalue.DefaultDispatcher<Object>() {
           @Override
           public Object handleUnknown(SemiserialRef s) {
-            return s.dispatchExportable(
-                new SemiserialRef.DefaultDispatcher<Object>() {
-                  @Override
-                  public Object handleExportableRef(SemiserialExportableRef s) {
-                    return context.lookupRef(s);
-                  }
-                });
+            return context.lookupRef(s);
           }
         });
   }
@@ -43,6 +38,12 @@ public interface ExportableType extends Exportable {
       ROList<String> accessPath,
       Object value) {
     Exportable exportable = (Exportable) value;
+    {
+      final Integer found = StaticAutogen.singletonExportableKeyLookup.getOpt(new ObjId<>(value));
+      if (found != null) {
+        return SemiserialBuiltinRef.create(found);
+      }
+    }
     {
       ArtifactId found = semiserializer.artifactLookup.getOpt(new ObjId<>(exportable));
       if (found != null) {
@@ -61,7 +62,7 @@ public interface ExportableType extends Exportable {
     semiserializer.artifacts.set(
         index,
         SemiserialExportable.create(
-            exportableType()
+            exporter()
                 .semiserializeValue(
                     importCacheId, semiserializer, newPath, accessPath.mut().add("(type)"), this),
             graphSemiserializeBody(

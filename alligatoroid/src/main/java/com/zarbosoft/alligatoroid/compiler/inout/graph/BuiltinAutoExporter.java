@@ -17,10 +17,10 @@ import static com.zarbosoft.alligatoroid.compiler.inout.graph.AutoSemiUtils.auto
 import static com.zarbosoft.alligatoroid.compiler.inout.graph.AutoSemiUtils.autoSemiAnyViaReflect;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class BuiltinAutoExportableType implements ExportableType, BuiltinSingletonExportable {
+public class BuiltinAutoExporter implements Exporter, BuiltinAutoExportable {
   private final Constructor constructor;
 
-  public BuiltinAutoExportableType(Class klass) {
+  public BuiltinAutoExporter(Class klass) {
     constructor = uncheck(() -> klass.getConstructors()[0]);
   }
 
