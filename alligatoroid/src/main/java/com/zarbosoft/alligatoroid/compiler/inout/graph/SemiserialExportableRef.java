@@ -3,7 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.inout.graph;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 
 public class SemiserialExportableRef implements SemiserialRef {
-  @BuiltinAutoExporter.Param
+  @AutoExporter.Param
   public ArtifactId id;
 
   public static SemiserialExportableRef create(ArtifactId id) {

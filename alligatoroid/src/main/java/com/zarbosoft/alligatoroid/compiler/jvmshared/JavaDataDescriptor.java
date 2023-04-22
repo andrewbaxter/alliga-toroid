@@ -2,15 +2,15 @@ package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
 import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.rendaw.common.Assertion;
 
 import java.util.Objects;
 
 /** Like La/b/c; */
-public class JavaDataDescriptor implements BuiltinAutoExportable {
-  @BuiltinAutoExporter.Param public String value;
+public class JavaDataDescriptor implements AutoExportable {
+  @AutoExporter.Param public String value;
 
   public JavaDataDescriptor() {}
 

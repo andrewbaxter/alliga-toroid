@@ -4,7 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
@@ -23,20 +23,20 @@ import java.util.Map;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstKey;
 
-public class MortarObjectImplTypestateAll
-    implements BuiltinAutoExportable, MortarDataTypestateForGeneric {
+public class MortarImplTypestateAll
+    implements AutoExportable, MortarDataTypestateForGeneric {
   public final MortarObjectInnerType meta;
   private final ROMap<Object, MortarObjectFieldstate> fields;
 
-  public MortarObjectImplTypestateAll(
+  public MortarImplTypestateAll(
       MortarObjectInnerType meta, ROMap<Object, MortarObjectFieldstate> fields) {
     this.meta = meta;
     this.fields = fields;
   }
 
-  public static MortarObjectImplTypestateAll create(
+  public static MortarImplTypestateAll create(
       MortarObjectInnerType meta, ROMap<Object, MortarObjectFieldstate> fields) {
-    final MortarObjectImplTypestateAll out = new MortarObjectImplTypestateAll(meta, fields);
+    final MortarImplTypestateAll out = new MortarImplTypestateAll(meta, fields);
     out.postInit();
     return out;
   }
@@ -62,7 +62,7 @@ public class MortarObjectImplTypestateAll
 
   @Override
   public EvaluateResult typestate_constCastTo(
-      EvaluationContext context, Location location, MortarDataType type, Object value) {
+          EvaluationContext context, Location location, MortarType type, Object value) {
     return EvaluateResult.pure(type.type_constAsValue(value));
   }
 
@@ -150,7 +150,7 @@ public class MortarObjectImplTypestateAll
       Location location,
       MortarDataTypestate other,
       Location otherLocation) {
-    if (!(other instanceof MortarObjectImplTypestateAll)) {
+    if (!(other instanceof MortarImplTypestateAll)) {
       context.errors.add(new GeneralLocationError(location, "Type mismatch unforking"));
       return null;
     }
@@ -160,11 +160,11 @@ public class MortarObjectImplTypestateAll
             this.meta,
             this.fields,
             location,
-            ((MortarObjectImplTypestateAll) other).meta,
-            ((MortarObjectImplTypestateAll) other).fields,
+            ((MortarImplTypestateAll) other).meta,
+            ((MortarImplTypestateAll) other).fields,
             otherLocation);
-    return MortarObjectImplTypestateAll.create(
-        unforked.useSelf ? meta : ((MortarObjectImplTypestateAll) other).meta, unforked.fields);
+    return MortarImplTypestateAll.create(
+        unforked.useSelf ? meta : ((MortarImplTypestateAll) other).meta, unforked.fields);
   }
 
   @Override
@@ -185,7 +185,7 @@ public class MortarObjectImplTypestateAll
           .fieldstate_varBindMerge(
               context,
               location,
-              ((MortarObjectImplTypestateAll) other).fields.get(fieldType.getKey()),
+              ((MortarImplTypestateAll) other).fields.get(fieldType.getKey()),
               otherLocation)) {
         ok = false;
       }
@@ -293,12 +293,12 @@ public class MortarObjectImplTypestateAll
         new MortarTargetCode(((MortarTargetModuleContext) context.target).transfer(data)));
   }
 
-  public MortarObjectImplTypestateAll fork() {
+  public MortarImplTypestateAll fork() {
     TSMap<Object, MortarObjectFieldstate> forkedFields = new TSMap<>();
     for (Map.Entry<Object, MortarObjectFieldstate> fieldType : fields) {
       forkedFields.put(fieldType.getKey(), fieldType.getValue().fieldstate_fork());
     }
-    return MortarObjectImplTypestateAll.create(meta, forkedFields);
+    return MortarImplTypestateAll.create(meta, forkedFields);
   }
 
   public static class UnforkedRes {

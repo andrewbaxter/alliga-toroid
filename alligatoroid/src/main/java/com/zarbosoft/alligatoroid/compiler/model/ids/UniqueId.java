@@ -2,17 +2,17 @@ package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeDumpable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.luxem.write.Writer;
 
 /**
  * A unique id within an import/module.
  */
-public class UniqueId implements TreeDumpable, BuiltinAutoExportable {
-  @BuiltinAutoExporter.Param
+public class UniqueId implements TreeDumpable, AutoExportable {
+  @AutoExporter.Param
   public long importCacheId;
-  @BuiltinAutoExporter.Param
+  @AutoExporter.Param
   public long subId;
 
   public UniqueId() {}

@@ -6,7 +6,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 
-public class MortarPrimitiveAllString implements MortarPrimitiveAll.Inner {
+public class MortarPrimitiveAllString implements MortarPrimitiveAll.Info {
   public static final MortarPrimitiveAllString instance = new MortarPrimitiveAllString();
 
   private MortarPrimitiveAllString() {}

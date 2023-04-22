@@ -9,6 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.GeneralLocationError;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
+import com.zarbosoft.rendaw.common.Assertion;
 
 public class MortarMethodValueConst implements Value {
   private final StaticAutogen.FuncInfo funcInfo;
@@ -37,6 +38,6 @@ public class MortarMethodValueConst implements Value {
 
   @Override
   public AlligatorusType type(EvaluationContext context) {
-  return NullType.type;
+    return NullType.INST;
   }
 }

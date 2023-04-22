@@ -2,16 +2,16 @@ package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
 import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeDumpable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.luxem.write.Writer;
 
 /**
  * A reference to an import that will deterministically produce an output. This means it includes
  * the override state.
  */
-public final class ImportId implements TreeDumpable, BuiltinAutoExportable {
-  @BuiltinAutoExporter.Param public ModuleId moduleId;
+public final class ImportId implements TreeDumpable, AutoExportable {
+  @AutoExporter.Param public ModuleId moduleId;
 
   public static ImportId create(ModuleId moduleId) {
     final ImportId importId = new ImportId();

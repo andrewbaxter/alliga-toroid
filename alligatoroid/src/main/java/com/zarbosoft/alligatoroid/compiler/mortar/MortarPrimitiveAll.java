@@ -11,6 +11,7 @@ import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
+import com.zarbosoft.rendaw.common.ROPair;
 
 public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataTypestateForGeneric {
   public static final MortarPrimitiveAll typeByte =
@@ -24,21 +25,22 @@ public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataT
   public static final MortarPrimitiveAll typeBytes =
       new MortarPrimitiveAll(MortarPrimitiveAllBytes.instance);
 
-  private MortarPrimitiveAll(Inner inner) {
-    this.inner = inner;
+  private MortarPrimitiveAll(Info info) {
+    this.info = info;
   }
 
   @Override
-  public Binding type_newInitialBinding(JavaBytecodeBindingKey key) {
-    return new MortarDataGenericBindingVar(key, this);
+  public ROPair<JavaBytecodeBindingKey, Binding> type_newInitialBinding() {
+    final JavaBytecodeBindingKey key = new JavaBytecodeBindingKey();
+    return new ROPair<>(key, new MortarDataGenericBindingVar(key, this));
   }
 
   @Override
   public MortarRecordField newTupleField(int offset) {
-    return new MortarDataGenericTupleField(offset, this);
+    return new MortarDataGenericRecordField(offset, this);
   }
 
-  public interface Inner {
+  public interface Info {
     JavaDataDescriptor jvmDesc();
 
     JavaBytecode returnBytecode();
@@ -58,11 +60,11 @@ public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataT
     JavaBytecode toObj();
   }
 
-  public final Inner inner;
+  public final Info info;
 
   @Override
   public JavaDataDescriptor type_jvmDesc() {
-    return inner.jvmDesc();
+    return info.jvmDesc();
   }
 
   @Override
@@ -72,12 +74,12 @@ public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataT
 
   @Override
   public JavaBytecode type_returnBytecode() {
-    return inner.returnBytecode();
+    return info.returnBytecode();
   }
 
   @Override
   public Value type_constAsValue(Object data) {
-    return MortarDataValueConst.create(this, data);
+    return new MortarDataValueConst(this, data);
   }
 
   @Override
@@ -92,17 +94,17 @@ public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataT
 
   @Override
   public JavaBytecode typestate_loadBytecode(JavaBytecodeBindingKey key) {
-    return inner.loadBytecode(key);
+    return info.loadBytecode(key);
   }
 
   @Override
   public JavaBytecode typestate_jvmToObj() {
-    return inner.toObj();
+    return info.toObj();
   }
 
   @Override
   public JavaBytecode typestate_jvmFromObj() {
-    return inner.fromObj();
+    return info.fromObj();
   }
 
   @Override
@@ -112,13 +114,13 @@ public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataT
 
   @Override
   public JavaBytecode typestate_storeBytecode(JavaBytecodeBindingKey key) {
-    return inner.storeBytecode(key);
+    return info.storeBytecode(key);
   }
 
   @Override
   public EvaluateResult typestate_constVary(EvaluationContext context, Location id, Object data) {
     return EvaluateResult.simple(
-        new MortarDataValueVariableStack(this), new MortarTargetCode(inner.literalBytecode(data)));
+        new MortarDataValueVariableStack(this), new MortarTargetCode(info.literalBytecode(data)));
   }
 
   @Override
@@ -129,8 +131,8 @@ public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataT
 
   @Override
   public EvaluateResult typestate_constCastTo(
-      EvaluationContext context, Location location, MortarDataType type, Object value) {
-    return EvaluateResult.pure(MortarDataValueConst.create(this, value));
+      EvaluationContext context, Location location, MortarType type, Object value) {
+    return EvaluateResult.pure(new MortarDataValueConst(this, value));
   }
 
   public boolean triviallyAssignableTo(AlligatorusType type) {
@@ -181,6 +183,6 @@ public class MortarPrimitiveAll implements MortarDataTypeForGeneric, MortarDataT
 
   @Override
   public JavaDataDescriptor typestate_jvmDesc() {
-    return inner.jvmDesc();
+    return info.jvmDesc();
   }
 }

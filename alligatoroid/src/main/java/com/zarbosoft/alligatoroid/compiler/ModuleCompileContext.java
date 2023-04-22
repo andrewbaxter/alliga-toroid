@@ -13,6 +13,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.ArtifactId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.modules.CacheImportIdRes;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarType;
 import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -78,8 +79,7 @@ public class ModuleCompileContext {
     // Only identity exportables get flattened into artifacts - all others are either builtin (no
     // artifact)
     // or inline.
-    TSList<ROPair<Exporter, ROPair<ArtifactId, SemiserialExportable>>> stratum =
-        new TSList<>();
+    TSList<ROPair<Exporter, ROPair<ArtifactId, SemiserialExportable>>> stratum = new TSList<>();
     do {
       stratum.clear();
       final Iterator<ROPair<ArtifactId, SemiserialExportable>> iter = remaining.iterator();
@@ -113,11 +113,8 @@ public class ModuleCompileContext {
        */
       throw new Assertion();
     }
-    final Value out = (Value) lookupRef(semi.root);
-    if (out == null) {
-      /** Shouldn't happen unless someone messes with the cache data directly. */
-      throw new Assertion();
-    }
+    final MortarType outType = (MortarType) lookupRef(semi.rootType);
+    final Object out = lookupRef(semi.root);
     // DEBUG
     /*
     {
@@ -143,7 +140,7 @@ public class ModuleCompileContext {
         importPath, importId.moduleId, backArtifactLookup.size());
      */
     // DEBUG
-    return out;
+    return outType.type_constAsValue(out);
   }
 
   public CompletableFuture<Value> getModule(CacheImportIdRes cacheImportId) {

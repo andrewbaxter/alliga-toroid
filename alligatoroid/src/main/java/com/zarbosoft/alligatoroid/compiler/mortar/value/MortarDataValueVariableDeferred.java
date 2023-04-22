@@ -3,6 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value;
 import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
@@ -13,7 +14,7 @@ import com.zarbosoft.alligatoroid.compiler.mortar.GeneralLocationError;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataType;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataTypestate;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarType;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -35,7 +36,7 @@ public class MortarDataValueVariableDeferred extends MortarDataValue implements 
   }
 
   @Override
-  public MortarDataType type(EvaluationContext context) {
+  public MortarType type(EvaluationContext context) {
     return typestate.typestate_asType();
   }
 
@@ -73,7 +74,7 @@ public class MortarDataValueVariableDeferred extends MortarDataValue implements 
     ectx.recordEffect(usedValue.consume(context, location));
     ectx.recordEffect(usedValue.cleanup(context, location));
     return EvaluateResult.simple(
-        NullValue.value,
+        Global.NULL_VALUE,
         new MortarTargetCode(code.set(MortarTargetCode.ex(ectx.build(null).effect))));
   }
 

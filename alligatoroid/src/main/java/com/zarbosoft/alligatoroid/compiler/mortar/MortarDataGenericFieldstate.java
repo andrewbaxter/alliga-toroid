@@ -8,7 +8,6 @@ import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCod
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeAccessObjectField;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableDeferred;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarMethodValueVariableDeferred;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
@@ -48,9 +47,8 @@ public class MortarDataGenericFieldstate implements MortarObjectFieldstate {
   @Override
   public EvaluateResult fieldstate_constObjectFieldAsValue(
       EvaluationContext context, Location location, Object base) {
-    return EvaluateResult.pure(
-        MortarDataValueConst.create(
-            typestate.typestate_fork(), uncheck(() -> base.getClass().getField(name).get(base))));
+      return EvaluateResult.pure(
+              new MortarDataValueConst(typestate.typestate_fork(), uncheck(() -> base.getClass().getField(name).get(base))));
   }
 
   @Override

@@ -24,8 +24,37 @@ public class Main {
     Writer outWriter = new Writer(System.out, (byte) ' ', 4);
     outWriter.recordBegin();
 
-    outWriter.primitive("modules").arrayBegin();
+    outWriter.primitive("log").arrayBegin();
+    for (Map.Entry<ImportId, ROList<String>> value : result.log.entrySet()) {
+      if (value.getValue().isEmpty()) {
+        continue;
+      }
+
+      Path localSource = result.localSources.get(value.getKey());
+      if (localSource != null) {
+        outWriter.primitive("source").primitive(value.toString());
+      }
+
+      outWriter.recordBegin().primitive("id");
+      value.getKey().treeDump(outWriter);
+
+      outWriter.primitive("log");
+      outWriter.arrayBegin();
+      for (String message : value.getValue()) {
+        outWriter.primitive(message);
+      }
+      outWriter.arrayEnd();
+
+      outWriter.recordEnd();
+    }
+    outWriter.arrayEnd();
+
+    outWriter.primitive("errors").arrayBegin();
     for (Map.Entry<ImportId, ROList<Error>> value : result.errors.entrySet()) {
+      if (value.getValue().isEmpty()) {
+        continue;
+      }
+
       Path localSource = result.localSources.get(value.getKey());
       if (localSource != null) {
         outWriter.primitive("source").primitive(value.toString());

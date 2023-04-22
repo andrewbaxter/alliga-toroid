@@ -22,52 +22,58 @@ import java.util.function.BiFunction;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class CompileContext {
-  public final ConcurrentHashMap<ImportId, ROList<Error>> moduleErrors = new ConcurrentHashMap<>();
-  public final ConcurrentHashMap<ImportId, ROList<String>> moduleLog = new ConcurrentHashMap<>();
-  public final ConcurrentHashMap<UniqueId, Void> loadedDefinitionSets = new ConcurrentHashMap<>();
-  public final ConcurrentHashMap<String, Definition> loadedDefinitions = new ConcurrentHashMap<>();
-  public final ClassLoader classLoader =
-      new ClassLoader(ClassLoader.getSystemClassLoader()) {
-        @Override
-        public Class<?> loadClass(String name) throws ClassNotFoundException {
-          Definition found = loadedDefinitions.get(name);
-          if (found != null) {
-            final Class<?> out = defineClass(name, found.bytecode(), 0, found.bytecode().length);
-            found.postLoad(out);
-            return out;
-          }
-          return super.loadClass(name);
-        }
-      };
+  public final ConcurrentHashMap<ImportId, ROList<Error>> moduleErrors;
+  public final ConcurrentHashMap<ImportId, ROList<String>> moduleLog;
+  public final ConcurrentHashMap<UniqueId, Void> loadedDefinitionSets;
+  public final ConcurrentHashMap<String, Definition> loadedDefinitions;
+  public final ClassLoader classLoader;
   public final LocalDependents dependents;
   public final Logger logger;
   public final Threads threads = new Threads();
   public final Modules modules;
   public final Sources sources;
-  public final ConcurrentHashMap<ModuleId, Path> localSources = new ConcurrentHashMap<>();
-  public ConcurrentHashMap<ModuleId, TSMap<Location, ROSetRef<String>>> traceModuleStringFields =
-      new ConcurrentHashMap<>();
+  public final ConcurrentHashMap<ModuleId, Path> localSources;
+  public ConcurrentHashMap<ModuleId, TSMap<Location, ROSetRef<String>>> traceModuleStringFields;
 
   public CompileContext(Path cacheRoot, Logger logger, ImportId rootImportId) {
+    loadedDefinitions = new ConcurrentHashMap<>();
+    loadedDefinitionSets = new ConcurrentHashMap<>();
+    moduleLog = new ConcurrentHashMap<>();
+    moduleErrors = new ConcurrentHashMap<>();
+    localSources = new ConcurrentHashMap<>();
+    traceModuleStringFields = new ConcurrentHashMap<>();
     modules = new Modules(new ModuleDiskCache(cacheRoot.resolve("modules"), new ModuleCompiler()));
     sources = new Sources(new SourceDiskCache(cacheRoot.resolve("sources")));
     this.logger = logger;
     dependents = new LocalDependents(this.logger, rootImportId.moduleId, cacheRoot);
+    classLoader =
+        new ClassLoader(ClassLoader.getSystemClassLoader()) {
+          @Override
+          public Class<?> loadClass(String name) throws ClassNotFoundException {
+            Definition found = loadedDefinitions.get(name);
+            if (found != null) {
+              final Class<?> out = defineClass(name, found.bytecode(), 0, found.bytecode().length);
+              found.postLoad(out);
+              return out;
+            }
+            return super.loadClass(name);
+          }
+        };
   }
 
-  public Class loadRootClass(String name, byte[] bytecode) {
+  public Class loadRootClass(String loadName, byte[] bytecode) {
     return uncheck(
         () ->
             new ClassLoader(classLoader) {
               @Override
-              protected Class<?> loadClass(String name, boolean resolve)
+              public Class<?> loadClass(String name)
                   throws ClassNotFoundException {
-                if (name.equals(name)) {
-                  return defineClass(name, bytecode, 0, bytecode.length);
+                if (name.equals(loadName)) {
+                  return defineClass(loadName, bytecode, 0, bytecode.length);
                 }
                 return super.loadClass(name);
               }
-            }.loadClass(name));
+            }.loadClass(loadName));
   }
 
   public void addTraceModuleStringFields(
@@ -80,7 +86,7 @@ public class CompileContext {
           public TSMap<Location, ROSetRef<String>> apply(
               ModuleId moduleId, TSMap<Location, ROSetRef<String>> entries) {
             if (entries == null) {
-                entries = new TSMap<>();
+              entries = new TSMap<>();
             }
             entries.put(location, strings);
             return entries;

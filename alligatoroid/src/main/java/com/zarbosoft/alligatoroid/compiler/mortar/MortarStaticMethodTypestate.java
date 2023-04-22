@@ -5,7 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeLineNumber;
@@ -18,6 +18,7 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROPair;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext.convertFunctionArgumentRoot;
 
@@ -26,7 +27,7 @@ import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleConte
  * call the static method.
  */
 public class MortarStaticMethodTypestate
-    implements BuiltinAutoExportable, MortarDataTypestateForGeneric, MortarDataTypeForGeneric {
+    implements AutoExportable, MortarDataTypestateForGeneric, MortarDataTypeForGeneric {
   // TODO move method type info into the type, check during type check
   public static final MortarStaticMethodTypestate typestate = new MortarStaticMethodTypestate();
   public static final JavaDataDescriptor DESC =
@@ -47,18 +48,20 @@ public class MortarStaticMethodTypestate
       return EvaluateResult.error;
     }
     code.add(JavaBytecodeLineNumber.create(context.sourceLocation(location)));
+    final MortarDataType retDataType =
+        funcInfo.returnType instanceof MortarDataType ? (MortarDataType) funcInfo.returnType : null;
     code.add(
         JavaBytecodeUtils.callStaticMethod(
             -1,
             funcInfo.base.asInternalName(),
             funcInfo.name,
             JavaMethodDescriptor.fromParts(
-                funcInfo.returnType.type_jvmDesc(), funcInfo.argDescriptor())));
-    if (funcInfo.returnType == NullType.type) {
-      return EvaluateResult.simple(NullValue.value, new MortarTargetCode(code));
+                retDataType == null ? Global.DESC_VOID : retDataType.type_jvmDesc(),
+                funcInfo.argDescriptor())));
+    if (!(funcInfo.returnType instanceof MortarDataType)) {
+      return EvaluateResult.simple(Global.NULL_VALUE, new MortarTargetCode(code));
     } else {
-      return EvaluateResult.simple(
-          funcInfo.returnType.type_stackAsValue(), new MortarTargetCode(code));
+      return EvaluateResult.simple(retDataType.type_stackAsValue(), new MortarTargetCode(code));
     }
   }
 
@@ -70,13 +73,13 @@ public class MortarStaticMethodTypestate
 
   @Override
   public EvaluateResult typestate_constCastTo(
-      EvaluationContext context, Location location, MortarDataType type, Object value) {
+      EvaluationContext context, Location location, MortarType type, Object value) {
     return EvaluateResult.pure(new MortarDataValueConst(this, value));
   }
 
   @Override
-  public boolean typestate_canCastTo(AlligatorusType prototype) {
-    return prototype == this;
+  public boolean typestate_canCastTo(AlligatorusType type) {
+    return type == this;
   }
 
   @Override
@@ -170,7 +173,7 @@ public class MortarStaticMethodTypestate
 
   @Override
   public Value type_constAsValue(Object data) {
-    return MortarDataValueConst.create(this, data);
+    return new MortarDataValueConst(this, data);
   }
 
   @Override
@@ -184,13 +187,14 @@ public class MortarStaticMethodTypestate
   }
 
   @Override
-  public Binding type_newInitialBinding(JavaBytecodeBindingKey key) {
-    return new MortarDataGenericBindingVar(key, this);
+  public ROPair<JavaBytecodeBindingKey, Binding> type_newInitialBinding() {
+    final JavaBytecodeBindingKey key = new JavaBytecodeBindingKey();
+    return new ROPair<>(key, new MortarDataGenericBindingVar(key, this));
   }
 
   @Override
   public MortarRecordField newTupleField(int offset) {
-    return new MortarDataGenericTupleField(offset, this);
+    return new MortarDataGenericRecordField(offset, this);
   }
 
   public static class ConvertImmediateArgRootRes {

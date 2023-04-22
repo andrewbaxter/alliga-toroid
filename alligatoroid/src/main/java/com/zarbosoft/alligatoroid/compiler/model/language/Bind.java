@@ -2,20 +2,20 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstKey;
 
 public class Bind extends LanguageElement {
-  @BuiltinAutoExporter.Param
+  @AutoExporter.Param
   public LanguageElement key;
-  @BuiltinAutoExporter.Param
+  @AutoExporter.Param
   public LanguageElement value;
 
   @Override
@@ -39,6 +39,6 @@ public class Bind extends LanguageElement {
     ROPair<TargetCode, Binding> bound = value.bind(context, id);
     context.scope.put(key, bound.second);
     ectx.recordEffect(bound.first);
-    return ectx.build(NullValue.value);
+    return ectx.build(Global.NULL_VALUE);
   }
 }

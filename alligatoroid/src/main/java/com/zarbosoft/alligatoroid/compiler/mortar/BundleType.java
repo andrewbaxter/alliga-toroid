@@ -1,12 +1,13 @@
-package com.zarbosoft.alligatoroid.compiler.mortar.value;
+package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ids.BundleModuleSubId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.ImportId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.LocalModuleId;
@@ -15,9 +16,10 @@ import com.zarbosoft.alligatoroid.compiler.model.ids.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RemoteModuleId;
 import com.zarbosoft.alligatoroid.compiler.model.ids.RootModuleId;
 import com.zarbosoft.alligatoroid.compiler.modules.Source;
-import com.zarbosoft.alligatoroid.compiler.mortar.GeneralLocationError;
-import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.FutureValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VoidValue;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.net.URI;
@@ -35,12 +37,12 @@ import java.util.stream.Stream;
 import static com.zarbosoft.alligatoroid.compiler.mortar.MortarRecordTypestate.assertConstString;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class BundleValue implements Value, BuiltinAutoExportable {
-  @BuiltinAutoExporter.Param public String root;
-  @BuiltinAutoExporter.Param public ImportId id;
+public final class BundleType extends VoidTypeSimple implements AutoExportable {
+  @AutoExporter.Param public String root;
+  @AutoExporter.Param public ImportId id;
 
-  public static BundleValue create(ImportId id, String root) {
-    final BundleValue out = new BundleValue();
+  public static BundleType create(ImportId id, String root) {
+    final BundleType out = new BundleType();
     out.id = id;
     out.root = root;
     out.postInit();
@@ -48,7 +50,7 @@ public class BundleValue implements Value, BuiltinAutoExportable {
   }
 
   @Override
-  public ROList<String> traceFields(EvaluationContext context, Location location) {
+  public ROList<String> typestate_traceFields(EvaluationContext context, Location location) {
     final Source source =
         context.moduleContext.compileContext.sources.get(
             context.moduleContext.compileContext, this.id.moduleId);
@@ -100,24 +102,8 @@ public class BundleValue implements Value, BuiltinAutoExportable {
   }
 
   @Override
-  public EvaluateResult realize(EvaluationContext context, Location id) {
-    context.errors.add(
-        new GeneralLocationError(id, "Bundle imports can't be returned from branches"));
-    return EvaluateResult.error;
-  }
-
-    @Override
-    public AlligatorusType type(EvaluationContext context) {
-    return NullType.type;
-    }
-
-    @Override
-  public TargetCode drop(EvaluationContext context, Location location) {
-    return null;
-  }
-
-  @Override
-  public EvaluateResult access(EvaluationContext context, Location location, Value field) {
+  public EvaluateResult typestate_varAccess(
+      EvaluationContext context, Location location, Value field) {
     final String key = assertConstString(context, location, field);
     if (key == null) {
       return EvaluateResult.error;
@@ -130,4 +116,66 @@ public class BundleValue implements Value, BuiltinAutoExportable {
                         id.moduleId, Paths.get(root).resolve(key).toString()))));
     return EvaluateResult.pure(new FutureValue(importResult));
   }
+
+  @Override
+  public boolean typestate_canCastTo(AlligatorusType other) {
+    return sameBundle(other);
+  }
+
+  private boolean sameBundle(AlligatorusType other) {
+    if (other.getClass() != getClass()) {
+      return false;
+    }
+    final BundleType other1 = (BundleType) other;
+    return root.equals(other1.root) && id.equal1(other1.id);
+  }
+
+  @Override
+  public EvaluateResult typestate_castTo(
+      EvaluationContext context, Location location, VoidType other) {
+    return EvaluateResult.pure(new VoidValue(this));
+  }
+
+  @Override
+  public VoidTypestate typestate_unfork(
+      EvaluationContext context, Location location, VoidTypestate other, Location otherLocation) {
+    if (other.getClass() != getClass() || !sameBundle((AlligatorusType) other)) {
+      context.errors.add(new GeneralLocationError(location, "Unfork type mismatch"));
+      return null;
+    }
+    return this;
+  }
+
+  @Override
+  public boolean recordfieldstate_canCastTo(AlligatorusType other) {
+    return sameBundle(other);
+  }
+
+  @Override
+  public boolean recordfieldstate_triviallyAssignableTo(MortarRecordFieldstate other) {
+    return sameBundle(other.recordfieldstate_asType());
+  }
+
+  @Override
+  public boolean recordfieldstate_bindMerge(
+      EvaluationContext context,
+      Location location,
+      MortarRecordFieldstate other,
+      Location otherLocation) {
+    return true;
+  }
+
+  @Override
+  public MortarRecordFieldstate recordfieldstate_unfork(
+      EvaluationContext context,
+      Location location,
+      MortarRecordFieldstate other,
+      Location otherLocation) {
+    if (other.getClass() != getClass() || !sameBundle((AlligatorusType) other)) {
+      context.errors.add(new GeneralLocationError(location, "Unfork type mismatch"));
+      return null;
+    }
+    return this;
+  }
+
 }

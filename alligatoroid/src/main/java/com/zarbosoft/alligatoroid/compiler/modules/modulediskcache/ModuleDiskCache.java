@@ -56,6 +56,7 @@ public class ModuleDiskCache implements ModuleResolver {
   private final Tables db;
 
   public ModuleDiskCache(Path rootCachePath, ModuleResolver inner) {
+    uncheck(() -> Files.createDirectories(rootCachePath));
     final Path cachePath = rootCachePath.resolve("cache.sqlite3");
 
     int currentVersion = 1;
@@ -70,7 +71,7 @@ public class ModuleDiskCache implements ModuleResolver {
                     tables = new Tables(cachePath);
                     try (CloseableIterator<TableVersion> iter = tables.version.iterator()) {
                       if (iter.next().version == currentVersion) {
-                          return tables;
+                        return tables;
                       }
                     }
                   } catch (Exception e) {
@@ -81,9 +82,9 @@ public class ModuleDiskCache implements ModuleResolver {
                     System.out.format("DEBUG failed to get cache version: %s", e);
                   }
                   try {
-                      Files.delete(cachePath);
+                    Files.delete(cachePath);
                   } catch (NoSuchFileException e) {
-                      // nop
+                    // nop
                   }
                   tables = new Tables(cachePath);
                   TableUtils.createTable(tables.version);
@@ -123,7 +124,7 @@ public class ModuleDiskCache implements ModuleResolver {
 
   @Override
   public Module get(
-          CompileContext context, ImportPath fromImportPath, CacheImportIdRes cacheId, Source source) {
+      CompileContext context, ImportPath fromImportPath, CacheImportIdRes cacheId, Source source) {
     // Find the location the result would be written
     TableModule tableMod = null;
     do {
@@ -134,7 +135,7 @@ public class ModuleDiskCache implements ModuleResolver {
               return context.dependents.isDirty(id.path);
             }
           })) {
-          break;
+        break;
       }
       try {
         tableMod = uncheck(() -> db.modules.queryForId(cacheId.cacheId));
@@ -157,7 +158,7 @@ public class ModuleDiskCache implements ModuleResolver {
             break;
           }
           if (res == null) {
-              throw new Assertion(); // Can this happen? no errors, no exception, but dead return
+            throw new Assertion(); // Can this happen? no errors, no exception, but dead return
           }
 
           // Validate by desemiserializing once
@@ -192,16 +193,16 @@ public class ModuleDiskCache implements ModuleResolver {
 
     // Cache result, source mappings, other things
     if (tableMod != null) {
-        try {
-          tableMod.outputHash = source.hash.getBytes(StandardCharsets.UTF_8);
-          final ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
-          Writer writer = new Writer(outputBytes, (byte) ' ', 4);
-          semisubMeta.serialize(writer, TypeInfo.fromClass(SemiserialModule.class), out.result());
-          tableMod.output = outputBytes.toByteArray();
-          db.modules.update(tableMod);
-        } catch (Throwable e) {
-          context.logger.warn(new WarnUnexpected(source.path.toString(), e));
-        }
+      try {
+        tableMod.outputHash = source.hash.getBytes(StandardCharsets.UTF_8);
+        final ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
+        Writer writer = new Writer(outputBytes, (byte) ' ', 4);
+        semisubMeta.serialize(writer, TypeInfo.fromClass(SemiserialModule.class), out.result());
+        tableMod.output = outputBytes.toByteArray();
+        db.modules.update(tableMod);
+      } catch (Throwable e) {
+        context.logger.warn(new WarnUnexpected(source.path.toString(), e));
+      }
     }
     return out;
   }

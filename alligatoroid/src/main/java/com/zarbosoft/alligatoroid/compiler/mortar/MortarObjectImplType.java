@@ -9,6 +9,7 @@ import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Map;
@@ -39,7 +40,7 @@ public class MortarObjectImplType implements MortarDataTypeForGeneric {
 
   @Override
   public Value type_constAsValue(Object data) {
-    return MortarDataValueConst.create(newTypestate(), data);
+    return new MortarDataValueConst(newTypestate(), data);
   }
 
   @Override
@@ -52,21 +53,22 @@ public class MortarObjectImplType implements MortarDataTypeForGeneric {
     return new MortarDataGenericField(parentType, fieldName, this);
   }
 
-  public MortarObjectImplTypestateAll newTypestate() {
+  public MortarImplTypestateAll newTypestate() {
     TSMap<Object, MortarObjectFieldstate> fields = new TSMap<>();
     for (Map.Entry<Object, MortarObjectField> field : this.fields) {
       fields.put(field.getKey(), field.getValue().field_newFieldstate());
     }
-    return MortarObjectImplTypestateAll.create(meta, fields);
+    return MortarImplTypestateAll.create(meta, fields);
   }
 
   @Override
-  public Binding type_newInitialBinding(JavaBytecodeBindingKey key) {
-    return new MortarDataGenericBindingVar(key, newTypestate());
+  public ROPair<JavaBytecodeBindingKey, Binding> type_newInitialBinding() {
+    final JavaBytecodeBindingKey key = new JavaBytecodeBindingKey();
+    return new ROPair<>(key, new MortarDataGenericBindingVar(key, newTypestate()));
   }
 
   @Override
   public MortarRecordField newTupleField(int offset) {
-  return new MortarDataGenericTupleField(offset, this);
+    return new MortarDataGenericRecordField(offset, this);
   }
 }

@@ -1,8 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRecord;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
 import com.zarbosoft.alligatoroid.compiler.model.error.ImportOutsideOwningBundleModule;
@@ -11,11 +11,11 @@ import com.zarbosoft.luxem.write.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public final class RemoteModuleId implements ModuleId, BuiltinAutoExportable {
+public final class RemoteModuleId implements ModuleId, AutoExportable {
   public static final SemiserialString GRAPH_KEY_URL = SemiserialString.create("url");
   public static final SemiserialString GRAPH_KEY_HASH = SemiserialString.create("hash");
-  @BuiltinAutoExporter.Param public String url;
-  @BuiltinAutoExporter.Param public String hash;
+  @AutoExporter.Param public String url;
+  @AutoExporter.Param public String hash;
 
   public static RemoteModuleId create(String url, String hash) {
     final RemoteModuleId out = new RemoteModuleId();

@@ -66,19 +66,25 @@ public class Alligatorus {
       context.threads.join();
     }
     return new Result(
-        context.moduleErrors, context.localSources, (Map) context.traceModuleStringFields);
+        context.moduleErrors,
+        context.moduleLog,
+        context.localSources,
+        (Map) context.traceModuleStringFields);
   }
 
   public static class Result {
     public final Map<ImportId, ROList<Error>> errors;
+    public final Map<ImportId, ROList<String>> log;
     public final Map<ModuleId, Path> localSources;
     public final Map<ModuleId, ROMap<Location, ROSetRef<String>>> traceStringFields;
 
     public Result(
         Map<ImportId, ROList<Error>> errors,
+        Map<ImportId, ROList<String>> log,
         Map<ModuleId, Path> localSources,
         Map<ModuleId, ROMap<Location, ROSetRef<String>>> traceStringFields) {
       this.errors = errors;
+      this.log = log;
       this.localSources = localSources;
       this.traceStringFields = traceStringFields;
     }

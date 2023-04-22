@@ -12,7 +12,7 @@ import org.objectweb.asm.tree.IntInsnNode;
 import static org.objectweb.asm.Opcodes.NEWARRAY;
 import static org.objectweb.asm.Opcodes.T_BYTE;
 
-public class MortarPrimitiveAllBytes implements MortarPrimitiveAll.Inner {
+public class MortarPrimitiveAllBytes implements MortarPrimitiveAll.Info {
   public static final MortarPrimitiveAllBytes instance = new MortarPrimitiveAllBytes();
 
   private MortarPrimitiveAllBytes() {}

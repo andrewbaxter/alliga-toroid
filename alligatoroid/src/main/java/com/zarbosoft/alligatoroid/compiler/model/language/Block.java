@@ -2,16 +2,16 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.UnreachableValue;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
-import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 
 public class Block extends LanguageElement {
-  @BuiltinAutoExporter.Param public ROList<LanguageElement> statements;
+  @AutoExporter.Param public ROList<LanguageElement> statements;
 
   public static Block create(Location id, ROList<LanguageElement> statements) {
     final Block block = new Block();
@@ -36,7 +36,7 @@ public class Block extends LanguageElement {
     if (unreachable) {
       return ectx.build(UnreachableValue.value);
     } else {
-      return ectx.build(NullValue.value);
+      return ectx.build(Global.NULL_VALUE);
     }
   }
 

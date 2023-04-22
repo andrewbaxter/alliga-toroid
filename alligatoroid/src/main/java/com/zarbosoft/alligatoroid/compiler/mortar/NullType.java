@@ -1,58 +1,63 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
-import com.zarbosoft.alligatoroid.compiler.Global;
-import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
-import com.zarbosoft.alligatoroid.compiler.model.Binding;
+import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
+import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
+import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VoidValue;
 
-public class NullType implements MortarDataType, BuiltinAutoExportable {
-  public static final NullType type = new NullType();
-
-  private NullType() {}
+public class NullType extends VoidTypeSimple implements AutoExportable {
+  public static final NullType INST = new NullType();
 
   @Override
-  public JavaDataDescriptor type_jvmDesc() {
-    return jvmDesc();
+  public boolean recordfieldstate_canCastTo(AlligatorusType other) {
+    return other == this;
   }
 
   @Override
-  public Value type_stackAsValue() {
-    return NullValue.value;
+  public boolean recordfieldstate_triviallyAssignableTo(MortarRecordFieldstate other) {
+    return other == this;
   }
 
   @Override
-  public JavaBytecode type_returnBytecode() {
-    return returnBytecode();
+  public boolean recordfieldstate_bindMerge(
+      EvaluationContext context,
+      Location location,
+      MortarRecordFieldstate other,
+      Location otherLocation) {
+    return true;
   }
 
   @Override
-  public Value type_constAsValue(Object data) {
-    return NullValue.value;
+  public MortarRecordFieldstate recordfieldstate_unfork(
+      EvaluationContext context,
+      Location location,
+      MortarRecordFieldstate other,
+      Location otherLocation) {
+    if (other != this) {
+      context.errors.add(new GeneralLocationError(location, "Unfork type mismatch"));
+    }
+    return this;
   }
 
   @Override
-  public MortarObjectField type_newField(MortarObjectInnerType parentType, String fieldName) {
-    return NullFieldAll.inst;
-  }
-
-  public static JavaBytecode returnBytecode() {
-    return Global.JBC_returnVoid;
-  }
-
-  public static JavaDataDescriptor jvmDesc() {
-    return Global.DESC_VOID;
+  public boolean typestate_canCastTo(AlligatorusType other) {
+    return other == this;
   }
 
   @Override
-  public Binding type_newInitialBinding(JavaBytecodeBindingKey key) {
-    return NullBinding.binding;
+  public EvaluateResult typestate_castTo(
+      EvaluationContext context, Location location, VoidType other) {
+    return EvaluateResult.pure(new VoidValue(this));
   }
 
   @Override
-  public MortarRecordField newTupleField(int offset) {
-    return NullFieldAll.inst;
+  public VoidTypestate typestate_unfork(
+      EvaluationContext context, Location location, VoidTypestate other, Location otherLocation) {
+    if (other != this) {
+      context.errors.add(new GeneralLocationError(location, "Unfork type mismatch"));
+    }
+    return this;
   }
 }

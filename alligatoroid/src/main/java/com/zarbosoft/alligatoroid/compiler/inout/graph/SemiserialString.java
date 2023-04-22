@@ -3,7 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.inout.graph;
 import java.util.Objects;
 
 public final class SemiserialString implements SemiserialSubvalue {
-  @BuiltinAutoExporter.Param
+  @AutoExporter.Param
   public String value;
 
   public static SemiserialString create(String value) {

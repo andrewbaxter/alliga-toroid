@@ -4,8 +4,8 @@ import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.builtin.Builtin;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Desemiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Exporter;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.InlineType;
@@ -42,7 +42,6 @@ import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
 import com.zarbosoft.alligatoroid.compiler.model.language.Wrap;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Evaluation2Context;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableStack;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.NoExportValue;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -68,12 +67,12 @@ import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class StaticAutogen {
   public static final ROMap<Class, InlineType> graphInlineTypeLookup;
-  public static final ROMap<Class, Exporter> autoExportableTypeLookup;
+  public static final ROMap<Class, Exporter> autoExporterLookup;
   public static final ROMap<ObjId<Object>, Integer> singletonExportableKeyLookup;
   public static final ROList<Object> singletonExportableLookup;
   public static final ROMap<Class, Exporter> detachedExportableTypeLookup;
   public static final ROMap<Class, MortarObjectImplType> autoMortarObjectTypes;
-  public static final ROMap<Class, MortarDataType> mortarPrimitiveTypes;
+  public static final ROMap<Class, MortarType> mortarPrimitiveTypes;
   public static final Value builtin;
   public static final MortarDataType typeLanguageElement;
   public static final MortarObjectImplType typeValue;
@@ -302,11 +301,37 @@ public class StaticAutogen {
     working.primitivePrototypeLookup.put(byte.class, MortarPrimitiveAll.typeByte);
     working.primitivePrototypeLookup.put(byte[].class, MortarPrimitiveAll.typeBytes);
 
+    working.detachedExportType(
+        void.class,
+        new InlineType() {
+          @Override
+          public Object desemiserializeValue(
+              ModuleCompileContext context,
+              Desemiserializer typeDesemiserializer,
+              TypeInfo type,
+              SemiserialSubvalue data) {
+            return null;
+          }
+
+          @Override
+          public SemiserialSubvalue semiserializeValue(
+              long importCacheId,
+              Semiserializer semiserializer,
+              ROList<Object> path,
+              ROList<String> accessPath,
+              TypeInfo type,
+              Object value) {
+            return SemiserialTuple.create(ROList.empty);
+          }
+        });
     {
       // working.singletonExportable(nullValue);
       // working.mortarType(nullValue.getClass(), nullValue.type);
       // working.singletonExportable(nullValue.type);
     }
+
+    // Gen exporter only
+    working.autogenExporter(DetachedExporter.class);
 
     // Gen type only
     working.autogenMortarObjectType(ModuleId.class);
@@ -333,7 +358,6 @@ public class StaticAutogen {
           Wrap.class,
 
           // Others
-          BundleValue.class,
           Location.class,
           LocalModuleId.class,
           RemoteModuleId.class,
@@ -342,11 +366,12 @@ public class StaticAutogen {
           JavaQualifiedName.class,
           JavaInternalName.class,
           JavaDataDescriptor.class,
+          NullType.class,
         }) {
       if (NoExportValue.class.isAssignableFrom(klass)) {
         throw new Assertion();
       }
-      if (!BuiltinAutoExportable.class.isAssignableFrom(klass)) {
+      if (!AutoExportable.class.isAssignableFrom(klass)) {
         throw new Assertion();
       }
       working.autogenExporter(klass);
@@ -355,7 +380,7 @@ public class StaticAutogen {
 
     // Done
     graphInlineTypeLookup = working.inlineTypeLookup;
-    autoExportableTypeLookup = working.autoExportableTypeLookup;
+    autoExporterLookup = working.autoExportableTypeLookup;
     detachedExportableTypeLookup = working.detachedExportableTypeLookup;
     singletonExportableKeyLookup = working.singletonBuiltinKeyLookup;
     singletonExportableLookup = working.singletonBuiltinLookup;
@@ -365,7 +390,7 @@ public class StaticAutogen {
     typeValue = autoMortarObjectTypes.get(Value.class);
     typeLocation = autoMortarObjectTypes.get(Location.class);
 
-    final ROPair<MortarDataType, Object> builtin0 =
+    final ROPair<MortarType, Object> builtin0 =
         StaticAutogen.autogenBuiltinAggregate(working, new Builtin(), "");
     builtin = builtin0.first.type_constAsValue(builtin0.second);
   }
@@ -381,30 +406,27 @@ public class StaticAutogen {
    */
   public static FuncInfo funcDescriptor(WorkingMeta working, Method method) {
     boolean needsLocation = false;
-    TSList<ROPair<Object, MortarDataType>> argTypes = new TSList<>();
+    TSList<ROPair<Object, MortarType>> argTypes = new TSList<>();
     for (int i = 0; i < method.getParameters().length; ++i) {
       Parameter parameter = method.getParameters()[i];
       if (i == 0 && parameter.getType() == Location.class) {
         needsLocation = true;
       }
-      MortarDataType paramType = dataDescriptor(working, parameter.getType());
+      MortarType paramType = dataDescriptor(working, parameter.getType());
       argTypes.add(new ROPair<>(parameter.getName(), paramType));
     }
-
-    MortarDataType retType = dataDescriptor(working, method.getReturnType());
-
     return new FuncInfo(
         method.getName(),
         JavaBytecodeUtils.qualifiedNameFromClass(method.getDeclaringClass()),
         argTypes,
-        retType,
+        dataDescriptor(working, method.getReturnType()),
         needsLocation);
   }
 
   /** Must be called during initialization (single thread)! */
-  public static MortarDataType dataDescriptor(WorkingMeta working, Class klass) {
+  public static MortarType dataDescriptor(WorkingMeta working, Class klass) {
     if (klass == void.class) {
-      return NullType.type;
+      return NullType.INST;
     } else if (klass.isPrimitive()) {
       if (klass == byte.class) {
         return MortarPrimitiveAll.typeByte;
@@ -440,7 +462,7 @@ public class StaticAutogen {
     return new ROPair<>(MortarStaticMethodTypestate.typestate, funcDescriptor(working, method));
   }
 
-  private static ROPair<MortarDataType, Object> autogenBuiltinAggregate(
+  private static ROPair<MortarType, Object> autogenBuiltinAggregate(
       WorkingMeta working, Object parentData, String path) {
     TSList<ROPair<Object, MortarRecordField>> fields = new TSList<>();
     TSList<Object> values = new TSList<>();
@@ -452,19 +474,17 @@ public class StaticAutogen {
       Object data = uncheck(() -> f.get(parentData));
       if (data.getClass().isAnnotationPresent(BuiltinAggregate.class)) {
         final String key = path + "/" + name;
-        final ROPair<MortarDataType, Object> value = autogenBuiltinAggregate(working, data, key);
+        final ROPair<MortarType, Object> value = autogenBuiltinAggregate(working, data, key);
         fields.add(new ROPair<>(name, value.first.newTupleField(values.size())));
         values.add(value.second);
       } else {
         working.registerSingletonBuiltinExportable(data);
-        if (data == NullValue.value) {
-          fields.add(new ROPair<>(name, NullFieldAll.inst));
-          values.add(null);
-        } else {
-          final MortarObjectImplType type = working.autogenMortarObjectType(data.getClass());
-          fields.add(new ROPair<>(name, type.newTupleField(values.size())));
-          values.add(data);
+        MortarType type = working.primitivePrototypeLookup.getOpt(data.getClass());
+        if (type == null) {
+          type = working.autogenMortarObjectType(data.getClass());
         }
+        fields.add(new ROPair<>(name, type.newTupleField(values.size())));
+        values.add(data);
       }
     }
     for (Method m : parentData.getClass().getDeclaredMethods()) {
@@ -510,7 +530,7 @@ public class StaticAutogen {
     public final TSMap<Class, InlineType> inlineTypeLookup = new TSMap<>();
     public final TSMap<ObjId<Object>, Integer> singletonBuiltinKeyLookup = new TSMap<>();
     public final TSList<Object> singletonBuiltinLookup = new TSList<>();
-    public final TSMap<Class, MortarDataType> primitivePrototypeLookup = new TSMap<>();
+    public final TSMap<Class, MortarType> primitivePrototypeLookup = new TSMap<>();
 
     private void registerSingletonBuiltinExportable(Object e) {
       singletonBuiltinKeyLookup.put(new ObjId<>(e), singletonBuiltinLookup.size());
@@ -518,7 +538,7 @@ public class StaticAutogen {
     }
 
     private void autogenExporter(Class klass) {
-      final BuiltinAutoExporter type = new BuiltinAutoExporter(klass);
+      final AutoExporter type = new AutoExporter(klass);
       autoExportableTypeLookup.put(klass, type);
       {
         final Constructor[] constructors = klass.getConstructors();
@@ -584,19 +604,24 @@ public class StaticAutogen {
     }
 
     public void detachedExportType(Class klass, InlineType inlineType) {
-      final DetachedExporter t = new DetachedExporter(TypeInfo.fromClass(klass), inlineType);
+      final DetachedExporter t = DetachedExporter.create(TypeInfo.fromClass(klass), inlineType);
       detachedExportableTypeLookup.put(klass, t);
       registerSingletonBuiltinExportable(t);
     }
   }
 
-  public static class DetachedExporter implements Exporter, BuiltinAutoExportable {
-    private final InlineType inlineType;
-    private final TypeInfo type;
+  public static class DetachedExporter implements Exporter, AutoExportable {
+    @AutoExporter.Param public InlineType inlineType;
+    @AutoExporter.Param public TypeInfo type;
 
-    public DetachedExporter(TypeInfo type, InlineType inlineType) {
-      this.inlineType = inlineType;
-      this.type = type;
+    public DetachedExporter() {}
+
+    public static DetachedExporter create(TypeInfo type, InlineType inlineType) {
+      final DetachedExporter out = new DetachedExporter();
+      out.inlineType = inlineType;
+      out.type = type;
+      out.postInit();
+      return out;
     }
 
     @Override
@@ -622,15 +647,15 @@ public class StaticAutogen {
   public static class FuncInfo {
     public final String name;
     public final JavaQualifiedName base;
-    public final ROList<ROPair<Object, MortarDataType>> arguments;
-    public final MortarDataType returnType;
+    public final ROList<ROPair<Object, MortarType>> arguments;
+    public final MortarType returnType;
     public final boolean needsLocation;
 
     public FuncInfo(
         String name,
         JavaQualifiedName base,
-        TSList<ROPair<Object, MortarDataType>> arguments,
-        MortarDataType returnType,
+        TSList<ROPair<Object, MortarType>> arguments,
+        MortarType returnType,
         boolean needsLocation) {
       this.name = name;
       this.base = base;
@@ -641,8 +666,10 @@ public class StaticAutogen {
 
     public ROList<JavaDataDescriptor> argDescriptor() {
       TSList<JavaDataDescriptor> out = new TSList<>();
-      for (ROPair<Object, MortarDataType> argumentType : arguments) {
-        out.add(argumentType.second.type_jvmDesc());
+      for (ROPair<Object, MortarType> argumentType : arguments) {
+        if (argumentType.second instanceof MortarDataType) {
+          out.add(((MortarDataType) argumentType.second).type_jvmDesc());
+        }
       }
       return out;
     }

@@ -50,9 +50,11 @@ public class JavaClass {
       TSList<JavaBytecodeBindingKey> initialIndexes) {
     MethodVisitor mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, methodId, desc.value, null, null);
     mv.visitCode();
-    MethodNode temp = new MethodNode();
-    code.render(temp, initialIndexes);
-    // JVMSharedCode.print(temp);
+    {
+      MethodNode temp = new MethodNode();
+      code.render(temp, initialIndexes);
+      JavaBytecodeUtils.print(temp);
+    }
     code.render(mv, initialIndexes);
     mv.visitMaxs(-1, -1);
     mv.visitEnd();

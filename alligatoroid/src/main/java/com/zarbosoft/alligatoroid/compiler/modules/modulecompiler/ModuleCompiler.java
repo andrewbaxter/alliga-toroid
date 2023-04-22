@@ -3,10 +3,10 @@ package com.zarbosoft.alligatoroid.compiler.modules.modulecompiler;
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
 import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialModule;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Semiserializer;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.languageinout.LanguageDeserializer;
@@ -16,6 +16,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaClass;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
+import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.ImportPath;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.alligatoroid.compiler.model.error.ImportLoopPre;
@@ -36,16 +37,17 @@ import com.zarbosoft.alligatoroid.compiler.modules.CacheImportIdRes;
 import com.zarbosoft.alligatoroid.compiler.modules.Module;
 import com.zarbosoft.alligatoroid.compiler.modules.ModuleResolver;
 import com.zarbosoft.alligatoroid.compiler.modules.Source;
+import com.zarbosoft.alligatoroid.compiler.mortar.BundleType;
 import com.zarbosoft.alligatoroid.compiler.mortar.ContinueError;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarDefinitionSet;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataType;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarDefinitionSet;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext;
+import com.zarbosoft.alligatoroid.compiler.mortar.MortarType;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
 import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.alligatoroid.compiler.mortar.builtinother.Evaluation2Context;
-import com.zarbosoft.alligatoroid.compiler.mortar.value.BundleValue;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValue;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Common;
@@ -69,7 +71,7 @@ import static com.zarbosoft.rendaw.common.Common.uncheck;
 public class ModuleCompiler implements ModuleResolver {
   TSMap<ImportId, Long> cacheIds = new TSMap<>();
 
-  public static Value rootEvaluate(
+  public static ROPair<MortarType, Object> rootEvaluate(
       ModuleCompileContext moduleContext, LanguageElement rootStatement) {
     final String entryMethodName = "enter";
     String className = "com.zarbosoft.alligatoroidmortar.ModuleRoot";
@@ -77,10 +79,11 @@ public class ModuleCompiler implements ModuleResolver {
 
     /// Do first pass evaluation, and get type of result (or const result).
     MortarTargetModuleContext targetContext = new MortarTargetModuleContext(jvmClassName.value);
-    JavaBytecodeBindingKey ectxKey = new JavaBytecodeBindingKey();
     final MortarDataType ectxType =
         StaticAutogen.autoMortarObjectTypes.get(Evaluation2Context.class);
     final EvaluationContext context = EvaluationContext.create(moduleContext, targetContext, true);
+    final ROPair<JavaBytecodeBindingKey, Binding> initialBinding =
+        ectxType.type_newInitialBinding();
     EvaluateResult firstPass =
         Label.evaluateLabeled(
             context,
@@ -91,22 +94,21 @@ public class ModuleCompiler implements ModuleResolver {
                     c1,
                     Location.rootLocation,
                     c2 -> rootStatement.evaluate(c2),
-                    new TSOrderedMap<>(
-                        m ->
-                            m.put(
-                                "ectx",
-                                ectxType.type_newInitialBinding(ectxKey)))));
+                    new TSOrderedMap<>(m -> m.put("ectx", initialBinding.second))));
     moduleContext.log.addAll(context.log);
     moduleContext.errors.addAll(context.errors);
     if (context.errors.some()) {
       return null;
     }
-    // TODO handle like returns from a block (merge all returns)
-    MortarDataType resultType;
+
+    MortarType retType;
+    MortarDataType retDataType;
     if (firstPass.value instanceof MortarDataValue) {
-      resultType = (MortarDataType) firstPass.value.type(context);
+      retDataType = (MortarDataType) firstPass.value.type(context);
+      retType = retDataType;
     } else {
-      resultType = NullType.type;
+      retType = NullType.INST;
+      retDataType = null;
     }
 
     boolean noDepErrors = true;
@@ -128,11 +130,12 @@ public class ModuleCompiler implements ModuleResolver {
     preClass.defineFunction(
         entryMethodName,
         JavaMethodDescriptor.fromParts(
-            resultType.type_jvmDesc(), new TSList<>(ectxType.type_jvmDesc())),
+            retDataType == null ? Global.DESC_VOID : retDataType.type_jvmDesc(),
+            new TSList<>(ectxType.type_jvmDesc())),
         new JavaBytecodeSequence()
             .add(MortarTargetCode.ex(firstPass.effect))
-            .add(resultType.type_returnBytecode()),
-        new TSList<>(ectxKey));
+            .add(retDataType == null ? Global.JBC_RETURN_VOID : retDataType.type_returnBytecode()),
+        new TSList<>(initialBinding.first));
     Class klass = moduleContext.compileContext.loadRootClass(className, preClass.render());
     for (ROPair<ObjId<Object>, String> e : Common.iterable(targetContext.transfers.iterator())) {
       uncheck(() -> klass.getDeclaredField(e.second).set(null, e.first));
@@ -183,7 +186,7 @@ public class ModuleCompiler implements ModuleResolver {
     }
 
     /// Turn the result jvm obj into a const value
-    return resultType.type_constAsValue(resultVariable);
+    return new ROPair<>(retType, resultVariable);
   }
 
   private static SemiserialModule rootEvaluate(
@@ -197,8 +200,8 @@ public class ModuleCompiler implements ModuleResolver {
       }
       rootStatement = Block.create(null, res);
     }
-    Value result = rootEvaluate(moduleContext, rootStatement);
-    return Semiserializer.semiserialize(moduleContext, result, rootStatement.id);
+    ROPair<MortarType, Object> result = rootEvaluate(moduleContext, rootStatement);
+    return Semiserializer.rootSemiserialize(moduleContext, result, rootStatement.id);
   }
 
   /** Only whole-ish values */
@@ -236,8 +239,8 @@ public class ModuleCompiler implements ModuleResolver {
                         }
                       });
                 } else if (stringPath.endsWith(".zip")) {
-                  return Semiserializer.semiserialize(
-                      moduleContext, BundleValue.create(importId, ""), null);
+                  return Semiserializer.rootSemiserialize(
+                      moduleContext, new ROPair<>(BundleType.create(importId, ""), null), null);
                 } else {
                   throw new UnknownImportFileTypePre(importId.moduleId);
                 }
@@ -268,9 +271,10 @@ public class ModuleCompiler implements ModuleResolver {
                           throw new ImportNotFoundPre(id.toString());
                         }
                         if (e.isDirectory()) {
-                          return Semiserializer.semiserialize(
+                          return Semiserializer.rootSemiserialize(
                               moduleContext,
-                              BundleValue.create(ImportId.create(id.module), path),
+                              new ROPair<>(
+                                  BundleType.create(ImportId.create(id.module), path), null),
                               null);
                         }
                         if (path.endsWith(".at")) {

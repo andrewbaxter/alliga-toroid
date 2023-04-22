@@ -10,30 +10,30 @@ import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCod
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueConst;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.MortarDataValueVariableDeferred;
 
-public class MortarDataGenericTupleFieldstate implements MortarRecordFieldstate {
+public class MortarDataGenericRecordFieldstate implements MortarRecordFieldstate {
   private final int offset;
   private final MortarDataTypestateForGeneric typestate;
 
-  public MortarDataGenericTupleFieldstate(int offset, MortarDataTypestateForGeneric typestate) {
+  public MortarDataGenericRecordFieldstate(int offset, MortarDataTypestateForGeneric typestate) {
     this.offset = offset;
     this.typestate = typestate;
   }
 
   @Override
   public EvaluateResult recordfieldstate_constAsValue(
-      EvaluationContext context, Location location, Object base, int key) {
+          EvaluationContext context, Location location, Object[] data) {
     return EvaluateResult.pure(
-        new MortarDataValueConst(typestate.typestate_fork(), ((Object[]) base)[key]));
+        new MortarDataValueConst(typestate.typestate_fork(), data[offset]));
   }
 
   @Override
   public MortarRecordFieldstate recordfieldstate_fork() {
-    return new MortarDataGenericTupleFieldstate(offset, typestate.typestate_fork());
+    return new MortarDataGenericRecordFieldstate(offset, typestate.typestate_fork());
   }
 
   @Override
   public EvaluateResult recordfieldstate_variableAsValue(
-      EvaluationContext context, Location location, MortarDeferredCode baseCode, int field) {
+      EvaluationContext context, Location location, MortarDeferredCode baseCode) {
     return EvaluateResult.pure(
         new MortarDataValueVariableDeferred(
             typestate.typestate_fork(),
@@ -51,7 +51,7 @@ public class MortarDataGenericTupleFieldstate implements MortarRecordFieldstate 
 
   @Override
   public MortarRecordField recordfieldstate_asField() {
-    return new MortarDataGenericTupleField(offset, typestate.typestate_asType());
+    return new MortarDataGenericRecordField(offset, typestate.typestate_asType());
   }
 
   @Override
@@ -66,7 +66,7 @@ public class MortarDataGenericTupleFieldstate implements MortarRecordFieldstate 
       MortarRecordFieldstate other,
       Location otherLocation) {
     return typestate.typestate_bindMerge(
-        context, location, ((MortarDataGenericTupleFieldstate) other).typestate, otherLocation);
+        context, location, ((MortarDataGenericRecordFieldstate) other).typestate, otherLocation);
   }
 
   @Override
@@ -75,19 +75,19 @@ public class MortarDataGenericTupleFieldstate implements MortarRecordFieldstate 
       Location location,
       MortarRecordFieldstate other,
       Location otherLocation) {
-    return new MortarDataGenericTupleFieldstate(
+    return new MortarDataGenericRecordFieldstate(
         offset,
         typestate.typestate_unfork(
             context,
             location,
-            ((MortarDataGenericTupleFieldstate) other).typestate,
+            ((MortarDataGenericRecordFieldstate) other).typestate,
             otherLocation));
   }
 
   @Override
   public Object recordfieldstate_constCastTo(
       EvaluationContext context, Location location, AlligatorusType other, Object value) {
-    return typestate.typestate_constCastTo(context, location, (MortarDataType) other, value);
+    return typestate.typestate_constCastTo(context, location, (MortarType) other, value);
   }
 
   @Override

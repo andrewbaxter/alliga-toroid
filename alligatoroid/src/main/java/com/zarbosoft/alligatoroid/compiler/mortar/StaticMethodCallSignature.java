@@ -4,10 +4,10 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
 public class StaticMethodCallSignature {
-    public final ROList<ROPair<Object, MortarDataType>> arguments;
-    public final MortarDataType returnType;
+    public final ROList<ROPair<Object, MortarType>> arguments;
+    public final MortarType returnType;
 
-    public StaticMethodCallSignature(ROList<ROPair<Object, MortarDataType>> arguments, MortarDataType returnType) {
+    public StaticMethodCallSignature(ROList<ROPair<Object, MortarType>> arguments, MortarType returnType) {
         this.arguments = arguments;
         this.returnType = returnType;
     }

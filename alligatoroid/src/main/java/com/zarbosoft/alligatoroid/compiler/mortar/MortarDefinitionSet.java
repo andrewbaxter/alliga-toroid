@@ -3,7 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.CompileContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleCompileContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.GraphDeferred;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class MortarDefinitionSet implements BuiltinAutoExportable {
+public class MortarDefinitionSet implements AutoExportable {
   public Location location;
   public long moduleId;
   public UniqueId id;
@@ -36,7 +36,7 @@ public class MortarDefinitionSet implements BuiltinAutoExportable {
   }
 
   @StaticAutogen.WrapExpose
-  public FunctionRet function(TSList<ROPair<Object, MortarDataType>> arguments, MortarDataType ret) {
+  public FunctionRet function(TSList<ROPair<Object, MortarType>> arguments, MortarDataType ret) {
     String className =
         Format.format(
             "com.zarbosoft.alligatoroidmortar.ModuleClass%s_%s_%s",
@@ -83,7 +83,7 @@ public class MortarDefinitionSet implements BuiltinAutoExportable {
     return true;
   }
 
-  public static class Definition implements CompileContext.Definition, BuiltinAutoExportable {
+  public static class Definition implements CompileContext.Definition, AutoExportable {
     public byte[] bytecode;
     public ROList<Transfer> transfers;
 
@@ -110,7 +110,7 @@ public class MortarDefinitionSet implements BuiltinAutoExportable {
     }
   }
 
-  public static class Transfer implements BuiltinAutoExportable {
+  public static class Transfer implements AutoExportable {
     public Object data;
     public String name;
 

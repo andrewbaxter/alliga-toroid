@@ -9,27 +9,15 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.MortarInvalidCast;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
+import com.zarbosoft.rendaw.common.ROPair;
 
-public interface MortarDataType extends MortarType, MortarRecordFieldable {
-  Binding type_newInitialBinding(JavaBytecodeBindingKey key);
+public interface MortarDataType extends MortarType {
 
   JavaDataDescriptor type_jvmDesc();
 
   Value type_stackAsValue();
 
   JavaBytecode type_returnBytecode();
-
-  Value type_constAsValue(Object data);
-
-  public default EvaluateResult type_cast(
-      EvaluationContext evaluationContext, Location location, Value value) {
-    if (value.canCastTo(evaluationContext, this)) {
-      return (value).castTo(evaluationContext, location, this);
-    } else {
-      evaluationContext.errors.add(new MortarInvalidCast(location, this));
-      return EvaluateResult.error;
-    }
-  }
 
   MortarObjectField type_newField(MortarObjectInnerType parentType, String fieldName);
 }

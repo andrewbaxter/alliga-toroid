@@ -3,36 +3,39 @@ package com.zarbosoft.alligatoroid.compiler.mortar.value;
 import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.model.Binding;
 import com.zarbosoft.alligatoroid.compiler.model.error.CantSetStackValue;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.GeneralLocationError;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataType;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarDataTypestate;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetCode;
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarType;
-import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCodeStack;
+import com.zarbosoft.alligatoroid.compiler.mortar.SimpleBinding;
+import com.zarbosoft.alligatoroid.compiler.mortar.VoidType;
+import com.zarbosoft.alligatoroid.compiler.mortar.VoidTypestate;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public class MortarDataValueVariableStack extends MortarDataValue implements NoExportValue {
+public class VoidValue implements Value, NoExportValue {
+  private final VoidTypestate typestate;
 
-  public MortarDataValueVariableStack(MortarDataTypestate typestate) {
-    super(typestate);
+  public VoidValue(VoidTypestate typestate) {
+    this.typestate = typestate;
+  }
+
+  @Override
+  public ROList<String> traceFields(EvaluationContext context, Location location) {
+  return typestate.typestate_traceFields(context,location);
   }
 
   @Override
   public ROPair<TargetCode, Binding> bind(EvaluationContext context, Location location) {
-    final ROPair<JavaBytecode, Binding> binding = typestate.typestate_varBind(context);
-    return new ROPair<>(new MortarTargetCode(binding.first), binding.second);
+    return new ROPair<>(null, new SimpleBinding(this));
   }
 
   @Override
-  public MortarType type(EvaluationContext context) {
+  public AlligatorusType type(EvaluationContext context) {
     return typestate.typestate_asType();
   }
 
@@ -43,12 +46,12 @@ public class MortarDataValueVariableStack extends MortarDataValue implements NoE
 
   @Override
   public TargetCode drop(EvaluationContext context, Location location) {
-    return new MortarTargetCode(Global.JBC_POP);
+    return null;
   }
 
   @Override
   public EvaluateResult access(EvaluationContext context, Location location, Value field) {
-    return typestate.typestate_varAccess(context, location, field, new MortarDeferredCodeStack());
+    return typestate.typestate_varAccess(context, location, field);
   }
 
   @Override
@@ -69,23 +72,23 @@ public class MortarDataValueVariableStack extends MortarDataValue implements NoE
 
   @Override
   public EvaluateResult castTo(EvaluationContext context, Location location, AlligatorusType type) {
-    if (!(type instanceof MortarDataType)) {
+    if (!(type instanceof VoidType)) {
       throw new Assertion();
     }
-    return typestate.typestate_varCastTo(context, location, (MortarDataType) type);
+    return typestate.typestate_castTo(context, location, (VoidType) type);
   }
 
   @Override
   public Value unfork(EvaluationContext context, Location location, ROPair<Location, Value> other) {
-    if (!(other.second instanceof MortarDataValue)) {
+    if (!(other.second instanceof VoidValue)) {
       context.errors.add(
           new GeneralLocationError(
               other.first, "Type doesn't match other branches")); // todo log both locations
       return ErrorValue.value;
     }
-    return new MortarDataValueVariableStack(
+    return new VoidValue(
         this.typestate.typestate_unfork(
-            context, location, ((MortarDataValue) other.second).typestate, other.first));
+            context, location, ((VoidValue) other.second).typestate, other.first));
   }
 
   @Override

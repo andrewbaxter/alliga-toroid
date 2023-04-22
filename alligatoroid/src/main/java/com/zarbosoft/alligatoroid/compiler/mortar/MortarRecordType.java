@@ -22,8 +22,9 @@ public class MortarRecordType implements MortarDataTypeForGeneric {
   }
 
   @Override
-  public Binding type_newInitialBinding(JavaBytecodeBindingKey key) {
-    return new MortarDataGenericBindingVar(key, newTypestate());
+  public ROPair<JavaBytecodeBindingKey, Binding> type_newInitialBinding() {
+    final JavaBytecodeBindingKey key = new JavaBytecodeBindingKey();
+    return new ROPair<>(key, new MortarDataGenericBindingVar(key, newTypestate()));
   }
 
   @Override
@@ -43,7 +44,7 @@ public class MortarRecordType implements MortarDataTypeForGeneric {
 
   @Override
   public Value type_constAsValue(Object data) {
-    return MortarDataValueConst.create(newTypestate(), data);
+    return new MortarDataValueConst(newTypestate(), data);
   }
 
   public MortarRecordTypestate newTypestate() {
@@ -61,7 +62,7 @@ public class MortarRecordType implements MortarDataTypeForGeneric {
 
   @Override
   public MortarRecordField newTupleField(int offset) {
-    return new MortarDataGenericTupleField(offset, this);
+    return new MortarDataGenericRecordField(offset, this);
   }
 
   @Override

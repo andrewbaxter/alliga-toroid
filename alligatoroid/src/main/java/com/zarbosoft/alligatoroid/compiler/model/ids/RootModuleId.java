@@ -1,12 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.Assertion;
 
 /** Pseudo module-id for root of compilation (outside any file) */
-public class RootModuleId implements ModuleId, BuiltinAutoExportable {
+public class RootModuleId implements ModuleId, AutoExportable {
   @Override
   public String toString() {
     return "root";

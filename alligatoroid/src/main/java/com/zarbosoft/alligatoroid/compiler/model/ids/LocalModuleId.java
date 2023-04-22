@@ -1,17 +1,17 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialRecord;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.SemiserialString;
 import com.zarbosoft.luxem.write.Writer;
 
 import java.nio.file.Paths;
 
-public final class LocalModuleId implements ModuleId, BuiltinAutoExportable {
+public final class LocalModuleId implements ModuleId, AutoExportable {
   public static final SemiserialString GRAPH_KEY_PATH = SemiserialString.create("path");
-  @BuiltinAutoExporter.Param
+  @AutoExporter.Param
   public String path;
 
   public static LocalModuleId graphDeserialize(SemiserialRecord data) {

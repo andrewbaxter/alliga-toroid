@@ -3,8 +3,8 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.model.language.Access;
 import com.zarbosoft.alligatoroid.compiler.model.language.Bind;
@@ -24,7 +24,7 @@ import com.zarbosoft.alligatoroid.compiler.model.language.Stage;
 import com.zarbosoft.alligatoroid.compiler.model.language.Tuple;
 import com.zarbosoft.rendaw.common.ROList;
 
-public abstract class LanguageElement implements BuiltinAutoExportable {
+public abstract class LanguageElement implements AutoExportable {
   public static final Class<? extends LanguageElement>[] SERIAL_UNION =
       new Class[] {
         Access.class,
@@ -44,7 +44,7 @@ public abstract class LanguageElement implements BuiltinAutoExportable {
         Stage.class,
         Tuple.class,
       };
-  @BuiltinAutoExporter.Param public Location id;
+  @AutoExporter.Param public Location id;
   private Boolean hasLowerInSubtree;
 
   protected static boolean hasLowerInSubtreeList(ROList<?> elements) {

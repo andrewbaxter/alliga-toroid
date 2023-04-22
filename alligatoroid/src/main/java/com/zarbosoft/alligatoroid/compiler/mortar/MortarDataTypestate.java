@@ -40,7 +40,7 @@ public interface MortarDataTypestate {
   }
 
   default Value typestate_constAsValue(Object value) {
-    return MortarDataValueConst.create(this, value);
+    return new MortarDataValueConst(this, value);
   }
 
   default EvaluateResult typestate_constValueAccess(
@@ -75,9 +75,9 @@ public interface MortarDataTypestate {
       EvaluationContext context, Location location, MortarDataType prototype);
 
   EvaluateResult typestate_constCastTo(
-      EvaluationContext context, Location location, MortarDataType type, Object value);
+          EvaluationContext context, Location location, MortarType type, Object value);
 
-  boolean typestate_canCastTo(AlligatorusType prototype);
+  boolean typestate_canCastTo(AlligatorusType type);
 
   MortarDataType typestate_asType();
 

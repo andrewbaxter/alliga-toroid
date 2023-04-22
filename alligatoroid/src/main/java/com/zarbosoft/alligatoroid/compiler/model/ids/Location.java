@@ -1,15 +1,15 @@
 package com.zarbosoft.alligatoroid.compiler.model.ids;
 
 import com.zarbosoft.alligatoroid.compiler.inout.tree.TreeDumpable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.luxem.write.Writer;
 
-public final class Location implements BuiltinAutoExportable, TreeDumpable {
+public final class Location implements AutoExportable, TreeDumpable {
   public final static Location rootLocation = null;
-    @BuiltinAutoExporter.Param
+    @AutoExporter.Param
   public int id;
-  @BuiltinAutoExporter.Param
+  @AutoExporter.Param
   public ModuleId module;
 
   public static Location create(ModuleId module, int id) {

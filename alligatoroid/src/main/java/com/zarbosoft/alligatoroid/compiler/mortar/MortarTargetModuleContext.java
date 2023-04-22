@@ -258,7 +258,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       for (int i = 0; i < looseRecord.data.size(); i += 1) {
         final ROPair<Object, EvaluateResult> e = looseRecord.data.getI(i);
         final MortarDataValueConst value = (MortarDataValueConst) ectx.record(e.second);
-        final MortarDataType valueType = value.type(context);
+        final MortarType valueType = value.type(context);
         record[keyOrder.get(i)] = value.constConsume(context, id);
         types[keyOrder.get(i)] =
             new ROPair<>(
@@ -283,16 +283,16 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       return false;
     }
     final MortarRecordTypestate other = (MortarRecordTypestate) type;
-    if (other.fields.size() != looseRecord.data.size()) {
+    if (other.logicalFields.size() != looseRecord.data.size()) {
       return false;
     }
     for (int i = 0; i < looseRecord.data.size(); i++) {
       final ROPair<Object, EvaluateResult> looseEl = looseRecord.data.getI(i);
       if (!looseEl.second.value.canCastTo(
-          context, other.fields.get(i).second.recordfieldstate_asType())) {
+          context, other.logicalFields.get(i).second.recordfieldstate_asType())) {
         return false;
       }
-      if (!other.fieldLookup.getOpt(looseEl.first).equals(i)) {
+      if (!other.logicalFieldLookup.getOpt(looseEl.first).equals(i)) {
         return false;
       }
     }
@@ -331,7 +331,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
                             context,
                             location,
                             destFields.get(destIndex).second.recordfield_asType()));
-        final MortarDataType valueType = value.type(context);
+        final MortarType valueType = value.type(context);
         record[destIndex] = value.constConsume(context, location);
         types[destIndex] =
             new ROPair<>(

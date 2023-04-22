@@ -50,7 +50,7 @@ public class GraphDeferred<T> implements Exportable {
   }
 
   public static class Exporter<T>
-      implements BuiltinAutoExportable,
+      implements AutoExportable,
           com.zarbosoft.alligatoroid.compiler.inout.graph.Exporter {
     private final GraphDeferred<T> graphDeferred;
 

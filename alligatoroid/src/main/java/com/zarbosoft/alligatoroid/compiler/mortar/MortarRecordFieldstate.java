@@ -3,18 +3,17 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.AlligatorusType;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.deferredcode.MortarDeferredCode;
 
 public interface MortarRecordFieldstate {
   EvaluateResult recordfieldstate_constAsValue(
-      EvaluationContext context, Location location, Object base, int key);
+      EvaluationContext context, Location location, Object[] data);
 
   MortarRecordFieldstate recordfieldstate_fork();
 
-    EvaluateResult recordfieldstate_variableAsValue(
-      EvaluationContext context, Location location, MortarDeferredCode baseCode, int field);
+  EvaluateResult recordfieldstate_variableAsValue(
+      EvaluationContext context, Location location, MortarDeferredCode baseCode);
 
   boolean recordfieldstate_canCastTo(AlligatorusType other);
 
@@ -29,12 +28,13 @@ public interface MortarRecordFieldstate {
       Location otherLocation);
 
   MortarRecordFieldstate recordfieldstate_unfork(
-          EvaluationContext context,
-          Location location,
-          MortarRecordFieldstate other,
-          Location otherLocation);
+      EvaluationContext context,
+      Location location,
+      MortarRecordFieldstate other,
+      Location otherLocation);
 
-    Object recordfieldstate_constCastTo(EvaluationContext context, Location location, AlligatorusType other, Object value);
+  Object recordfieldstate_constCastTo(
+      EvaluationContext context, Location location, AlligatorusType other, Object value);
 
   AlligatorusType recordfieldstate_asType();
 }

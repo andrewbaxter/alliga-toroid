@@ -4,6 +4,8 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaInternalName;
+import com.zarbosoft.alligatoroid.compiler.mortar.NullType;
+import com.zarbosoft.alligatoroid.compiler.mortar.value.VoidValue;
 import org.objectweb.asm.Opcodes;
 
 import static org.objectweb.asm.Opcodes.AALOAD;
@@ -79,13 +81,14 @@ public class Global {
   public static final JavaBytecode JBC_literalInt5;
   public static final JavaBytecode JBC_literalLong0;
   public static final JavaBytecode JBC_literalLong1;
-  public static final JavaBytecode JBC_returnVoid;
+  public static final JavaBytecode JBC_RETURN_VOID;
   public static final JavaBytecode JBC_returnIntShortByteBool;
   public static final JavaBytecode JBC_returnLong;
   public static final JavaBytecode JBC_returnFloat;
   public static final JavaBytecode JBC_returnDouble;
   public static final JavaBytecode JBC_returnObj;
   public static final JavaBytecode JBC_literalNull;
+  public static final VoidValue NULL_VALUE;
 
   static {
     INTNAME_OBJECT = JavaBytecodeUtils.internalNameFromClass(Object.class);
@@ -139,12 +142,13 @@ public class Global {
     JBC_literalInt5 = JavaBytecodeUtils.inst(ICONST_5);
     JBC_literalLong0 = JavaBytecodeUtils.inst(LCONST_0);
     JBC_literalLong1 = JavaBytecodeUtils.inst(LCONST_1);
-    JBC_returnVoid = JavaBytecodeUtils.inst(RETURN);
+    JBC_RETURN_VOID = JavaBytecodeUtils.inst(RETURN);
     JBC_returnIntShortByteBool = JavaBytecodeUtils.inst(IRETURN);
     JBC_returnLong = JavaBytecodeUtils.inst(LRETURN);
     JBC_returnFloat = JavaBytecodeUtils.inst(FRETURN);
     JBC_returnDouble = JavaBytecodeUtils.inst(DRETURN);
     JBC_returnObj = JavaBytecodeUtils.inst(ARETURN);
     JBC_literalNull = JavaBytecodeUtils.inst(ACONST_NULL);
+    NULL_VALUE = new VoidValue(NullType.INST);
   }
 }

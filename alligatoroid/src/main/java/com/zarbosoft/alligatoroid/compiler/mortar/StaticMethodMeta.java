@@ -2,6 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
+import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.ObjId;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.GraphDeferred;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
@@ -47,13 +48,15 @@ public class StaticMethodMeta {
 
     TSList<JavaBytecodeBindingKey> initialIndexes = new TSList<>();
     final TSOrderedMap<Object, Binding> initialBindings = new TSOrderedMap<>();
-    for (ROPair<Object, MortarDataType> argument : funcInfo.arguments) {
-      final JavaBytecodeBindingKey key = new JavaBytecodeBindingKey();
-      initialIndexes.add(key);
+    for (ROPair<Object, MortarType> argument : funcInfo.arguments) {
       JavaBytecodeCatchKey bindingFinallyKey = new JavaBytecodeCatchKey();
       pre.add(new JavaBytecodeCatchStart(bindingFinallyKey));
-      initialBindings.putNew(
-          argument.first, argument.second.type_newInitialBinding(key));
+      final ROPair<JavaBytecodeBindingKey, Binding> initialBinding =
+          argument.second.type_newInitialBinding();
+      if (initialBinding.first != null) {
+        initialIndexes.add(initialBinding.first);
+      }
+      initialBindings.putNew(argument.first, initialBinding.second);
     }
 
     // Do evaluation
@@ -93,13 +96,16 @@ public class StaticMethodMeta {
       preClass.defineStaticField(
           e.second, StaticAutogen.autoMortarObjectTypes.get(e.first.getClass()).type_jvmDesc());
     }
+    final MortarDataType retDataType =
+        funcInfo.returnType instanceof MortarDataType ? (MortarDataType) funcInfo.returnType : null;
     preClass.defineFunction(
         entryMethodName,
         JavaMethodDescriptor.fromParts(
-            funcInfo.returnType.type_jvmDesc(), funcInfo.argDescriptor()),
+            retDataType == null ? Global.DESC_VOID : retDataType.type_jvmDesc(),
+            funcInfo.argDescriptor()),
         new JavaBytecodeSequence()
             .add(MortarTargetCode.ex(firstPass.effect))
-            .add(funcInfo.returnType.type_returnBytecode()),
+            .add(retDataType == null ? Global.JBC_RETURN_VOID : retDataType.type_returnBytecode()),
         initialIndexes);
 
     // Register definition in set
@@ -108,6 +114,7 @@ public class StaticMethodMeta {
       transfers.add(MortarDefinitionSet.Transfer.create(transfer.first.obj, transfer.second));
     }
     definitionSet.definitions.put(
-        funcInfo.base.toString(), MortarDefinitionSet.Definition.create(preClass.render(), transfers));
+        funcInfo.base.toString(),
+        MortarDefinitionSet.Definition.create(preClass.render(), transfers));
   }
 }

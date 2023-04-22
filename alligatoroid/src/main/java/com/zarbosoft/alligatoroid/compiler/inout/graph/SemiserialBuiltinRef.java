@@ -1,7 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.inout.graph;
 
 public class SemiserialBuiltinRef implements SemiserialRef {
-  @BuiltinAutoExporter.Param
+  @AutoExporter.Param
   public int index;
 
   public static SemiserialBuiltinRef create(int index) {

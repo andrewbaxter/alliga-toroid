@@ -10,8 +10,8 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class MortarPrimitiveAllByte implements MortarPrimitiveAll.Inner {
-  public static MortarPrimitiveAll.Inner instance = new MortarPrimitiveAllByte();
+public class MortarPrimitiveAllByte implements MortarPrimitiveAll.Info {
+  public static MortarPrimitiveAll.Info instance = new MortarPrimitiveAllByte();
 
   @Override
   public JavaDataDescriptor jvmDesc() {

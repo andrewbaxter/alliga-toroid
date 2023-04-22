@@ -1,7 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.inout.utils.treeauto;
 
 import com.zarbosoft.alligatoroid.compiler.Utils;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.ProtoType;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.PrototypeBool;
@@ -185,7 +185,7 @@ public class AutoTreeMeta {
         if (Modifier.isStatic(field.getModifiers())) {
           continue;
         }
-        if (field.getAnnotation(BuiltinAutoExporter.Param.class) == null) {
+        if (field.getAnnotation(AutoExporter.Param.class) == null) {
           continue;
         }
         TypeInfo fieldInfo = TypeInfo.fromField(field);

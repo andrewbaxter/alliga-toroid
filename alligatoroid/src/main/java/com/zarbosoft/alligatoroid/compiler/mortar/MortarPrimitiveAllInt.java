@@ -10,7 +10,7 @@ import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaMethodDescriptor;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class MortarPrimitiveAllInt implements MortarPrimitiveAll.Inner {
+public class MortarPrimitiveAllInt implements MortarPrimitiveAll.Info {
   public static final MortarPrimitiveAllInt instance = new MortarPrimitiveAllInt();
 
   private MortarPrimitiveAllInt() {}

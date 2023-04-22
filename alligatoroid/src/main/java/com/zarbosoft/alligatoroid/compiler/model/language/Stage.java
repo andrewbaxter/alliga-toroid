@@ -4,7 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.alligatoroid.compiler.inout.graph.Exportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
@@ -31,7 +31,7 @@ import static com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen.typeLocat
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Stage extends LanguageElement {
-  @BuiltinAutoExporter.Param public LanguageElement child;
+  @AutoExporter.Param public LanguageElement child;
 
   /**
    * @param context
@@ -91,7 +91,7 @@ public class Stage extends LanguageElement {
         if (Modifier.isStatic(field.getModifiers())) {
           continue;
         }
-        if (field.getAnnotation(BuiltinAutoExporter.Param.class) == null) {
+        if (field.getAnnotation(AutoExporter.Param.class) == null) {
           continue;
         }
         JavaDataDescriptor fieldDesc;

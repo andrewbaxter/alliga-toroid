@@ -48,6 +48,6 @@ public final class ErrorValue implements Value, NoExportValue {
   }
   @Override
   public AlligatorusType type(EvaluationContext context) {
-    return NullType.type;
+  return NullType.INST;
   }
 }

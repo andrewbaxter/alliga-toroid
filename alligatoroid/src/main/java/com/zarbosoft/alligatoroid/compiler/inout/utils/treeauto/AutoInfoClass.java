@@ -4,7 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.inout.utils.classstate.ClassInfo;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.classstate.StateClassBody;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.BaseStateSingle;
 import com.zarbosoft.alligatoroid.compiler.inout.utils.deserializer.StateRecord;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.alligatoroid.compiler.model.error.Error;
 import com.zarbosoft.luxem.read.path.LuxemPathBuilder;
 import com.zarbosoft.luxem.write.Writer;
@@ -39,7 +39,7 @@ class AutoInfoClass implements AutoInfo {
   public void write(Writer writer, Object object) {
     writer.recordBegin();
     for (Field field : info.klass.getFields()) {
-      if (field.getAnnotation(BuiltinAutoExporter.Param.class) == null) {
+      if (field.getAnnotation(AutoExporter.Param.class) == null) {
           continue;
       }
       if (Modifier.isStatic(field.getModifiers())) {

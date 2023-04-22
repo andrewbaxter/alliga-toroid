@@ -3,7 +3,7 @@ package com.zarbosoft.alligatoroid.compiler.inout.graph;
 import java.util.Objects;
 
 public final class SemiserialBool implements SemiserialSubvalue {
-  @BuiltinAutoExporter.Param
+  @AutoExporter.Param
   public boolean value;
 
   public static SemiserialBool create(boolean value) {

@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
 import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.JumpKey;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
 import com.zarbosoft.alligatoroid.compiler.mortar.StaticAutogen;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -51,7 +51,7 @@ import static org.objectweb.asm.Opcodes.ISTORE;
 import static org.objectweb.asm.Opcodes.JSR;
 import static org.objectweb.asm.Opcodes.LSTORE;
 
-public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable {
+public class JavaBytecodeSequence implements JavaBytecode, AutoExportable {
   interface AsmFramingVisitor {
     void handleTable(Label dflt, Label[] labels);
 
@@ -277,8 +277,7 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
             public Iterator<JavaBytecode> handleLand(JavaBytecodeLand n) {
               flattened.add(
                   new JavaBytecodeInstructionObj(
-                      new JumpInsnNode(
-                          GOTO, jumpLabels.getCreate(n.jumpKey, () -> new LabelNode()))));
+                      jumpLabels.getCreate(n.jumpKey, () -> new LabelNode())));
               return null;
             }
 
@@ -286,7 +285,8 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
             public Iterator<JavaBytecode> handleJump(JavaBytecodeJump n) {
               flattened.add(
                   new JavaBytecodeInstructionObj(
-                      jumpLabels.getCreate(n.jumpKey, () -> new LabelNode())));
+                      new JumpInsnNode(
+                          GOTO, jumpLabels.getCreate(n.jumpKey, () -> new LabelNode()))));
               return null;
             }
           });
@@ -418,7 +418,12 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
                         dispatchAsmFraming(
                             n.node,
                             new AsmFramingVisitor() {
-                              void branchSet(Label l) {
+                              /**
+                               * Copy current variable state into new frame, and if that frame was
+                               * already the destination of some other jump/branch make sure the
+                               * indexes match.
+                               */
+                              void setFrameInitialVars(Label l) {
                                 final ROPair<
                                         PMap<JavaBytecodeBindingKey, Integer>,
                                         PVector<JavaBytecodeBindingKey>>
@@ -426,21 +431,23 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
                                         branchIndexes.putReplace(
                                             l,
                                             new ROPair<>(currentIndexes[0], currentRevIndexes[0]));
-                                if (old.second.size() != currentRevIndexes[0].size()) {
-                                  throw new Assertion();
-                                }
-                                for (int i = 0; i < old.second.size(); ++i) {
-                                  if (currentRevIndexes[0].get(i) != old.second.get(i)) {
+                                if (old != null) {
+                                  if (old.second.size() != currentRevIndexes[0].size()) {
                                     throw new Assertion();
+                                  }
+                                  for (int i = 0; i < old.second.size(); ++i) {
+                                    if (currentRevIndexes[0].get(i) != old.second.get(i)) {
+                                      throw new Assertion();
+                                    }
                                   }
                                 }
                               }
 
                               @Override
                               public void handleTable(Label dflt, Label[] labels) {
-                                branchSet(dflt);
+                                setFrameInitialVars(dflt);
                                 for (Label label : labels) {
-                                  branchSet(label);
+                                  setFrameInitialVars(label);
                                 }
                                 currentIndexes[0] = null;
                                 currentRevIndexes[0] = null;
@@ -448,12 +455,12 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
 
                               @Override
                               public void handleBranch(Label label) {
-                                branchSet(label);
+                                setFrameInitialVars(label);
                               }
 
                               @Override
                               public void handleJump(Label label) {
-                                branchSet(label);
+                                setFrameInitialVars(label);
                                 currentIndexes[0] = null;
                                 currentRevIndexes[0] = null;
                               }
@@ -500,8 +507,6 @@ public class JavaBytecodeSequence implements JavaBytecode, BuiltinAutoExportable
 
               @Override
               public Object handleStoreLoad(JavaBytecodeStoreLoad storeLoad) {
-                // TODO swap indexes when hitting labels
-                // clear on unconditional jump, table
                 int index = currentIndexes[0].getOrDefault(storeLoad.key, -1);
                 if (index == -1) {
                   if (storeLoad.code == ISTORE

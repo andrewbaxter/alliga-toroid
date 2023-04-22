@@ -6,7 +6,7 @@ import com.zarbosoft.alligatoroid.compiler.JumpKey;
 import com.zarbosoft.alligatoroid.compiler.ScopeState;
 import com.zarbosoft.alligatoroid.compiler.UnreachableValue;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.alligatoroid.compiler.model.ids.Location;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.rendaw.common.ROList;
@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class Label extends LanguageElement {
-  @BuiltinAutoExporter.Param public String key;
-  @BuiltinAutoExporter.Param public LanguageElement value;
+  @AutoExporter.Param public String key;
+  @AutoExporter.Param public LanguageElement value;
 
   @Override
   protected boolean innerHasLowerInSubtree() {

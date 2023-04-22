@@ -47,6 +47,6 @@ public class UnreachableValue implements Value {
 
   @Override
   public AlligatorusType type(EvaluationContext context) {
-    return NullType.type;
+  return NullType.INST;
   }
 }

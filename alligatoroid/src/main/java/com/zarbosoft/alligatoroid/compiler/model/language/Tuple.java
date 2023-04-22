@@ -2,14 +2,14 @@ package com.zarbosoft.alligatoroid.compiler.model.language;
 
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExporter;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExporter;
 import com.zarbosoft.alligatoroid.compiler.mortar.LanguageElement;
 import com.zarbosoft.alligatoroid.compiler.mortar.value.LooseRecord;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 public class Tuple extends LanguageElement {
-  @BuiltinAutoExporter.Param
+  @AutoExporter.Param
   public ROList<LanguageElement> elements;
 
   @Override

@@ -5,10 +5,11 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.EvaluationContext;
 import com.zarbosoft.alligatoroid.compiler.Global;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.inout.graph.BuiltinAutoExportable;
+import com.zarbosoft.alligatoroid.compiler.inout.graph.AutoExportable;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeBindingKey;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeInstructionInt;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeSequence;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaBytecodeUtils;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JavaDataDescriptor;
 import com.zarbosoft.alligatoroid.compiler.model.error.NoField;
@@ -26,19 +27,18 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
 import static org.objectweb.asm.Opcodes.ANEWARRAY;
 
-public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataTypestateForGeneric {
-  public final ROList<ROPair<Object, MortarRecordFieldstate>> fields;
-  public final ROMap<Object, Integer> fieldLookup;
+public class MortarRecordTypestate implements AutoExportable, MortarDataTypestateForGeneric {
+  public final ROList<ROPair<Object, MortarRecordFieldstate>> logicalFields;
+  public final ROMap<Object, Integer> logicalFieldLookup;
 
   public MortarRecordTypestate(ROList<ROPair<Object, MortarRecordFieldstate>> fields) {
-    this.fields = fields;
-    this.fieldLookup =
+    this.logicalFields = fields;
+    this.logicalFieldLookup =
         TSMap.createWith(
             m -> {
               for (int i = 0; i < fields.size(); i++) {
@@ -103,7 +103,7 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
   public ROList<String> typestate_traceFields(
       EvaluationContext context, Location location, Object inner) {
     final TSList<String> out = new TSList<>();
-    for (ROPair<Object, MortarRecordFieldstate> field : fields) {
+    for (ROPair<Object, MortarRecordFieldstate> field : logicalFields) {
       if (!(field.first instanceof String)) {
         continue;
       }
@@ -118,12 +118,12 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
     if (fieldKey == null) {
       return null;
     }
-    final Integer index = fieldLookup.getOpt(fieldKey);
+    final Integer index = logicalFieldLookup.getOpt(fieldKey);
     if (index == null) {
       context.errors.add(new NoField(location, fieldKey));
       return null;
     }
-    return new ROPair<>(index, fields.get(index).second);
+    return new ROPair<>(index, logicalFields.get(index).second);
   }
 
   @Override
@@ -133,7 +133,7 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
     if (field == null) {
       return EvaluateResult.error;
     }
-    return field.second.recordfieldstate_constAsValue(context, location, value, field.first);
+    return field.second.recordfieldstate_constAsValue(context, location, (Object[]) value);
   }
 
   @Override
@@ -143,7 +143,7 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
     if (field == null) {
       return EvaluateResult.error;
     }
-    return field.second.recordfieldstate_variableAsValue(context, location, baseCode, field.first);
+    return field.second.recordfieldstate_variableAsValue(context, location, baseCode);
   }
 
   @Override
@@ -160,21 +160,33 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
 
   public static EvaluateResult newTupleCode(
       EvaluationContext context, Location location, ROList<ROPair<Object, EvaluateResult>> data) {
+    int dataCount = 0;
+    for (int i = 0; i < data.size(); i++) {
+      final MortarType elType = (MortarType) data.get(i).second.value.type(context);
+      if (elType instanceof MortarDataType) {
+        dataCount += 1;
+      }
+    }
+
     TSList<ROPair<Object, MortarRecordFieldstate>> fields = new TSList<>();
     final EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
-    ectx.recordEffect(new MortarTargetCode(new JavaBytecodeInstructionInt(ANEWARRAY)));
+    ectx.recordEffect(
+        new MortarTargetCode(
+            new JavaBytecodeSequence()
+                .add(JavaBytecodeUtils.literalIntShortByte(dataCount))
+                .add(new JavaBytecodeInstructionInt(ANEWARRAY))));
     TSList<Value> usedValues = new TSList<>();
     for (int i = 0; i < data.size(); i++) {
-      final AlligatorusType elType = data.get(i).second.value.type(context);
+      final MortarType elType = (MortarType) data.get(i).second.value.type(context);
       final Value usedValue = ectx.record(data.get(i).second);
       ectx.recordEffect(usedValue.consume(context, location));
       usedValues.add(usedValue);
-      ectx.recordEffect(new MortarTargetCode(JavaBytecodeUtils.literalIntShortByte(i)));
-      ectx.recordEffect(new MortarTargetCode(Global.JBC_ARRAY_STORE_OBJ));
+      if (elType instanceof MortarDataType) {
+        ectx.recordEffect(new MortarTargetCode(JavaBytecodeUtils.literalIntShortByte(i)));
+        ectx.recordEffect(new MortarTargetCode(Global.JBC_ARRAY_STORE_OBJ));
+      }
       fields.add(
-          new ROPair<>(
-              data.get(i).first,
-              ((MortarRecordFieldable) elType).newTupleField(i).recordfield_newFieldstate()));
+          new ROPair<>(data.get(i).first, elType.newTupleField(i).recordfield_newFieldstate()));
     }
     for (Value value : new ReverseIterable<>(usedValues)) {
       ectx.recordEffect(value.cleanup(context, location));
@@ -210,13 +222,13 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
 
   @Override
   public EvaluateResult typestate_constCastTo(
-      EvaluationContext context, Location location, MortarDataType other, Object value) {
+      EvaluationContext context, Location location, MortarType other, Object value) {
     final Object[] value1 = (Object[]) value;
     final MortarRecordType other1 = (MortarRecordType) other;
     final Object[] out = new Object[other1.fields.size()];
     for (int i = 0; i < other1.fields.size(); i++) {
       out[i] =
-          fields
+          logicalFields
               .get(i)
               .second
               .recordfieldstate_constCastTo(
@@ -226,24 +238,25 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
   }
 
   @Override
-  public boolean typestate_canCastTo(AlligatorusType prototype) {
-    if (!(prototype instanceof MortarRecordTypestate)) {
+  public boolean typestate_canCastTo(AlligatorusType type) {
+    if (!(type instanceof MortarRecordTypestate)) {
       return false;
     }
-    final MortarRecordTypestate other = (MortarRecordTypestate) prototype;
-    if (other.fields.size() != fields.size()) {
+    final MortarRecordTypestate other = (MortarRecordTypestate) type;
+    if (other.logicalFields.size() != logicalFields.size()) {
       return false;
     }
-    for (int i = 0; i < fields.size(); i++) {
-      if (!fields
+    for (int i = 0; i < logicalFields.size(); i++) {
+      if (!logicalFields
           .get(i)
           .second
-          .recordfieldstate_canCastTo(other.fields.get(i).second.recordfieldstate_asType())) {
+          .recordfieldstate_canCastTo(
+              other.logicalFields.get(i).second.recordfieldstate_asType())) {
         return false;
       }
     }
-    for (Map.Entry<Object, Integer> e : fieldLookup) {
-      if (!e.getValue().equals(other.fieldLookup.getOpt(e.getKey()))) {
+    for (Map.Entry<Object, Integer> e : logicalFieldLookup) {
+      if (!e.getValue().equals(other.logicalFieldLookup.getOpt(e.getKey()))) {
         return false;
       }
     }
@@ -255,10 +268,9 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
     return asType();
   }
 
-  @NotNull
   private MortarRecordType asType() {
     final TSList<ROPair<Object, MortarRecordField>> fields = new TSList<>();
-    for (ROPair<Object, MortarRecordFieldstate> field : this.fields) {
+    for (ROPair<Object, MortarRecordFieldstate> field : this.logicalFields) {
       fields.add(new ROPair<>(field.first, field.second.recordfieldstate_asField()));
     }
     return new MortarRecordType(fields);
@@ -276,20 +288,20 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
     }
     TSList<ROPair<Object, MortarRecordFieldstate>> unforkedFields = new TSList<>();
     boolean ok = true;
-    for (int i = 0; i < fields.size(); i++) {
-      final ROPair<Object, MortarRecordFieldstate> field = fields.get(i);
+    for (int i = 0; i < logicalFields.size(); i++) {
+      final ROPair<Object, MortarRecordFieldstate> field = logicalFields.get(i);
       final MortarRecordFieldstate unforkedField =
           field.second.recordfieldstate_unfork(
               context,
               location,
-              ((MortarRecordTypestate) other).fields.get(i).second,
+              ((MortarRecordTypestate) other).logicalFields.get(i).second,
               otherLocation);
       if (unforkedField == null) {
         ok = false;
       }
       unforkedFields.add(new ROPair<>(field.first, unforkedField));
     }
-    for (ROPair<Object, MortarRecordFieldstate> fieldType : fields) {}
+    for (ROPair<Object, MortarRecordFieldstate> fieldType : logicalFields) {}
     if (!ok) {
       return null;
     }
@@ -299,7 +311,7 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
   @Override
   public MortarDataTypestateForGeneric typestate_fork() {
     TSList<ROPair<Object, MortarRecordFieldstate>> fields = new TSList<>();
-    for (ROPair<Object, MortarRecordFieldstate> field : this.fields) {
+    for (ROPair<Object, MortarRecordFieldstate> field : this.logicalFields) {
       fields.add(new ROPair<>(field.first, field.second.recordfieldstate_fork()));
     }
     return new MortarRecordTypestate(fields);
@@ -312,12 +324,12 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
       MortarDataTypestate other,
       Location otherLocation) {
     final ROList<ROPair<Object, MortarRecordFieldstate>> otherFields =
-        ((MortarRecordTypestate) other).fields;
+        ((MortarRecordTypestate) other).logicalFields;
     boolean ok = true;
-    for (int i = 0; i < fields.size(); i++) {
+    for (int i = 0; i < logicalFields.size(); i++) {
       ok =
           ok
-              && fields
+              && logicalFields
                   .get(i)
                   .second
                   .recordfieldstate_bindMerge(
@@ -332,12 +344,15 @@ public class MortarRecordTypestate implements BuiltinAutoExportable, MortarDataT
       return false;
     }
     final ROList<ROPair<Object, MortarRecordFieldstate>> otherFields =
-        ((MortarRecordTypestate) type).fields;
-    if (otherFields.size() != fields.size()) {
+        ((MortarRecordTypestate) type).logicalFields;
+    if (otherFields.size() != logicalFields.size()) {
       return false;
     }
-    for (int i = 0; i < fields.size(); i++) {
-      if (!fields.get(i).second.recordfieldstate_triviallyAssignableTo(otherFields.get(i).second)) {
+    for (int i = 0; i < logicalFields.size(); i++) {
+      if (!logicalFields
+          .get(i)
+          .second
+          .recordfieldstate_triviallyAssignableTo(otherFields.get(i).second)) {
         return false;
       }
     }
